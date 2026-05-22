@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/converters.dart';
+import '../../locations/data/locations_table.dart';
 import '../../species/data/species_table.dart';
 
 class PlantsTable extends Table {
@@ -18,6 +19,9 @@ class PlantsTable extends Table {
 
   DateTimeColumn get acquisitionDate => dateTime()();
   TextColumn get location => text().nullable()();
+  TextColumn get locationId => text()
+      .nullable()
+      .references(LocationsTable, #id, onDelete: KeyAction.setNull)();
   DateTimeColumn get lastIrrigatedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime()();
 
