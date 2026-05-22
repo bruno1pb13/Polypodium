@@ -1,0 +1,173 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plantlog/features/plants/presentation/providers/plants_providers.dart';
+import 'package:plantlog/features/entries/presentation/providers/entries_providers.dart';
+import 'package:plantlog/features/plants/data/plants_repository.dart';
+import 'package:plantlog/features/entries/data/entries_repository.dart';
+import 'package:plantlog/features/plants/domain/plant_model.dart';
+import 'package:plantlog/features/entries/domain/entry_model.dart';
+import 'package:plantlog/features/species/domain/species_model.dart';
+import 'package:plantlog/features/locations/domain/location_model.dart';
+import 'package:plantlog/features/species/presentation/providers/species_providers.dart';
+import 'package:plantlog/features/locations/presentation/providers/locations_providers.dart';
+import 'package:plantlog/core/enums.dart';
+
+class MockPlantsRepository extends Mock implements PlantsRepository {}
+class MockEntriesRepository extends Mock implements EntriesRepository {}
+
+// Simple mocks for notifiers
+class MockSpeciesNotifier extends SpeciesNotifier with Mock {
+  @override
+  Future<List<SpeciesModel>> build() async => [];
+}
+
+class MockLocationsNotifier extends LocationsNotifier with Mock {
+  @override
+  Future<List<LocationModel>> build() async => [];
+}
+
+class MockEntriesNotifier extends EntriesNotifier with Mock {
+  @override
+  Future<List<EntryModel>> build(String plantId) async => [];
+}
+
+void main() {
+  late MockPlantsRepository mockPlantsRepo;
+  late MockEntriesRepository mockEntriesRepo;
+  late ProviderContainer container;
+
+  final now = DateTime.now();
+  final dummyEntry = EntryModel(
+    id: 'dummy',
+    plantId: 'plant1',
+    date: now,
+    type: EntryType.history,
+    createdAt: now,
+  );
+
+  setUpAll(() {
+    registerFallbackValue(dummyEntry);
+    registerFallbackValue(PlantModel(
+      id: '',
+      speciesId: '',
+      nickname: '',
+      soilType: SoilType.loamy,
+      acquisitionDate: now,
+      createdAt: now,
+    ));
+  });
+
+  setUp(() {
+    mockPlantsRepo = MockPlantsRepository();
+    mockEntriesRepo = MockEntriesRepository();
+    
+    container = ProviderContainer(
+      overrides: [
+        plantsRepositoryProvider.overrideWithValue(mockPlantsRepo),
+        entriesRepositoryProvider.overrideWithValue(mockEntriesRepo),
+        speciesNotifierProvider.overrideWith(() => MockSpeciesNotifier()),
+        locationsNotifierProvider.overrideWith(() => MockLocationsNotifier()),
+        // For family providers, we need to override the specific instance or use the whole family
+        // entriesNotifierProvider.overrideWith((p) => MockEntriesNotifier()) is not correct for riverpod_generator
+        // We can override each call or use a different strategy.
+        // Let's try to override the family with a provider that returns our mock.
+      ],
+    );
+  });
+
+  tearDown(() {
+    container.dispose();
+  });
+
+  group('PlantsNotifier', () {
+    test('save creates history entry when plant is new', () async {
+      final plant = PlantModel(
+        id: 'p1',
+        speciesId: 's1',
+        nickname: 'Ferny',
+        soilType: SoilType.loamy,
+        acquisitionDate: DateTime(2024, 1, 1),
+        createdAt: now,
+      );
+
+      when(() => mockPlantsRepo.getAll()).thenAnswer((_) async => []);
+      when(() => mockPlantsRepo.save(any())).thenAnswer((_) async => {});
+      when(() => mockEntriesRepo.create(any())).thenAnswer((_) async => {});
+
+      // For history creation, PlantsNotifier calls entriesNotifierProvider(plant.id).notifier.create
+      // So we need to ensure that notifier is available.
+      // We can override the provider for this specific ID.
+      container = ProviderContainer(
+        overrides: [
+          plantsRepositoryProvider.overrideWithValue(mockPlantsRepo),
+          entriesRepositoryProvider.overrideWithValue(mockEntriesRepo),
+          speciesNotifierProvider.overrideWith(() => MockSpeciesNotifier()),
+          locationsNotifierProvider.overrideWith(() => MockLocationsNotifier()),
+          entriesNotifierProvider('p1').overrideWith(() => MockEntriesNotifier()),
+        ],
+      );
+
+      final notifier = container.read(plantsNotifierProvider.notifier);
+      await notifier.save(plant);
+
+      verify(() => mockPlantsRepo.save(plant)).called(1);
+      
+      final capturedEntry = verify(() => mockEntriesRepo.create(captureAny())).captured.single as EntryModel;
+      expect(capturedEntry.type, EntryType.history);
+      expect(capturedEntry.plantId, plant.id);
+      expect(capturedEntry.note, contains('Planta adicionada'));
+      expect(capturedEntry.note, contains('Ferny'));
+    });
+
+    test('save creates history entry when plant is updated', () async {
+      final oldPlant = PlantModel(
+        id: 'p1',
+        speciesId: 's1',
+        nickname: 'Ferny',
+        soilType: SoilType.loamy,
+        acquisitionDate: DateTime(2024, 1, 1),
+        createdAt: now,
+      );
+      
+      final newPlant = oldPlant.copyWith(nickname: 'Ferny Updated');
+
+      when(() => mockPlantsRepo.getAll()).thenAnswer((_) async => [oldPlant]);
+      when(() => mockPlantsRepo.save(any())).thenAnswer((_) async => {});
+      when(() => mockEntriesRepo.create(any())).thenAnswer((_) async => {});
+
+      container = ProviderContainer(
+        overrides: [
+          plantsRepositoryProvider.overrideWithValue(mockPlantsRepo),
+          entriesRepositoryProvider.overrideWithValue(mockEntriesRepo),
+          speciesNotifierProvider.overrideWith(() => MockSpeciesNotifier()),
+          locationsNotifierProvider.overrideWith(() => MockLocationsNotifier()),
+          entriesNotifierProvider('p1').overrideWith(() => MockEntriesNotifier()),
+        ],
+      );
+
+      final notifier = container.read(plantsNotifierProvider.notifier);
+      // Wait for initial build to populate the "oldPlants" state
+      await container.read(plantsNotifierProvider.future);
+      
+      await notifier.save(newPlant);
+
+      verify(() => mockPlantsRepo.save(newPlant)).called(1);
+      
+      final capturedEntry = verify(() => mockEntriesRepo.create(captureAny())).captured.single as EntryModel;
+      expect(capturedEntry.type, EntryType.history);
+      expect(capturedEntry.note, contains('Apelido: Ferny → Ferny Updated'));
+    });
+
+    test('irrigate calls repository and invalidates self', () async {
+      const plantId = 'p1';
+      when(() => mockPlantsRepo.irrigate(plantId)).thenAnswer((_) async => null);
+      when(() => mockPlantsRepo.getAll()).thenAnswer((_) async => []);
+
+      final notifier = container.read(plantsNotifierProvider.notifier);
+      await notifier.irrigate(plantId);
+
+      verify(() => mockPlantsRepo.irrigate(plantId)).called(1);
+    });
+  });
+}

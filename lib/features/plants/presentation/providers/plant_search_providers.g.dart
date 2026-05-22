@@ -7,7 +7,7 @@ part of 'plant_search_providers.dart';
 // **************************************************************************
 
 String _$filteredSortedPlantsHash() =>
-    r'9a48910bb5c3628691ee6a79866fbc511e0ab4f4';
+    r'04b421b1a801ce2f8a0106c0e03eab2c35a942fb';
 
 /// See also [filteredSortedPlants].
 @ProviderFor(filteredSortedPlants)

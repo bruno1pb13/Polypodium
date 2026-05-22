@@ -23,7 +23,7 @@ final plantsRepositoryProvider = Provider<PlantsRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PlantsRepositoryRef = ProviderRef<PlantsRepository>;
-String _$plantsWithSpeciesHash() => r'e616f682e9442324f848cb726f98b465d94d292e';
+String _$plantsWithSpeciesHash() => r'dc3240068001850a004347d39e7ead0a2b43ae0e';
 
 /// Combines each plant with its resolved species for home-screen display.
 ///
@@ -44,7 +44,7 @@ final plantsWithSpeciesProvider =
 // ignore: unused_element
 typedef PlantsWithSpeciesRef
     = AutoDisposeFutureProviderRef<List<PlantWithSpecies>>;
-String _$plantsNotifierHash() => r'ad47e8e509359fb10c04184ada92df0608101097';
+String _$plantsNotifierHash() => r'cf9f2f57884c48bf21febd43a379f8e8b05a8032';
 
 /// See also [PlantsNotifier].
 @ProviderFor(PlantsNotifier)
