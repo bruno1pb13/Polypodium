@@ -440,6 +440,322 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
   }
 }
 
+class $LocationsTableTable extends LocationsTable
+    with TableInfo<$LocationsTableTable, LocationsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocationsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  late final GeneratedColumnWithTypeConverter<SyncStatus, String> syncStatus =
+      GeneratedColumn<String>('sync_status', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('pending'))
+          .withConverter<SyncStatus>($LocationsTableTable.$convertersyncStatus);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, description, createdAt, syncStatus];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'locations';
+  @override
+  VerificationContext validateIntegrity(Insertable<LocationsTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocationsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocationsTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      syncStatus: $LocationsTableTable.$convertersyncStatus.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}sync_status'])!),
+    );
+  }
+
+  @override
+  $LocationsTableTable createAlias(String alias) {
+    return $LocationsTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<SyncStatus, String> $convertersyncStatus =
+      const SyncStatusConverter();
+}
+
+class LocationsTableData extends DataClass
+    implements Insertable<LocationsTableData> {
+  final String id;
+  final String name;
+  final String? description;
+  final DateTime createdAt;
+  final SyncStatus syncStatus;
+  const LocationsTableData(
+      {required this.id,
+      required this.name,
+      this.description,
+      required this.createdAt,
+      required this.syncStatus});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    {
+      map['sync_status'] = Variable<String>(
+          $LocationsTableTable.$convertersyncStatus.toSql(syncStatus));
+    }
+    return map;
+  }
+
+  LocationsTableCompanion toCompanion(bool nullToAbsent) {
+    return LocationsTableCompanion(
+      id: Value(id),
+      name: Value(name),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      createdAt: Value(createdAt),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory LocationsTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocationsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      syncStatus: serializer.fromJson<SyncStatus>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'syncStatus': serializer.toJson<SyncStatus>(syncStatus),
+    };
+  }
+
+  LocationsTableData copyWith(
+          {String? id,
+          String? name,
+          Value<String?> description = const Value.absent(),
+          DateTime? createdAt,
+          SyncStatus? syncStatus}) =>
+      LocationsTableData(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        description: description.present ? description.value : this.description,
+        createdAt: createdAt ?? this.createdAt,
+        syncStatus: syncStatus ?? this.syncStatus,
+      );
+  LocationsTableData copyWithCompanion(LocationsTableCompanion data) {
+    return LocationsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      description:
+          data.description.present ? data.description.value : this.description,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      syncStatus:
+          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocationsTableData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, description, createdAt, syncStatus);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocationsTableData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.description == this.description &&
+          other.createdAt == this.createdAt &&
+          other.syncStatus == this.syncStatus);
+}
+
+class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String?> description;
+  final Value<DateTime> createdAt;
+  final Value<SyncStatus> syncStatus;
+  final Value<int> rowid;
+  const LocationsTableCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocationsTableCompanion.insert({
+    required String id,
+    required String name,
+    this.description = const Value.absent(),
+    required DateTime createdAt,
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        createdAt = Value(createdAt);
+  static Insertable<LocationsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<DateTime>? createdAt,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (createdAt != null) 'created_at': createdAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocationsTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String?>? description,
+      Value<DateTime>? createdAt,
+      Value<SyncStatus>? syncStatus,
+      Value<int>? rowid}) {
+    return LocationsTableCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(
+          $LocationsTableTable.$convertersyncStatus.toSql(syncStatus.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocationsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $PlantsTableTable extends PlantsTable
     with TableInfo<$PlantsTableTable, PlantsTableData> {
   @override
@@ -489,6 +805,15 @@ class $PlantsTableTable extends PlantsTable
   late final GeneratedColumn<String> location = GeneratedColumn<String>(
       'location', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _locationIdMeta =
+      const VerificationMeta('locationId');
+  @override
+  late final GeneratedColumn<String> locationId = GeneratedColumn<String>(
+      'location_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES locations (id) ON DELETE SET NULL'));
   static const VerificationMeta _lastIrrigatedAtMeta =
       const VerificationMeta('lastIrrigatedAt');
   @override
@@ -517,6 +842,7 @@ class $PlantsTableTable extends PlantsTable
         irrigationFrequencyDays,
         acquisitionDate,
         location,
+        locationId,
         lastIrrigatedAt,
         createdAt,
         syncStatus
@@ -567,6 +893,12 @@ class $PlantsTableTable extends PlantsTable
       context.handle(_locationMeta,
           location.isAcceptableOrUnknown(data['location']!, _locationMeta));
     }
+    if (data.containsKey('location_id')) {
+      context.handle(
+          _locationIdMeta,
+          locationId.isAcceptableOrUnknown(
+              data['location_id']!, _locationIdMeta));
+    }
     if (data.containsKey('last_irrigated_at')) {
       context.handle(
           _lastIrrigatedAtMeta,
@@ -604,6 +936,8 @@ class $PlantsTableTable extends PlantsTable
           DriftSqlType.dateTime, data['${effectivePrefix}acquisition_date'])!,
       location: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}location']),
+      locationId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}location_id']),
       lastIrrigatedAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}last_irrigated_at']),
       createdAt: attachedDatabase.typeMapping
@@ -635,6 +969,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
   final int? irrigationFrequencyDays;
   final DateTime acquisitionDate;
   final String? location;
+  final String? locationId;
   final DateTime? lastIrrigatedAt;
   final DateTime createdAt;
   final SyncStatus syncStatus;
@@ -646,6 +981,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       this.irrigationFrequencyDays,
       required this.acquisitionDate,
       this.location,
+      this.locationId,
       this.lastIrrigatedAt,
       required this.createdAt,
       required this.syncStatus});
@@ -665,6 +1001,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
     map['acquisition_date'] = Variable<DateTime>(acquisitionDate);
     if (!nullToAbsent || location != null) {
       map['location'] = Variable<String>(location);
+    }
+    if (!nullToAbsent || locationId != null) {
+      map['location_id'] = Variable<String>(locationId);
     }
     if (!nullToAbsent || lastIrrigatedAt != null) {
       map['last_irrigated_at'] = Variable<DateTime>(lastIrrigatedAt);
@@ -690,6 +1029,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       location: location == null && nullToAbsent
           ? const Value.absent()
           : Value(location),
+      locationId: locationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(locationId),
       lastIrrigatedAt: lastIrrigatedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastIrrigatedAt),
@@ -710,6 +1052,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           serializer.fromJson<int?>(json['irrigationFrequencyDays']),
       acquisitionDate: serializer.fromJson<DateTime>(json['acquisitionDate']),
       location: serializer.fromJson<String?>(json['location']),
+      locationId: serializer.fromJson<String?>(json['locationId']),
       lastIrrigatedAt: serializer.fromJson<DateTime?>(json['lastIrrigatedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       syncStatus: serializer.fromJson<SyncStatus>(json['syncStatus']),
@@ -727,6 +1070,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           serializer.toJson<int?>(irrigationFrequencyDays),
       'acquisitionDate': serializer.toJson<DateTime>(acquisitionDate),
       'location': serializer.toJson<String?>(location),
+      'locationId': serializer.toJson<String?>(locationId),
       'lastIrrigatedAt': serializer.toJson<DateTime?>(lastIrrigatedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'syncStatus': serializer.toJson<SyncStatus>(syncStatus),
@@ -741,6 +1085,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           Value<int?> irrigationFrequencyDays = const Value.absent(),
           DateTime? acquisitionDate,
           Value<String?> location = const Value.absent(),
+          Value<String?> locationId = const Value.absent(),
           Value<DateTime?> lastIrrigatedAt = const Value.absent(),
           DateTime? createdAt,
           SyncStatus? syncStatus}) =>
@@ -754,6 +1099,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
             : this.irrigationFrequencyDays,
         acquisitionDate: acquisitionDate ?? this.acquisitionDate,
         location: location.present ? location.value : this.location,
+        locationId: locationId.present ? locationId.value : this.locationId,
         lastIrrigatedAt: lastIrrigatedAt.present
             ? lastIrrigatedAt.value
             : this.lastIrrigatedAt,
@@ -773,6 +1119,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ? data.acquisitionDate.value
           : this.acquisitionDate,
       location: data.location.present ? data.location.value : this.location,
+      locationId:
+          data.locationId.present ? data.locationId.value : this.locationId,
       lastIrrigatedAt: data.lastIrrigatedAt.present
           ? data.lastIrrigatedAt.value
           : this.lastIrrigatedAt,
@@ -792,6 +1140,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ..write('irrigationFrequencyDays: $irrigationFrequencyDays, ')
           ..write('acquisitionDate: $acquisitionDate, ')
           ..write('location: $location, ')
+          ..write('locationId: $locationId, ')
           ..write('lastIrrigatedAt: $lastIrrigatedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('syncStatus: $syncStatus')
@@ -808,6 +1157,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       irrigationFrequencyDays,
       acquisitionDate,
       location,
+      locationId,
       lastIrrigatedAt,
       createdAt,
       syncStatus);
@@ -822,6 +1172,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           other.irrigationFrequencyDays == this.irrigationFrequencyDays &&
           other.acquisitionDate == this.acquisitionDate &&
           other.location == this.location &&
+          other.locationId == this.locationId &&
           other.lastIrrigatedAt == this.lastIrrigatedAt &&
           other.createdAt == this.createdAt &&
           other.syncStatus == this.syncStatus);
@@ -835,6 +1186,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
   final Value<int?> irrigationFrequencyDays;
   final Value<DateTime> acquisitionDate;
   final Value<String?> location;
+  final Value<String?> locationId;
   final Value<DateTime?> lastIrrigatedAt;
   final Value<DateTime> createdAt;
   final Value<SyncStatus> syncStatus;
@@ -847,6 +1199,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.irrigationFrequencyDays = const Value.absent(),
     this.acquisitionDate = const Value.absent(),
     this.location = const Value.absent(),
+    this.locationId = const Value.absent(),
     this.lastIrrigatedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.syncStatus = const Value.absent(),
@@ -860,6 +1213,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.irrigationFrequencyDays = const Value.absent(),
     required DateTime acquisitionDate,
     this.location = const Value.absent(),
+    this.locationId = const Value.absent(),
     this.lastIrrigatedAt = const Value.absent(),
     required DateTime createdAt,
     this.syncStatus = const Value.absent(),
@@ -878,6 +1232,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     Expression<int>? irrigationFrequencyDays,
     Expression<DateTime>? acquisitionDate,
     Expression<String>? location,
+    Expression<String>? locationId,
     Expression<DateTime>? lastIrrigatedAt,
     Expression<DateTime>? createdAt,
     Expression<String>? syncStatus,
@@ -892,6 +1247,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
         'irrigation_frequency_days': irrigationFrequencyDays,
       if (acquisitionDate != null) 'acquisition_date': acquisitionDate,
       if (location != null) 'location': location,
+      if (locationId != null) 'location_id': locationId,
       if (lastIrrigatedAt != null) 'last_irrigated_at': lastIrrigatedAt,
       if (createdAt != null) 'created_at': createdAt,
       if (syncStatus != null) 'sync_status': syncStatus,
@@ -907,6 +1263,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       Value<int?>? irrigationFrequencyDays,
       Value<DateTime>? acquisitionDate,
       Value<String?>? location,
+      Value<String?>? locationId,
       Value<DateTime?>? lastIrrigatedAt,
       Value<DateTime>? createdAt,
       Value<SyncStatus>? syncStatus,
@@ -920,6 +1277,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
           irrigationFrequencyDays ?? this.irrigationFrequencyDays,
       acquisitionDate: acquisitionDate ?? this.acquisitionDate,
       location: location ?? this.location,
+      locationId: locationId ?? this.locationId,
       lastIrrigatedAt: lastIrrigatedAt ?? this.lastIrrigatedAt,
       createdAt: createdAt ?? this.createdAt,
       syncStatus: syncStatus ?? this.syncStatus,
@@ -953,6 +1311,9 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     if (location.present) {
       map['location'] = Variable<String>(location.value);
     }
+    if (locationId.present) {
+      map['location_id'] = Variable<String>(locationId.value);
+    }
     if (lastIrrigatedAt.present) {
       map['last_irrigated_at'] = Variable<DateTime>(lastIrrigatedAt.value);
     }
@@ -979,6 +1340,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
           ..write('irrigationFrequencyDays: $irrigationFrequencyDays, ')
           ..write('acquisitionDate: $acquisitionDate, ')
           ..write('location: $location, ')
+          ..write('locationId: $locationId, ')
           ..write('lastIrrigatedAt: $lastIrrigatedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('syncStatus: $syncStatus, ')
@@ -1803,6 +2165,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $SpeciesTableTable speciesTable = $SpeciesTableTable(this);
+  late final $LocationsTableTable locationsTable = $LocationsTableTable(this);
   late final $PlantsTableTable plantsTable = $PlantsTableTable(this);
   late final $EntriesTableTable entriesTable = $EntriesTableTable(this);
   late final $SyncQueueTableTable syncQueueTable = $SyncQueueTableTable(this);
@@ -1811,10 +2174,17 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [speciesTable, plantsTable, entriesTable, syncQueueTable];
+      [speciesTable, locationsTable, plantsTable, entriesTable, syncQueueTable];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('locations',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('plants', kind: UpdateKind.update),
+            ],
+          ),
           WritePropagation(
             on: TableUpdateQuery.onTableName('plants',
                 limitUpdateKind: UpdateKind.delete),
@@ -2123,6 +2493,266 @@ typedef $$SpeciesTableTableProcessedTableManager = ProcessedTableManager<
     (SpeciesTableData, $$SpeciesTableTableReferences),
     SpeciesTableData,
     PrefetchHooks Function({bool plantsTableRefs})>;
+typedef $$LocationsTableTableCreateCompanionBuilder = LocationsTableCompanion
+    Function({
+  required String id,
+  required String name,
+  Value<String?> description,
+  required DateTime createdAt,
+  Value<SyncStatus> syncStatus,
+  Value<int> rowid,
+});
+typedef $$LocationsTableTableUpdateCompanionBuilder = LocationsTableCompanion
+    Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String?> description,
+  Value<DateTime> createdAt,
+  Value<SyncStatus> syncStatus,
+  Value<int> rowid,
+});
+
+final class $$LocationsTableTableReferences extends BaseReferences<
+    _$AppDatabase, $LocationsTableTable, LocationsTableData> {
+  $$LocationsTableTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$PlantsTableTable, List<PlantsTableData>>
+      _plantsTableRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.plantsTable,
+              aliasName: $_aliasNameGenerator(
+                  db.locationsTable.id, db.plantsTable.locationId));
+
+  $$PlantsTableTableProcessedTableManager get plantsTableRefs {
+    final manager = $$PlantsTableTableTableManager($_db, $_db.plantsTable)
+        .filter((f) => f.locationId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_plantsTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$LocationsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $LocationsTableTable> {
+  $$LocationsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, String>
+      get syncStatus => $composableBuilder(
+          column: $table.syncStatus,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  Expression<bool> plantsTableRefs(
+      Expression<bool> Function($$PlantsTableTableFilterComposer f) f) {
+    final $$PlantsTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.plantsTable,
+        getReferencedColumn: (t) => t.locationId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PlantsTableTableFilterComposer(
+              $db: $db,
+              $table: $db.plantsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$LocationsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocationsTableTable> {
+  $$LocationsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+}
+
+class $$LocationsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocationsTableTable> {
+  $$LocationsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<SyncStatus, String> get syncStatus =>
+      $composableBuilder(
+          column: $table.syncStatus, builder: (column) => column);
+
+  Expression<T> plantsTableRefs<T extends Object>(
+      Expression<T> Function($$PlantsTableTableAnnotationComposer a) f) {
+    final $$PlantsTableTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.plantsTable,
+        getReferencedColumn: (t) => t.locationId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PlantsTableTableAnnotationComposer(
+              $db: $db,
+              $table: $db.plantsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$LocationsTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LocationsTableTable,
+    LocationsTableData,
+    $$LocationsTableTableFilterComposer,
+    $$LocationsTableTableOrderingComposer,
+    $$LocationsTableTableAnnotationComposer,
+    $$LocationsTableTableCreateCompanionBuilder,
+    $$LocationsTableTableUpdateCompanionBuilder,
+    (LocationsTableData, $$LocationsTableTableReferences),
+    LocationsTableData,
+    PrefetchHooks Function({bool plantsTableRefs})> {
+  $$LocationsTableTableTableManager(
+      _$AppDatabase db, $LocationsTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocationsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocationsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocationsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String?> description = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<SyncStatus> syncStatus = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocationsTableCompanion(
+            id: id,
+            name: name,
+            description: description,
+            createdAt: createdAt,
+            syncStatus: syncStatus,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            Value<String?> description = const Value.absent(),
+            required DateTime createdAt,
+            Value<SyncStatus> syncStatus = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocationsTableCompanion.insert(
+            id: id,
+            name: name,
+            description: description,
+            createdAt: createdAt,
+            syncStatus: syncStatus,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$LocationsTableTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({plantsTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (plantsTableRefs) db.plantsTable],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (plantsTableRefs)
+                    await $_getPrefetchedData<LocationsTableData,
+                            $LocationsTableTable, PlantsTableData>(
+                        currentTable: table,
+                        referencedTable: $$LocationsTableTableReferences
+                            ._plantsTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$LocationsTableTableReferences(db, table, p0)
+                                .plantsTableRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.locationId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$LocationsTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $LocationsTableTable,
+    LocationsTableData,
+    $$LocationsTableTableFilterComposer,
+    $$LocationsTableTableOrderingComposer,
+    $$LocationsTableTableAnnotationComposer,
+    $$LocationsTableTableCreateCompanionBuilder,
+    $$LocationsTableTableUpdateCompanionBuilder,
+    (LocationsTableData, $$LocationsTableTableReferences),
+    LocationsTableData,
+    PrefetchHooks Function({bool plantsTableRefs})>;
 typedef $$PlantsTableTableCreateCompanionBuilder = PlantsTableCompanion
     Function({
   required String id,
@@ -2132,6 +2762,7 @@ typedef $$PlantsTableTableCreateCompanionBuilder = PlantsTableCompanion
   Value<int?> irrigationFrequencyDays,
   required DateTime acquisitionDate,
   Value<String?> location,
+  Value<String?> locationId,
   Value<DateTime?> lastIrrigatedAt,
   required DateTime createdAt,
   Value<SyncStatus> syncStatus,
@@ -2146,6 +2777,7 @@ typedef $$PlantsTableTableUpdateCompanionBuilder = PlantsTableCompanion
   Value<int?> irrigationFrequencyDays,
   Value<DateTime> acquisitionDate,
   Value<String?> location,
+  Value<String?> locationId,
   Value<DateTime?> lastIrrigatedAt,
   Value<DateTime> createdAt,
   Value<SyncStatus> syncStatus,
@@ -2166,6 +2798,21 @@ final class $$PlantsTableTableReferences
     final manager = $$SpeciesTableTableTableManager($_db, $_db.speciesTable)
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_speciesIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $LocationsTableTable _locationIdTable(_$AppDatabase db) =>
+      db.locationsTable.createAlias($_aliasNameGenerator(
+          db.plantsTable.locationId, db.locationsTable.id));
+
+  $$LocationsTableTableProcessedTableManager? get locationId {
+    final $_column = $_itemColumn<String>('location_id');
+    if ($_column == null) return null;
+    final manager = $$LocationsTableTableTableManager($_db, $_db.locationsTable)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_locationIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
@@ -2242,6 +2889,26 @@ class $$PlantsTableTableFilterComposer
             $$SpeciesTableTableFilterComposer(
               $db: $db,
               $table: $db.speciesTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$LocationsTableTableFilterComposer get locationId {
+    final $$LocationsTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.locationId,
+        referencedTable: $db.locationsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocationsTableTableFilterComposer(
+              $db: $db,
+              $table: $db.locationsTable,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -2330,6 +2997,26 @@ class $$PlantsTableTableOrderingComposer
             ));
     return composer;
   }
+
+  $$LocationsTableTableOrderingComposer get locationId {
+    final $$LocationsTableTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.locationId,
+        referencedTable: $db.locationsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocationsTableTableOrderingComposer(
+              $db: $db,
+              $table: $db.locationsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$PlantsTableTableAnnotationComposer
@@ -2389,6 +3076,26 @@ class $$PlantsTableTableAnnotationComposer
     return composer;
   }
 
+  $$LocationsTableTableAnnotationComposer get locationId {
+    final $$LocationsTableTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.locationId,
+        referencedTable: $db.locationsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocationsTableTableAnnotationComposer(
+              $db: $db,
+              $table: $db.locationsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
   Expression<T> entriesTableRefs<T extends Object>(
       Expression<T> Function($$EntriesTableTableAnnotationComposer a) f) {
     final $$EntriesTableTableAnnotationComposer composer = $composerBuilder(
@@ -2422,7 +3129,8 @@ class $$PlantsTableTableTableManager extends RootTableManager<
     $$PlantsTableTableUpdateCompanionBuilder,
     (PlantsTableData, $$PlantsTableTableReferences),
     PlantsTableData,
-    PrefetchHooks Function({bool speciesId, bool entriesTableRefs})> {
+    PrefetchHooks Function(
+        {bool speciesId, bool locationId, bool entriesTableRefs})> {
   $$PlantsTableTableTableManager(_$AppDatabase db, $PlantsTableTable table)
       : super(TableManagerState(
           db: db,
@@ -2441,6 +3149,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<int?> irrigationFrequencyDays = const Value.absent(),
             Value<DateTime> acquisitionDate = const Value.absent(),
             Value<String?> location = const Value.absent(),
+            Value<String?> locationId = const Value.absent(),
             Value<DateTime?> lastIrrigatedAt = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<SyncStatus> syncStatus = const Value.absent(),
@@ -2454,6 +3163,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             irrigationFrequencyDays: irrigationFrequencyDays,
             acquisitionDate: acquisitionDate,
             location: location,
+            locationId: locationId,
             lastIrrigatedAt: lastIrrigatedAt,
             createdAt: createdAt,
             syncStatus: syncStatus,
@@ -2467,6 +3177,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<int?> irrigationFrequencyDays = const Value.absent(),
             required DateTime acquisitionDate,
             Value<String?> location = const Value.absent(),
+            Value<String?> locationId = const Value.absent(),
             Value<DateTime?> lastIrrigatedAt = const Value.absent(),
             required DateTime createdAt,
             Value<SyncStatus> syncStatus = const Value.absent(),
@@ -2480,6 +3191,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             irrigationFrequencyDays: irrigationFrequencyDays,
             acquisitionDate: acquisitionDate,
             location: location,
+            locationId: locationId,
             lastIrrigatedAt: lastIrrigatedAt,
             createdAt: createdAt,
             syncStatus: syncStatus,
@@ -2492,7 +3204,9 @@ class $$PlantsTableTableTableManager extends RootTableManager<
                   ))
               .toList(),
           prefetchHooksCallback: (
-              {speciesId = false, entriesTableRefs = false}) {
+              {speciesId = false,
+              locationId = false,
+              entriesTableRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [if (entriesTableRefs) db.entriesTable],
@@ -2517,6 +3231,16 @@ class $$PlantsTableTableTableManager extends RootTableManager<
                         $$PlantsTableTableReferences._speciesIdTable(db),
                     referencedColumn:
                         $$PlantsTableTableReferences._speciesIdTable(db).id,
+                  ) as T;
+                }
+                if (locationId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.locationId,
+                    referencedTable:
+                        $$PlantsTableTableReferences._locationIdTable(db),
+                    referencedColumn:
+                        $$PlantsTableTableReferences._locationIdTable(db).id,
                   ) as T;
                 }
 
@@ -2555,7 +3279,8 @@ typedef $$PlantsTableTableProcessedTableManager = ProcessedTableManager<
     $$PlantsTableTableUpdateCompanionBuilder,
     (PlantsTableData, $$PlantsTableTableReferences),
     PlantsTableData,
-    PrefetchHooks Function({bool speciesId, bool entriesTableRefs})>;
+    PrefetchHooks Function(
+        {bool speciesId, bool locationId, bool entriesTableRefs})>;
 typedef $$EntriesTableTableCreateCompanionBuilder = EntriesTableCompanion
     Function({
   required String id,
@@ -3085,6 +3810,8 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$SpeciesTableTableTableManager get speciesTable =>
       $$SpeciesTableTableTableManager(_db, _db.speciesTable);
+  $$LocationsTableTableTableManager get locationsTable =>
+      $$LocationsTableTableTableManager(_db, _db.locationsTable);
   $$PlantsTableTableTableManager get plantsTable =>
       $$PlantsTableTableTableManager(_db, _db.plantsTable);
   $$EntriesTableTableTableManager get entriesTable =>

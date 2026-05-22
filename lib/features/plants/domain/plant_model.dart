@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../../core/enums.dart';
+import '../../locations/domain/location_model.dart';
 import '../../species/domain/species_model.dart';
 
 class PlantModel {
@@ -13,6 +14,7 @@ class PlantModel {
   final int? irrigationFrequencyDays;
   final DateTime acquisitionDate;
   final String? location;
+  final String? locationId;
   final DateTime? lastIrrigatedAt;
   final DateTime createdAt;
   // TODO(sync): Used by the sync layer to determine pending changes
@@ -26,6 +28,7 @@ class PlantModel {
     this.irrigationFrequencyDays,
     required this.acquisitionDate,
     this.location,
+    this.locationId,
     this.lastIrrigatedAt,
     required this.createdAt,
     this.syncStatus = SyncStatus.pending,
@@ -39,6 +42,7 @@ class PlantModel {
     Object? irrigationFrequencyDays = _sentinel,
     DateTime? acquisitionDate,
     Object? location = _sentinel,
+    Object? locationId = _sentinel,
     Object? lastIrrigatedAt = _sentinel,
     DateTime? createdAt,
     SyncStatus? syncStatus,
@@ -53,6 +57,7 @@ class PlantModel {
             : irrigationFrequencyDays as int?,
         acquisitionDate: acquisitionDate ?? this.acquisitionDate,
         location: location == _sentinel ? this.location : location as String?,
+        locationId: locationId == _sentinel ? this.locationId : locationId as String?,
         lastIrrigatedAt: lastIrrigatedAt == _sentinel
             ? this.lastIrrigatedAt
             : lastIrrigatedAt as DateTime?,
@@ -69,6 +74,7 @@ class PlantModel {
         'irrigationFrequencyDays': irrigationFrequencyDays,
         'acquisitionDate': acquisitionDate.toIso8601String(),
         'location': location,
+        'locationId': locationId,
         'lastIrrigatedAt': lastIrrigatedAt?.toIso8601String(),
         'createdAt': createdAt.toIso8601String(),
         'syncStatus': syncStatus.name,
@@ -84,8 +90,13 @@ const Object _sentinel = Object();
 class PlantWithSpecies {
   final PlantModel plant;
   final SpeciesModel species;
+  final LocationModel? location;
 
-  const PlantWithSpecies({required this.plant, required this.species});
+  const PlantWithSpecies({
+    required this.plant,
+    required this.species,
+    this.location,
+  });
 
   int get effectiveFrequencyDays =>
       plant.irrigationFrequencyDays ?? species.defaultIrrigationFrequencyDays;

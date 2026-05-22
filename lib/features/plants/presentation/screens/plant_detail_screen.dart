@@ -8,6 +8,7 @@ import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../entries/presentation/screens/add_entry_screen.dart';
 import '../../../entries/presentation/widgets/entry_list_item.dart';
+import '../../../locations/presentation/providers/locations_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
 import '../../domain/plant_model.dart';
 import '../providers/plants_providers.dart';
@@ -22,6 +23,7 @@ class PlantDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final plantsAsync = ref.watch(plantsNotifierProvider);
     final speciesAsync = ref.watch(speciesNotifierProvider);
+    final locationsAsync = ref.watch(locationsNotifierProvider);
     final entriesAsync = ref.watch(entriesNotifierProvider(plantId));
 
     return plantsAsync.when(
@@ -38,8 +40,18 @@ class PlantDetailScreen extends ConsumerWidget {
             ?.where((s) => s.id == plant.speciesId)
             .firstOrNull;
 
+        final location = plant.locationId != null
+            ? locationsAsync.valueOrNull
+                ?.where((l) => l.id == plant.locationId)
+                .firstOrNull
+            : null;
+
         final pws = species != null
-            ? PlantWithSpecies(plant: plant, species: species)
+            ? PlantWithSpecies(
+                plant: plant,
+                species: species,
+                location: location,
+              )
             : null;
 
         return Scaffold(
@@ -250,7 +262,10 @@ class _PlantInfoCard extends StatelessWidget {
               const SizedBox(height: 4),
             ],
             _row('Solo', plant.soilType.label),
-            if (plant.location != null) _row('Localização', plant.location!),
+            if (pws?.location != null)
+              _row('Localização', pws!.location!.name)
+            else if (plant.location != null)
+              _row('Localização (antiga)', plant.location!),
             _row(
               'Adquirida em',
               DateFormat('dd/MM/yyyy').format(plant.acquisitionDate),
