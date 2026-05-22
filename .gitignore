@@ -70,3 +70,5 @@ build/macos/
 
 # VS Code
 .vscode/
+
+.artifacts
