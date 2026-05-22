@@ -5,6 +5,14 @@ enum EntryType { irrigation, fertilizer, pruning, observation, other }
 // TODO(sync): Tracks local changes pending server synchronization
 enum SyncStatus { synced, pending, conflict }
 
+enum PlantSortOption {
+  wateringNeeds,
+  nameAZ,
+  nameZA,
+  lastWatered,
+  dateAdded,
+}
+
 extension SoilTypeX on SoilType {
   String get label => switch (this) {
         SoilType.sandy => 'Arenoso',
