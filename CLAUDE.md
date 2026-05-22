@@ -70,6 +70,22 @@ lib/
 
 **Sync preparation:** Every entity has `syncStatus: SyncStatus` (pending/synced/conflict). Every write calls `SyncQueueDao.enqueue()`. Both fields and the `sync_queue` table exist in the DB but are ignored by the UI. All sync integration points are marked `// TODO(sync):`.
 
+## SOLID and Testing Guidelines
+
+**Testing:**
+- Always write unit tests for new business logic in Repositories and Notifiers.
+- Use `mocktail` for mocking dependencies.
+- Use `ProviderContainer` for testing Riverpod providers without a widget tree.
+- Mock repositories when testing notifiers to isolate logic.
+- For database tests, use `NativeDatabase.memory()` and `AppDatabase.forTesting()`.
+
+**SOLID Principles:**
+- **S**ingle Responsibility: Keep DAOs focused on raw SQL/mapping, Repositories on domain logic, and Notifiers on UI state.
+- **O**pen/Closed: Prefer adding new providers or extending logic via composition rather than modifying complex existing classes.
+- **L**iskov Substitution: If using interfaces for repositories, ensure mocks follow the same behavior.
+- **I**nterface Segregation: Notifiers should only depend on the specific repositories they need.
+- **D**ependency Inversion: Always use Riverpod providers to inject dependencies. Do not instantiate repositories or services directly inside notifiers or other services. Use `ref.watch` or `ref.read` to obtain dependencies.
+
 ## Platform Setup (required before running)
 
 **Android** (`android/app/src/main/AndroidManifest.xml`):
