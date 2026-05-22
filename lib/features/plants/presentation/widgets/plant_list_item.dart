@@ -30,7 +30,8 @@ class PlantListItem extends StatelessWidget {
       ),
       title: Text(pws.plant.nickname,
           style: const TextStyle(fontWeight: FontWeight.w600)),
-      subtitle: Text(pws.species.popularName),
+      subtitle: Text(
+          '${pws.species.popularName}${pws.location != null ? ' • ${pws.location!.name}' : ''}'),
       trailing: _IrrigationBadge(daysRelative: days, overdue: overdue),
       onTap: onTap,
     );

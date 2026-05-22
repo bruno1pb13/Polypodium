@@ -6,6 +6,8 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/enums.dart';
 import '../../../species/domain/species_model.dart';
 import '../../../species/presentation/providers/species_providers.dart';
+import '../../../locations/presentation/providers/locations_providers.dart';
+import '../../../locations/presentation/screens/add_edit_location_screen.dart';
 import '../../domain/plant_model.dart';
 import '../providers/plants_providers.dart';
 
@@ -21,10 +23,10 @@ class AddEditPlantScreen extends ConsumerStatefulWidget {
 class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nicknameCtrl;
-  late final TextEditingController _locationCtrl;
   late final TextEditingController _frequencyCtrl;
 
   String? _selectedSpeciesId;
+  String? _selectedLocationId;
   SoilType _soilType = SoilType.loamy;
   DateTime _acquisitionDate = DateTime.now();
 
@@ -38,11 +40,11 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
     super.initState();
     final p = widget.plant;
     _nicknameCtrl = TextEditingController(text: p?.nickname ?? '');
-    _locationCtrl = TextEditingController(text: p?.location ?? '');
     _frequencyCtrl = TextEditingController(
       text: p?.irrigationFrequencyDays?.toString() ?? '',
     );
     _selectedSpeciesId = p?.speciesId;
+    _selectedLocationId = p?.locationId;
     _soilType = p?.soilType ?? SoilType.loamy;
     _acquisitionDate = p?.acquisitionDate ?? DateTime.now();
   }
@@ -50,7 +52,6 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
   @override
   void dispose() {
     _nicknameCtrl.dispose();
-    _locationCtrl.dispose();
     _frequencyCtrl.dispose();
     super.dispose();
   }
@@ -58,6 +59,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
   @override
   Widget build(BuildContext context) {
     final speciesAsync = ref.watch(speciesNotifierProvider);
+    final locationsAsync = ref.watch(locationsNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -66,97 +68,125 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
       body: speciesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro: $e')),
-        data: (species) => Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              TextFormField(
-                controller: _nicknameCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Apelido *',
-                  hintText: 'Ex: Samambaia da sala',
+        data: (species) => locationsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(child: Text('Erro: $e')),
+          data: (locations) => Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                TextFormField(
+                  controller: _nicknameCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Apelido *',
+                    hintText: 'Ex: Samambaia da sala',
+                  ),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Informe um apelido' : null,
                 ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Informe um apelido' : null,
-              ),
-              const SizedBox(height: 16),
-              _SpeciesDropdown(
-                species: species,
-                selected: _selectedSpeciesId,
-                onChanged: (id) {
-                  setState(() {
-                    _selectedSpeciesId = id;
-                    if (!_isEditing && id != null) {
-                      final selectedSpecies =
-                          species.firstWhere((s) => s.id == id);
-                      _frequencyCtrl.text = selectedSpecies
-                          .defaultIrrigationFrequencyDays
-                          .toString();
-                      _isFrequencyAutoFilled = true;
+                const SizedBox(height: 16),
+                _SpeciesDropdown(
+                  species: species,
+                  selected: _selectedSpeciesId,
+                  onChanged: (id) {
+                    setState(() {
+                      _selectedSpeciesId = id;
+                      if (!_isEditing && id != null) {
+                        final selectedSpecies =
+                            species.firstWhere((s) => s.id == id);
+                        _frequencyCtrl.text = selectedSpecies
+                            .defaultIrrigationFrequencyDays
+                            .toString();
+                        _isFrequencyAutoFilled = true;
 
-                      if (selectedSpecies.recommendedSoilTypes.isNotEmpty) {
-                        _soilType = selectedSpecies.recommendedSoilTypes.first;
-                        _isSoilAutoFilled = true;
+                        if (selectedSpecies.recommendedSoilTypes.isNotEmpty) {
+                          _soilType = selectedSpecies.recommendedSoilTypes.first;
+                          _isSoilAutoFilled = true;
+                        }
                       }
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                _SoilTypeDropdown(
+                  value: _soilType,
+                  isRecommended: _isSoilAutoFilled,
+                  onChanged: (v) {
+                    setState(() {
+                      _soilType = v!;
+                      _isSoilAutoFilled = false;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _frequencyCtrl,
+                  decoration: InputDecoration(
+                    labelText:
+                        'Frequência de irrigação (dias)${_isFrequencyAutoFilled ? ' (recomendado)' : ''}',
+                    hintText: 'Deixe vazio para usar o padrão da espécie',
+                  ),
+                  onChanged: (_) {
+                    if (_isFrequencyAutoFilled) {
+                      setState(() => _isFrequencyAutoFilled = false);
                     }
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              _SoilTypeDropdown(
-                value: _soilType,
-                isRecommended: _isSoilAutoFilled,
-                onChanged: (v) {
-                  setState(() {
-                    _soilType = v!;
-                    _isSoilAutoFilled = false;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _frequencyCtrl,
-                decoration: InputDecoration(
-                  labelText:
-                      'Frequência de irrigação (dias)${_isFrequencyAutoFilled ? ' (recomendado)' : ''}',
-                  hintText: 'Deixe vazio para usar o padrão da espécie',
+                  },
+                  keyboardType: TextInputType.number,
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return null;
+                    final n = int.tryParse(v);
+                    if (n == null || n <= 0) return 'Informe um número positivo';
+                    return null;
+                  },
                 ),
-                onChanged: (_) {
-                  if (_isFrequencyAutoFilled) {
-                    setState(() => _isFrequencyAutoFilled = false);
-                  }
-                },
-                keyboardType: TextInputType.number,
-                validator: (v) {
-                  if (v == null || v.isEmpty) return null;
-                  final n = int.tryParse(v);
-                  if (n == null || n <= 0) return 'Informe um número positivo';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _locationCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Localização',
-                  hintText: 'Ex: Varanda, quarto',
+                const SizedBox(height: 16),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        value: _selectedLocationId,
+                        decoration: const InputDecoration(
+                          labelText: 'Localização',
+                        ),
+                        items: locations
+                            .map((l) => DropdownMenuItem(
+                                  value: l.id,
+                                  child: Text(l.name),
+                                ))
+                            .toList(),
+                        onChanged: (v) => setState(() => _selectedLocationId = v),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.add_location_alt_outlined),
+                      tooltip: 'Nova localização',
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AddEditLocationScreen(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Data de aquisição'),
-                subtitle: Text(DateFormat('dd/MM/yyyy').format(_acquisitionDate)),
-                trailing: const Icon(Icons.calendar_today_outlined),
-                onTap: _pickDate,
-              ),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _submit,
-                child: Text(_isEditing ? 'Salvar alterações' : 'Adicionar planta'),
-              ),
-            ],
+                const SizedBox(height: 16),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Data de aquisição'),
+                  subtitle: Text(DateFormat('dd/MM/yyyy').format(_acquisitionDate)),
+                  trailing: const Icon(Icons.calendar_today_outlined),
+                  onTap: _pickDate,
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: _submit,
+                  child: Text(_isEditing ? 'Salvar alterações' : 'Adicionar planta'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -191,9 +221,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
       irrigationFrequencyDays:
           frequencyText.isEmpty ? null : int.parse(frequencyText),
       acquisitionDate: _acquisitionDate,
-      location: _locationCtrl.text.trim().isEmpty
-          ? null
-          : _locationCtrl.text.trim(),
+      locationId: _selectedLocationId,
       lastIrrigatedAt: widget.plant?.lastIrrigatedAt,
       createdAt: widget.plant?.createdAt ?? DateTime.now(),
     );

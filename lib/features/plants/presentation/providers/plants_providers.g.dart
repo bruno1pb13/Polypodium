@@ -23,7 +23,7 @@ final plantsRepositoryProvider = Provider<PlantsRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PlantsRepositoryRef = ProviderRef<PlantsRepository>;
-String _$plantsWithSpeciesHash() => r'01e1c3a330e6e379351e8991fc3dc6cc5be79fab';
+String _$plantsWithSpeciesHash() => r'e616f682e9442324f848cb726f98b465d94d292e';
 
 /// Combines each plant with its resolved species for home-screen display.
 ///

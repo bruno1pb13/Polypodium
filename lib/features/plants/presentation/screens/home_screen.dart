@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../species/presentation/screens/species_list_screen.dart';
+import '../../../locations/presentation/screens/locations_list_screen.dart';
 import '../providers/plants_providers.dart';
 import '../widgets/plant_list_item.dart';
 import 'add_edit_plant_screen.dart';
@@ -18,6 +19,14 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('PlantLog'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.location_on_outlined),
+            tooltip: 'Localizações',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const LocationsListScreen()),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.eco_outlined),
             tooltip: 'Espécies',
