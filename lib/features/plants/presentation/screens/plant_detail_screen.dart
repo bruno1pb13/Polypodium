@@ -157,11 +157,9 @@ class PlantDetailScreen extends ConsumerWidget {
         createdAt: DateTime.now(),
       );
 
-      // Perform both updates in parallel and wait for both to complete
-      await Future.wait([
-        ref.read(plantsNotifierProvider.notifier).irrigate(plantId),
-        ref.read(entriesNotifierProvider(plantId).notifier).create(entry),
-      ]);
+      // Now we only need to create the entry.
+      // The EntriesNotifier will trigger refreshPlantStatus if it's an irrigation.
+      await ref.read(entriesNotifierProvider(plantId).notifier).create(entry);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -172,6 +170,7 @@ class PlantDetailScreen extends ConsumerWidget {
         );
       }
     } catch (e) {
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

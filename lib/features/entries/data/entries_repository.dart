@@ -17,7 +17,13 @@ class EntriesRepository {
 
   static const _retentionLimit = 30;
 
+  Future<EntryModel?> getById(String id) async {
+    final row = await _dao.getById(id);
+    return row == null ? null : _fromRow(row);
+  }
+
   Future<List<EntryModel>> getByPlant(String plantId) async {
+
     final rows = await _dao.getByPlant(plantId);
     return rows.map(_fromRow).toList();
   }
