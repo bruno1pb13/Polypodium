@@ -44,8 +44,13 @@ class EntriesRepository {
   }
 
   Future<void> delete(String id, {String? photoPath}) async {
+    final entry = await getById(id);
+    if (entry?.type == EntryType.history) {
+      throw Exception('Registros de histórico não podem ser removidos.');
+    }
     if (photoPath != null) await _photoStorage.deletePhoto(photoPath);
     await _dao.deleteById(id);
+
     // TODO(sync): Enqueue deletion for server sync
     await _syncQueueDao.enqueue(
       entityType: 'entry',

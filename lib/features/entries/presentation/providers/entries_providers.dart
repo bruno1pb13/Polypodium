@@ -39,7 +39,11 @@ class EntriesNotifier extends _$EntriesNotifier {
 
   Future<void> delete(String id, {String? photoPath}) async {
     final entry = await ref.read(entriesRepositoryProvider).getById(id);
+    if (entry?.type == EntryType.history) {
+      throw Exception('Registros de histórico não podem ser removidos.');
+    }
     await ref.read(entriesRepositoryProvider).delete(id, photoPath: photoPath);
+
     if (entry?.type == EntryType.irrigation) {
       await ref.read(plantsRepositoryProvider).refreshPlantStatus(plantId);
       ref.invalidate(plantsNotifierProvider);
