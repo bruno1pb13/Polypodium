@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../data/plants_repository.dart';
 import '../../domain/plant_model.dart';
+import '../../../locations/presentation/providers/locations_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
 
 part 'plants_providers.g.dart';
@@ -43,10 +44,17 @@ Future<List<PlantWithSpecies>> plantsWithSpecies(
     PlantsWithSpeciesRef ref) async {
   final plants = await ref.watch(plantsNotifierProvider.future);
   final species = await ref.watch(speciesNotifierProvider.future);
+  final locations = await ref.watch(locationsNotifierProvider.future);
 
   final speciesById = {for (final s in species) s.id: s};
+  final locationsById = {for (final l in locations) l.id: l};
+
   return plants
       .where((p) => speciesById.containsKey(p.speciesId))
-      .map((p) => PlantWithSpecies(plant: p, species: speciesById[p.speciesId]!))
+      .map((p) => PlantWithSpecies(
+            plant: p,
+            species: speciesById[p.speciesId]!,
+            location: p.locationId != null ? locationsById[p.locationId] : null,
+          ))
       .toList();
 }
