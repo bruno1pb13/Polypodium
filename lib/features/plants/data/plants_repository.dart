@@ -9,13 +9,16 @@ import 'plants_dao.dart';
 
 class PlantsRepository {
   PlantsRepository(AppDatabase db)
-      : _dao = db.plantsDao,
+      : _db = db,
+        _dao = db.plantsDao,
         _syncQueueDao = db.syncQueueDao,
         _speciesRepo = SpeciesRepository(db);
 
+  final AppDatabase _db;
   final PlantsDao _dao;
   final _syncQueueDao;
   final SpeciesRepository _speciesRepo;
+
 
   Future<List<PlantModel>> getAll() async {
     final rows = await _dao.getAll();
@@ -58,7 +61,18 @@ class PlantsRepository {
     return updated;
   }
 
+  /// Recalculates lastIrrigatedAt based on the most recent irrigation entry.
+  Future<void> refreshPlantStatus(String plantId) async {
+    final lastDate = await _db.entriesDao.getLastIrrigationDate(plantId);
+    await _dao.updateLastIrrigated(plantId, lastDate);
+    final plant = await getById(plantId);
+    if (plant != null) {
+      await _rescheduleNotification(plant);
+    }
+  }
+
   Future<void> delete(String id) async {
+
     await NotificationService.cancelNotification(id);
     await _dao.deleteById(id);
     // TODO(sync): Enqueue deletion for server sync

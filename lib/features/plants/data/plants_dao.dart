@@ -24,9 +24,10 @@ class PlantsDao extends DatabaseAccessor<AppDatabase> with _$PlantsDaoMixin {
   Future<void> upsert(PlantsTableCompanion companion) =>
       into(plantsTable).insertOnConflictUpdate(companion);
 
-  Future<void> updateLastIrrigated(String id, DateTime when) =>
+  Future<void> updateLastIrrigated(String id, DateTime? when) =>
       (update(plantsTable)..where((t) => t.id.equals(id)))
           .write(PlantsTableCompanion(lastIrrigatedAt: Value(when)));
+
 
   Future<void> updateSyncStatus(String id, SyncStatus status) =>
       (update(plantsTable)..where((t) => t.id.equals(id)))
