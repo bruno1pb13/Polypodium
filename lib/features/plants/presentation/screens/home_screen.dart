@@ -6,6 +6,7 @@ import '../../../locations/presentation/screens/locations_list_screen.dart';
 import '../providers/plants_providers.dart';
 import '../providers/plant_search_providers.dart';
 import '../../../../core/enums.dart';
+import '../../../../core/widgets/app_drawer.dart';
 import '../widgets/plant_list_item.dart';
 import 'add_edit_plant_screen.dart';
 import 'plant_detail_screen.dart';
@@ -33,25 +34,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('PlantLog'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.location_on_outlined),
-            tooltip: 'Localizações',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const LocationsListScreen()),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.eco_outlined),
-            tooltip: 'Espécies',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SpeciesListScreen()),
-            ),
-          ),
-        ],
       ),
+      drawer: const AppDrawer(),
       body: Column(
         children: [
           Padding(
