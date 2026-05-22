@@ -28,6 +28,9 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
   SoilType _soilType = SoilType.loamy;
   DateTime _acquisitionDate = DateTime.now();
 
+  bool _isFrequencyAutoFilled = false;
+  bool _isSoilAutoFilled = false;
+
   bool get _isEditing => widget.plant != null;
 
   @override
@@ -81,20 +84,49 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
               _SpeciesDropdown(
                 species: species,
                 selected: _selectedSpeciesId,
-                onChanged: (id) => setState(() => _selectedSpeciesId = id),
+                onChanged: (id) {
+                  setState(() {
+                    _selectedSpeciesId = id;
+                    if (!_isEditing && id != null) {
+                      final selectedSpecies =
+                          species.firstWhere((s) => s.id == id);
+                      _frequencyCtrl.text = selectedSpecies
+                          .defaultIrrigationFrequencyDays
+                          .toString();
+                      _isFrequencyAutoFilled = true;
+
+                      if (selectedSpecies.recommendedSoilTypes.isNotEmpty) {
+                        _soilType = selectedSpecies.recommendedSoilTypes.first;
+                        _isSoilAutoFilled = true;
+                      }
+                    }
+                  });
+                },
               ),
               const SizedBox(height: 16),
               _SoilTypeDropdown(
                 value: _soilType,
-                onChanged: (v) => setState(() => _soilType = v!),
+                isRecommended: _isSoilAutoFilled,
+                onChanged: (v) {
+                  setState(() {
+                    _soilType = v!;
+                    _isSoilAutoFilled = false;
+                  });
+                },
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _frequencyCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Frequência de irrigação (dias)',
+                decoration: InputDecoration(
+                  labelText:
+                      'Frequência de irrigação (dias)${_isFrequencyAutoFilled ? ' (recomendado)' : ''}',
                   hintText: 'Deixe vazio para usar o padrão da espécie',
                 ),
+                onChanged: (_) {
+                  if (_isFrequencyAutoFilled) {
+                    setState(() => _isFrequencyAutoFilled = false);
+                  }
+                },
                 keyboardType: TextInputType.number,
                 validator: (v) {
                   if (v == null || v.isEmpty) return null;
@@ -200,15 +232,22 @@ class _SpeciesDropdown extends StatelessWidget {
 
 class _SoilTypeDropdown extends StatelessWidget {
   final SoilType value;
+  final bool isRecommended;
   final ValueChanged<SoilType?> onChanged;
 
-  const _SoilTypeDropdown({required this.value, required this.onChanged});
+  const _SoilTypeDropdown({
+    required this.value,
+    this.isRecommended = false,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<SoilType>(
       initialValue: value,
-      decoration: const InputDecoration(labelText: 'Tipo de solo *'),
+      decoration: InputDecoration(
+        labelText: 'Tipo de solo *${isRecommended ? ' (recomendado)' : ''}',
+      ),
       items: SoilType.values
           .map((s) => DropdownMenuItem(value: s, child: Text(s.label)))
           .toList(),
