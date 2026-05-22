@@ -42,9 +42,14 @@ class PlantsNotifier extends _$PlantsNotifier {
 @riverpod
 Future<List<PlantWithSpecies>> plantsWithSpecies(
     PlantsWithSpeciesRef ref) async {
-  final plants = await ref.watch(plantsNotifierProvider.future);
-  final species = await ref.watch(speciesNotifierProvider.future);
-  final locations = await ref.watch(locationsNotifierProvider.future);
+  // Watch all futures at once to keep them alive and potentially run in parallel
+  final plantsFuture = ref.watch(plantsNotifierProvider.future);
+  final speciesFuture = ref.watch(speciesNotifierProvider.future);
+  final locationsFuture = ref.watch(locationsNotifierProvider.future);
+
+  final plants = await plantsFuture;
+  final species = await speciesFuture;
+  final locations = await locationsFuture;
 
   final speciesById = {for (final s in species) s.id: s};
   final locationsById = {for (final l in locations) l.id: l};
