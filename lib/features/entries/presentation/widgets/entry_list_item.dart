@@ -72,12 +72,13 @@ class EntryListItem extends StatelessWidget {
                 ],
               ),
             ),
-            if (onDelete != null)
+            if (onDelete != null && entry.type != EntryType.history)
               IconButton(
                 icon: const Icon(Icons.delete_outline),
                 iconSize: 20,
                 onPressed: onDelete,
               ),
+
           ],
         ),
       ),

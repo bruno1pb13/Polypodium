@@ -1,10 +1,16 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/database/database_provider.dart';
+import '../../../../core/enums.dart';
+import '../../../entries/domain/entry_model.dart';
+import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../data/plants_repository.dart';
 import '../../domain/plant_model.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
+
 
 part 'plants_providers.g.dart';
 
@@ -20,12 +26,99 @@ class PlantsNotifier extends _$PlantsNotifier {
       ref.watch(plantsRepositoryProvider).getAll();
 
   Future<void> save(PlantModel plant) async {
+    final oldPlants = await future;
+    final oldPlant = oldPlants.where((p) => p.id == plant.id).firstOrNull;
+
     await ref.read(plantsRepositoryProvider).save(plant);
+
+    final note = await _generateHistoryNote(oldPlant, plant);
+    if (note != null) {
+      final entry = EntryModel(
+        id: const Uuid().v4(),
+        plantId: plant.id,
+        date: DateTime.now(),
+        type: EntryType.history,
+        note: note,
+        createdAt: DateTime.now(),
+      );
+      // We read the notifier and call create.
+      // Note: this will also trigger refreshPlantStatus if it were an irrigation,
+      // but for history it just creates the entry and invalidates entries.
+      await ref.read(entriesNotifierProvider(plant.id).notifier).create(entry);
+    }
+
     ref.invalidateSelf();
     await future;
   }
 
+  Future<String?> _generateHistoryNote(PlantModel? old, PlantModel next) async {
+    if (old == null) {
+      // Creation
+      final species = await ref.read(speciesNotifierProvider.future).then(
+          (list) => list.where((s) => s.id == next.speciesId).firstOrNull);
+      final location = next.locationId == null
+          ? null
+          : await ref.read(locationsNotifierProvider.future).then(
+              (list) => list.where((l) => l.id == next.locationId).firstOrNull);
+
+      final sb = StringBuffer();
+      sb.writeln('Planta adicionada ao sistema:');
+      sb.writeln('• Apelido: ${next.nickname}');
+      if (species != null) {
+        sb.writeln(
+            '• Espécie: ${species.popularName} (${species.scientificName})');
+      }
+      sb.writeln('• Solo: ${next.soilType.label}');
+      if (location != null) {
+        sb.writeln('• Localização: ${location.name}');
+      }
+      sb.writeln(
+          '• Adquirida em: ${DateFormat('dd/MM/yyyy').format(next.acquisitionDate)}');
+      if (next.irrigationFrequencyDays != null) {
+        sb.writeln('• Rega personalizada: ${next.irrigationFrequencyDays} dias');
+      }
+      return sb.toString().trim();
+    }
+
+    // Update
+    final changes = <String>[];
+    if (old.nickname != next.nickname) {
+      changes.add('Apelido: ${old.nickname} → ${next.nickname}');
+    }
+    if (old.speciesId != next.speciesId) {
+      final speciesList = await ref.read(speciesNotifierProvider.future);
+      final oldS = speciesList.where((s) => s.id == old.speciesId).firstOrNull;
+      final nextS = speciesList.where((s) => s.id == next.speciesId).firstOrNull;
+      changes.add(
+          'Espécie: ${oldS?.popularName ?? 'Desconhecida'} → ${nextS?.popularName ?? 'Desconhecida'}');
+    }
+    if (old.soilType != next.soilType) {
+      changes.add('Solo: ${old.soilType.label} → ${next.soilType.label}');
+    }
+    if (old.locationId != next.locationId) {
+      final locList = await ref.read(locationsNotifierProvider.future);
+      final oldL = locList.where((l) => l.id == old.locationId).firstOrNull;
+      final nextL = locList.where((l) => l.id == next.locationId).firstOrNull;
+      changes.add(
+          'Localização: ${oldL?.name ?? 'Nenhuma'} → ${nextL?.name ?? 'Nenhuma'}');
+    }
+    if (old.irrigationFrequencyDays != next.irrigationFrequencyDays) {
+      changes.add(
+          'Frequência de rega: ${old.irrigationFrequencyDays ?? 'Padrão'} → ${next.irrigationFrequencyDays ?? 'Padrão'} dias');
+    }
+    if (old.acquisitionDate.day != next.acquisitionDate.day ||
+        old.acquisitionDate.month != next.acquisitionDate.month ||
+        old.acquisitionDate.year != next.acquisitionDate.year) {
+      changes.add(
+          'Data de aquisição: ${DateFormat('dd/MM/yyyy').format(old.acquisitionDate)} → ${DateFormat('dd/MM/yyyy').format(next.acquisitionDate)}');
+    }
+
+    if (changes.isEmpty) return null;
+    return 'Informações atualizadas:\n${changes.map((c) => '• $c').join('\n')}';
+  }
+
   Future<void> irrigate(String plantId) async {
+
     await ref.read(plantsRepositoryProvider).irrigate(plantId);
     ref.invalidateSelf();
     await future;

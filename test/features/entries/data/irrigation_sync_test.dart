@@ -97,4 +97,26 @@ void main() {
     updatedPlant = await plantsRepo.getById(plantId);
     expect(updatedPlant?.lastIrrigatedAt, isNull);
   });
+
+  test('History entries cannot be deleted', () async {
+    final plantId = const Uuid().v4();
+    final entry = EntryModel(
+      id: const Uuid().v4(),
+      plantId: plantId,
+      date: DateTime.now(),
+      type: EntryType.history,
+      createdAt: DateTime.now(),
+    );
+
+    await entriesRepo.create(entry);
+    
+    expect(
+      () => entriesRepo.delete(entry.id),
+      throwsA(isA<Exception>().having((e) => e.toString(), 'message', contains('histórico'))),
+    );
+
+    final savedEntry = await entriesRepo.getById(entry.id);
+    expect(savedEntry, isNotNull);
+  });
 }
+
