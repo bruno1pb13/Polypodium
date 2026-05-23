@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/database/database_provider.dart';
@@ -10,10 +11,10 @@ import '../../domain/entry_model.dart';
 part 'entries_providers.g.dart';
 
 @Riverpod(keepAlive: true)
-PhotoStorage photoStorage(PhotoStorageRef ref) => PhotoStorage();
+PhotoStorage photoStorage(Ref ref) => PhotoStorage();
 
 @Riverpod(keepAlive: true)
-EntriesRepository entriesRepository(EntriesRepositoryRef ref) {
+EntriesRepository entriesRepository(Ref ref) {
   return EntriesRepository(
     ref.watch(appDatabaseProvider),
     ref.watch(photoStorageProvider),

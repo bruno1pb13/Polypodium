@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/enums.dart';
 import '../providers/plants_providers.dart';
@@ -22,8 +23,7 @@ class PlantSortOptionNotifier extends _$PlantSortOptionNotifier {
 }
 
 @riverpod
-Future<List<PlantWithSpecies>> filteredSortedPlants(
-    FilteredSortedPlantsRef ref) async {
+Future<List<PlantWithSpecies>> filteredSortedPlants(Ref ref) async {
   // Watch synchronous providers FIRST to ensure they are not disposed during await
   final query = ref.watch(plantSearchQueryProvider).toLowerCase();
   final sortOption = ref.watch(plantSortOptionNotifierProvider);
