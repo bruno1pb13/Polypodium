@@ -56,14 +56,18 @@ class _IrrigationBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: overdue ? colorScheme.errorContainer : colorScheme.surfaceContainerHighest,
+        color: overdue
+            ? colorScheme.errorContainer
+            : colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         label,
         style: TextStyle(
           fontSize: 12,
-          color: overdue ? colorScheme.error : colorScheme.onSurfaceVariant, // ignore: deprecated_member_use
+          color: overdue
+              ? colorScheme.error
+              : colorScheme.onSurfaceVariant, // ignore: deprecated_member_use
           fontWeight: FontWeight.w500,
         ),
       ),

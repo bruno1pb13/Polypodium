@@ -61,7 +61,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: TextField(
@@ -174,7 +175,8 @@ class _EmptyState extends StatelessWidget {
         children: [
           Icon(Icons.local_florist_outlined,
               size: 64,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4)),
+              color:
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
           const Text('Nenhuma planta cadastrada'),
           const SizedBox(height: 8),

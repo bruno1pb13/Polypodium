@@ -14,6 +14,7 @@ import 'package:plantlog/features/locations/presentation/providers/locations_pro
 import 'package:plantlog/core/enums.dart';
 
 class MockPlantsRepository extends Mock implements PlantsRepository {}
+
 class MockEntriesRepository extends Mock implements EntriesRepository {}
 
 // Simple mocks for notifiers
@@ -61,7 +62,7 @@ void main() {
   setUp(() {
     mockPlantsRepo = MockPlantsRepository();
     mockEntriesRepo = MockEntriesRepository();
-    
+
     container = ProviderContainer(
       overrides: [
         plantsRepositoryProvider.overrideWithValue(mockPlantsRepo),
@@ -104,7 +105,8 @@ void main() {
           entriesRepositoryProvider.overrideWithValue(mockEntriesRepo),
           speciesNotifierProvider.overrideWith(() => MockSpeciesNotifier()),
           locationsNotifierProvider.overrideWith(() => MockLocationsNotifier()),
-          entriesNotifierProvider('p1').overrideWith(() => MockEntriesNotifier()),
+          entriesNotifierProvider('p1')
+              .overrideWith(() => MockEntriesNotifier()),
         ],
       );
 
@@ -112,8 +114,10 @@ void main() {
       await notifier.save(plant);
 
       verify(() => mockPlantsRepo.save(plant)).called(1);
-      
-      final capturedEntry = verify(() => mockEntriesRepo.create(captureAny())).captured.single as EntryModel;
+
+      final capturedEntry = verify(() => mockEntriesRepo.create(captureAny()))
+          .captured
+          .single as EntryModel;
       expect(capturedEntry.type, EntryType.history);
       expect(capturedEntry.plantId, plant.id);
       expect(capturedEntry.note, contains('Planta adicionada'));
@@ -129,7 +133,7 @@ void main() {
         acquisitionDate: DateTime(2024, 1, 1),
         createdAt: now,
       );
-      
+
       final newPlant = oldPlant.copyWith(nickname: 'Ferny Updated');
 
       when(() => mockPlantsRepo.getAll()).thenAnswer((_) async => [oldPlant]);
@@ -142,26 +146,30 @@ void main() {
           entriesRepositoryProvider.overrideWithValue(mockEntriesRepo),
           speciesNotifierProvider.overrideWith(() => MockSpeciesNotifier()),
           locationsNotifierProvider.overrideWith(() => MockLocationsNotifier()),
-          entriesNotifierProvider('p1').overrideWith(() => MockEntriesNotifier()),
+          entriesNotifierProvider('p1')
+              .overrideWith(() => MockEntriesNotifier()),
         ],
       );
 
       final notifier = container.read(plantsNotifierProvider.notifier);
       // Wait for initial build to populate the "oldPlants" state
       await container.read(plantsNotifierProvider.future);
-      
+
       await notifier.save(newPlant);
 
       verify(() => mockPlantsRepo.save(newPlant)).called(1);
-      
-      final capturedEntry = verify(() => mockEntriesRepo.create(captureAny())).captured.single as EntryModel;
+
+      final capturedEntry = verify(() => mockEntriesRepo.create(captureAny()))
+          .captured
+          .single as EntryModel;
       expect(capturedEntry.type, EntryType.history);
       expect(capturedEntry.note, contains('Apelido: Ferny → Ferny Updated'));
     });
 
     test('irrigate calls repository and invalidates self', () async {
       const plantId = 'p1';
-      when(() => mockPlantsRepo.irrigate(plantId)).thenAnswer((_) async => null);
+      when(() => mockPlantsRepo.irrigate(plantId))
+          .thenAnswer((_) async => null);
       when(() => mockPlantsRepo.getAll()).thenAnswer((_) async => []);
 
       final notifier = container.read(plantsNotifierProvider.notifier);

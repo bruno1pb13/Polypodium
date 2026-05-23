@@ -2,7 +2,6 @@ enum SoilType { sandy, clay, loamy, peaty, chalky, silty }
 
 enum EntryType { irrigation, fertilizer, pruning, observation, other, history }
 
-
 // TODO(sync): Tracks local changes pending server synchronization
 enum SyncStatus { synced, pending, conflict }
 
@@ -43,5 +42,4 @@ extension EntryTypeX on EntryType {
         EntryType.other => '📝',
         EntryType.history => '📜',
       };
-
 }

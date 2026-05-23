@@ -28,15 +28,19 @@ export 'sync_queue_table.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [SpeciesTable, PlantsTable, EntriesTable, SyncQueueTable, LocationsTable],
+  tables: [
+    SpeciesTable,
+    PlantsTable,
+    EntriesTable,
+    SyncQueueTable,
+    LocationsTable
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(QueryExecutor executor) : super(executor);
 
   @override
-
-
   int get schemaVersion => 2;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
@@ -75,7 +79,8 @@ class AppDatabase extends _$AppDatabase {
                 for (final name in uniqueNames) {
                   final id = const Uuid().v4();
                   nameToId[name] = id;
-                  await into(locationsTable).insert(LocationsTableCompanion.insert(
+                  await into(locationsTable)
+                      .insert(LocationsTableCompanion.insert(
                     id: id,
                     name: name,
                     createdAt: DateTime.now(),
@@ -86,7 +91,8 @@ class AppDatabase extends _$AppDatabase {
                 for (final plant in plantsWithLocation) {
                   final name = plant.location;
                   if (name != null && nameToId.containsKey(name)) {
-                    await (update(plantsTable)..where((t) => t.id.equals(plant.id)))
+                    await (update(plantsTable)
+                          ..where((t) => t.id.equals(plant.id)))
                         .write(PlantsTableCompanion(
                       locationId: Value(nameToId[name]),
                     ));

@@ -19,7 +19,6 @@ class PlantsRepository {
   final _syncQueueDao;
   final SpeciesRepository _speciesRepo;
 
-
   Future<List<PlantModel>> getAll() async {
     final rows = await _dao.getAll();
     return rows.map(_fromRow).toList();
@@ -72,7 +71,6 @@ class PlantsRepository {
   }
 
   Future<void> delete(String id) async {
-
     await NotificationService.cancelNotification(id);
     await _dao.deleteById(id);
     // TODO(sync): Enqueue deletion for server sync

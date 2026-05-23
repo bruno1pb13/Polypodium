@@ -89,8 +89,8 @@ class SpeciesListScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Deletar espécie?'),
-        content: const Text(
-            'Plantas vinculadas a esta espécie não serão afetadas.'),
+        content:
+            const Text('Plantas vinculadas a esta espécie não serão afetadas.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

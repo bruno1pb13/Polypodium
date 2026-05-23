@@ -118,7 +118,8 @@ class _AddSpeciesScreenState extends ConsumerState<AddSpeciesScreen> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(_isEditing ? 'Salvar alterações' : 'Adicionar espécie'),
+                  : Text(
+                      _isEditing ? 'Salvar alterações' : 'Adicionar espécie'),
             ),
           ],
         ),

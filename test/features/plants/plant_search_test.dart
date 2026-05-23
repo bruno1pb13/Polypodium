@@ -32,7 +32,8 @@ void main() {
           soilType: SoilType.loamy,
           acquisitionDate: DateTime(2023, 1, 1),
           createdAt: DateTime(2023, 1, 1),
-          lastIrrigatedAt: DateTime.now().subtract(const Duration(days: 4)), // Overdue
+          lastIrrigatedAt:
+              DateTime.now().subtract(const Duration(days: 4)), // Overdue
         ),
         species: species1,
       ),
@@ -44,7 +45,8 @@ void main() {
           soilType: SoilType.sandy,
           acquisitionDate: DateTime(2023, 2, 1),
           createdAt: DateTime(2023, 2, 1),
-          lastIrrigatedAt: DateTime.now().subtract(const Duration(days: 1)), // Not overdue
+          lastIrrigatedAt:
+              DateTime.now().subtract(const Duration(days: 1)), // Not overdue
         ),
         species: species2,
       ),
@@ -56,7 +58,8 @@ void main() {
           soilType: SoilType.loamy,
           acquisitionDate: DateTime(2023, 3, 1),
           createdAt: DateTime(2023, 3, 1),
-          lastIrrigatedAt: DateTime.now().subtract(const Duration(days: 5)), // More overdue
+          lastIrrigatedAt:
+              DateTime.now().subtract(const Duration(days: 5)), // More overdue
         ),
         species: species1,
       ),
@@ -64,8 +67,10 @@ void main() {
 
     test('Filter by nickname', () {
       final query = 'red';
-      final filtered = plants.where((p) =>
-          p.plant.nickname.toLowerCase().contains(query.toLowerCase())).toList();
+      final filtered = plants
+          .where((p) =>
+              p.plant.nickname.toLowerCase().contains(query.toLowerCase()))
+          .toList();
       expect(filtered.length, 1);
       expect(filtered.first.plant.id, 'p1');
     });
@@ -82,11 +87,11 @@ void main() {
     test('Sort by watering needs (overdue first)', () {
       final sorted = [...plants]..sort((a, b) =>
           b.daysRelativeToSchedule.compareTo(a.daysRelativeToSchedule));
-      
+
       // p3 is 5-3=2 days overdue
       // p1 is 4-3=1 day overdue
       // p2 is 1-10=-9 days (not overdue)
-      
+
       expect(sorted[0].plant.id, 'p3');
       expect(sorted[1].plant.id, 'p1');
       expect(sorted[2].plant.id, 'p2');

@@ -11,7 +11,6 @@ import '../../domain/plant_model.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
 
-
 part 'plants_providers.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -75,7 +74,8 @@ class PlantsNotifier extends _$PlantsNotifier {
       sb.writeln(
           '• Adquirida em: ${DateFormat('dd/MM/yyyy').format(next.acquisitionDate)}');
       if (next.irrigationFrequencyDays != null) {
-        sb.writeln('• Rega personalizada: ${next.irrigationFrequencyDays} dias');
+        sb.writeln(
+            '• Rega personalizada: ${next.irrigationFrequencyDays} dias');
       }
       return sb.toString().trim();
     }
@@ -88,7 +88,8 @@ class PlantsNotifier extends _$PlantsNotifier {
     if (old.speciesId != next.speciesId) {
       final speciesList = await ref.read(speciesNotifierProvider.future);
       final oldS = speciesList.where((s) => s.id == old.speciesId).firstOrNull;
-      final nextS = speciesList.where((s) => s.id == next.speciesId).firstOrNull;
+      final nextS =
+          speciesList.where((s) => s.id == next.speciesId).firstOrNull;
       changes.add(
           'Espécie: ${oldS?.popularName ?? 'Desconhecida'} → ${nextS?.popularName ?? 'Desconhecida'}');
     }
@@ -118,7 +119,6 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   Future<void> irrigate(String plantId) async {
-
     await ref.read(plantsRepositoryProvider).irrigate(plantId);
     ref.invalidateSelf();
     await future;

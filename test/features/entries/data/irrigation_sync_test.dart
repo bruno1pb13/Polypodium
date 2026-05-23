@@ -37,7 +37,8 @@ void main() {
     await db.close();
   });
 
-  test('refreshPlantStatus updates lastIrrigatedAt based on latest entry', () async {
+  test('refreshPlantStatus updates lastIrrigatedAt based on latest entry',
+      () async {
     final plantId = const Uuid().v4();
     final plant = PlantModel(
       id: plantId,
@@ -109,14 +110,14 @@ void main() {
     );
 
     await entriesRepo.create(entry);
-    
+
     expect(
       () => entriesRepo.delete(entry.id),
-      throwsA(isA<Exception>().having((e) => e.toString(), 'message', contains('histórico'))),
+      throwsA(isA<Exception>()
+          .having((e) => e.toString(), 'message', contains('histórico'))),
     );
 
     final savedEntry = await entriesRepo.getById(entry.id);
     expect(savedEntry, isNotNull);
   });
 }
-
