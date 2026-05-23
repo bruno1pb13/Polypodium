@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../species/presentation/screens/species_list_screen.dart';
 import '../../../locations/presentation/screens/locations_list_screen.dart';
-import '../providers/plants_providers.dart';
 import '../providers/plant_search_providers.dart';
 import '../../../../core/enums.dart';
 import '../widgets/plant_list_item.dart';

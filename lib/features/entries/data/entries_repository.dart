@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/database/sync_queue_dao.dart';
 import '../../../core/enums.dart';
 import '../../../core/storage/photo_storage.dart';
 import '../domain/entry_model.dart';
@@ -12,7 +13,7 @@ class EntriesRepository {
         _syncQueueDao = db.syncQueueDao;
 
   final EntriesDao _dao;
-  final _syncQueueDao;
+  final SyncQueueDao _syncQueueDao;
   final PhotoStorage _photoStorage;
 
   static const _retentionLimit = 30;

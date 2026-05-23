@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
-import '../../../core/enums.dart';
+import '../../../core/database/sync_queue_dao.dart';
 import '../domain/species_model.dart';
 import 'species_dao.dart';
 
@@ -11,7 +11,7 @@ class SpeciesRepository {
         _syncQueueDao = db.syncQueueDao;
 
   final SpeciesDao _dao;
-  final _syncQueueDao;
+  final SyncQueueDao _syncQueueDao;
 
   Future<List<SpeciesModel>> getAll() async {
     final rows = await _dao.getAll();

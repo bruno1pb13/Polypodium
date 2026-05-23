@@ -27,7 +27,7 @@ class SpeciesListScreen extends ConsumerWidget {
                       color: Theme.of(context)
                           .colorScheme
                           .primary
-                          .withOpacity(0.4)),
+                          .withValues(alpha: 0.4)),
                   const SizedBox(height: 16),
                   const Text('Nenhuma espécie cadastrada'),
                 ],
