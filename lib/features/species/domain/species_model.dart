@@ -35,8 +35,8 @@ class SpeciesModel {
         id: id ?? this.id,
         scientificName: scientificName ?? this.scientificName,
         popularName: popularName ?? this.popularName,
-        defaultIrrigationFrequencyDays:
-            defaultIrrigationFrequencyDays ?? this.defaultIrrigationFrequencyDays,
+        defaultIrrigationFrequencyDays: defaultIrrigationFrequencyDays ??
+            this.defaultIrrigationFrequencyDays,
         recommendedSoilTypes: recommendedSoilTypes ?? this.recommendedSoilTypes,
         syncStatus: syncStatus ?? this.syncStatus,
         createdAt: createdAt ?? this.createdAt,

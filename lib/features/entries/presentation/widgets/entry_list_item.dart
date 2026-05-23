@@ -32,7 +32,8 @@ class EntryListItem extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
-              child: Text(entry.type.emoji, style: const TextStyle(fontSize: 18)),
+              child:
+                  Text(entry.type.emoji, style: const TextStyle(fontSize: 18)),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -72,7 +73,7 @@ class EntryListItem extends StatelessWidget {
                 ],
               ),
             ),
-            if (onDelete != null)
+            if (onDelete != null && entry.type != EntryType.history)
               IconButton(
                 icon: const Icon(Icons.delete_outline),
                 iconSize: 20,

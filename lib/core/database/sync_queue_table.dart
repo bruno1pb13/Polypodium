@@ -18,8 +18,7 @@ class SyncQueueTable extends Table {
   /// JSON-encoded snapshot of the entity at the time of the write
   TextColumn get payload => text()();
 
-  BoolColumn get processed =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get processed => boolean().withDefault(const Constant(false))();
 
   DateTimeColumn get createdAt => dateTime()();
 }

@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/database/database_provider.dart';
@@ -7,7 +8,7 @@ import '../../domain/location_model.dart';
 part 'locations_providers.g.dart';
 
 @Riverpod(keepAlive: true)
-LocationsRepository locationsRepository(LocationsRepositoryRef ref) {
+LocationsRepository locationsRepository(Ref ref) {
   return LocationsRepository(ref.watch(appDatabaseProvider));
 }
 
