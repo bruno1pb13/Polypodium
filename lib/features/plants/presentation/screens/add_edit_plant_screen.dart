@@ -150,7 +150,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<String>(
-                        value: _selectedLocationId,
+                        initialValue: _selectedLocationId,
                         decoration: const InputDecoration(
                           labelText: 'Localização',
                         ),
@@ -252,7 +252,7 @@ class _SpeciesDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      value: selected,
+      initialValue: selected,
       decoration: const InputDecoration(labelText: 'Espécie *'),
       items: species
           .map((s) => DropdownMenuItem(
@@ -279,7 +279,7 @@ class _SoilTypeDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<SoilType>(
-      value: value,
+      initialValue: value,
       decoration: InputDecoration(
         labelText: 'Tipo de solo *${isRecommended ? ' (recomendado)' : ''}',
       ),
