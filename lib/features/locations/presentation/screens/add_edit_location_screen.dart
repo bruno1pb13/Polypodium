@@ -11,7 +11,8 @@ class AddEditLocationScreen extends ConsumerStatefulWidget {
   const AddEditLocationScreen({super.key, this.location});
 
   @override
-  ConsumerState<AddEditLocationScreen> createState() => _AddEditLocationScreenState();
+  ConsumerState<AddEditLocationScreen> createState() =>
+      _AddEditLocationScreenState();
 }
 
 class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
@@ -26,7 +27,8 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
   void initState() {
     super.initState();
     _nameCtrl = TextEditingController(text: widget.location?.name ?? '');
-    _descriptionCtrl = TextEditingController(text: widget.location?.description ?? '');
+    _descriptionCtrl =
+        TextEditingController(text: widget.location?.description ?? '');
   }
 
   @override
@@ -75,7 +77,9 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(_isEditing ? 'Salvar alterações' : 'Adicionar localização'),
+                  : Text(_isEditing
+                      ? 'Salvar alterações'
+                      : 'Adicionar localização'),
             ),
           ],
         ),

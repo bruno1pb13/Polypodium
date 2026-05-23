@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
-import '../../../core/enums.dart';
+import '../../../core/database/sync_queue_dao.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../species/data/species_repository.dart';
 import '../domain/plant_model.dart';
@@ -9,12 +9,14 @@ import 'plants_dao.dart';
 
 class PlantsRepository {
   PlantsRepository(AppDatabase db)
-      : _dao = db.plantsDao,
+      : _db = db,
+        _dao = db.plantsDao,
         _syncQueueDao = db.syncQueueDao,
         _speciesRepo = SpeciesRepository(db);
 
+  final AppDatabase _db;
   final PlantsDao _dao;
-  final _syncQueueDao;
+  final SyncQueueDao _syncQueueDao;
   final SpeciesRepository _speciesRepo;
 
   Future<List<PlantModel>> getAll() async {
@@ -56,6 +58,16 @@ class PlantsRepository {
     final updated = await getById(plantId);
     if (updated != null) await _rescheduleNotification(updated);
     return updated;
+  }
+
+  /// Recalculates lastIrrigatedAt based on the most recent irrigation entry.
+  Future<void> refreshPlantStatus(String plantId) async {
+    final lastDate = await _db.entriesDao.getLastIrrigationDate(plantId);
+    await _dao.updateLastIrrigated(plantId, lastDate);
+    final plant = await getById(plantId);
+    if (plant != null) {
+      await _rescheduleNotification(plant);
+    }
   }
 
   Future<void> delete(String id) async {

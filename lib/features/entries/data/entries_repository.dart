@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/database/sync_queue_dao.dart';
 import '../../../core/enums.dart';
 import '../../../core/storage/photo_storage.dart';
 import '../domain/entry_model.dart';
@@ -12,10 +13,15 @@ class EntriesRepository {
         _syncQueueDao = db.syncQueueDao;
 
   final EntriesDao _dao;
-  final _syncQueueDao;
+  final SyncQueueDao _syncQueueDao;
   final PhotoStorage _photoStorage;
 
   static const _retentionLimit = 30;
+
+  Future<EntryModel?> getById(String id) async {
+    final row = await _dao.getById(id);
+    return row == null ? null : _fromRow(row);
+  }
 
   Future<List<EntryModel>> getByPlant(String plantId) async {
     final rows = await _dao.getByPlant(plantId);
@@ -38,8 +44,13 @@ class EntriesRepository {
   }
 
   Future<void> delete(String id, {String? photoPath}) async {
+    final entry = await getById(id);
+    if (entry?.type == EntryType.history) {
+      throw Exception('Registros de histórico não podem ser removidos.');
+    }
     if (photoPath != null) await _photoStorage.deletePhoto(photoPath);
     await _dao.deleteById(id);
+
     // TODO(sync): Enqueue deletion for server sync
     await _syncQueueDao.enqueue(
       entityType: 'entry',
@@ -54,7 +65,8 @@ class EntriesRepository {
   /// Deletes entries beyond [_retentionLimit] (oldest first) and cleans
   /// orphaned photo files from disk.
   Future<void> _enforceRetentionPolicy(String plantId) async {
-    final overflow = await _dao.getOverRetentionLimit(plantId, keepCount: _retentionLimit);
+    final overflow =
+        await _dao.getOverRetentionLimit(plantId, keepCount: _retentionLimit);
     for (final row in overflow) {
       if (row.photoPath != null) {
         await _photoStorage.deletePhoto(row.photoPath!);

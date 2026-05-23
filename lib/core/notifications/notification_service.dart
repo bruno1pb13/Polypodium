@@ -22,7 +22,8 @@ class NotificationService {
       tz.setLocalLocation(tz.getLocation(timezoneName.identifier));
     } catch (e) {
       // ignore: avoid_print
-      print('[NotificationService] Failed to set local location, falling back to UTC: $e');
+      print(
+          '[NotificationService] Failed to set local location, falling back to UTC: $e');
       tz.setLocalLocation(tz.getLocation('UTC'));
     }
 
@@ -62,9 +63,10 @@ class NotificationService {
     required PlantModel plant,
     required SpeciesModel species,
   }) async {
-    final frequencyDays = plant.irrigationFrequencyDays ??
-        species.defaultIrrigationFrequencyDays;
-    final scheduledDate = _nextIrrigationTime(plant.lastIrrigatedAt, frequencyDays);
+    final frequencyDays =
+        plant.irrigationFrequencyDays ?? species.defaultIrrigationFrequencyDays;
+    final scheduledDate =
+        _nextIrrigationTime(plant.lastIrrigatedAt, frequencyDays);
 
     await _plugin.zonedSchedule(
       _notificationId(plant.id),
@@ -114,8 +116,7 @@ class NotificationService {
             .add(Duration(days: frequencyDays));
 
     // Notify at 9am on the due date
-    var scheduled =
-        tz.TZDateTime(tz.local, base.year, base.month, base.day, 9);
+    var scheduled = tz.TZDateTime(tz.local, base.year, base.month, base.day, 9);
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }

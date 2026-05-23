@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/database/database_provider.dart';
@@ -7,7 +8,7 @@ import '../../domain/species_model.dart';
 part 'species_providers.g.dart';
 
 @Riverpod(keepAlive: true)
-SpeciesRepository speciesRepository(SpeciesRepositoryRef ref) {
+SpeciesRepository speciesRepository(Ref ref) {
   return SpeciesRepository(ref.watch(appDatabaseProvider));
 }
 

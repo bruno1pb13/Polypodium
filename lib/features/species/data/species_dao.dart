@@ -2,7 +2,6 @@ import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/enums.dart';
-import 'species_table.dart';
 
 part 'species_dao.g.dart';
 

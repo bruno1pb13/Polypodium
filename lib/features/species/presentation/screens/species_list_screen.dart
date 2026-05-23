@@ -27,7 +27,7 @@ class SpeciesListScreen extends ConsumerWidget {
                       color: Theme.of(context)
                           .colorScheme
                           .primary
-                          .withOpacity(0.4)),
+                          .withValues(alpha: 0.4)),
                   const SizedBox(height: 16),
                   const Text('Nenhuma espécie cadastrada'),
                 ],
@@ -89,8 +89,8 @@ class SpeciesListScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Deletar espécie?'),
-        content: const Text(
-            'Plantas vinculadas a esta espécie não serão afetadas.'),
+        content:
+            const Text('Plantas vinculadas a esta espécie não serão afetadas.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

@@ -115,9 +115,8 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     if (xFile == null) return;
 
     // Save photo via PhotoStorage and store the final path
-    final savedPath = await ref
-        .read(photoStorageProvider)
-        .savePhoto(File(xFile.path));
+    final savedPath =
+        await ref.read(photoStorageProvider).savePhoto(File(xFile.path));
     setState(() => _photoPath = savedPath);
   }
 

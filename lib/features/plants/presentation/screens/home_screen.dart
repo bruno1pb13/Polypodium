@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// ignore: unused_import
 import '../../../species/presentation/screens/species_list_screen.dart';
+// ignore: unused_import
 import '../../../locations/presentation/screens/locations_list_screen.dart';
-import '../providers/plants_providers.dart';
 import '../providers/plant_search_providers.dart';
 import '../../../../core/enums.dart';
 import '../../../../core/widgets/app_drawer.dart';
@@ -45,7 +46,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: TextField(
@@ -158,7 +160,8 @@ class _EmptyState extends StatelessWidget {
         children: [
           Icon(Icons.local_florist_outlined,
               size: 64,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4)),
+              color:
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
           const Text('Nenhuma planta cadastrada'),
           const SizedBox(height: 8),

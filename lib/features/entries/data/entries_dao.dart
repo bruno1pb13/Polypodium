@@ -2,7 +2,6 @@ import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/enums.dart';
-import 'entries_table.dart';
 
 part 'entries_dao.g.dart';
 
@@ -21,6 +20,19 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
             ..where((t) => t.plantId.equals(plantId))
             ..orderBy([(t) => OrderingTerm.desc(t.date)]))
           .watch();
+
+  Future<EntriesTableData?> getById(String id) =>
+      (select(entriesTable)..where((t) => t.id.equals(id))).getSingleOrNull();
+
+  Future<DateTime?> getLastIrrigationDate(String plantId) async {
+    final query = select(entriesTable)
+      ..where((t) =>
+          t.plantId.equals(plantId) & t.type.equalsValue(EntryType.irrigation))
+      ..orderBy([(t) => OrderingTerm.desc(t.date)])
+      ..limit(1);
+    final row = await query.getSingleOrNull();
+    return row?.date;
+  }
 
   Future<void> insert(EntriesTableCompanion companion) =>
       into(entriesTable).insert(companion);

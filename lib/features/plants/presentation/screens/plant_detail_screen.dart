@@ -27,7 +27,8 @@ class PlantDetailScreen extends ConsumerWidget {
     final entriesAsync = ref.watch(entriesNotifierProvider(plantId));
 
     return plantsAsync.when(
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(body: Center(child: Text('Erro: $e'))),
       data: (plants) {
         final plant = plants.where((p) => p.id == plantId).firstOrNull;
@@ -157,11 +158,9 @@ class PlantDetailScreen extends ConsumerWidget {
         createdAt: DateTime.now(),
       );
 
-      // Perform both updates in parallel and wait for both to complete
-      await Future.wait([
-        ref.read(plantsNotifierProvider.notifier).irrigate(plantId),
-        ref.read(entriesNotifierProvider(plantId).notifier).create(entry),
-      ]);
+      // Now we only need to create the entry.
+      // The EntriesNotifier will trigger refreshPlantStatus if it's an irrigation.
+      await ref.read(entriesNotifierProvider(plantId).notifier).create(entry);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -217,8 +216,7 @@ class PlantDetailScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Deletar planta?'),
-        content: const Text(
-            'Todos os registros desta planta serão removidos.'),
+        content: const Text('Todos os registros desta planta serão removidos.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -232,8 +230,9 @@ class PlantDetailScreen extends ConsumerWidget {
       ),
     );
     if (confirmed == true && context.mounted) {
+      final navigator = Navigator.of(context);
       await ref.read(plantsNotifierProvider.notifier).delete(plantId);
-      Navigator.pop(context);
+      navigator.pop();
     }
   }
 }
@@ -306,7 +305,8 @@ class _IrrigationStatusCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      color: overdue ? colorScheme.errorContainer : colorScheme.primaryContainer,
+      color:
+          overdue ? colorScheme.errorContainer : colorScheme.primaryContainer,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
