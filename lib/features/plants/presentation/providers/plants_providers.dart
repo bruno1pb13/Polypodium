@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
@@ -14,7 +15,7 @@ import '../../../species/presentation/providers/species_providers.dart';
 part 'plants_providers.g.dart';
 
 @Riverpod(keepAlive: true)
-PlantsRepository plantsRepository(PlantsRepositoryRef ref) {
+PlantsRepository plantsRepository(Ref ref) {
   return PlantsRepository(ref.watch(appDatabaseProvider));
 }
 
@@ -133,8 +134,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 
 /// Combines each plant with its resolved species for home-screen display.
 @riverpod
-Future<List<PlantWithSpecies>> plantsWithSpecies(
-    PlantsWithSpeciesRef ref) async {
+Future<List<PlantWithSpecies>> plantsWithSpecies(Ref ref) async {
   // Watch all futures at once to keep them alive and potentially run in parallel
   final plantsFuture = ref.watch(plantsNotifierProvider.future);
   final speciesFuture = ref.watch(speciesNotifierProvider.future);

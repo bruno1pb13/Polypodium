@@ -230,8 +230,9 @@ class PlantDetailScreen extends ConsumerWidget {
       ),
     );
     if (confirmed == true && context.mounted) {
+      final navigator = Navigator.of(context);
       await ref.read(plantsNotifierProvider.notifier).delete(plantId);
-      Navigator.pop(context);
+      navigator.pop();
     }
   }
 }
