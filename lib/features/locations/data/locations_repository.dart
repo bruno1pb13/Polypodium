@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/database/sync_queue_dao.dart';
 import '../domain/location_model.dart';
 import 'locations_dao.dart';
 
@@ -10,7 +11,7 @@ class LocationsRepository {
         _syncQueueDao = db.syncQueueDao;
 
   final LocationsDao _dao;
-  final _syncQueueDao;
+  final SyncQueueDao _syncQueueDao;
 
   Future<List<LocationModel>> getAll() async {
     final rows = await _dao.getAll();

@@ -138,8 +138,9 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                   validator: (v) {
                     if (v == null || v.isEmpty) return null;
                     final n = int.tryParse(v);
-                    if (n == null || n <= 0)
+                    if (n == null || n <= 0) {
                       return 'Informe um número positivo';
+                    }
                     return null;
                   },
                 ),
@@ -251,7 +252,7 @@ class _SpeciesDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      initialValue: selected,
+      value: selected,
       decoration: const InputDecoration(labelText: 'Espécie *'),
       items: species
           .map((s) => DropdownMenuItem(
@@ -278,7 +279,7 @@ class _SoilTypeDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<SoilType>(
-      initialValue: value,
+      value: value,
       decoration: InputDecoration(
         labelText: 'Tipo de solo *${isRecommended ? ' (recomendado)' : ''}',
       ),
