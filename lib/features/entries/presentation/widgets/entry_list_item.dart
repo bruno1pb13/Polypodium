@@ -32,7 +32,8 @@ class EntryListItem extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
-              child: Text(entry.type.emoji, style: const TextStyle(fontSize: 18)),
+              child:
+                  Text(entry.type.emoji, style: const TextStyle(fontSize: 18)),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -78,7 +79,6 @@ class EntryListItem extends StatelessWidget {
                 iconSize: 20,
                 onPressed: onDelete,
               ),
-
           ],
         ),
       ),

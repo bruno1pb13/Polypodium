@@ -57,7 +57,8 @@ class PlantModel {
             : irrigationFrequencyDays as int?,
         acquisitionDate: acquisitionDate ?? this.acquisitionDate,
         location: location == _sentinel ? this.location : location as String?,
-        locationId: locationId == _sentinel ? this.locationId : locationId as String?,
+        locationId:
+            locationId == _sentinel ? this.locationId : locationId as String?,
         lastIrrigatedAt: lastIrrigatedAt == _sentinel
             ? this.lastIrrigatedAt
             : lastIrrigatedAt as DateTime?,

@@ -82,8 +82,9 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                     labelText: 'Apelido *',
                     hintText: 'Ex: Samambaia da sala',
                   ),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Informe um apelido' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Informe um apelido'
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 _SpeciesDropdown(
@@ -101,7 +102,8 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                         _isFrequencyAutoFilled = true;
 
                         if (selectedSpecies.recommendedSoilTypes.isNotEmpty) {
-                          _soilType = selectedSpecies.recommendedSoilTypes.first;
+                          _soilType =
+                              selectedSpecies.recommendedSoilTypes.first;
                           _isSoilAutoFilled = true;
                         }
                       }
@@ -136,7 +138,8 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                   validator: (v) {
                     if (v == null || v.isEmpty) return null;
                     final n = int.tryParse(v);
-                    if (n == null || n <= 0) return 'Informe um número positivo';
+                    if (n == null || n <= 0)
+                      return 'Informe um número positivo';
                     return null;
                   },
                 ),
@@ -156,7 +159,8 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                                   child: Text(l.name),
                                 ))
                             .toList(),
-                        onChanged: (v) => setState(() => _selectedLocationId = v),
+                        onChanged: (v) =>
+                            setState(() => _selectedLocationId = v),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -176,14 +180,16 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Data de aquisição'),
-                  subtitle: Text(DateFormat('dd/MM/yyyy').format(_acquisitionDate)),
+                  subtitle:
+                      Text(DateFormat('dd/MM/yyyy').format(_acquisitionDate)),
                   trailing: const Icon(Icons.calendar_today_outlined),
                   onTap: _pickDate,
                 ),
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: _submit,
-                  child: Text(_isEditing ? 'Salvar alterações' : 'Adicionar planta'),
+                  child: Text(
+                      _isEditing ? 'Salvar alterações' : 'Adicionar planta'),
                 ),
               ],
             ),

@@ -27,7 +27,8 @@ class PlantDetailScreen extends ConsumerWidget {
     final entriesAsync = ref.watch(entriesNotifierProvider(plantId));
 
     return plantsAsync.when(
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(body: Center(child: Text('Erro: $e'))),
       data: (plants) {
         final plant = plants.where((p) => p.id == plantId).firstOrNull;
@@ -170,7 +171,6 @@ class PlantDetailScreen extends ConsumerWidget {
         );
       }
     } catch (e) {
-
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -216,8 +216,7 @@ class PlantDetailScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Deletar planta?'),
-        content: const Text(
-            'Todos os registros desta planta serão removidos.'),
+        content: const Text('Todos os registros desta planta serão removidos.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -305,7 +304,8 @@ class _IrrigationStatusCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      color: overdue ? colorScheme.errorContainer : colorScheme.primaryContainer,
+      color:
+          overdue ? colorScheme.errorContainer : colorScheme.primaryContainer,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(

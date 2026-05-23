@@ -27,7 +27,9 @@ class LocationModel {
       LocationModel(
         id: id ?? this.id,
         name: name ?? this.name,
-        description: description == _sentinel ? this.description : description as String?,
+        description: description == _sentinel
+            ? this.description
+            : description as String?,
         createdAt: createdAt ?? this.createdAt,
         syncStatus: syncStatus ?? this.syncStatus,
       );

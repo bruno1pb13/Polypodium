@@ -1,12 +1,12 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
-import 'locations_table.dart';
 
 part 'locations_dao.g.dart';
 
 @DriftAccessor(tables: [LocationsTable])
-class LocationsDao extends DatabaseAccessor<AppDatabase> with _$LocationsDaoMixin {
+class LocationsDao extends DatabaseAccessor<AppDatabase>
+    with _$LocationsDaoMixin {
   LocationsDao(super.db);
 
   Future<List<LocationsTableData>> getAll() =>

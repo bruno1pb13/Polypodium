@@ -7,7 +7,6 @@ import '../../../../core/enums.dart';
 import '../../data/entries_repository.dart';
 import '../../domain/entry_model.dart';
 
-
 part 'entries_providers.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -52,4 +51,3 @@ class EntriesNotifier extends _$EntriesNotifier {
     await future;
   }
 }
-

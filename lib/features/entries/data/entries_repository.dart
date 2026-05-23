@@ -23,7 +23,6 @@ class EntriesRepository {
   }
 
   Future<List<EntryModel>> getByPlant(String plantId) async {
-
     final rows = await _dao.getByPlant(plantId);
     return rows.map(_fromRow).toList();
   }
@@ -65,7 +64,8 @@ class EntriesRepository {
   /// Deletes entries beyond [_retentionLimit] (oldest first) and cleans
   /// orphaned photo files from disk.
   Future<void> _enforceRetentionPolicy(String plantId) async {
-    final overflow = await _dao.getOverRetentionLimit(plantId, keepCount: _retentionLimit);
+    final overflow =
+        await _dao.getOverRetentionLimit(plantId, keepCount: _retentionLimit);
     for (final row in overflow) {
       if (row.photoPath != null) {
         await _photoStorage.deletePhoto(row.photoPath!);

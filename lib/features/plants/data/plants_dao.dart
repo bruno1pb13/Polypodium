@@ -2,7 +2,6 @@ import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/enums.dart';
-import 'plants_table.dart';
 
 part 'plants_dao.g.dart';
 
@@ -27,7 +26,6 @@ class PlantsDao extends DatabaseAccessor<AppDatabase> with _$PlantsDaoMixin {
   Future<void> updateLastIrrigated(String id, DateTime? when) =>
       (update(plantsTable)..where((t) => t.id.equals(id)))
           .write(PlantsTableCompanion(lastIrrigatedAt: Value(when)));
-
 
   Future<void> updateSyncStatus(String id, SyncStatus status) =>
       (update(plantsTable)..where((t) => t.id.equals(id)))

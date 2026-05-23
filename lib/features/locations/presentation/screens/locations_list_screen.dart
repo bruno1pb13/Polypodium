@@ -40,7 +40,8 @@ class LocationsListScreen extends ConsumerWidget {
               final loc = locations[i];
               return ListTile(
                 title: Text(loc.name),
-                subtitle: loc.description != null ? Text(loc.description!) : null,
+                subtitle:
+                    loc.description != null ? Text(loc.description!) : null,
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
