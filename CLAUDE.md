@@ -72,7 +72,12 @@ lib/
 
 ## SOLID and Testing Guidelines
 
-**Testing:**
+All generated code must be testable and follow SOLID principles. These are non-negotiable requirements, not suggestions.
+
+**Testability rules:**
+- Every new class that has dependencies must receive them via constructor injection so they can be replaced with mocks in tests.
+- Never call static methods of platform-coupled services (notifications, storage, sensors) directly from repositories or notifiers — always go through an interface injected via Riverpod.
+- Extract non-trivial pure logic (date calculations, filtering, validation) into standalone functions or methods marked `@visibleForTesting` so they can be unit-tested without initialising Flutter plugins.
 - Always write unit tests for new business logic in Repositories and Notifiers.
 - Use `mocktail` for mocking dependencies.
 - Use `ProviderContainer` for testing Riverpod providers without a widget tree.
@@ -83,7 +88,7 @@ lib/
 - **S**ingle Responsibility: Keep DAOs focused on raw SQL/mapping, Repositories on domain logic, and Notifiers on UI state.
 - **O**pen/Closed: Prefer adding new providers or extending logic via composition rather than modifying complex existing classes.
 - **L**iskov Substitution: If using interfaces for repositories, ensure mocks follow the same behavior.
-- **I**nterface Segregation: Notifiers should only depend on the specific repositories they need.
+- **I**nterface Segregation: Notifiers should only depend on the specific repositories they need. Platform services (notifications, storage) must expose narrow interfaces — only the methods a given caller needs.
 - **D**ependency Inversion: Always use Riverpod providers to inject dependencies. Do not instantiate repositories or services directly inside notifiers or other services. Use `ref.watch` or `ref.read` to obtain dependencies.
 
 ## Platform Setup (required before running)
@@ -93,7 +98,7 @@ lib/
 <!-- WorkManager / exact alarms -->
 <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
-<!-- WorkManager background service -->
+    <!-- WorkManager background service -->
 <service android:name="androidx.work.impl.background.systemjob.SystemJobService" .../>
 ```
 
