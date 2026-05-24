@@ -2,10 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/native.dart';
 import 'package:plantlog/core/database/app_database.dart';
 import 'package:plantlog/core/enums.dart';
+import 'package:plantlog/core/notifications/notification_service.dart';
 import 'package:plantlog/features/plants/data/plants_repository.dart';
 import 'package:plantlog/features/entries/data/entries_repository.dart';
 import 'package:plantlog/features/entries/domain/entry_model.dart';
 import 'package:plantlog/features/plants/domain/plant_model.dart';
+import 'package:plantlog/features/species/domain/species_model.dart';
 import 'package:plantlog/core/storage/photo_storage.dart';
 import 'package:uuid/uuid.dart';
 
@@ -20,6 +22,15 @@ class MockPhotoStorage implements PhotoStorage {
   Future<String> savePhoto(dynamic file) async => '';
 }
 
+class MockNotificationService implements INotificationService {
+  @override
+  Future<void> schedule(
+          {required PlantModel plant, required SpeciesModel species}) async {}
+
+  @override
+  Future<void> cancel(String plantId) async {}
+}
+
 void main() {
   late AppDatabase db;
   late PlantsRepository plantsRepo;
@@ -28,7 +39,7 @@ void main() {
 
   setUp(() {
     db = AppDatabase.forTesting(NativeDatabase.memory());
-    plantsRepo = PlantsRepository(db);
+    plantsRepo = PlantsRepository(db, MockNotificationService());
     mockPhotoStorage = MockPhotoStorage();
     entriesRepo = EntriesRepository(db, mockPhotoStorage);
   });

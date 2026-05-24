@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/database/sync_queue_dao.dart';
@@ -9,16 +8,18 @@ import '../domain/plant_model.dart';
 import 'plants_dao.dart';
 
 class PlantsRepository {
-  PlantsRepository(AppDatabase db)
+  PlantsRepository(AppDatabase db, INotificationService notifications)
       : _db = db,
         _dao = db.plantsDao,
         _syncQueueDao = db.syncQueueDao,
-        _speciesRepo = SpeciesRepository(db);
+        _speciesRepo = SpeciesRepository(db),
+        _notifications = notifications;
 
   final AppDatabase _db;
   final PlantsDao _dao;
   final SyncQueueDao _syncQueueDao;
   final SpeciesRepository _speciesRepo;
+  final INotificationService _notifications;
 
   Future<List<PlantModel>> getAll() async {
     final rows = await _dao.getAll();
@@ -72,7 +73,7 @@ class PlantsRepository {
   }
 
   Future<void> delete(String id) async {
-    await NotificationService.cancelNotification(id);
+    await _notifications.cancel(id);
     await _dao.deleteById(id);
     // TODO(sync): Enqueue deletion for server sync
     await _syncQueueDao.enqueue(
@@ -87,16 +88,14 @@ class PlantsRepository {
 
   Future<void> _rescheduleNotification(PlantModel plant) async {
     final species = await _speciesRepo.getById(plant.speciesId);
-    if (species == null) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    final enabled = prefs.getBool('notifications_enabled') ?? true;
-
-    await NotificationService.scheduleIrrigationNotification(
-      plant: plant,
-      species: species,
-      enabled: enabled,
-    );
+    if (species == null) {
+      // ignore: avoid_print
+      print(
+          '[PlantsRepository] Species ${plant.speciesId} not found for plant '
+          '${plant.id}; irrigation notification skipped');
+      return;
+    }
+    await _notifications.schedule(plant: plant, species: species);
   }
 
   static PlantModel _fromRow(PlantsTableData row) => PlantModel(
