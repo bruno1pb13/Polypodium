@@ -1,13 +1,26 @@
+import 'dart:io';
+
+import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../database/app_database.dart';
 import '../../features/plants/domain/plant_model.dart';
 import '../../features/species/domain/species_model.dart';
 
-class NotificationService {
-  NotificationService._();
+abstract interface class INotificationService {
+  Future<void> schedule({required PlantModel plant, required SpeciesModel species});
+  Future<void> cancel(String plantId);
+}
+
+class NotificationService implements INotificationService {
+  const NotificationService();
 
   static const irrigationCheckTask = 'irrigation-check';
   static const _channelId = 'plantlog_irrigation';
@@ -38,14 +51,12 @@ class NotificationService {
       const InitializationSettings(android: android, iOS: iOS),
     );
 
-    // Request permissions for Android 13+
     final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
 
     await androidPlugin?.requestNotificationsPermission();
     await androidPlugin?.requestExactAlarmsPermission();
 
-    // Android 8+ requires an explicit notification channel
     await _plugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
@@ -58,11 +69,34 @@ class NotificationService {
         );
   }
 
-  /// Schedules (or reschedules) the irrigation reminder for a plant.
-  static Future<void> scheduleIrrigationNotification({
+  // INotificationService --------------------------------------------------
+
+  @override
+  Future<void> schedule({
     required PlantModel plant,
     required SpeciesModel species,
   }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final enabled = prefs.getBool('notifications_enabled') ?? true;
+    await scheduleIrrigationNotification(
+        plant: plant, species: species, enabled: enabled);
+  }
+
+  @override
+  Future<void> cancel(String plantId) => cancelNotification(plantId);
+
+  // Static API ------------------------------------------------------------
+
+  static Future<void> scheduleIrrigationNotification({
+    required PlantModel plant,
+    required SpeciesModel species,
+    bool enabled = true,
+  }) async {
+    if (!enabled) {
+      await cancelNotification(plant.id);
+      return;
+    }
+
     final frequencyDays =
         plant.irrigationFrequencyDays ?? species.defaultIrrigationFrequencyDays;
     final scheduledDate =
@@ -86,43 +120,108 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
+      // No matchDateTimeComponents — one-shot; rescheduled after each irrigation
     );
   }
 
   static Future<void> cancelNotification(String plantId) =>
       _plugin.cancel(_notificationId(plantId));
 
-  /// Called from the WorkManager background isolate to reschedule all plants.
-  // TODO(sync): This method will also trigger a background sync pass
+  /// Called from the WorkManager background isolate every 12 h to recover
+  /// notifications lost after a device reboot.
+  // TODO(sync): Also trigger a background sync pass here
   static Future<void> checkAndRescheduleAll() async {
-    // WorkManager isolate: instantiate database directly (no Riverpod available)
     // ignore: avoid_print
     print('[NotificationService] Background check triggered');
-    // Implementation detail: import AppDatabase and instantiate here when
-    // WorkManager isolation issues are resolved at platform setup.
+
+    tz_data.initializeTimeZones();
+    try {
+      final timezoneName = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(timezoneName.identifier));
+    } catch (_) {
+      tz.setLocalLocation(tz.getLocation('UTC'));
+    }
+
+    // Re-initialise the plugin inside the background isolate
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iOS = DarwinInitializationSettings();
+    await _plugin
+        .initialize(const InitializationSettings(android: android, iOS: iOS));
+
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File(p.join(dir.path, 'plantlog.db'));
+    final db = AppDatabase.forTesting(NativeDatabase(file));
+
+    try {
+      final plantRows = await db.plantsDao.getAll();
+      for (final row in plantRows) {
+        final speciesRow = await db.speciesDao.getById(row.speciesId);
+        if (speciesRow == null) continue;
+
+        final plant = PlantModel(
+          id: row.id,
+          speciesId: row.speciesId,
+          nickname: row.nickname,
+          soilType: row.soilType,
+          irrigationFrequencyDays: row.irrigationFrequencyDays,
+          acquisitionDate: row.acquisitionDate,
+          location: row.location,
+          locationId: row.locationId,
+          lastIrrigatedAt: row.lastIrrigatedAt,
+          createdAt: row.createdAt,
+          syncStatus: row.syncStatus,
+        );
+        final species = SpeciesModel(
+          id: speciesRow.id,
+          scientificName: speciesRow.scientificName,
+          popularName: speciesRow.popularName,
+          defaultIrrigationFrequencyDays:
+              speciesRow.defaultIrrigationFrequencyDays,
+          recommendedSoilTypes: speciesRow.recommendedSoilTypes,
+          syncStatus: speciesRow.syncStatus,
+          createdAt: speciesRow.createdAt,
+        );
+
+        await scheduleIrrigationNotification(plant: plant, species: species);
+      }
+    } finally {
+      await db.close();
+    }
   }
 
   // ---------------------------------------------------------------------------
 
-  static tz.TZDateTime _nextIrrigationTime(
+  /// Computes the next 9 am on or after the plant's due irrigation date.
+  ///
+  /// Exposed for unit testing; prefer [scheduleIrrigationNotification] in
+  /// production code.
+  @visibleForTesting
+  static DateTime computeNextIrrigationDate(
     DateTime? lastIrrigatedAt,
     int frequencyDays,
+    DateTime now,
   ) {
-    final now = tz.TZDateTime.now(tz.local);
     final base = lastIrrigatedAt == null
         ? now
-        : tz.TZDateTime.from(lastIrrigatedAt, tz.local)
-            .add(Duration(days: frequencyDays));
+        : lastIrrigatedAt.add(Duration(days: frequencyDays));
 
-    // Notify at 9am on the due date
-    var scheduled = tz.TZDateTime(tz.local, base.year, base.month, base.day, 9);
+    var scheduled = DateTime(base.year, base.month, base.day, 9);
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }
     return scheduled;
   }
 
-  /// Derives a stable int ID from a UUID string.
+  static tz.TZDateTime _nextIrrigationTime(
+    DateTime? lastIrrigatedAt,
+    int frequencyDays,
+  ) {
+    final now = tz.TZDateTime.now(tz.local);
+    final result =
+        computeNextIrrigationDate(lastIrrigatedAt, frequencyDays, now.toLocal());
+    return tz.TZDateTime(
+        tz.local, result.year, result.month, result.day, result.hour);
+  }
+
   static int _notificationId(String uuid) => uuid.hashCode.abs() % 0x7FFFFFFF;
 }

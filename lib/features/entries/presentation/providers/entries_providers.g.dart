@@ -6,7 +6,7 @@ part of 'entries_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$photoStorageHash() => r'edb77f151a7ffb5671fd4f95d6a089777430e07c';
+String _$photoStorageHash() => r'5ce9ac86894b40b476d216e0b0ff75f15bc19f75';
 
 /// See also [photoStorage].
 @ProviderFor(photoStorage)
@@ -22,7 +22,7 @@ final photoStorageProvider = Provider<PhotoStorage>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PhotoStorageRef = ProviderRef<PhotoStorage>;
-String _$entriesRepositoryHash() => r'35059b922e8ea9bf61f58d7693a85f53cbbcb6a6';
+String _$entriesRepositoryHash() => r'5cfd89564a430f86edc242884039887e067525d3';
 
 /// See also [entriesRepository].
 @ProviderFor(entriesRepository)
