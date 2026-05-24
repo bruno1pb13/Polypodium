@@ -6,7 +6,7 @@ part of 'plants_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$plantsRepositoryHash() => r'ca95cad43129c42275f9b70e6e85eeb049e3d4b5';
+String _$plantsRepositoryHash() => r'801f9b8b0100179effd42508163272755f4d881e';
 
 /// See also [plantsRepository].
 @ProviderFor(plantsRepository)
@@ -23,7 +23,7 @@ final plantsRepositoryProvider = Provider<PlantsRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PlantsRepositoryRef = ProviderRef<PlantsRepository>;
-String _$plantsWithSpeciesHash() => r'dc3240068001850a004347d39e7ead0a2b43ae0e';
+String _$plantsWithSpeciesHash() => r'e76ed9d383212fc46302cbce4e4e81498dab85ba';
 
 /// Combines each plant with its resolved species for home-screen display.
 ///

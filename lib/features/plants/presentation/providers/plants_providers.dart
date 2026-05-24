@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/enums.dart';
+import '../../../../core/notifications/notification_provider.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../data/plants_repository.dart';
@@ -16,7 +17,10 @@ part 'plants_providers.g.dart';
 
 @Riverpod(keepAlive: true)
 PlantsRepository plantsRepository(Ref ref) {
-  return PlantsRepository(ref.watch(appDatabaseProvider));
+  return PlantsRepository(
+    ref.watch(appDatabaseProvider),
+    ref.watch(notificationServiceProvider),
+  );
 }
 
 @riverpod
