@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/database/sync_queue_dao.dart';
@@ -87,9 +88,14 @@ class PlantsRepository {
   Future<void> _rescheduleNotification(PlantModel plant) async {
     final species = await _speciesRepo.getById(plant.speciesId);
     if (species == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final enabled = prefs.getBool('notifications_enabled') ?? true;
+
     await NotificationService.scheduleIrrigationNotification(
       plant: plant,
       species: species,
+      enabled: enabled,
     );
   }
 

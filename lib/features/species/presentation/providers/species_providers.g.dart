@@ -6,7 +6,7 @@ part of 'species_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$speciesRepositoryHash() => r'a804d1475e9b985f4c7dabd618463fd0aed74e28';
+String _$speciesRepositoryHash() => r'60c995257591df82175f8a29f0a08cbceedbea0c';
 
 /// See also [speciesRepository].
 @ProviderFor(speciesRepository)
