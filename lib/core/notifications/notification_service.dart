@@ -62,7 +62,13 @@ class NotificationService {
   static Future<void> scheduleIrrigationNotification({
     required PlantModel plant,
     required SpeciesModel species,
+    bool enabled = true,
   }) async {
+    if (!enabled) {
+      await cancelNotification(plant.id);
+      return;
+    }
+
     final frequencyDays =
         plant.irrigationFrequencyDays ?? species.defaultIrrigationFrequencyDays;
     final scheduledDate =
