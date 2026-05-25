@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -33,107 +34,183 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final plantsAsync = ref.watch(filteredSortedPlantsProvider);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Polypodium'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text(
+          'Polypodium',
+          style: TextStyle(
+            fontFamily: 'CormorantGaramond',
+            fontWeight: FontWeight.w600,
+            fontSize: 28,
+            letterSpacing: 0.5,
+            color: Colors.white,
+            shadows: [
+              Shadow(
+                color: Colors.black45,
+                offset: Offset(0, 2),
+                blurRadius: 4,
+              ),
+            ],
+          ),
+        ),
       ),
       drawer: const AppDrawer(),
-      body: Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: const InputDecoration(
-                        hintText: 'Buscar plantas...',
-                        prefixIcon: Icon(Icons.search),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 15),
-                      ),
-                      onChanged: (value) {
-                        ref
-                            .read(plantSearchQueryProvider.notifier)
-                            .setQuery(value);
-                      },
-                    ),
-                  ),
+          // Background Image
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/background.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          // Gradient overlay for better readability - darkened at top
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.5),
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.2),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: PopupMenuButton<PlantSortOption>(
-                    icon: Icon(Icons.tune,
-                        color: Theme.of(context).colorScheme.onPrimary),
-                    onSelected: (option) {
-                      ref
-                          .read(plantSortOptionNotifierProvider.notifier)
-                          .setSortOption(option);
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: PlantSortOption.wateringNeeds,
-                        child: Text('Necessidade de rega'),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                ),
+                              ),
+                              child: TextField(
+                                controller: _searchController,
+                                style: const TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                  hintText: 'Buscar plantas...',
+                                  hintStyle: TextStyle(
+                                      color:
+                                          Colors.white.withValues(alpha: 0.6)),
+                                  prefixIcon: const Icon(Icons.search,
+                                      color: Colors.white70),
+                                  border: InputBorder.none,
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(vertical: 15),
+                                ),
+                                onChanged: (value) {
+                                  ref
+                                      .read(plantSearchQueryProvider.notifier)
+                                      .setQuery(value);
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                      const PopupMenuItem(
-                        value: PlantSortOption.nameAZ,
-                        child: Text('Nome (A-Z)'),
-                      ),
-                      const PopupMenuItem(
-                        value: PlantSortOption.nameZA,
-                        child: Text('Nome (Z-A)'),
-                      ),
-                      const PopupMenuItem(
-                        value: PlantSortOption.lastWatered,
-                        child: Text('Última rega'),
-                      ),
-                      const PopupMenuItem(
-                        value: PlantSortOption.dateAdded,
-                        child: Text('Data de adição'),
+                      const SizedBox(width: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withValues(alpha: 0.7),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: PopupMenuButton<PlantSortOption>(
+                              icon: const Icon(Icons.tune, color: Colors.white),
+                              onSelected: (option) {
+                                ref
+                                    .read(plantSortOptionNotifierProvider.notifier)
+                                    .setSortOption(option);
+                              },
+                              itemBuilder: (context) => [
+                                const PopupMenuItem(
+                                  value: PlantSortOption.wateringNeeds,
+                                  child: Text('Necessidade de rega'),
+                                ),
+                                const PopupMenuItem(
+                                  value: PlantSortOption.nameAZ,
+                                  child: Text('Nome (A-Z)'),
+                                ),
+                                const PopupMenuItem(
+                                  value: PlantSortOption.nameZA,
+                                  child: Text('Nome (Z-A)'),
+                                ),
+                                const PopupMenuItem(
+                                  value: PlantSortOption.lastWatered,
+                                  child: Text('Última rega'),
+                                ),
+                                const PopupMenuItem(
+                                  value: PlantSortOption.dateAdded,
+                                  child: Text('Data de adição'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: plantsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) =>
-                  Center(child: Text('Erro ao carregar plantas: $e')),
-              data: (plants) {
-                if (plants.isEmpty) {
-                  return _searchController.text.isNotEmpty
-                      ? const Center(child: Text('Nenhuma planta encontrada'))
-                      : const _EmptyState();
-                }
+                Expanded(
+                  child: plantsAsync.when(
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Center(
+                        child: Text('Erro ao carregar plantas: $e',
+                            style: const TextStyle(color: Colors.white))),
+                    data: (plants) {
+                      if (plants.isEmpty) {
+                        return _searchController.text.isNotEmpty
+                            ? const Center(
+                                child: Text('Nenhuma planta encontrada',
+                                    style: TextStyle(color: Colors.white)))
+                            : const _EmptyState();
+                      }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 80),
-                  itemCount: plants.length,
-                  itemBuilder: (ctx, i) => PlantListItem(
-                    plantWithSpecies: plants[i],
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            PlantDetailScreen(plantId: plants[i].plant.id),
-                      ),
-                    ),
+                      return ListView.builder(
+                        padding: const EdgeInsets.only(bottom: 80),
+                        itemCount: plants.length,
+                        itemBuilder: (ctx, i) => PlantListItem(
+                          plantWithSpecies: plants[i],
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PlantDetailScreen(
+                                  plantId: plants[i].plant.id),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ],
             ),
           ),
         ],
@@ -159,14 +236,13 @@ class _EmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.local_florist_outlined,
-              size: 64,
-              color:
-                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.4)),
+              size: 64, color: Colors.white.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
-          const Text('Nenhuma planta cadastrada'),
+          const Text('Nenhuma planta cadastrada',
+              style: TextStyle(color: Colors.white, fontSize: 16)),
           const SizedBox(height: 8),
           const Text('Toque em + para adicionar sua primeira planta.',
-              style: TextStyle(fontSize: 13)),
+              style: TextStyle(fontSize: 13, color: Colors.white70)),
         ],
       ),
     );

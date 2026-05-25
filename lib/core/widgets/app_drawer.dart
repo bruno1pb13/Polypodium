@@ -31,8 +31,11 @@ class AppDrawer extends StatelessWidget {
                 Text(
                   'Polypodium',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontFamily: 'CormorantGaramond',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 28,
+                    letterSpacing: 0.5,
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
