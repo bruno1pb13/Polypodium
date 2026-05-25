@@ -58,5 +58,38 @@ final notificationsEnabledNotifierProvider =
 );
 
 typedef _$NotificationsEnabledNotifier = AutoDisposeNotifier<bool>;
+String _$transparencyEnabledNotifierHash() =>
+    r'6f58bf7a2ca91afacb663938637ab16746cef5c3';
+
+/// See also [TransparencyEnabledNotifier].
+@ProviderFor(TransparencyEnabledNotifier)
+final transparencyEnabledNotifierProvider =
+    AutoDisposeNotifierProvider<TransparencyEnabledNotifier, bool>.internal(
+  TransparencyEnabledNotifier.new,
+  name: r'transparencyEnabledNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$transparencyEnabledNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$TransparencyEnabledNotifier = AutoDisposeNotifier<bool>;
+String _$themeModeNotifierHash() => r'5eafcd88bf3a44a20ce6d13ecbb2f7ea4e592fe2';
+
+/// See also [ThemeModeNotifier].
+@ProviderFor(ThemeModeNotifier)
+final themeModeNotifierProvider =
+    AutoDisposeNotifierProvider<ThemeModeNotifier, String>.internal(
+  ThemeModeNotifier.new,
+  name: r'themeModeNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$themeModeNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$ThemeModeNotifier = AutoDisposeNotifier<String>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

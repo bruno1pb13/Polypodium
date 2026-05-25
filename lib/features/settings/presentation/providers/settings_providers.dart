@@ -32,3 +32,31 @@ class NotificationsEnabledNotifier extends _$NotificationsEnabledNotifier {
     await ref.read(settingsRepositoryProvider).rescheduleAllNotifications(ref);
   }
 }
+
+@riverpod
+class TransparencyEnabledNotifier extends _$TransparencyEnabledNotifier {
+  @override
+  bool build() {
+    final repository = ref.watch(settingsRepositoryProvider);
+    return repository.isTransparencyEnabled();
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    await ref.read(settingsRepositoryProvider).setTransparencyEnabled(enabled);
+    state = enabled;
+  }
+}
+
+@riverpod
+class ThemeModeNotifier extends _$ThemeModeNotifier {
+  @override
+  String build() {
+    final repository = ref.watch(settingsRepositoryProvider);
+    return repository.getThemeMode();
+  }
+
+  Future<void> setThemeMode(String themeMode) async {
+    await ref.read(settingsRepositoryProvider).setThemeMode(themeMode);
+    state = themeMode;
+  }
+}

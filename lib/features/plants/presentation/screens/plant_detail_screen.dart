@@ -13,6 +13,7 @@ import '../../../entries/presentation/providers/entry_filters_provider.dart';
 import '../../../entries/presentation/screens/add_entry_screen.dart';
 import '../../../entries/presentation/widgets/entry_timeline_item.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
+import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
 import '../../domain/plant_model.dart';
 import '../providers/plants_providers.dart';
@@ -397,37 +398,53 @@ class _PhotoPlaceholder extends StatelessWidget {
   }
 }
 
-class _PlantInfoCard extends StatelessWidget {
+class _PlantInfoCard extends ConsumerWidget {
   final PlantModel plant;
   final PlantWithSpecies? pws;
 
   const _PlantInfoCard({required this.plant, required this.pws});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: transparencyEnabled
+              ? ImageFilter.blur(sigmaX: 10, sigmaY: 10)
+              : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: transparencyEnabled
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              border: Border.all(
+                color: transparencyEnabled
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.transparent,
+              ),
             ),
             child: Column(
               children: [
-                _row(context, Icons.terrain_outlined, 'Solo',
-                    plant.soilType.label),
+                _row(
+                  context,
+                  Icons.terrain_outlined,
+                  'Solo',
+                  plant.soilType.label,
+                  transparencyEnabled,
+                ),
                 const Divider(color: Colors.white10, height: 16),
                 _row(
                   context,
                   Icons.location_on_outlined,
                   'Localização',
                   pws?.location?.name ?? plant.location ?? 'Não informada',
+                  transparencyEnabled,
                 ),
                 const Divider(color: Colors.white10, height: 16),
                 _row(
@@ -435,6 +452,7 @@ class _PlantInfoCard extends StatelessWidget {
                   Icons.calendar_today_outlined,
                   'Adquirida em',
                   DateFormat('dd/MM/yyyy').format(plant.acquisitionDate),
+                  transparencyEnabled,
                 ),
                 if (pws?.effectiveFrequencyDays != null) ...[
                   const Divider(color: Colors.white10, height: 16),
@@ -443,6 +461,7 @@ class _PlantInfoCard extends StatelessWidget {
                     Icons.opacity_outlined,
                     'Frequência de irrigação',
                     '${pws!.effectiveFrequencyDays} dias',
+                    transparencyEnabled,
                   ),
                 ],
               ],
@@ -453,31 +472,47 @@ class _PlantInfoCard extends StatelessWidget {
     );
   }
 
-  Widget _row(BuildContext context, IconData icon, String label, String value) =>
+  Widget _row(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+    bool transparencyEnabled,
+  ) =>
       Row(
         children: [
-          Icon(icon, size: 20, color: Colors.white60),
+          Icon(
+            icon,
+            size: 20,
+            color: transparencyEnabled ? Colors.white60 : null,
+          ),
           const SizedBox(width: 12),
-          Text(label, style: const TextStyle(color: Colors.white70)),
+          Text(
+            label,
+            style: TextStyle(
+              color: transparencyEnabled ? Colors.white70 : null,
+            ),
+          ),
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: transparencyEnabled ? Colors.white : null,
             ),
           ),
         ],
       );
 }
 
-class _IrrigationStatusCard extends StatelessWidget {
+class _IrrigationStatusCard extends ConsumerWidget {
   final PlantWithSpecies pws;
 
   const _IrrigationStatusCard({required this.pws});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final overdue = pws.needsWatering;
     final days = pws.daysRelativeToSchedule;
@@ -485,15 +520,21 @@ class _IrrigationStatusCard extends StatelessWidget {
     if (days == null) return const SizedBox.shrink();
 
     final cardColor = overdue
-        ? colorScheme.errorContainer.withValues(alpha: 0.8)
-        : colorScheme.primaryContainer.withValues(alpha: 0.6);
+        ? (transparencyEnabled
+            ? colorScheme.errorContainer.withValues(alpha: 0.8)
+            : colorScheme.errorContainer)
+        : (transparencyEnabled
+            ? colorScheme.primaryContainer.withValues(alpha: 0.6)
+            : colorScheme.primaryContainer);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: transparencyEnabled
+              ? ImageFilter.blur(sigmaX: 10, sigmaY: 10)
+              : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -564,7 +605,7 @@ class _FilterSection extends ConsumerWidget {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: Colors.white,
             ),
           ),
         ),

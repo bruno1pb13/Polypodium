@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../entries/presentation/providers/entries_providers.dart';
+import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/plant_model.dart';
 
 class PlantListItem extends ConsumerWidget {
@@ -23,19 +24,26 @@ class PlantListItem extends ConsumerWidget {
     final days = pws.daysRelativeToSchedule;
     final overdue = pws.needsWatering;
     final photoAsync = ref.watch(latestPlantPhotoProvider(pws.plant.id));
+    final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: transparencyEnabled
+              ? ImageFilter.blur(sigmaX: 10, sigmaY: 10)
+              : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.35),
+              color: transparencyEnabled
+                  ? Colors.black.withValues(alpha: 0.35)
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: transparencyEnabled
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.transparent,
               ),
             ),
             child: InkWell(
@@ -60,34 +68,49 @@ class PlantListItem extends ConsumerWidget {
                               Expanded(
                                 child: Text(
                                   pws.plant.nickname,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 17,
-                                    color: Colors.white,
+                                    color: transparencyEnabled
+                                        ? Colors.white
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
                                     letterSpacing: 0.3,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black26,
-                                        offset: Offset(0, 1),
-                                        blurRadius: 2,
-                                      ),
-                                    ],
+                                    shadows: transparencyEnabled
+                                        ? [
+                                            const Shadow(
+                                              color: Colors.black26,
+                                              offset: Offset(0, 1),
+                                              blurRadius: 2,
+                                            ),
+                                          ]
+                                        : null,
                                   ),
                                 ),
                               ),
-                              const Icon(
+                              Icon(
                                 Icons.more_vert,
                                 size: 20,
-                                color: Colors.white70,
+                                color: transparencyEnabled
+                                    ? Colors.white70
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
                               ),
                             ],
                           ),
                           Text(
                             '${pws.species.popularName}'
                             '${pws.location != null ? ' • ${pws.location!.name}' : ''}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
-                              color: Colors.white70,
+                              color: transparencyEnabled
+                                  ? Colors.white70
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                      .withValues(alpha: 0.7),
                             ),
                           ),
                           if (days != null) ...[

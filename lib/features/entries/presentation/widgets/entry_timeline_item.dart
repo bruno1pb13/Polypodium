@@ -2,12 +2,14 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/enums.dart';
+import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/entry_model.dart';
 
-class EntryTimelineItem extends StatelessWidget {
+class EntryTimelineItem extends ConsumerWidget {
   final EntryModel entry;
   final VoidCallback? onDelete;
   final bool isLast;
@@ -20,7 +22,9 @@ class EntryTimelineItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: IntrinsicHeight(
@@ -40,14 +44,22 @@ class EntryTimelineItem extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    filter: transparencyEnabled
+                        ? ImageFilter.blur(sigmaX: 10, sigmaY: 10)
+                        : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.25),
+                        color: transparencyEnabled
+                            ? Colors.black.withValues(alpha: 0.25)
+                            : Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.1),
+                          color: transparencyEnabled
+                              ? Colors.white.withValues(alpha: 0.1)
+                              : Colors.transparent,
                         ),
                       ),
                       child: Column(
@@ -57,17 +69,26 @@ class EntryTimelineItem extends StatelessWidget {
                             children: [
                               Text(
                                 entry.type.label,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.white,
+                                  color: transparencyEnabled
+                                      ? Colors.white
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
                                   fontSize: 16,
                                 ),
                               ),
                               const Spacer(),
                               Text(
                                 DateFormat('dd/MM/yy HH:mm').format(entry.date),
-                                style: const TextStyle(
-                                  color: Colors.white60,
+                                style: TextStyle(
+                                  color: transparencyEnabled
+                                      ? Colors.white60
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant
+                                          .withValues(alpha: 0.7),
                                   fontSize: 12,
                                 ),
                               ),
@@ -77,8 +98,12 @@ class EntryTimelineItem extends StatelessWidget {
                             const SizedBox(height: 6),
                             Text(
                               entry.note!,
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: transparencyEnabled
+                                    ? Colors.white
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
                                 fontSize: 14,
                                 height: 1.4,
                               ),
@@ -98,13 +123,22 @@ class EntryTimelineItem extends StatelessWidget {
                               ),
                             ),
                           ],
-                          if (onDelete != null && entry.type != EntryType.history) ...[
+                          if (onDelete != null &&
+                              entry.type != EntryType.history) ...[
                             const SizedBox(height: 4),
                             Align(
                               alignment: Alignment.centerRight,
                               child: IconButton(
-                                icon: const Icon(Icons.delete_outline,
-                                    color: Colors.white60, size: 20),
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  color: transparencyEnabled
+                                      ? Colors.white60
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant
+                                          .withValues(alpha: 0.6),
+                                  size: 20,
+                                ),
                                 onPressed: onDelete,
                               ),
                             ),
@@ -123,7 +157,7 @@ class EntryTimelineItem extends StatelessWidget {
   }
 }
 
-class SliverTimelineIndicator extends StatelessWidget {
+class SliverTimelineIndicator extends ConsumerWidget {
   final EntryType type;
   final bool isLast;
 
@@ -134,7 +168,10 @@ class SliverTimelineIndicator extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       children: [
         const SizedBox(height: 12),
@@ -142,9 +179,13 @@ class SliverTimelineIndicator extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
+            color: transparencyEnabled
+                ? Colors.white.withValues(alpha: 0.15)
+                : colorScheme.surfaceContainer,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white24),
+            border: Border.all(
+              color: transparencyEnabled ? Colors.white24 : colorScheme.outlineVariant,
+            ),
           ),
           alignment: Alignment.center,
           child: Text(
@@ -156,7 +197,7 @@ class SliverTimelineIndicator extends StatelessWidget {
           Expanded(
             child: Container(
               width: 2,
-              color: Colors.white24,
+              color: transparencyEnabled ? Colors.white24 : colorScheme.outlineVariant,
             ),
           )
         else
