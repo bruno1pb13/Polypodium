@@ -56,6 +56,7 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 3) {
             // Migration for version 3: making defaultIrrigationFrequencyDays nullable
+            // ignore: experimental_member_use
             await m.alterTable(TableMigration(
               speciesTable,
             ));

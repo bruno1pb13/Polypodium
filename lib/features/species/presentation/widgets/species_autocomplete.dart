@@ -54,7 +54,6 @@ class _SpeciesAutocompleteState extends ConsumerState<SpeciesAutocomplete> {
   }
 
   void _onFocusChange() {
-    debugPrint('SpeciesAutocomplete: Focus change: ${_focusNode.hasFocus}');
     if (_focusNode.hasFocus) {
       _updateOptions();
     } else {
@@ -82,7 +81,6 @@ class _SpeciesAutocompleteState extends ConsumerState<SpeciesAutocomplete> {
   Future<void> _updateOptions() async {
     if (!mounted) return;
     final query = widget.controller.text;
-    debugPrint('SpeciesAutocomplete: Updating options for query: "$query"');
     
     // 1. Filter Local (Immediate)
     final List<SpeciesModel> locals;
@@ -125,7 +123,6 @@ class _SpeciesAutocompleteState extends ConsumerState<SpeciesAutocomplete> {
           _isLoading = false;
           if (_focusNode.hasFocus) {
             _options = [...locals, ...externals];
-            debugPrint('SpeciesAutocomplete: Found ${_options.length} options');
             _showOverlay();
           }
         });
@@ -144,7 +141,6 @@ class _SpeciesAutocompleteState extends ConsumerState<SpeciesAutocomplete> {
       return;
     }
 
-    debugPrint('SpeciesAutocomplete: Creating overlay');
     final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
     
@@ -211,7 +207,6 @@ class _SpeciesAutocompleteState extends ConsumerState<SpeciesAutocomplete> {
                                   color: isLocal ? Colors.amber : Colors.grey,
                                 ),
                                 onTap: () {
-                                  debugPrint('SpeciesAutocomplete: Selected: $title');
                                   _debounce?.cancel(); // Cancel any pending search
                                   _ignoreNextQueryChange = true;
                                   
@@ -255,7 +250,6 @@ class _SpeciesAutocompleteState extends ConsumerState<SpeciesAutocomplete> {
 
   void _removeOverlay() {
     if (_overlayEntry != null) {
-      debugPrint('SpeciesAutocomplete: Removing overlay');
       _overlayEntry?.remove();
       _overlayEntry = null;
     }
@@ -277,7 +271,6 @@ class _SpeciesAutocompleteState extends ConsumerState<SpeciesAutocomplete> {
         ),
         validator: widget.validator,
         onTap: () {
-          debugPrint('SpeciesAutocomplete: TextFormField tapped');
           if (!_focusNode.hasFocus) {
             _focusNode.requestFocus();
           } else {

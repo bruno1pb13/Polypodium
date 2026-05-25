@@ -85,8 +85,11 @@ void main() {
     });
 
     test('Sort by watering needs (overdue first)', () {
-      final sorted = [...plants]..sort((a, b) =>
-          b.daysRelativeToSchedule.compareTo(a.daysRelativeToSchedule));
+      final sorted = [...plants]..sort((a, b) {
+          final aVal = a.daysRelativeToSchedule ?? -999;
+          final bVal = b.daysRelativeToSchedule ?? -999;
+          return bVal.compareTo(aVal);
+        });
 
       // p3 is 5-3=2 days overdue
       // p1 is 4-3=1 day overdue

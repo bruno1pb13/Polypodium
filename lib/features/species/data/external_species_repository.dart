@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -28,21 +27,21 @@ class ExternalSpeciesRepository extends _$ExternalSpeciesRepository {
 
   @override
   Future<void> build() async {
-    debugPrint('ExternalSpeciesRepository: Initializing build...');
+    ref.onDispose(() {
+      _db?.dispose();
+      _db = null;
+    });
+
     if (_db != null) return;
 
     final dbFile = await _getDatabaseFile();
-    debugPrint('ExternalSpeciesRepository: DB Path: ${dbFile.path}');
     
     // O arquivo de 12KB (12288 bytes) é um banco SQLite vazio.
     // O real deve ter cerca de 11MB.
     bool shouldCopy = !await dbFile.exists() || await dbFile.length() < 1000000; // Menos de 1MB
     
     if (shouldCopy) {
-      debugPrint('ExternalSpeciesRepository: Copying DB from assets (Force/Missing)...');
       await _copyFromAssets(dbFile);
-    } else {
-      debugPrint('ExternalSpeciesRepository: DB already exists. Size: ${await dbFile.length()}');
     }
 
     try {
@@ -50,23 +49,15 @@ class ExternalSpeciesRepository extends _$ExternalSpeciesRepository {
       
       final countResult = _db!.select('SELECT COUNT(*) as cnt FROM external_species');
       final int count = countResult.first['cnt'] as int;
-      debugPrint('ExternalSpeciesRepository: Row count in DB: $count');
 
       if (count == 0) {
-        debugPrint('ExternalSpeciesRepository: DB is empty, forcing re-copy...');
         _db!.dispose();
         await _copyFromAssets(dbFile);
         _db = sqlite3.open(dbFile.path);
-        final newCount = _db!.select('SELECT COUNT(*) as cnt FROM external_species');
-        debugPrint('ExternalSpeciesRepository: New row count: ${newCount.first['cnt']}');
       }
     } catch (e) {
-      debugPrint('ExternalSpeciesRepository: ERROR opening/verifying SQLite: $e');
+      // Failed to open or verify DB
     }
-    
-    ref.onDispose(() {
-      _db?.dispose();
-    });
   }
 
   Future<void> _copyFromAssets(File dbFile) async {
@@ -74,12 +65,11 @@ class ExternalSpeciesRepository extends _$ExternalSpeciesRepository {
       final data = await rootBundle.load('assets/data/flora_brasil.db');
       final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
       await dbFile.writeAsBytes(bytes, flush: true);
-      debugPrint('ExternalSpeciesRepository: DB copied successfully. Size: ${bytes.length}');
       
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_lastUpdateKey, _defaultDate);
     } catch (e) {
-      debugPrint('ExternalSpeciesRepository: CRITICAL ERROR copying DB: $e');
+      // Error copying DB
     }
   }
 
@@ -90,7 +80,6 @@ class ExternalSpeciesRepository extends _$ExternalSpeciesRepository {
       final count = _db!.select('SELECT COUNT(*) as cnt FROM external_species');
       return count.first['cnt'] as int;
     } catch (e) {
-      debugPrint('ExternalSpeciesRepository: Error getting count: $e');
       return 0;
     }
   }
@@ -109,7 +98,6 @@ class ExternalSpeciesRepository extends _$ExternalSpeciesRepository {
     await future;
     if (_db == null || query.isEmpty) return [];
 
-    debugPrint('ExternalSpeciesRepository: Searching for "$query"');
     try {
       final results = _db!.select(
         'SELECT popular_name, scientific_name FROM external_species '
@@ -118,7 +106,6 @@ class ExternalSpeciesRepository extends _$ExternalSpeciesRepository {
         ['%$query%', '%$query%'],
       );
 
-      debugPrint('ExternalSpeciesRepository: Found ${results.length} results');
       return results.map((row) {
         return ExternalSpecies(
           popularName: row['popular_name'] as String,
@@ -126,7 +113,6 @@ class ExternalSpeciesRepository extends _$ExternalSpeciesRepository {
         );
       }).toList();
     } catch (e) {
-      debugPrint('ExternalSpeciesRepository: Error searching: $e');
       return [];
     }
   }
@@ -144,8 +130,12 @@ class ExternalSpeciesRepository extends _$ExternalSpeciesRepository {
     String? vernacularContent;
 
     for (final file in archive) {
-      if (file.name == 'taxon.txt') taxonContent = utf8.decode(file.content);
-      if (file.name == 'vernacularname.txt') vernacularContent = utf8.decode(file.content);
+      if (file.name == 'taxon.txt') {
+        taxonContent = utf8.decode(file.content);
+      }
+      if (file.name == 'vernacularname.txt') {
+        vernacularContent = utf8.decode(file.content);
+      }
     }
 
     if (taxonContent == null || vernacularContent == null) throw Exception('Arquivos não encontrados no ZIP');
