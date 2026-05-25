@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plantlog/core/notifications/notification_service.dart';
+import 'package:polypodium/core/notifications/notification_service.dart';
 
 void main() {
   group('NotificationService.computeNextIrrigationDate', () {

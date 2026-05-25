@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/native.dart';
-import 'package:plantlog/core/database/app_database.dart';
-import 'package:plantlog/core/enums.dart';
-import 'package:plantlog/core/notifications/notification_service.dart';
-import 'package:plantlog/features/plants/data/plants_repository.dart';
-import 'package:plantlog/features/entries/data/entries_repository.dart';
-import 'package:plantlog/features/entries/domain/entry_model.dart';
-import 'package:plantlog/features/plants/domain/plant_model.dart';
-import 'package:plantlog/features/species/domain/species_model.dart';
-import 'package:plantlog/core/storage/photo_storage.dart';
+import 'package:polypodium/core/database/app_database.dart';
+import 'package:polypodium/core/enums.dart';
+import 'package:polypodium/core/notifications/notification_service.dart';
+import 'package:polypodium/features/plants/data/plants_repository.dart';
+import 'package:polypodium/features/entries/data/entries_repository.dart';
+import 'package:polypodium/features/entries/domain/entry_model.dart';
+import 'package:polypodium/features/plants/domain/plant_model.dart';
+import 'package:polypodium/features/species/domain/species_model.dart';
+import 'package:polypodium/core/storage/photo_storage.dart';
 import 'package:uuid/uuid.dart';
 
 class MockPhotoStorage implements PhotoStorage {

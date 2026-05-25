@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**PlantLog** — Flutter mobile app for plant care tracking. Offline-first; no network calls exist yet. Future sync layer will use the `sync_queue` table and `syncStatus` fields already present on every entity.
+**Polypodium** — Flutter mobile app for plant care tracking. Offline-first; no network calls exist yet. Future sync layer will use the `sync_queue` table and `syncStatus` fields already present on every entity.
 
 ## Build Commands
 

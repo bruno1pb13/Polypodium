@@ -1,8 +1,8 @@
-# PlantLog
+# Polypodium
 
 App de acompanhamento de plantas - offline-first.
 
-O **PlantLog** é uma ferramenta para ajudar entusiastas de botânica a gerenciar suas coleções de plantas, registrar atividades e receber lembretes de cuidados, tudo funcionando de forma independente de conexão com a internet.
+O **Polypodium** é uma ferramenta para ajudar entusiastas de botânica a gerenciar suas coleções de plantas, registrar atividades e receber lembretes de cuidados, tudo funcionando de forma independente de conexão com a internet.
 
 ## 🚀 Funcionalidades
 

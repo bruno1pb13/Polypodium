@@ -1,4 +1,4 @@
-name: plantlog
+name: polypodium
 description: App de acompanhamento de plantas - offline-first
 publish_to: 'none'
 version: 1.0.0+1
@@ -26,6 +26,7 @@ dependencies:
   shared_preferences: ^2.5.5
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
   drift_dev: ^2.18.0
@@ -34,5 +35,25 @@ dev_dependencies:
   mocktail: ^1.0.5
   flutter_lints: ^6.0.0
 
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/images/logo.png"
+  web:
+    generate: true
+    image_path: "assets/images/logo.png"
+  windows:
+    generate: true
+    image_path: "assets/images/logo.png"
+  macos:
+    generate: true
+    image_path: "assets/images/logo.png"
+  linux:
+    generate: true
+    image_path: "assets/images/logo.png"
+
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/images/logo.png

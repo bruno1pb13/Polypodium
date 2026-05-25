@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plantlog/core/enums.dart';
-import 'package:plantlog/features/plants/domain/plant_model.dart';
-import 'package:plantlog/features/species/domain/species_model.dart';
+import 'package:polypodium/core/enums.dart';
+import 'package:polypodium/features/plants/domain/plant_model.dart';
+import 'package:polypodium/features/species/domain/species_model.dart';
 
 void main() {
   group('Plant Filter and Sort Logic', () {
