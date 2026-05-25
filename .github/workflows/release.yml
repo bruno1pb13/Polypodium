@@ -1,0 +1,71 @@
+name: Build & Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run code generation
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          # Extract tag name from GITHUB_REF (e.g., refs/tags/v1.2.3+4 -> v1.2.3+4)
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          
+          # Remove 'v' prefix if exists
+          VERSION=${TAG_NAME#v}
+          
+          # Split version and build number (e.g., 1.2.3+4)
+          if [[ $VERSION == *"+"* ]]; then
+            BUILD_NAME=$(echo $VERSION | cut -d'+' -f1)
+            BUILD_NUMBER=$(echo $VERSION | cut -d'+' -f2)
+          else
+            BUILD_NAME=$VERSION
+            BUILD_NUMBER=$GITHUB_RUN_NUMBER
+          fi
+          
+          echo "BUILD_NAME=$BUILD_NAME" >> $GITHUB_OUTPUT
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Build APK
+        run: flutter build apk --release --build-name=${{ steps.get_version.outputs.BUILD_NAME }} --build-number=${{ steps.get_version.outputs.BUILD_NUMBER }}
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/app/outputs/flutter-apk/app-release.apk
+          name: Release ${{ steps.get_version.outputs.TAG_NAME }}
+          tag_name: ${{ steps.get_version.outputs.TAG_NAME }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
