@@ -34,6 +34,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final plantsAsync = ref.watch(filteredSortedPlantsProvider);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
