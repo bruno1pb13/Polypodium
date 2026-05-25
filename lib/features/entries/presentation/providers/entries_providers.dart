@@ -10,6 +10,12 @@ import '../../domain/entry_model.dart';
 
 part 'entries_providers.g.dart';
 
+final latestPlantPhotoProvider =
+    FutureProvider.autoDispose.family<String?, String>((ref, plantId) async {
+  final db = ref.watch(appDatabaseProvider);
+  return db.entriesDao.getLatestPhotoPath(plantId);
+});
+
 @Riverpod(keepAlive: true)
 PhotoStorage photoStorage(Ref ref) => PhotoStorage();
 
