@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -6,8 +9,9 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/enums.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
+import '../../../entries/presentation/providers/entry_filters_provider.dart';
 import '../../../entries/presentation/screens/add_entry_screen.dart';
-import '../../../entries/presentation/widgets/entry_list_item.dart';
+import '../../../entries/presentation/widgets/entry_timeline_item.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
 import '../../domain/plant_model.dart';
@@ -25,6 +29,7 @@ class PlantDetailScreen extends ConsumerWidget {
     final speciesAsync = ref.watch(speciesNotifierProvider);
     final locationsAsync = ref.watch(locationsNotifierProvider);
     final entriesAsync = ref.watch(entriesNotifierProvider(plantId));
+    final activeFilters = ref.watch(entryFiltersNotifierProvider(plantId));
 
     return plantsAsync.when(
       loading: () =>
@@ -56,8 +61,19 @@ class PlantDetailScreen extends ConsumerWidget {
             : null;
 
         return Scaffold(
+          extendBodyBehindAppBar: true,
           appBar: AppBar(
-            title: Text(plant.nickname),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            iconTheme: const IconThemeData(color: Colors.white),
+            title: Text(
+              plant.nickname,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+              ),
+            ),
             actions: [
               IconButton(
                 icon: const Icon(Icons.edit_outlined),
@@ -74,50 +90,92 @@ class PlantDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          body: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: _PlantInfoCard(plant: plant, pws: pws),
-              ),
-              if (pws != null)
-                SliverToBoxAdapter(
-                  child: _IrrigationStatusCard(pws: pws),
+          body: Stack(
+            children: [
+              // Background Image
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/images/background.png',
+                  fit: BoxFit.cover,
                 ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Text(
-                    'Registros',
-                    style: Theme.of(context).textTheme.titleMedium,
+              ),
+              // Gradient overlay
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.5),
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.3),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              entriesAsync.when(
-                loading: () => const SliverToBoxAdapter(
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (e, _) => SliverToBoxAdapter(
-                  child: Center(child: Text('Erro: $e')),
-                ),
-                data: (entries) => entries.isEmpty
-                    ? const SliverToBoxAdapter(
-                        child: Padding(
-                          padding: EdgeInsets.all(32),
-                          child: Center(child: Text('Nenhum registro ainda')),
-                        ),
-                      )
-                    : SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (ctx, i) => EntryListItem(
-                            entry: entries[i],
-                            onDelete: () =>
-                                _deleteEntry(context, ref, entries[i]),
-                          ),
-                          childCount: entries.length,
-                        ),
+              SafeArea(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: _HeaderSection(plant: plant, pws: pws),
+                    ),
+                    SliverToBoxAdapter(
+                      child: _PlantInfoCard(plant: plant, pws: pws),
+                    ),
+                    if (pws != null)
+                      SliverToBoxAdapter(
+                        child: _IrrigationStatusCard(pws: pws),
                       ),
+                    // Filters
+                    SliverToBoxAdapter(
+                      child: _FilterSection(plantId: plantId),
+                    ),
+                    // Timeline Entries
+                    entriesAsync.when(
+                      loading: () => const SliverToBoxAdapter(
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                      error: (e, _) => SliverToBoxAdapter(
+                        child: Center(child: Text('Erro: $e')),
+                      ),
+                      data: (entries) {
+                        final filteredEntries = entries
+                            .where((e) => activeFilters.contains(e.type))
+                            .toList();
+
+                        if (filteredEntries.isEmpty) {
+                          return const SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.all(48),
+                              child: Center(
+                                child: Text(
+                                  'Nenhum registro encontrado',
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+
+                        return SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (ctx, i) => EntryTimelineItem(
+                              entry: filteredEntries[i],
+                              isLast: i == filteredEntries.length - 1,
+                              onDelete: () =>
+                                  _deleteEntry(context, ref, filteredEntries[i]),
+                            ),
+                            childCount: filteredEntries.length,
+                          ),
+                        );
+                      },
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 120)),
+                  ],
+                ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 80)),
             ],
           ),
           floatingActionButton: Column(
@@ -158,8 +216,6 @@ class PlantDetailScreen extends ConsumerWidget {
         createdAt: DateTime.now(),
       );
 
-      // Now we only need to create the entry.
-      // The EntriesNotifier will trigger refreshPlantStatus if it's an irrigation.
       await ref.read(entriesNotifierProvider(plantId).notifier).create(entry);
 
       if (context.mounted) {
@@ -237,6 +293,110 @@ class PlantDetailScreen extends ConsumerWidget {
   }
 }
 
+class _HeaderSection extends ConsumerWidget {
+  final PlantModel plant;
+  final PlantWithSpecies? pws;
+
+  const _HeaderSection({required this.plant, required this.pws});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final photoAsync = ref.watch(latestPlantPhotoProvider(plant.id));
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _PlantPhoto(photoPath: photoAsync.valueOrNull),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  plant.nickname,
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [Shadow(color: Colors.black38, blurRadius: 4)],
+                  ),
+                ),
+                if (pws != null) ...[
+                  Text(
+                    pws!.species.popularName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                    ),
+                  ),
+                  Text(
+                    pws!.species.scientificName,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.white54,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlantPhoto extends StatelessWidget {
+  final String? photoPath;
+
+  const _PlantPhoto({this.photoPath});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: photoPath != null
+            ? Image.file(
+                File(photoPath!),
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _PhotoPlaceholder(),
+              )
+            : _PhotoPlaceholder(),
+      ),
+    );
+  }
+}
+
+class _PhotoPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white.withValues(alpha: 0.1),
+      child: const Icon(
+        Icons.local_florist_outlined,
+        size: 48,
+        color: Colors.white24,
+      ),
+    );
+  }
+}
+
 class _PlantInfoCard extends StatelessWidget {
   final PlantModel plant;
   final PlantWithSpecies? pws;
@@ -245,50 +405,69 @@ class _PlantInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (pws != null) ...[
-              Text(pws!.species.scientificName,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(fontStyle: FontStyle.italic)),
-              const SizedBox(height: 4),
-            ],
-            _row('Solo', plant.soilType.label),
-            if (pws?.location != null)
-              _row('Localização', pws!.location!.name)
-            else if (plant.location != null)
-              _row('Localização (antiga)', plant.location!),
-            _row(
-              'Adquirida em',
-              DateFormat('dd/MM/yyyy').format(plant.acquisitionDate),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
-            if (pws != null && pws!.effectiveFrequencyDays != null)
-              _row(
-                'Frequência de irrigação',
-                '${pws!.effectiveFrequencyDays} dias',
-              ),
-          ],
+            child: Column(
+              children: [
+                _row(context, Icons.terrain_outlined, 'Solo',
+                    plant.soilType.label),
+                const Divider(color: Colors.white10, height: 16),
+                _row(
+                  context,
+                  Icons.location_on_outlined,
+                  'Localização',
+                  pws?.location?.name ?? plant.location ?? 'Não informada',
+                ),
+                const Divider(color: Colors.white10, height: 16),
+                _row(
+                  context,
+                  Icons.calendar_today_outlined,
+                  'Adquirida em',
+                  DateFormat('dd/MM/yyyy').format(plant.acquisitionDate),
+                ),
+                if (pws?.effectiveFrequencyDays != null) ...[
+                  const Divider(color: Colors.white10, height: 16),
+                  _row(
+                    context,
+                    Icons.opacity_outlined,
+                    'Frequência de irrigação',
+                    '${pws!.effectiveFrequencyDays} dias',
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _row(String label, String value) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Row(
-          children: [
-            Text('$label: ',
-                style: const TextStyle(fontWeight: FontWeight.w500)),
-            Text(value),
-          ],
-        ),
+  Widget _row(BuildContext context, IconData icon, String label, String value) =>
+      Row(
+        children: [
+          Icon(icon, size: 20, color: Colors.white60),
+          const SizedBox(width: 12),
+          Text(label, style: const TextStyle(color: Colors.white70)),
+          const Spacer(),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ],
       );
 }
 
@@ -305,51 +484,124 @@ class _IrrigationStatusCard extends StatelessWidget {
 
     if (days == null) return const SizedBox.shrink();
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      color:
-          overdue ? colorScheme.errorContainer : colorScheme.primaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Icon(
-              overdue ? Icons.water_drop : Icons.check_circle_outline,
-              color: overdue ? colorScheme.error : colorScheme.primary,
+    final cardColor = overdue
+        ? colorScheme.errorContainer.withValues(alpha: 0.8)
+        : colorScheme.primaryContainer.withValues(alpha: 0.6);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(20),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    overdue ? 'Precisa de água!' : 'Irrigação em dia',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: overdue
-                          ? colorScheme.onErrorContainer
-                          : colorScheme.onPrimaryContainer,
-                    ),
+            child: Row(
+              children: [
+                Icon(
+                  overdue ? Icons.water_drop : Icons.check_circle_outline,
+                  color: overdue ? colorScheme.error : colorScheme.primary,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        overdue ? 'Precisa de água!' : 'Irrigação em dia',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: overdue
+                              ? colorScheme.onErrorContainer
+                              : colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                      Text(
+                        pws.plant.lastIrrigatedAt == null
+                            ? 'Última rega não registrada'
+                            : overdue
+                                ? '$days dia(s) em atraso'
+                                : 'Próxima irrigação em ${-days} dia(s)',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: overdue
+                              ? colorScheme.onErrorContainer
+                              : colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    pws.plant.lastIrrigatedAt == null
-                        ? 'Nunca regada'
-                        : overdue
-                            ? '$days dia(s) em atraso'
-                            : 'Próxima irrigação em ${-days} dia(s)',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: overdue
-                          ? colorScheme.onErrorContainer
-                          : colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _FilterSection extends ConsumerWidget {
+  final String plantId;
+
+  const _FilterSection({required this.plantId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activeFilters = ref.watch(entryFiltersNotifierProvider(plantId));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 24, 16, 12),
+          child: Text(
+            'Registros',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: EntryType.values.map((type) {
+              final isActive = activeFilters.contains(type);
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: FilterChip(
+                  label: Text(type.label),
+                  selected: isActive,
+                  onSelected: (_) => ref
+                      .read(entryFiltersNotifierProvider(plantId).notifier)
+                      .toggleFilter(type),
+                  backgroundColor: Colors.black.withValues(alpha: 0.2),
+                  selectedColor: Theme.of(context).colorScheme.primary,
+                  checkmarkColor: Colors.white,
+                  labelStyle: TextStyle(
+                    color: isActive ? Colors.white : Colors.white70,
+                    fontSize: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: BorderSide(
+                      color: isActive ? Colors.transparent : Colors.white24,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

@@ -7,7 +7,7 @@ part of 'external_species_repository.dart';
 // **************************************************************************
 
 String _$externalSpeciesRepositoryHash() =>
-    r'092e954a0d0d96a6c29467f02390a0bb2b79c238';
+    r'd193916140a6558cfd5de90c341ce984fc348efc';
 
 /// See also [ExternalSpeciesRepository].
 @ProviderFor(ExternalSpeciesRepository)

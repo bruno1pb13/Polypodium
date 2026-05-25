@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,61 +24,84 @@ class PlantListItem extends ConsumerWidget {
     final overdue = pws.needsWatering;
     final photoAsync = ref.watch(latestPlantPhotoProvider(pws.plant.id));
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 0,
-      child: InkWell(
-        onTap: onTap,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              _PlantThumbnail(
-                photoPath: photoAsync.valueOrNull,
-                overdue: overdue,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            pws.plant.nickname,
+                    _PlantThumbnail(
+                      photoPath: photoAsync.valueOrNull,
+                      overdue: overdue,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  pws.plant.nickname,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 17,
+                                    color: Colors.white,
+                                    letterSpacing: 0.3,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black26,
+                                        offset: Offset(0, 1),
+                                        blurRadius: 2,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const Icon(
+                                Icons.more_vert,
+                                size: 20,
+                                color: Colors.white70,
+                              ),
+                            ],
+                          ),
+                          Text(
+                            '${pws.species.popularName}'
+                            '${pws.location != null ? ' • ${pws.location!.name}' : ''}',
                             style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
+                              fontSize: 13,
+                              color: Colors.white70,
                             ),
                           ),
-                        ),
-                        Icon(
-                          Icons.more_vert,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ],
-                    ),
-                    Text(
-                      '${pws.species.popularName}'
-                      '${pws.location != null ? ' • ${pws.location!.name}' : ''}',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          if (days != null) ...[
+                            const SizedBox(height: 8),
+                            _IrrigationBadge(
+                                daysRelative: days, overdue: overdue),
+                          ],
+                        ],
                       ),
                     ),
-                    if (days != null) ...[
-                      const SizedBox(height: 8),
-                      _IrrigationBadge(daysRelative: days, overdue: overdue),
-                    ],
                   ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -149,27 +173,31 @@ class _IrrigationBadge extends StatelessWidget {
             : '${daysRelative}d atrasada'
         : 'em ${(-daysRelative)}d';
 
-    final color = overdue ? colorScheme.error : colorScheme.onSurfaceVariant;
+    final color = overdue ? colorScheme.onErrorContainer : Colors.white;
+    final bgColor = overdue
+        ? colorScheme.errorContainer.withValues(alpha: 0.8)
+        : Colors.white.withValues(alpha: 0.15);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: overdue
-            ? colorScheme.errorContainer
-            : colorScheme.surfaceContainerHighest,
+        color: bgColor,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: overdue ? Colors.transparent : Colors.white.withValues(alpha: 0.1),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.calendar_today_outlined, size: 12, color: color),
-          const SizedBox(width: 4),
+          const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
               fontSize: 12,
               color: color,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
