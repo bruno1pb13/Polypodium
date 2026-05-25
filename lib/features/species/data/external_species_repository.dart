@@ -138,11 +138,15 @@ class ExternalSpeciesRepository extends _$ExternalSpeciesRepository {
       }
     }
 
-    if (taxonContent == null || vernacularContent == null) throw Exception('Arquivos não encontrados no ZIP');
+    if (taxonContent == null || vernacularContent == null) {
+      throw Exception('Arquivos não encontrados no ZIP');
+    }
 
     // 3. Rebuild SQLite locally
     final tempDbFile = File(join((await getTemporaryDirectory()).path, 'temp_flora.db'));
-    if (await tempDbFile.exists()) await tempDbFile.delete();
+    if (await tempDbFile.exists()) {
+      await tempDbFile.delete();
+    }
     
     final tempDb = sqlite3.open(tempDbFile.path);
     tempDb.execute('CREATE TABLE external_species (popular_name TEXT, scientific_name TEXT)');
