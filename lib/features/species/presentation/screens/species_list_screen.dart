@@ -52,8 +52,6 @@ class SpeciesListScreen extends ConsumerWidget {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('${s.defaultIrrigationFrequencyDays}d',
-                              style: Theme.of(context).textTheme.bodySmall),
                           const SizedBox(width: 8),
                           IconButton(
                             icon: const Icon(Icons.edit_outlined),
