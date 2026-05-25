@@ -51,6 +51,15 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
     return rows.map((r) => r.photoPath!).toList();
   }
 
+  Future<String?> getLatestPhotoPath(String plantId) async {
+    final row = await (select(entriesTable)
+          ..where((t) => t.plantId.equals(plantId) & t.photoPath.isNotNull())
+          ..orderBy([(t) => OrderingTerm.desc(t.date)])
+          ..limit(1))
+        .getSingleOrNull();
+    return row?.photoPath;
+  }
+
   /// Returns the IDs (and photo paths) of entries that exceed the retention
   /// limit, ordered oldest-first so the caller can delete them.
   Future<List<EntriesTableData>> getOverRetentionLimit(

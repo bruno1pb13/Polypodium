@@ -61,4 +61,12 @@ flutter:
 
   assets:
     - assets/images/logo.png
+    - assets/images/background.png
     - assets/data/flora_brasil.db
+
+  fonts:
+    - family: CormorantGaramond
+      fonts:
+        - asset: assets/fonts/CormorantGaramond-VariableFont_wght.ttf
+        - asset: assets/fonts/CormorantGaramond-Italic-VariableFont_wght.ttf
+          style: italic
