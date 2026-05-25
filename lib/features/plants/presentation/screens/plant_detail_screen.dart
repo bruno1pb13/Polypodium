@@ -62,6 +62,7 @@ class PlantDetailScreen extends ConsumerWidget {
             : null;
 
         return Scaffold(
+          resizeToAvoidBottomInset: false,
           extendBodyBehindAppBar: true,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
