@@ -269,7 +269,7 @@ class _PlantInfoCard extends StatelessWidget {
               'Adquirida em',
               DateFormat('dd/MM/yyyy').format(plant.acquisitionDate),
             ),
-            if (pws != null)
+            if (pws != null && pws!.effectiveFrequencyDays != null)
               _row(
                 'Frequência de irrigação',
                 '${pws!.effectiveFrequencyDays} dias',
@@ -302,6 +302,8 @@ class _IrrigationStatusCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final overdue = pws.needsWatering;
     final days = pws.daysRelativeToSchedule;
+
+    if (days == null) return const SizedBox.shrink();
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),

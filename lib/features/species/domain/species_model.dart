@@ -6,7 +6,7 @@ class SpeciesModel {
   final String id;
   final String scientificName;
   final String popularName;
-  final int defaultIrrigationFrequencyDays;
+  final int? defaultIrrigationFrequencyDays;
   final List<SoilType> recommendedSoilTypes;
   // TODO(sync): Used by the sync layer to determine pending changes
   final SyncStatus syncStatus;
@@ -26,7 +26,7 @@ class SpeciesModel {
     String? id,
     String? scientificName,
     String? popularName,
-    int? defaultIrrigationFrequencyDays,
+    Object? defaultIrrigationFrequencyDays = _sentinel,
     List<SoilType>? recommendedSoilTypes,
     SyncStatus? syncStatus,
     DateTime? createdAt,
@@ -35,8 +35,9 @@ class SpeciesModel {
         id: id ?? this.id,
         scientificName: scientificName ?? this.scientificName,
         popularName: popularName ?? this.popularName,
-        defaultIrrigationFrequencyDays: defaultIrrigationFrequencyDays ??
-            this.defaultIrrigationFrequencyDays,
+        defaultIrrigationFrequencyDays: defaultIrrigationFrequencyDays == _sentinel
+            ? this.defaultIrrigationFrequencyDays
+            : defaultIrrigationFrequencyDays as int?,
         recommendedSoilTypes: recommendedSoilTypes ?? this.recommendedSoilTypes,
         syncStatus: syncStatus ?? this.syncStatus,
         createdAt: createdAt ?? this.createdAt,
@@ -56,3 +57,6 @@ class SpeciesModel {
 
   String toJsonString() => jsonEncode(toJson());
 }
+
+// Sentinel for nullable copyWith overrides
+const Object _sentinel = Object();

@@ -65,7 +65,7 @@ class SpeciesRepository {
         id: m.id,
         scientificName: m.scientificName,
         popularName: m.popularName,
-        defaultIrrigationFrequencyDays: m.defaultIrrigationFrequencyDays,
+        defaultIrrigationFrequencyDays: Value(m.defaultIrrigationFrequencyDays),
         recommendedSoilTypes: m.recommendedSoilTypes,
         syncStatus: Value(m.syncStatus),
         createdAt: m.createdAt,

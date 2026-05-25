@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/enums.dart';
 import '../../domain/species_model.dart';
 import '../providers/species_providers.dart';
+import '../widgets/species_autocomplete.dart';
 
 class AddSpeciesScreen extends ConsumerStatefulWidget {
   final SpeciesModel? species;
@@ -33,7 +34,7 @@ class _AddSpeciesScreenState extends ConsumerState<AddSpeciesScreen> {
     _scientificCtrl = TextEditingController(text: s?.scientificName ?? '');
     _popularCtrl = TextEditingController(text: s?.popularName ?? '');
     _frequencyCtrl = TextEditingController(
-      text: s?.defaultIrrigationFrequencyDays.toString() ?? '7',
+      text: s?.defaultIrrigationFrequencyDays?.toString() ?? '',
     );
     _soilTypes = s?.recommendedSoilTypes.toSet() ?? {};
   }
@@ -57,15 +58,19 @@ class _AddSpeciesScreenState extends ConsumerState<AddSpeciesScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            TextFormField(
+            SpeciesAutocomplete(
+              localSpecies: const [], // Na tela de espécie só queremos buscar na base externa
               controller: _popularCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Nome popular *',
-                hintText: 'Ex: Samambaia',
-              ),
-              textCapitalization: TextCapitalization.words,
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Campo obrigatório' : null,
+              label: 'Nome popular *',
+              onSelected: (_, popular, scientific) {
+                setState(() {
+                  _popularCtrl.text = popular!;
+                  _scientificCtrl.text = scientific!;
+                });
+              },
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? 'Campo obrigatório'
+                  : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -81,11 +86,12 @@ class _AddSpeciesScreenState extends ConsumerState<AddSpeciesScreen> {
             TextFormField(
               controller: _frequencyCtrl,
               decoration: const InputDecoration(
-                labelText: 'Frequência de irrigação padrão (dias) *',
+                labelText: 'Frequência de irrigação padrão (dias)',
               ),
               keyboardType: TextInputType.number,
               validator: (v) {
-                final n = int.tryParse(v ?? '');
+                if (v == null || v.trim().isEmpty) return null;
+                final n = int.tryParse(v);
                 if (n == null || n <= 0) return 'Informe um número positivo';
                 return null;
               },
@@ -135,7 +141,10 @@ class _AddSpeciesScreenState extends ConsumerState<AddSpeciesScreen> {
         id: widget.species?.id ?? const Uuid().v4(),
         scientificName: _scientificCtrl.text.trim(),
         popularName: _popularCtrl.text.trim(),
-        defaultIrrigationFrequencyDays: int.parse(_frequencyCtrl.text.trim()),
+        defaultIrrigationFrequencyDays:
+            _frequencyCtrl.text.trim().isEmpty
+                ? null
+                : int.parse(_frequencyCtrl.text.trim()),
         recommendedSoilTypes: _soilTypes.toList(),
         createdAt: widget.species?.createdAt ?? DateTime.now(),
       );

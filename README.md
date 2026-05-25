@@ -12,6 +12,14 @@ O **Polypodium** é uma ferramenta para ajudar entusiastas de botânica a gerenc
 - **Notificações:** Receba lembretes para não esquecer de cuidar das suas plantas.
 - **Offline-first:** Todos os dados são armazenados localmente no dispositivo.
 
+## 🌿 Dados Oficiais
+
+O aplicativo integra dados oficiais do projeto **Flora e Funga do Brasil**, coordenado pelo **Jardim Botânico do Rio de Janeiro (JBRJ)**.
+
+- **Base de Dados:** Inclui milhares de espécies cadastradas com nomes populares e científicos.
+*   **Atualização:** O usuário pode baixar versões atualizadas do dataset diretamente pela interface do aplicativo.
+*   **Busca Inteligente:** Autocomplete integrado que combina espécies locais (cadastradas pelo usuário) com a base oficial do JBRJ.
+
 ## 🛠️ Tech Stack
 
 - **Framework:** [Flutter](https://flutter.dev)
