@@ -29,9 +29,9 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
           const AboutListTile(
             icon: Icon(Icons.info_outline),
-            applicationName: 'PlantLog',
+            applicationName: 'Polypodium',
             applicationVersion: '1.0.0',
-            applicationLegalese: '© 2024 PlantLog Team',
+            applicationLegalese: '© 2024 Polypodium Team',
             child: Text('Sobre o Aplicativo'),
           ),
         ],

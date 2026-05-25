@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.plantlog" "\0"
-            VALUE "FileDescription", "plantlog" "\0"
+            VALUE "CompanyName", "com.polypodium" "\0"
+            VALUE "FileDescription", "polypodium" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "plantlog" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.plantlog. All rights reserved." "\0"
-            VALUE "OriginalFilename", "plantlog.exe" "\0"
-            VALUE "ProductName", "plantlog" "\0"
+            VALUE "InternalName", "polypodium" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.polypodium. All rights reserved." "\0"
+            VALUE "OriginalFilename", "polypodium.exe" "\0"
+            VALUE "ProductName", "polypodium" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

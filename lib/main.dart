@@ -31,16 +31,16 @@ Future<void> main() async {
     existingWorkPolicy: ExistingPeriodicWorkPolicy.replace,
   );
 
-  runApp(const ProviderScope(child: PlantLogApp()));
+  runApp(const ProviderScope(child: PolypodiumApp()));
 }
 
-class PlantLogApp extends StatelessWidget {
-  const PlantLogApp({super.key});
+class PolypodiumApp extends StatelessWidget {
+  const PolypodiumApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PlantLog',
+      title: 'Polypodium',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       home: const HomeScreen(),

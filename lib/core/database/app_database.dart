@@ -107,7 +107,7 @@ class AppDatabase extends _$AppDatabase {
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
       final dir = await getApplicationDocumentsDirectory();
-      final file = File(p.join(dir.path, 'plantlog.db'));
+      final file = File(p.join(dir.path, 'polypodium.db'));
       return NativeDatabase.createInBackground(file);
     });
   }

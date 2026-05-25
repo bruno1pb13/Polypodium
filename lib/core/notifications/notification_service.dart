@@ -23,7 +23,7 @@ class NotificationService implements INotificationService {
   const NotificationService();
 
   static const irrigationCheckTask = 'irrigation-check';
-  static const _channelId = 'plantlog_irrigation';
+  static const _channelId = 'polypodium_irrigation';
   static const _channelName = 'Irrigação';
 
   static final _plugin = FlutterLocalNotificationsPlugin();
@@ -149,7 +149,7 @@ class NotificationService implements INotificationService {
         .initialize(const InitializationSettings(android: android, iOS: iOS));
 
     final dir = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, 'plantlog.db'));
+    final file = File(p.join(dir.path, 'polypodium.db'));
     final db = AppDatabase.forTesting(NativeDatabase(file));
 
     try {

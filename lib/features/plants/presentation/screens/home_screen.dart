@@ -34,7 +34,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PlantLog'),
+        title: const Text('Polypodium'),
       ),
       drawer: const AppDrawer(),
       body: Column(

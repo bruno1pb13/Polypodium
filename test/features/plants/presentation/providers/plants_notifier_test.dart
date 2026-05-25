@@ -1,17 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:plantlog/features/plants/presentation/providers/plants_providers.dart';
-import 'package:plantlog/features/entries/presentation/providers/entries_providers.dart';
-import 'package:plantlog/features/plants/data/plants_repository.dart';
-import 'package:plantlog/features/entries/data/entries_repository.dart';
-import 'package:plantlog/features/plants/domain/plant_model.dart';
-import 'package:plantlog/features/entries/domain/entry_model.dart';
-import 'package:plantlog/features/species/domain/species_model.dart';
-import 'package:plantlog/features/locations/domain/location_model.dart';
-import 'package:plantlog/features/species/presentation/providers/species_providers.dart';
-import 'package:plantlog/features/locations/presentation/providers/locations_providers.dart';
-import 'package:plantlog/core/enums.dart';
+import 'package:polypodium/features/plants/presentation/providers/plants_providers.dart';
+import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
+import 'package:polypodium/features/plants/data/plants_repository.dart';
+import 'package:polypodium/features/entries/data/entries_repository.dart';
+import 'package:polypodium/features/plants/domain/plant_model.dart';
+import 'package:polypodium/features/entries/domain/entry_model.dart';
+import 'package:polypodium/features/species/domain/species_model.dart';
+import 'package:polypodium/features/locations/domain/location_model.dart';
+import 'package:polypodium/features/species/presentation/providers/species_providers.dart';
+import 'package:polypodium/features/locations/presentation/providers/locations_providers.dart';
+import 'package:polypodium/core/enums.dart';
 
 class MockPlantsRepository extends Mock implements PlantsRepository {}
 
