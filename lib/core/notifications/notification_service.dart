@@ -99,6 +99,12 @@ class NotificationService implements INotificationService {
 
     final frequencyDays =
         plant.irrigationFrequencyDays ?? species.defaultIrrigationFrequencyDays;
+    
+    if (frequencyDays == null) {
+      await cancelNotification(plant.id);
+      return;
+    }
+
     final scheduledDate =
         _nextIrrigationTime(plant.lastIrrigatedAt, frequencyDays);
 

@@ -43,8 +43,11 @@ Future<List<PlantWithSpecies>> filteredSortedPlants(Ref ref) async {
 
   switch (sortOption) {
     case PlantSortOption.wateringNeeds:
-      sorted.sort((a, b) =>
-          b.daysRelativeToSchedule.compareTo(a.daysRelativeToSchedule));
+      sorted.sort((a, b) {
+        final aVal = a.daysRelativeToSchedule ?? -999;
+        final bVal = b.daysRelativeToSchedule ?? -999;
+        return bVal.compareTo(aVal);
+      });
       break;
     case PlantSortOption.nameAZ:
       sorted.sort((a, b) => a.plant.nickname

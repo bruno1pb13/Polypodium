@@ -31,8 +31,8 @@ class $SpeciesTableTable extends SpeciesTable
   @override
   late final GeneratedColumn<int> defaultIrrigationFrequencyDays =
       GeneratedColumn<int>(
-          'default_irrigation_frequency_days', aliasedName, false,
-          type: DriftSqlType.int, requiredDuringInsert: true);
+          'default_irrigation_frequency_days', aliasedName, true,
+          type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   late final GeneratedColumnWithTypeConverter<List<SoilType>, String>
       recommendedSoilTypes = GeneratedColumn<String>(
@@ -100,8 +100,6 @@ class $SpeciesTableTable extends SpeciesTable
           defaultIrrigationFrequencyDays.isAcceptableOrUnknown(
               data['default_irrigation_frequency_days']!,
               _defaultIrrigationFrequencyDaysMeta));
-    } else if (isInserting) {
-      context.missing(_defaultIrrigationFrequencyDaysMeta);
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -126,7 +124,7 @@ class $SpeciesTableTable extends SpeciesTable
           .read(DriftSqlType.string, data['${effectivePrefix}popular_name'])!,
       defaultIrrigationFrequencyDays: attachedDatabase.typeMapping.read(
           DriftSqlType.int,
-          data['${effectivePrefix}default_irrigation_frequency_days'])!,
+          data['${effectivePrefix}default_irrigation_frequency_days']),
       recommendedSoilTypes: $SpeciesTableTable.$converterrecommendedSoilTypes
           .fromSql(attachedDatabase.typeMapping.read(DriftSqlType.string,
               data['${effectivePrefix}recommended_soil_types'])!),
@@ -154,7 +152,7 @@ class SpeciesTableData extends DataClass
   final String id;
   final String scientificName;
   final String popularName;
-  final int defaultIrrigationFrequencyDays;
+  final int? defaultIrrigationFrequencyDays;
 
   /// JSON-encoded list of SoilType names
   final List<SoilType> recommendedSoilTypes;
@@ -164,7 +162,7 @@ class SpeciesTableData extends DataClass
       {required this.id,
       required this.scientificName,
       required this.popularName,
-      required this.defaultIrrigationFrequencyDays,
+      this.defaultIrrigationFrequencyDays,
       required this.recommendedSoilTypes,
       required this.syncStatus,
       required this.createdAt});
@@ -174,8 +172,10 @@ class SpeciesTableData extends DataClass
     map['id'] = Variable<String>(id);
     map['scientific_name'] = Variable<String>(scientificName);
     map['popular_name'] = Variable<String>(popularName);
-    map['default_irrigation_frequency_days'] =
-        Variable<int>(defaultIrrigationFrequencyDays);
+    if (!nullToAbsent || defaultIrrigationFrequencyDays != null) {
+      map['default_irrigation_frequency_days'] =
+          Variable<int>(defaultIrrigationFrequencyDays);
+    }
     {
       map['recommended_soil_types'] = Variable<String>($SpeciesTableTable
           .$converterrecommendedSoilTypes
@@ -194,7 +194,10 @@ class SpeciesTableData extends DataClass
       id: Value(id),
       scientificName: Value(scientificName),
       popularName: Value(popularName),
-      defaultIrrigationFrequencyDays: Value(defaultIrrigationFrequencyDays),
+      defaultIrrigationFrequencyDays:
+          defaultIrrigationFrequencyDays == null && nullToAbsent
+              ? const Value.absent()
+              : Value(defaultIrrigationFrequencyDays),
       recommendedSoilTypes: Value(recommendedSoilTypes),
       syncStatus: Value(syncStatus),
       createdAt: Value(createdAt),
@@ -209,7 +212,7 @@ class SpeciesTableData extends DataClass
       scientificName: serializer.fromJson<String>(json['scientificName']),
       popularName: serializer.fromJson<String>(json['popularName']),
       defaultIrrigationFrequencyDays:
-          serializer.fromJson<int>(json['defaultIrrigationFrequencyDays']),
+          serializer.fromJson<int?>(json['defaultIrrigationFrequencyDays']),
       recommendedSoilTypes:
           serializer.fromJson<List<SoilType>>(json['recommendedSoilTypes']),
       syncStatus: serializer.fromJson<SyncStatus>(json['syncStatus']),
@@ -224,7 +227,7 @@ class SpeciesTableData extends DataClass
       'scientificName': serializer.toJson<String>(scientificName),
       'popularName': serializer.toJson<String>(popularName),
       'defaultIrrigationFrequencyDays':
-          serializer.toJson<int>(defaultIrrigationFrequencyDays),
+          serializer.toJson<int?>(defaultIrrigationFrequencyDays),
       'recommendedSoilTypes':
           serializer.toJson<List<SoilType>>(recommendedSoilTypes),
       'syncStatus': serializer.toJson<SyncStatus>(syncStatus),
@@ -236,7 +239,7 @@ class SpeciesTableData extends DataClass
           {String? id,
           String? scientificName,
           String? popularName,
-          int? defaultIrrigationFrequencyDays,
+          Value<int?> defaultIrrigationFrequencyDays = const Value.absent(),
           List<SoilType>? recommendedSoilTypes,
           SyncStatus? syncStatus,
           DateTime? createdAt}) =>
@@ -244,8 +247,9 @@ class SpeciesTableData extends DataClass
         id: id ?? this.id,
         scientificName: scientificName ?? this.scientificName,
         popularName: popularName ?? this.popularName,
-        defaultIrrigationFrequencyDays: defaultIrrigationFrequencyDays ??
-            this.defaultIrrigationFrequencyDays,
+        defaultIrrigationFrequencyDays: defaultIrrigationFrequencyDays.present
+            ? defaultIrrigationFrequencyDays.value
+            : this.defaultIrrigationFrequencyDays,
         recommendedSoilTypes: recommendedSoilTypes ?? this.recommendedSoilTypes,
         syncStatus: syncStatus ?? this.syncStatus,
         createdAt: createdAt ?? this.createdAt,
@@ -313,7 +317,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
   final Value<String> id;
   final Value<String> scientificName;
   final Value<String> popularName;
-  final Value<int> defaultIrrigationFrequencyDays;
+  final Value<int?> defaultIrrigationFrequencyDays;
   final Value<List<SoilType>> recommendedSoilTypes;
   final Value<SyncStatus> syncStatus;
   final Value<DateTime> createdAt;
@@ -332,7 +336,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
     required String id,
     required String scientificName,
     required String popularName,
-    required int defaultIrrigationFrequencyDays,
+    this.defaultIrrigationFrequencyDays = const Value.absent(),
     required List<SoilType> recommendedSoilTypes,
     this.syncStatus = const Value.absent(),
     required DateTime createdAt,
@@ -340,7 +344,6 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
   })  : id = Value(id),
         scientificName = Value(scientificName),
         popularName = Value(popularName),
-        defaultIrrigationFrequencyDays = Value(defaultIrrigationFrequencyDays),
         recommendedSoilTypes = Value(recommendedSoilTypes),
         createdAt = Value(createdAt);
   static Insertable<SpeciesTableData> custom({
@@ -371,7 +374,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
       {Value<String>? id,
       Value<String>? scientificName,
       Value<String>? popularName,
-      Value<int>? defaultIrrigationFrequencyDays,
+      Value<int?>? defaultIrrigationFrequencyDays,
       Value<List<SoilType>>? recommendedSoilTypes,
       Value<SyncStatus>? syncStatus,
       Value<DateTime>? createdAt,
@@ -2201,7 +2204,7 @@ typedef $$SpeciesTableTableCreateCompanionBuilder = SpeciesTableCompanion
   required String id,
   required String scientificName,
   required String popularName,
-  required int defaultIrrigationFrequencyDays,
+  Value<int?> defaultIrrigationFrequencyDays,
   required List<SoilType> recommendedSoilTypes,
   Value<SyncStatus> syncStatus,
   required DateTime createdAt,
@@ -2212,7 +2215,7 @@ typedef $$SpeciesTableTableUpdateCompanionBuilder = SpeciesTableCompanion
   Value<String> id,
   Value<String> scientificName,
   Value<String> popularName,
-  Value<int> defaultIrrigationFrequencyDays,
+  Value<int?> defaultIrrigationFrequencyDays,
   Value<List<SoilType>> recommendedSoilTypes,
   Value<SyncStatus> syncStatus,
   Value<DateTime> createdAt,
@@ -2412,7 +2415,7 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             Value<String> scientificName = const Value.absent(),
             Value<String> popularName = const Value.absent(),
-            Value<int> defaultIrrigationFrequencyDays = const Value.absent(),
+            Value<int?> defaultIrrigationFrequencyDays = const Value.absent(),
             Value<List<SoilType>> recommendedSoilTypes = const Value.absent(),
             Value<SyncStatus> syncStatus = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -2432,7 +2435,7 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             required String id,
             required String scientificName,
             required String popularName,
-            required int defaultIrrigationFrequencyDays,
+            Value<int?> defaultIrrigationFrequencyDays = const Value.absent(),
             required List<SoilType> recommendedSoilTypes,
             Value<SyncStatus> syncStatus = const Value.absent(),
             required DateTime createdAt,
