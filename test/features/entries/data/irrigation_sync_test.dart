@@ -4,6 +4,7 @@ import 'package:polypodium/core/database/app_database.dart';
 import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/core/notifications/notification_service.dart';
 import 'package:polypodium/features/plants/data/plants_repository.dart';
+import 'package:polypodium/features/species/data/species_repository.dart';
 import 'package:polypodium/features/entries/data/entries_repository.dart';
 import 'package:polypodium/features/entries/domain/entry_model.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
@@ -33,15 +34,28 @@ class MockNotificationService implements INotificationService {
 
 void main() {
   late AppDatabase db;
+  late SpeciesRepository speciesRepo;
   late PlantsRepository plantsRepo;
   late EntriesRepository entriesRepo;
   late MockPhotoStorage mockPhotoStorage;
 
-  setUp(() {
+  setUp(() async {
     db = AppDatabase.forTesting(NativeDatabase.memory());
-    plantsRepo = PlantsRepository(db, MockNotificationService());
+    speciesRepo = SpeciesRepository(db);
+    plantsRepo = PlantsRepository(db, MockNotificationService(),
+        speciesRepo: speciesRepo);
     mockPhotoStorage = MockPhotoStorage();
     entriesRepo = EntriesRepository(db, mockPhotoStorage);
+
+    // Create a default species for tests
+    await speciesRepo.save(SpeciesModel(
+      id: 'species1',
+      scientificName: 'Test Scientific',
+      popularName: 'Test Popular',
+      defaultIrrigationFrequencyDays: 7,
+      recommendedSoilTypes: [SoilType.loamy],
+      createdAt: DateTime.now(),
+    ));
   });
 
   tearDown(() async {

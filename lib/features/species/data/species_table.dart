@@ -9,7 +9,7 @@ class SpeciesTable extends Table {
   TextColumn get id => text()();
   TextColumn get scientificName => text()();
   TextColumn get popularName => text()();
-  IntColumn get defaultIrrigationFrequencyDays => integer()();
+  IntColumn get defaultIrrigationFrequencyDays => integer().nullable()();
 
   /// JSON-encoded list of SoilType names
   TextColumn get recommendedSoilTypes =>

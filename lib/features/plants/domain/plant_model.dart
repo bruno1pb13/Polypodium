@@ -99,20 +99,27 @@ class PlantWithSpecies {
     this.location,
   });
 
-  int get effectiveFrequencyDays =>
+  int? get effectiveFrequencyDays =>
       plant.irrigationFrequencyDays ?? species.defaultIrrigationFrequencyDays;
 
   bool get needsWatering {
+    final freq = effectiveFrequencyDays;
+    if (freq == null) return false;
     if (plant.lastIrrigatedAt == null) return true;
-    return daysSinceIrrigation >= effectiveFrequencyDays;
+    return daysSinceIrrigation >= freq;
   }
 
   int get daysSinceIrrigation {
-    if (plant.lastIrrigatedAt == null) return effectiveFrequencyDays;
+    if (plant.lastIrrigatedAt == null) {
+      return effectiveFrequencyDays ?? 0;
+    }
     return DateTime.now().difference(plant.lastIrrigatedAt!).inDays;
   }
 
   /// Positive = days overdue, negative = days until due
-  int get daysRelativeToSchedule =>
-      daysSinceIrrigation - effectiveFrequencyDays;
+  int? get daysRelativeToSchedule {
+    final freq = effectiveFrequencyDays;
+    if (freq == null) return null;
+    return daysSinceIrrigation - freq;
+  }
 }

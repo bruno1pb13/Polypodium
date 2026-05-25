@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/enums.dart';
 import '../../../species/domain/species_model.dart';
 import '../../../species/presentation/providers/species_providers.dart';
+import '../../../species/presentation/widgets/species_autocomplete.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
 import '../../../locations/presentation/screens/add_edit_location_screen.dart';
 import '../../domain/plant_model.dart';
@@ -23,9 +24,13 @@ class AddEditPlantScreen extends ConsumerStatefulWidget {
 class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nicknameCtrl;
+  late final TextEditingController _speciesSearchCtrl;
   late final TextEditingController _frequencyCtrl;
 
   String? _selectedSpeciesId;
+  String? _tempExternalPopularName;
+  String? _tempExternalScientificName;
+
   String? _selectedLocationId;
   SoilType _soilType = SoilType.loamy;
   DateTime _acquisitionDate = DateTime.now();
@@ -40,6 +45,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
     super.initState();
     final p = widget.plant;
     _nicknameCtrl = TextEditingController(text: p?.nickname ?? '');
+    _speciesSearchCtrl = TextEditingController();
     _frequencyCtrl = TextEditingController(
       text: p?.irrigationFrequencyDays?.toString() ?? '',
     );
@@ -47,11 +53,29 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
     _selectedLocationId = p?.locationId;
     _soilType = p?.soilType ?? SoilType.loamy;
     _acquisitionDate = p?.acquisitionDate ?? DateTime.now();
+
+    // If editing, we need to load the species name into the search field
+    if (_isEditing && _selectedSpeciesId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final speciesList = await ref.read(speciesNotifierProvider.future);
+        final match = speciesList.cast<SpeciesModel?>().firstWhere(
+              (s) => s?.id == _selectedSpeciesId,
+              orElse: () => null,
+            );
+        if (match != null) {
+          setState(() {
+            _speciesSearchCtrl.text =
+                '${match.popularName} (${match.scientificName})';
+          });
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
     _nicknameCtrl.dispose();
+    _speciesSearchCtrl.dispose();
     _frequencyCtrl.dispose();
     super.dispose();
   }
@@ -87,28 +111,46 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                       : null,
                 ),
                 const SizedBox(height: 16),
-                _SpeciesDropdown(
-                  species: species,
-                  selected: _selectedSpeciesId,
-                  onChanged: (id) {
+                SpeciesAutocomplete(
+                  localSpecies: species,
+                  controller: _speciesSearchCtrl,
+                  onSelected: (id, popular, scientific) {
                     setState(() {
                       _selectedSpeciesId = id;
-                      if (!_isEditing && id != null) {
+                      _tempExternalPopularName = popular;
+                      _tempExternalScientificName = scientific;
+
+                      if (id != null) {
+                        // Local species selected
                         final selectedSpecies =
                             species.firstWhere((s) => s.id == id);
-                        _frequencyCtrl.text = selectedSpecies
-                            .defaultIrrigationFrequencyDays
-                            .toString();
-                        _isFrequencyAutoFilled = true;
+                        
+                        if (selectedSpecies.defaultIrrigationFrequencyDays != null) {
+                          _frequencyCtrl.text = selectedSpecies
+                              .defaultIrrigationFrequencyDays
+                              .toString();
+                          _isFrequencyAutoFilled = true;
+                        } else {
+                          _frequencyCtrl.text = '';
+                          _isFrequencyAutoFilled = false;
+                        }
 
                         if (selectedSpecies.recommendedSoilTypes.isNotEmpty) {
                           _soilType =
                               selectedSpecies.recommendedSoilTypes.first;
                           _isSoilAutoFilled = true;
                         }
+                      } else {
+                        // External species selected (will be created on submit)
+                        _frequencyCtrl.text = ''; 
+                        _isFrequencyAutoFilled = false;
+                        _isSoilAutoFilled = false;
                       }
                     });
                   },
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Selecione uma espécie'
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 _SoilTypeDropdown(
@@ -126,8 +168,8 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                   controller: _frequencyCtrl,
                   decoration: InputDecoration(
                     labelText:
-                        'Frequência de irrigação (dias)${_isFrequencyAutoFilled ? ' (recomendado)' : ''}',
-                    hintText: 'Deixe vazio para usar o padrão da espécie',
+                        'Frequência de irrigação (dias)${_isFrequencyAutoFilled ? ' (recomendado)' : ''} *',
+                    hintText: 'Informe o intervalo entre regas',
                   ),
                   onChanged: (_) {
                     if (_isFrequencyAutoFilled) {
@@ -136,7 +178,9 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                   },
                   keyboardType: TextInputType.number,
                   validator: (v) {
-                    if (v == null || v.isEmpty) return null;
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Informe a frequência de irrigação';
+                    }
                     final n = int.tryParse(v);
                     if (n == null || n <= 0) {
                       return 'Informe um número positivo';
@@ -213,17 +257,32 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedSpeciesId == null) {
+
+    if (_selectedSpeciesId == null && _tempExternalScientificName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione uma espécie')),
+        const SnackBar(content: Text('Selecione uma espécie da lista')),
       );
       return;
+    }
+
+    // Get or create local species ID
+    String finalSpeciesId;
+    if (_selectedSpeciesId != null) {
+      finalSpeciesId = _selectedSpeciesId!;
+    } else {
+      // Create from external
+      finalSpeciesId = await ref
+          .read(speciesNotifierProvider.notifier)
+          .getOrCreateFromExternal(
+            popularName: _tempExternalPopularName!,
+            scientificName: _tempExternalScientificName!,
+          );
     }
 
     final frequencyText = _frequencyCtrl.text.trim();
     final plant = PlantModel(
       id: widget.plant?.id ?? const Uuid().v4(),
-      speciesId: _selectedSpeciesId!,
+      speciesId: finalSpeciesId,
       nickname: _nicknameCtrl.text.trim(),
       soilType: _soilType,
       irrigationFrequencyDays:
@@ -236,34 +295,6 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
 
     await ref.read(plantsNotifierProvider.notifier).save(plant);
     if (mounted) Navigator.pop(context);
-  }
-}
-
-class _SpeciesDropdown extends StatelessWidget {
-  final List<SpeciesModel> species;
-  final String? selected;
-  final ValueChanged<String?> onChanged;
-
-  const _SpeciesDropdown({
-    required this.species,
-    required this.selected,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      // ignore: deprecated_member_use
-      value: selected,
-      decoration: const InputDecoration(labelText: 'Espécie *'),
-      items: species
-          .map((s) => DropdownMenuItem(
-                value: s.id,
-                child: Text('${s.popularName} (${s.scientificName})'),
-              ))
-          .toList(),
-      onChanged: onChanged,
-    );
   }
 }
 

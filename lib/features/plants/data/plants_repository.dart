@@ -8,11 +8,14 @@ import '../domain/plant_model.dart';
 import 'plants_dao.dart';
 
 class PlantsRepository {
-  PlantsRepository(AppDatabase db, INotificationService notifications)
-      : _db = db,
+  PlantsRepository(
+    AppDatabase db,
+    INotificationService notifications, {
+    SpeciesRepository? speciesRepo,
+  })  : _db = db,
         _dao = db.plantsDao,
         _syncQueueDao = db.syncQueueDao,
-        _speciesRepo = SpeciesRepository(db),
+        _speciesRepo = speciesRepo ?? SpeciesRepository(db),
         _notifications = notifications;
 
   final AppDatabase _db;

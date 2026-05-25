@@ -1,7 +1,7 @@
 name: polypodium
 description: App de acompanhamento de plantas - offline-first
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+1
 
 environment:
   sdk: '>=3.5.0 <4.0.0'
@@ -24,6 +24,10 @@ dependencies:
   uuid: ^4.4.0
   intl: ^0.19.0
   shared_preferences: ^2.5.5
+  sqlite3: ^2.5.0
+  http: ^1.2.1
+  archive: ^3.6.1
+  csv: ^6.0.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
@@ -57,3 +61,4 @@ flutter:
 
   assets:
     - assets/images/logo.png
+    - assets/data/flora_brasil.db
