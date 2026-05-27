@@ -5,6 +5,8 @@ class SoilModel {
   final String id;
   final String name;
   final String? composition;
+  final String? imagePath;
+  final String? imageSource;
   final DateTime createdAt;
   final SyncStatus syncStatus;
 
@@ -12,6 +14,8 @@ class SoilModel {
     required this.id,
     required this.name,
     this.composition,
+    this.imagePath,
+    this.imageSource,
     required this.createdAt,
     this.syncStatus = SyncStatus.pending,
   });
@@ -20,6 +24,8 @@ class SoilModel {
     String? id,
     String? name,
     Object? composition = _sentinel,
+    Object? imagePath = _sentinel,
+    Object? imageSource = _sentinel,
     DateTime? createdAt,
     SyncStatus? syncStatus,
   }) =>
@@ -27,6 +33,8 @@ class SoilModel {
         id: id ?? this.id,
         name: name ?? this.name,
         composition: composition == _sentinel ? this.composition : composition as String?,
+        imagePath: imagePath == _sentinel ? this.imagePath : imagePath as String?,
+        imageSource: imageSource == _sentinel ? this.imageSource : imageSource as String?,
         createdAt: createdAt ?? this.createdAt,
         syncStatus: syncStatus ?? this.syncStatus,
       );
@@ -35,6 +43,8 @@ class SoilModel {
         'id': id,
         'name': name,
         'composition': composition,
+        'imagePath': imagePath,
+        'imageSource': imageSource,
         'createdAt': createdAt.toIso8601String(),
         'syncStatus': syncStatus.name,
       };
@@ -43,6 +53,8 @@ class SoilModel {
         id: json['id'],
         name: json['name'],
         composition: json['composition'],
+        imagePath: json['imagePath'],
+        imageSource: json['imageSource'],
         createdAt: DateTime.parse(json['createdAt']),
         syncStatus: SyncStatus.values.byName(json['syncStatus'] ?? 'pending'),
       );

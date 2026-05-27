@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -223,20 +224,31 @@ class _SoilListItem extends ConsumerWidget {
                 child: Row(
                   children: [
                     Container(
-                      width: 48,
-                      height: 48,
+                      width: 56,
+                      height: 56,
                       decoration: BoxDecoration(
                         color: transparencyEnabled
                             ? Colors.white.withValues(alpha: 0.1)
                             : colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(12),
+                        image: soil.imagePath != null
+                            ? DecorationImage(
+                                image: soil.imagePath!.startsWith('assets/')
+                                    ? AssetImage(soil.imagePath!)
+                                        as ImageProvider
+                                    : FileImage(File(soil.imagePath!)),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
                       ),
-                      child: Icon(
-                        Icons.terrain_outlined,
-                        color: transparencyEnabled
-                            ? Colors.white
-                            : colorScheme.primary,
-                      ),
+                      child: soil.imagePath == null
+                          ? Icon(
+                              Icons.terrain_outlined,
+                              color: transparencyEnabled
+                                  ? Colors.white
+                                  : colorScheme.primary,
+                            )
+                          : null,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -274,6 +286,25 @@ class _SoilListItem extends ConsumerWidget {
                                     : colorScheme.onSurfaceVariant
                                         .withValues(alpha: 0.7),
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                          if (soil.imageSource != null &&
+                              soil.imageSource!.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              'Fonte: ${soil.imageSource}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontStyle: FontStyle.italic,
+                                color: transparencyEnabled
+                                    ? Colors.white60
+                                    : colorScheme.onSurfaceVariant
+                                        .withValues(alpha: 0.5),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ],

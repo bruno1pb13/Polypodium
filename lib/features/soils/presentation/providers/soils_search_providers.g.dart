@@ -7,7 +7,7 @@ part of 'soils_search_providers.dart';
 // **************************************************************************
 
 String _$filteredSortedSoilsHash() =>
-    r'275170ce2734becb36d6a0def3438c54e01598af';
+    r'db55dc539caeb5294e79b8ad193d04d2eae83d65';
 
 /// See also [filteredSortedSoils].
 @ProviderFor(filteredSortedSoils)
@@ -25,7 +25,7 @@ final filteredSortedSoilsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FilteredSortedSoilsRef = AutoDisposeFutureProviderRef<List<SoilModel>>;
-String _$soilSearchQueryHash() => r'b313ff7fc38416991734d056f57a545ef550e41b';
+String _$soilSearchQueryHash() => r'133aa3046b45f7b0b3543600ef989213bb3a926b';
 
 /// See also [SoilSearchQuery].
 @ProviderFor(SoilSearchQuery)

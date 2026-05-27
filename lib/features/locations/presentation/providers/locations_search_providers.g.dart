@@ -7,7 +7,7 @@ part of 'locations_search_providers.dart';
 // **************************************************************************
 
 String _$filteredSortedLocationsHash() =>
-    r'47b65651badbe4c368be2f8fa6762856f8c2b820';
+    r'936fa77daab0b25ed861c2fa2e527c7e53e90374';
 
 /// See also [filteredSortedLocations].
 @ProviderFor(filteredSortedLocations)
@@ -27,7 +27,7 @@ final filteredSortedLocationsProvider =
 typedef FilteredSortedLocationsRef
     = AutoDisposeFutureProviderRef<List<LocationModel>>;
 String _$locationSearchQueryHash() =>
-    r'2ffc528522744c848ee6a64f2f55fa4f1d754700';
+    r'd458810aaf3f7fc98d34f1e47837b12105c48137';
 
 /// See also [LocationSearchQuery].
 @ProviderFor(LocationSearchQuery)

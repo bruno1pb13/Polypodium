@@ -7,7 +7,7 @@ part of 'species_search_providers.dart';
 // **************************************************************************
 
 String _$filteredSortedSpeciesHash() =>
-    r'1e385d6a685a3f0aa76f3edb8044a62af495488d';
+    r'c7a790716bbb3615b59e7eb59f7c74c3dab5cff3';
 
 /// See also [filteredSortedSpecies].
 @ProviderFor(filteredSortedSpecies)
@@ -27,7 +27,7 @@ final filteredSortedSpeciesProvider =
 typedef FilteredSortedSpeciesRef
     = AutoDisposeFutureProviderRef<List<SpeciesModel>>;
 String _$speciesSearchQueryHash() =>
-    r'6aecdaa69440480f3aa04f2bfeede3b9033382e3';
+    r'9e73842d1c51d494ffe3b23a8b05b1d6c3d73373';
 
 /// See also [SpeciesSearchQuery].
 @ProviderFor(SpeciesSearchQuery)

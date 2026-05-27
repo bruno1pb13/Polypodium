@@ -465,6 +465,18 @@ class $SoilsTableTable extends SoilsTable
   late final GeneratedColumn<String> composition = GeneratedColumn<String>(
       'composition', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _imagePathMeta =
+      const VerificationMeta('imagePath');
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+      'image_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _imageSourceMeta =
+      const VerificationMeta('imageSource');
+  @override
+  late final GeneratedColumn<String> imageSource = GeneratedColumn<String>(
+      'image_source', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -480,7 +492,7 @@ class $SoilsTableTable extends SoilsTable
           .withConverter<SyncStatus>($SoilsTableTable.$convertersyncStatus);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, composition, createdAt, syncStatus];
+      [id, name, composition, imagePath, imageSource, createdAt, syncStatus];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -508,6 +520,16 @@ class $SoilsTableTable extends SoilsTable
           composition.isAcceptableOrUnknown(
               data['composition']!, _compositionMeta));
     }
+    if (data.containsKey('image_path')) {
+      context.handle(_imagePathMeta,
+          imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta));
+    }
+    if (data.containsKey('image_source')) {
+      context.handle(
+          _imageSourceMeta,
+          imageSource.isAcceptableOrUnknown(
+              data['image_source']!, _imageSourceMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -529,6 +551,10 @@ class $SoilsTableTable extends SoilsTable
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       composition: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}composition']),
+      imagePath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}image_path']),
+      imageSource: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}image_source']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       syncStatus: $SoilsTableTable.$convertersyncStatus.fromSql(attachedDatabase
@@ -550,12 +576,16 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
   final String id;
   final String name;
   final String? composition;
+  final String? imagePath;
+  final String? imageSource;
   final DateTime createdAt;
   final SyncStatus syncStatus;
   const SoilsTableData(
       {required this.id,
       required this.name,
       this.composition,
+      this.imagePath,
+      this.imageSource,
       required this.createdAt,
       required this.syncStatus});
   @override
@@ -565,6 +595,12 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || composition != null) {
       map['composition'] = Variable<String>(composition);
+    }
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
+    }
+    if (!nullToAbsent || imageSource != null) {
+      map['image_source'] = Variable<String>(imageSource);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     {
@@ -581,6 +617,12 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       composition: composition == null && nullToAbsent
           ? const Value.absent()
           : Value(composition),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
+      imageSource: imageSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imageSource),
       createdAt: Value(createdAt),
       syncStatus: Value(syncStatus),
     );
@@ -593,6 +635,8 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       composition: serializer.fromJson<String?>(json['composition']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
+      imageSource: serializer.fromJson<String?>(json['imageSource']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       syncStatus: serializer.fromJson<SyncStatus>(json['syncStatus']),
     );
@@ -604,6 +648,8 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'composition': serializer.toJson<String?>(composition),
+      'imagePath': serializer.toJson<String?>(imagePath),
+      'imageSource': serializer.toJson<String?>(imageSource),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'syncStatus': serializer.toJson<SyncStatus>(syncStatus),
     };
@@ -613,12 +659,16 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
           {String? id,
           String? name,
           Value<String?> composition = const Value.absent(),
+          Value<String?> imagePath = const Value.absent(),
+          Value<String?> imageSource = const Value.absent(),
           DateTime? createdAt,
           SyncStatus? syncStatus}) =>
       SoilsTableData(
         id: id ?? this.id,
         name: name ?? this.name,
         composition: composition.present ? composition.value : this.composition,
+        imagePath: imagePath.present ? imagePath.value : this.imagePath,
+        imageSource: imageSource.present ? imageSource.value : this.imageSource,
         createdAt: createdAt ?? this.createdAt,
         syncStatus: syncStatus ?? this.syncStatus,
       );
@@ -628,6 +678,9 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       name: data.name.present ? data.name.value : this.name,
       composition:
           data.composition.present ? data.composition.value : this.composition,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      imageSource:
+          data.imageSource.present ? data.imageSource.value : this.imageSource,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       syncStatus:
           data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
@@ -640,6 +693,8 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('composition: $composition, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('imageSource: $imageSource, ')
           ..write('createdAt: $createdAt, ')
           ..write('syncStatus: $syncStatus')
           ..write(')'))
@@ -647,7 +702,8 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, name, composition, createdAt, syncStatus);
+  int get hashCode => Object.hash(
+      id, name, composition, imagePath, imageSource, createdAt, syncStatus);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -655,6 +711,8 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
           other.id == this.id &&
           other.name == this.name &&
           other.composition == this.composition &&
+          other.imagePath == this.imagePath &&
+          other.imageSource == this.imageSource &&
           other.createdAt == this.createdAt &&
           other.syncStatus == this.syncStatus);
 }
@@ -663,6 +721,8 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
   final Value<String> id;
   final Value<String> name;
   final Value<String?> composition;
+  final Value<String?> imagePath;
+  final Value<String?> imageSource;
   final Value<DateTime> createdAt;
   final Value<SyncStatus> syncStatus;
   final Value<int> rowid;
@@ -670,6 +730,8 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.composition = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.imageSource = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -678,6 +740,8 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
     required String id,
     required String name,
     this.composition = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.imageSource = const Value.absent(),
     required DateTime createdAt,
     this.syncStatus = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -688,6 +752,8 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? composition,
+    Expression<String>? imagePath,
+    Expression<String>? imageSource,
     Expression<DateTime>? createdAt,
     Expression<String>? syncStatus,
     Expression<int>? rowid,
@@ -696,6 +762,8 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (composition != null) 'composition': composition,
+      if (imagePath != null) 'image_path': imagePath,
+      if (imageSource != null) 'image_source': imageSource,
       if (createdAt != null) 'created_at': createdAt,
       if (syncStatus != null) 'sync_status': syncStatus,
       if (rowid != null) 'rowid': rowid,
@@ -706,6 +774,8 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
       {Value<String>? id,
       Value<String>? name,
       Value<String?>? composition,
+      Value<String?>? imagePath,
+      Value<String?>? imageSource,
       Value<DateTime>? createdAt,
       Value<SyncStatus>? syncStatus,
       Value<int>? rowid}) {
@@ -713,6 +783,8 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
       id: id ?? this.id,
       name: name ?? this.name,
       composition: composition ?? this.composition,
+      imagePath: imagePath ?? this.imagePath,
+      imageSource: imageSource ?? this.imageSource,
       createdAt: createdAt ?? this.createdAt,
       syncStatus: syncStatus ?? this.syncStatus,
       rowid: rowid ?? this.rowid,
@@ -730,6 +802,12 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
     }
     if (composition.present) {
       map['composition'] = Variable<String>(composition.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
+    if (imageSource.present) {
+      map['image_source'] = Variable<String>(imageSource.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -750,6 +828,8 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('composition: $composition, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('imageSource: $imageSource, ')
           ..write('createdAt: $createdAt, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('rowid: $rowid')
@@ -2902,6 +2982,8 @@ typedef $$SoilsTableTableCreateCompanionBuilder = SoilsTableCompanion Function({
   required String id,
   required String name,
   Value<String?> composition,
+  Value<String?> imagePath,
+  Value<String?> imageSource,
   required DateTime createdAt,
   Value<SyncStatus> syncStatus,
   Value<int> rowid,
@@ -2910,6 +2992,8 @@ typedef $$SoilsTableTableUpdateCompanionBuilder = SoilsTableCompanion Function({
   Value<String> id,
   Value<String> name,
   Value<String?> composition,
+  Value<String?> imagePath,
+  Value<String?> imageSource,
   Value<DateTime> createdAt,
   Value<SyncStatus> syncStatus,
   Value<int> rowid,
@@ -2952,6 +3036,12 @@ class $$SoilsTableTableFilterComposer
 
   ColumnFilters<String> get composition => $composableBuilder(
       column: $table.composition, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imageSource => $composableBuilder(
+      column: $table.imageSource, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -3001,6 +3091,12 @@ class $$SoilsTableTableOrderingComposer
   ColumnOrderings<String> get composition => $composableBuilder(
       column: $table.composition, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get imageSource => $composableBuilder(
+      column: $table.imageSource, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -3025,6 +3121,12 @@ class $$SoilsTableTableAnnotationComposer
 
   GeneratedColumn<String> get composition => $composableBuilder(
       column: $table.composition, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
+  GeneratedColumn<String> get imageSource => $composableBuilder(
+      column: $table.imageSource, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -3081,6 +3183,8 @@ class $$SoilsTableTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String?> composition = const Value.absent(),
+            Value<String?> imagePath = const Value.absent(),
+            Value<String?> imageSource = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<SyncStatus> syncStatus = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -3089,6 +3193,8 @@ class $$SoilsTableTableTableManager extends RootTableManager<
             id: id,
             name: name,
             composition: composition,
+            imagePath: imagePath,
+            imageSource: imageSource,
             createdAt: createdAt,
             syncStatus: syncStatus,
             rowid: rowid,
@@ -3097,6 +3203,8 @@ class $$SoilsTableTableTableManager extends RootTableManager<
             required String id,
             required String name,
             Value<String?> composition = const Value.absent(),
+            Value<String?> imagePath = const Value.absent(),
+            Value<String?> imageSource = const Value.absent(),
             required DateTime createdAt,
             Value<SyncStatus> syncStatus = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -3105,6 +3213,8 @@ class $$SoilsTableTableTableManager extends RootTableManager<
             id: id,
             name: name,
             composition: composition,
+            imagePath: imagePath,
+            imageSource: imageSource,
             createdAt: createdAt,
             syncStatus: syncStatus,
             rowid: rowid,

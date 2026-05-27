@@ -8,6 +8,8 @@ class SoilsTable extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get composition => text().nullable()();
+  TextColumn get imagePath => text().nullable()();
+  TextColumn get imageSource => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   
   TextColumn get syncStatus => text()

@@ -23,6 +23,8 @@ class SoilsRepository {
       id: Value(model.id),
       name: Value(model.name),
       composition: Value(model.composition),
+      imagePath: Value(model.imagePath),
+      imageSource: Value(model.imageSource),
       createdAt: Value(model.createdAt),
       syncStatus: Value(model.syncStatus),
     );
@@ -38,6 +40,8 @@ class SoilsRepository {
       id: row.id,
       name: row.name,
       composition: row.composition,
+      imagePath: row.imagePath,
+      imageSource: row.imageSource,
       createdAt: row.createdAt,
       syncStatus: row.syncStatus,
     );
