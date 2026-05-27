@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +29,7 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
   bool _saving = false;
 
   bool get _isEditing => widget.soil != null;
+  bool get _isAssetImage => _imagePath?.startsWith('assets/') ?? false;
 
   @override
   void initState() {
@@ -51,7 +53,10 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      setState(() => _imagePath = image.path);
+      setState(() {
+        _imagePath = image.path;
+        _sourceCtrl.clear();
+      });
     }
   }
 
@@ -93,87 +98,263 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(_isEditing ? 'Editar Solo' : 'Novo Solo'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          _isEditing ? 'Editar solo' : 'Novo solo',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+          ),
+        ),
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Center(
-              child: GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(16),
-                    image: _imagePath != null
-                        ? DecorationImage(
-                            image: _imagePath!.startsWith('assets/')
-                                ? AssetImage(_imagePath!) as ImageProvider
-                                : FileImage(File(_imagePath!)),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
-                  ),
-                  child: _imagePath == null
-                      ? const Icon(Icons.add_a_photo_outlined, size: 40)
-                      : null,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/background.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.5),
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.3),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 8),
-            const Center(
-              child: Text(
-                'Toque para alterar a imagem',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+          SafeArea(
+            child: Theme(
+              data: _darkFormTheme(context),
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
+                  children: [
+                    _GlassCard(
+                      child: Column(
+                        children: [
+                          Center(
+                            child: GestureDetector(
+                              onTap: _pickImage,
+                              child: Container(
+                                width: 160,
+                                height: 160,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                      color: Colors.white.withValues(alpha: 0.2)),
+                                  image: _imagePath != null
+                                      ? DecorationImage(
+                                          image: _imagePath!.startsWith('assets/')
+                                              ? AssetImage(_imagePath!)
+                                                  as ImageProvider
+                                              : FileImage(File(_imagePath!)),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : null,
+                                ),
+                                child: _imagePath == null
+                                    ? const Icon(Icons.add_a_photo_outlined,
+                                        size: 48, color: Colors.white70)
+                                    : null,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Toque para alterar a imagem',
+                            style: TextStyle(fontSize: 12, color: Colors.white60),
+                          ),
+                          if (_isAssetImage && _sourceCtrl.text.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              'Fonte: ${_sourceCtrl.text}',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.white54,
+                                  fontStyle: FontStyle.italic),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _GlassCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const _SectionTitle('Informações'),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _nameCtrl,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              labelText: 'Nome do Solo *',
+                              hintText: 'Ex: Solo Orgânico Premium',
+                              prefixIcon: Icon(Icons.terrain_outlined),
+                            ),
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Informe um nome'
+                                : null,
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _compositionCtrl,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              labelText: 'Composição (opcional)',
+                              hintText:
+                                  'Ex: 40% húmus, 30% perlita, 30% fibra de coco',
+                              helperText: 'Uma linha descrevendo a mistura.',
+                              prefixIcon: Icon(Icons.layers_outlined),
+                            ),
+                            maxLines: 2,
+                          ),
+                          if (!_isAssetImage) ...[
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _sourceCtrl,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: const InputDecoration(
+                                labelText: 'Fonte da Imagem (opcional)',
+                                hintText: 'Ex: https://exemplo.com/foto',
+                                prefixIcon: Icon(Icons.link_outlined),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      height: 56,
+                      child: FilledButton(
+                        onPressed: _saving ? null : _submit,
+                        style: FilledButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: _saving
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                _isEditing ? 'Salvar alterações' : 'Criar solo',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 24),
-            TextFormField(
-              controller: _nameCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Nome do Solo *',
-                hintText: 'Ex: Solo Orgânico Premium',
-              ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Informe um nome' : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _compositionCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Composição (opcional)',
-                hintText: 'Ex: 40% húmus, 30% perlita, 30% fibra de coco',
-                helperText: 'Uma linha descrevendo a mistura do solo.',
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _sourceCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Fonte da Imagem (opcional)',
-                hintText: 'Ex: https://exemplo.com/foto',
-              ),
-            ),
-            const SizedBox(height: 32),
-            FilledButton(
-              onPressed: _saving ? null : _submit,
-              child: _saving
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : Text(_isEditing ? 'Salvar' : 'Adicionar'),
-            ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+ThemeData _darkFormTheme(BuildContext context) {
+  final base = Theme.of(context);
+  final primary = base.colorScheme.primary;
+  OutlineInputBorder border([Color color = Colors.white24]) =>
+      OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: color),
+      );
+
+  return base.copyWith(
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: Colors.white.withValues(alpha: 0.05),
+      labelStyle: const TextStyle(color: Colors.white70),
+      floatingLabelStyle: TextStyle(color: primary),
+      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+      helperStyle: const TextStyle(color: Colors.white60),
+      prefixIconColor: Colors.white70,
+      suffixIconColor: Colors.white70,
+      iconColor: Colors.white70,
+      border: border(),
+      enabledBorder: border(),
+      focusedBorder: border(primary),
+      errorBorder: border(base.colorScheme.error),
+      focusedErrorBorder: border(base.colorScheme.error),
+      errorStyle: TextStyle(color: base.colorScheme.error),
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: primary,
+      selectionColor: primary.withValues(alpha: 0.4),
+      selectionHandleColor: primary,
+    ),
+  );
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String text;
+
+  const _SectionTitle(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+}
+
+class _GlassCard extends StatelessWidget {
+  final Widget child;
+
+  const _GlassCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          ),
+          child: child,
         ),
       ),
     );
