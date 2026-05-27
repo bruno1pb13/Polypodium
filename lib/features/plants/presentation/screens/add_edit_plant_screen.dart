@@ -238,7 +238,9 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                                   },
                                   keyboardType: TextInputType.number,
                                   validator: (v) {
-                                    if (v == null || v.trim().isEmpty) return null;
+                                    if (v == null || v.trim().isEmpty) {
+                                      return null;
+                                    }
                                     final n = int.tryParse(v);
                                     if (n == null || n <= 0) {
                                       return 'Informe um número positivo';
