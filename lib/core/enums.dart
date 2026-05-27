@@ -91,6 +91,59 @@ extension SoilTypeX on SoilType {
         SoilType.coconutFiber => 'Melhora a aeração e mantém umidade controlada.',
         SoilType.manure => 'Adubo orgânico rico. Deve ser usado sempre decomposto.',
       };
+
+  String? get imagePath => switch (this) {
+        SoilType.sandy => 'assets/soils/sandy.jpg',
+        SoilType.clay => 'assets/soils/clay.jpg',
+        SoilType.loamy => 'assets/soils/loamy.jpg',
+        SoilType.peaty => 'assets/soils/peaty.jpg',
+        SoilType.chalky => 'assets/soils/chalky.jpg',
+        SoilType.silty => 'assets/soils/silty.jpg',
+        SoilType.latosol => 'assets/soils/latosol.jpg',
+        SoilType.argisol => 'assets/soils/argisol.jpg',
+        SoilType.terraRoxa => 'assets/soils/terra_roxa.jpg',
+        SoilType.massape => 'assets/soils/massape.jpg',
+        SoilType.alluvial => 'assets/soils/alluvial.jpg',
+        SoilType.wormCastings => 'assets/soils/worm_castings.jpg',
+        SoilType.manure => 'assets/soils/manure.jpg',
+        SoilType.terraVegetal => null,
+        SoilType.pottingMix => null,
+        SoilType.succulentMix => null,
+        SoilType.coconutFiber => null,
+      };
+
+  String? get imageSource => switch (this) {
+        SoilType.sandy =>
+          'Wikimedia Commons — File:Arenosol.JPG (CC BY-SA)',
+        SoilType.clay =>
+          'Wikimedia Commons — File:Blue glacial clay IMG 5670 ersvika.JPG (CC BY-SA)',
+        SoilType.loamy =>
+          'Wikimedia Commons — File:Soil Texture Samples including loam, sand and clay.jpg (CC BY-SA)',
+        SoilType.peaty =>
+          'Wikimedia Commons — File:Histosol2.JPG (CC BY-SA)',
+        SoilType.chalky =>
+          'Wikimedia Commons — File:Haplic Calcisol.JPG (CC BY-SA)',
+        SoilType.silty =>
+          'Wikimedia Commons — File:Soil profile with silt, loam, and clay.jpg (CC BY-SA)',
+        SoilType.latosol =>
+          'Wikimedia Commons — File:Ferralsol.JPG (CC BY-SA) · ref. EMBRAPA SiBCS',
+        SoilType.argisol =>
+          'EMBRAPA — Agência de Informação Tecnológica, Argissolos',
+        SoilType.terraRoxa =>
+          'Wikimedia Commons — File:Tierra-misionera.JPG (CC BY-SA) · ref. pt.wikipedia.org/wiki/Terra_roxa',
+        SoilType.massape =>
+          'Wikimedia Commons — File:Calcari-eutric Vertisol.JPG (CC BY-SA) · ref. en.wikipedia.org/wiki/Massapê',
+        SoilType.alluvial =>
+          'Wikimedia Commons — File:Amazon alluvium deposit - autazes.jpg (CC BY-SA)',
+        SoilType.wormCastings =>
+          'Wikimedia Commons — File:A Vermi compost.JPG (CC BY-SA)',
+        SoilType.manure =>
+          'Wikimedia Commons — File:Compost pile.JPG (CC BY-SA)',
+        SoilType.terraVegetal => null,
+        SoilType.pottingMix => null,
+        SoilType.succulentMix => null,
+        SoilType.coconutFiber => null,
+      };
 }
 
 extension EntryTypeX on EntryType {

@@ -44,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 8;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -64,6 +64,8 @@ class AppDatabase extends _$AppDatabase {
                 id: type.name,
                 name: type.label,
                 composition: Value(type.description),
+                imagePath: Value(type.imagePath),
+                imageSource: Value(type.imageSource),
                 createdAt: DateTime.now(),
                 syncStatus: const Value(SyncStatus.synced),
               ),
@@ -120,6 +122,29 @@ class AppDatabase extends _$AppDatabase {
                   id: type.name,
                   name: type.label,
                   composition: Value(type.description),
+                  createdAt: DateTime.now(),
+                  syncStatus: const Value(SyncStatus.synced),
+                ),
+                mode: InsertMode.insertOrReplace,
+              );
+            }
+          }
+          if (from < 7) {
+            await m.addColumn(soilsTable, soilsTable.imagePath);
+            await m.addColumn(soilsTable, soilsTable.imageSource);
+          }
+          if (from < 8) {
+            // Re-seed soils with image paths and sources populated from
+            // the current SoilType enum. Only touches seeded rows (whose
+            // id matches an enum name); user-created soils are untouched.
+            for (final type in SoilType.values) {
+              await into(soilsTable).insert(
+                SoilsTableCompanion.insert(
+                  id: type.name,
+                  name: type.label,
+                  composition: Value(type.description),
+                  imagePath: Value(type.imagePath),
+                  imageSource: Value(type.imageSource),
                   createdAt: DateTime.now(),
                   syncStatus: const Value(SyncStatus.synced),
                 ),

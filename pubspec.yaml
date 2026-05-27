@@ -64,6 +64,7 @@ flutter:
     - assets/images/logo.png
     - assets/images/background.png
     - assets/data/flora_brasil.db
+    - assets/soils/
 
   fonts:
     - family: CormorantGaramond

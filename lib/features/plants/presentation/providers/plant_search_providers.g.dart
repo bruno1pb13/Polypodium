@@ -7,7 +7,7 @@ part of 'plant_search_providers.dart';
 // **************************************************************************
 
 String _$filteredSortedPlantsHash() =>
-    r'89818c353fac8c377ba1ab8664859cd94c1f5202';
+    r'8452628106646af79ce341bdab529618bb647859';
 
 /// See also [filteredSortedPlants].
 @ProviderFor(filteredSortedPlants)
@@ -26,7 +26,7 @@ final filteredSortedPlantsProvider =
 // ignore: unused_element
 typedef FilteredSortedPlantsRef
     = AutoDisposeFutureProviderRef<List<PlantWithSpecies>>;
-String _$plantSearchQueryHash() => r'938e2573bdf25bdbb0b6273d1b020b90c3234324';
+String _$plantSearchQueryHash() => r'253e815c1b32167df85402581e64df3f8ff2bc5e';
 
 /// See also [PlantSearchQuery].
 @ProviderFor(PlantSearchQuery)
