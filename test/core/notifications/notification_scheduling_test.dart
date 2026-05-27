@@ -16,7 +16,7 @@ void main() {
       id: 'plant-1',
       speciesId: 'species-1',
       nickname: 'Basil',
-      soilType: SoilType.loamy,
+      soilId: 'loamy',
       acquisitionDate: DateTime(2026, 1, 1),
       createdAt: DateTime(2026, 1, 1),
       lastIrrigatedAt: DateTime(2026, 5, 20),

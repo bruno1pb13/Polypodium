@@ -30,7 +30,7 @@ void main() {
         scientificName: 'Rosa gallica',
         popularName: 'Red Rose',
         defaultIrrigationFrequencyDays: 3,
-        recommendedSoilTypes: [],
+        recommendedSoilIds: [],
         createdAt: DateTime.now(),
       );
       

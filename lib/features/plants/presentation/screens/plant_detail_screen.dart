@@ -14,6 +14,7 @@ import '../../../entries/presentation/screens/add_entry_screen.dart';
 import '../../../entries/presentation/widgets/entry_timeline_item.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
+import '../../../soils/presentation/providers/soils_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
 import '../../domain/plant_model.dart';
 import '../providers/plants_providers.dart';
@@ -29,6 +30,7 @@ class PlantDetailScreen extends ConsumerWidget {
     final plantsAsync = ref.watch(plantsNotifierProvider);
     final speciesAsync = ref.watch(speciesNotifierProvider);
     final locationsAsync = ref.watch(locationsNotifierProvider);
+    final soilsAsync = ref.watch(soilsNotifierProvider);
     final entriesAsync = ref.watch(entriesNotifierProvider(plantId));
     final activeFilters = ref.watch(entryFiltersNotifierProvider(plantId));
 
@@ -52,6 +54,10 @@ class PlantDetailScreen extends ConsumerWidget {
                 ?.where((l) => l.id == plant.locationId)
                 .firstOrNull
             : null;
+
+        final soil = soilsAsync.valueOrNull
+            ?.where((s) => s.id == plant.soilId)
+            .firstOrNull;
 
         final pws = species != null
             ? PlantWithSpecies(
@@ -124,7 +130,7 @@ class PlantDetailScreen extends ConsumerWidget {
                       child: _HeaderSection(plant: plant, pws: pws),
                     ),
                     SliverToBoxAdapter(
-                      child: _PlantInfoCard(plant: plant, pws: pws),
+                      child: _PlantInfoCard(plant: plant, pws: pws, soilName: soil?.name, soilComposition: soil?.composition),
                     ),
                     if (pws != null)
                       SliverToBoxAdapter(
@@ -402,8 +408,10 @@ class _PhotoPlaceholder extends StatelessWidget {
 class _PlantInfoCard extends ConsumerWidget {
   final PlantModel plant;
   final PlantWithSpecies? pws;
+  final String? soilName;
+  final String? soilComposition;
 
-  const _PlantInfoCard({required this.plant, required this.pws});
+  const _PlantInfoCard({required this.plant, required this.pws, this.soilName, this.soilComposition});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -436,9 +444,26 @@ class _PlantInfoCard extends ConsumerWidget {
                   context,
                   Icons.terrain_outlined,
                   'Solo',
-                  plant.soilType.label,
+                  soilName ?? 'Não informado',
                   transparencyEnabled,
                 ),
+                if (soilComposition != null) ...[
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 32),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        soilComposition!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: transparencyEnabled ? Colors.white54 : Colors.black54,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
                 const Divider(color: Colors.white10, height: 16),
                 _row(
                   context,

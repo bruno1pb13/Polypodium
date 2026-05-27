@@ -53,7 +53,7 @@ void main() {
       scientificName: 'Test Scientific',
       popularName: 'Test Popular',
       defaultIrrigationFrequencyDays: 7,
-      recommendedSoilTypes: [SoilType.loamy],
+      recommendedSoilIds: ['loamy'],
       createdAt: DateTime.now(),
     ));
   });
@@ -69,7 +69,7 @@ void main() {
       id: plantId,
       speciesId: 'species1',
       nickname: 'Test Plant',
-      soilType: SoilType.loamy,
+      soilId: 'loamy',
       acquisitionDate: DateTime.now(),
       createdAt: DateTime.now(),
     );

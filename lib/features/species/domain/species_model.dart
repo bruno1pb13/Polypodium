@@ -7,7 +7,7 @@ class SpeciesModel {
   final String scientificName;
   final String popularName;
   final int? defaultIrrigationFrequencyDays;
-  final List<SoilType> recommendedSoilTypes;
+  final List<String> recommendedSoilIds;
   // TODO(sync): Used by the sync layer to determine pending changes
   final SyncStatus syncStatus;
   final DateTime createdAt;
@@ -17,7 +17,7 @@ class SpeciesModel {
     required this.scientificName,
     required this.popularName,
     required this.defaultIrrigationFrequencyDays,
-    required this.recommendedSoilTypes,
+    required this.recommendedSoilIds,
     this.syncStatus = SyncStatus.pending,
     required this.createdAt,
   });
@@ -27,7 +27,7 @@ class SpeciesModel {
     String? scientificName,
     String? popularName,
     Object? defaultIrrigationFrequencyDays = _sentinel,
-    List<SoilType>? recommendedSoilTypes,
+    List<String>? recommendedSoilIds,
     SyncStatus? syncStatus,
     DateTime? createdAt,
   }) =>
@@ -38,7 +38,7 @@ class SpeciesModel {
         defaultIrrigationFrequencyDays: defaultIrrigationFrequencyDays == _sentinel
             ? this.defaultIrrigationFrequencyDays
             : defaultIrrigationFrequencyDays as int?,
-        recommendedSoilTypes: recommendedSoilTypes ?? this.recommendedSoilTypes,
+        recommendedSoilIds: recommendedSoilIds ?? this.recommendedSoilIds,
         syncStatus: syncStatus ?? this.syncStatus,
         createdAt: createdAt ?? this.createdAt,
       );
@@ -49,8 +49,7 @@ class SpeciesModel {
         'scientificName': scientificName,
         'popularName': popularName,
         'defaultIrrigationFrequencyDays': defaultIrrigationFrequencyDays,
-        'recommendedSoilTypes':
-            recommendedSoilTypes.map((s) => s.name).toList(),
+        'recommendedSoilIds': recommendedSoilIds,
         'syncStatus': syncStatus.name,
         'createdAt': createdAt.toIso8601String(),
       };

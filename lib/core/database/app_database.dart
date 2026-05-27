@@ -14,6 +14,8 @@ import '../../features/plants/data/plants_dao.dart';
 import '../../features/plants/data/plants_table.dart';
 import '../../features/species/data/species_dao.dart';
 import '../../features/species/data/species_table.dart';
+import '../../features/soils/data/soils_dao.dart';
+import '../../features/soils/data/soils_table.dart';
 import 'converters.dart';
 import 'sync_queue_dao.dart';
 import 'sync_queue_table.dart';
@@ -21,6 +23,7 @@ import 'sync_queue_table.dart';
 export '../../features/entries/data/entries_table.dart';
 export '../../features/locations/data/locations_table.dart';
 export '../../features/plants/data/plants_table.dart';
+export '../../features/soils/data/soils_table.dart';
 export '../../features/species/data/species_table.dart';
 export 'sync_queue_table.dart';
 
@@ -32,7 +35,8 @@ part 'app_database.g.dart';
     PlantsTable,
     EntriesTable,
     SyncQueueTable,
-    LocationsTable
+    LocationsTable,
+    SoilsTable
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -40,13 +44,14 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 5;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
   late final EntriesDao entriesDao = EntriesDao(this);
   late final SyncQueueDao syncQueueDao = SyncQueueDao(this);
   late final LocationsDao locationsDao = LocationsDao(this);
+  late final SoilsDao soilsDao = SoilsDao(this);
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -60,6 +65,36 @@ class AppDatabase extends _$AppDatabase {
             await m.alterTable(TableMigration(
               speciesTable,
             ));
+          }
+          if (from < 4) {
+            // 1. Create soils table
+            await m.createTable(soilsTable);
+
+            // 2. Seed soils with defaults from SoilType enum
+            for (final type in SoilType.values) {
+              await into(soilsTable).insert(
+                SoilsTableCompanion.insert(
+                  id: type.name, // Use name as ID for migration
+                  name: type.label,
+                  createdAt: DateTime.now(),
+                  syncStatus: const Value(SyncStatus.synced),
+                ),
+              );
+            }
+
+            // 3. Update plants table to use text ID instead of enum-mapped string
+            // Actually, plantsTable.soilType is already TextColumn, but mapped with SoilTypeConverter.
+            // We need to change the mapping or just store the ID.
+            // Since we're changing the model too, we'll keep the column name but change what it stores.
+            // Drift handles table updates via alterTable but for column type/converter changes it's trickier.
+            // For now, we'll just migrate the values.
+            
+            // 4. Species recommended soils: currently JSON list of enum names.
+            // Since we used enum names as IDs for the seed, the content is already compatible!
+          }
+          if (from < 5) {
+            await m.addColumn(locationsTable, locationsTable.latitude);
+            await m.addColumn(locationsTable, locationsTable.longitude);
           }
         },
       );

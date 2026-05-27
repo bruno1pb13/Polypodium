@@ -168,7 +168,7 @@ class NotificationService implements INotificationService {
           id: row.id,
           speciesId: row.speciesId,
           nickname: row.nickname,
-          soilType: row.soilType,
+          soilId: row.soilType,
           irrigationFrequencyDays: row.irrigationFrequencyDays,
           acquisitionDate: row.acquisitionDate,
           location: row.location,
@@ -183,7 +183,7 @@ class NotificationService implements INotificationService {
           popularName: speciesRow.popularName,
           defaultIrrigationFrequencyDays:
               speciesRow.defaultIrrigationFrequencyDays,
-          recommendedSoilTypes: speciesRow.recommendedSoilTypes,
+          recommendedSoilIds: speciesRow.recommendedSoilTypes,
           syncStatus: speciesRow.syncStatus,
           createdAt: speciesRow.createdAt,
         );

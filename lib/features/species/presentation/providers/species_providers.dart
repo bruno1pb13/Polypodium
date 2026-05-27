@@ -51,7 +51,7 @@ class SpeciesNotifier extends _$SpeciesNotifier {
       popularName: popularName,
       scientificName: scientificName,
       defaultIrrigationFrequencyDays: null,
-      recommendedSoilTypes: [],
+      recommendedSoilIds: [],
       createdAt: DateTime.now(),
     );
 

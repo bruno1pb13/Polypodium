@@ -113,7 +113,7 @@ class PlantListItem extends ConsumerWidget {
                                       .withValues(alpha: 0.7),
                             ),
                           ),
-                          if (days != null) ...[
+                          if (days != null && overdue) ...[
                             const SizedBox(height: 8),
                             _IrrigationBadge(
                                 daysRelative: days, overdue: overdue),

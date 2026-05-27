@@ -44,7 +44,7 @@ final plantsWithSpeciesProvider =
 // ignore: unused_element
 typedef PlantsWithSpeciesRef
     = AutoDisposeFutureProviderRef<List<PlantWithSpecies>>;
-String _$plantsNotifierHash() => r'cf9f2f57884c48bf21febd43a379f8e8b05a8032';
+String _$plantsNotifierHash() => r'3fc702c4980cdc912600d6d55b606c93488f205f';
 
 /// See also [PlantsNotifier].
 @ProviderFor(PlantsNotifier)
