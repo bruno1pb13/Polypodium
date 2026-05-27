@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/location/location_provider.dart';
+import '../../../../core/location/location_service.dart';
 import '../../domain/location_model.dart';
 import '../providers/locations_providers.dart';
 
@@ -25,6 +27,7 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
   late final TextEditingController _latitudeCtrl;
   late final TextEditingController _longitudeCtrl;
   bool _saving = false;
+  bool _fetchingLocation = false;
 
   bool get _isEditing => widget.location != null;
 
@@ -186,6 +189,39 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: (_fetchingLocation || _saving)
+                                  ? null
+                                  : _useDeviceLocation,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                side: const BorderSide(color: Colors.white24),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 14, horizontal: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              icon: _fetchingLocation
+                                  ? const SizedBox(
+                                      height: 18,
+                                      width: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Icon(Icons.my_location),
+                              label: Text(
+                                _fetchingLocation
+                                    ? 'Obtendo localização...'
+                                    : 'Usar localização atual',
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -241,6 +277,30 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
     final text = ctrl.text.trim();
     if (text.isEmpty) return null;
     return double.tryParse(text);
+  }
+
+  Future<void> _useDeviceLocation() async {
+    setState(() => _fetchingLocation = true);
+    try {
+      final coords =
+          await ref.read(locationServiceProvider).getCurrentPosition();
+      if (!mounted) return;
+      _latitudeCtrl.text = coords.latitude.toStringAsFixed(6);
+      _longitudeCtrl.text = coords.longitude.toStringAsFixed(6);
+      _formKey.currentState?.validate();
+    } on LocationServiceException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Não foi possível obter a localização: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _fetchingLocation = false);
+    }
   }
 
   Future<void> _submit() async {
