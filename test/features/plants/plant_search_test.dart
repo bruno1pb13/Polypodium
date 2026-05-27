@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/species/domain/species_model.dart';
 
