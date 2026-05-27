@@ -1,18 +1,15 @@
 import 'package:drift/drift.dart';
-
 import '../../../core/database/converters.dart';
 
-class LocationsTable extends Table {
+class SoilsTable extends Table {
   @override
-  String get tableName => 'locations';
+  String get tableName => 'soils';
 
   TextColumn get id => text()();
   TextColumn get name => text()();
-  TextColumn get description => text().nullable()();
-  RealColumn get latitude => real().nullable()();
-  RealColumn get longitude => real().nullable()();
+  TextColumn get composition => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
-
+  
   TextColumn get syncStatus => text()
       .map(const SyncStatusConverter())
       .withDefault(const Constant('pending'))();

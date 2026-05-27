@@ -11,6 +11,7 @@ import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../data/plants_repository.dart';
 import '../../domain/plant_model.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
+import '../../../soils/presentation/providers/soils_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
 
 part 'plants_providers.g.dart';
@@ -72,7 +73,9 @@ class PlantsNotifier extends _$PlantsNotifier {
         sb.writeln(
             '• Espécie: ${species.popularName} (${species.scientificName})');
       }
-      sb.writeln('• Solo: ${next.soilType.label}');
+      final soil = await ref.read(soilsNotifierProvider.future).then(
+          (list) => list.where((s) => s.id == next.soilId).firstOrNull);
+      sb.writeln('• Solo: ${soil?.name ?? 'Desconhecido'}');
       if (location != null) {
         sb.writeln('• Localização: ${location.name}');
       }
@@ -98,8 +101,12 @@ class PlantsNotifier extends _$PlantsNotifier {
       changes.add(
           'Espécie: ${oldS?.popularName ?? 'Desconhecida'} → ${nextS?.popularName ?? 'Desconhecida'}');
     }
-    if (old.soilType != next.soilType) {
-      changes.add('Solo: ${old.soilType.label} → ${next.soilType.label}');
+    if (old.soilId != next.soilId) {
+      final soilList = await ref.read(soilsNotifierProvider.future);
+      final oldSoil = soilList.where((s) => s.id == old.soilId).firstOrNull;
+      final nextSoil = soilList.where((s) => s.id == next.soilId).firstOrNull;
+      changes.add(
+          'Solo: ${oldSoil?.name ?? 'Desconhecido'} → ${nextSoil?.name ?? 'Desconhecido'}');
     }
     if (old.locationId != next.locationId) {
       final locList = await ref.read(locationsNotifierProvider.future);

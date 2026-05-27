@@ -172,36 +172,41 @@ class SliverTimelineIndicator extends ConsumerWidget {
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Column(
+    return Stack(
+      alignment: Alignment.topCenter,
       children: [
-        const SizedBox(height: 12),
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
+        Positioned(
+          top: 0,
+          bottom: isLast ? null : 0,
+          height: isLast ? 20 : null,
+          child: Container(
+            width: 2,
             color: transparencyEnabled
-                ? Colors.white.withValues(alpha: 0.15)
-                : colorScheme.surfaceContainer,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: transparencyEnabled ? Colors.white24 : colorScheme.outlineVariant,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            type.emoji,
-            style: const TextStyle(fontSize: 16),
+                ? Colors.white24
+                : colorScheme.outlineVariant,
           ),
         ),
-        if (!isLast)
-          Expanded(
-            child: Container(
-              width: 2,
-              color: transparencyEnabled ? Colors.white24 : colorScheme.outlineVariant,
+        Column(
+          children: [
+            const SizedBox(height: 20),
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: transparencyEnabled
+                    ? Colors.white.withValues(alpha: 0.4)
+                    : colorScheme.surfaceContainer,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: transparencyEnabled
+                      ? Colors.white
+                      : colorScheme.outlineVariant,
+                ),
+              ),
+              alignment: Alignment.center,
             ),
-          )
-        else
-          const Expanded(child: SizedBox()),
+          ],
+        ),
       ],
     );
   }

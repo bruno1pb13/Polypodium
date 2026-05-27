@@ -55,7 +55,7 @@ class SpeciesRepository {
         scientificName: row.scientificName,
         popularName: row.popularName,
         defaultIrrigationFrequencyDays: row.defaultIrrigationFrequencyDays,
-        recommendedSoilTypes: row.recommendedSoilTypes,
+        recommendedSoilIds: row.recommendedSoilTypes,
         syncStatus: row.syncStatus,
         createdAt: row.createdAt,
       );
@@ -66,7 +66,7 @@ class SpeciesRepository {
         scientificName: m.scientificName,
         popularName: m.popularName,
         defaultIrrigationFrequencyDays: Value(m.defaultIrrigationFrequencyDays),
-        recommendedSoilTypes: m.recommendedSoilTypes,
+        recommendedSoilTypes: m.recommendedSoilIds,
         syncStatus: Value(m.syncStatus),
         createdAt: m.createdAt,
       );

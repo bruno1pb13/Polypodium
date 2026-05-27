@@ -11,9 +11,9 @@ class SpeciesTable extends Table {
   TextColumn get popularName => text()();
   IntColumn get defaultIrrigationFrequencyDays => integer().nullable()();
 
-  /// JSON-encoded list of SoilType names
+  /// JSON-encoded list of soil IDs
   TextColumn get recommendedSoilTypes =>
-      text().map(const SoilTypeListConverter())();
+      text().map(const StringListConverter())();
 
   // TODO(sync): Pending/synced/conflict status for future server sync
   TextColumn get syncStatus => text()

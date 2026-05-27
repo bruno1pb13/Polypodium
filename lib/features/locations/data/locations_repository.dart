@@ -50,6 +50,8 @@ class LocationsRepository {
         id: row.id,
         name: row.name,
         description: row.description,
+        latitude: row.latitude,
+        longitude: row.longitude,
         createdAt: row.createdAt,
         syncStatus: row.syncStatus,
       );
@@ -59,6 +61,8 @@ class LocationsRepository {
         id: m.id,
         name: m.name,
         description: Value(m.description),
+        latitude: Value(m.latitude),
+        longitude: Value(m.longitude),
         createdAt: m.createdAt,
         syncStatus: Value(m.syncStatus),
       );

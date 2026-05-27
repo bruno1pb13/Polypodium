@@ -6,6 +6,8 @@ class LocationModel {
   final String id;
   final String name;
   final String? description;
+  final double? latitude;
+  final double? longitude;
   final DateTime createdAt;
   final SyncStatus syncStatus;
 
@@ -13,6 +15,8 @@ class LocationModel {
     required this.id,
     required this.name,
     this.description,
+    this.latitude,
+    this.longitude,
     required this.createdAt,
     this.syncStatus = SyncStatus.pending,
   });
@@ -21,6 +25,8 @@ class LocationModel {
     String? id,
     String? name,
     Object? description = _sentinel,
+    Object? latitude = _sentinel,
+    Object? longitude = _sentinel,
     DateTime? createdAt,
     SyncStatus? syncStatus,
   }) =>
@@ -30,6 +36,10 @@ class LocationModel {
         description: description == _sentinel
             ? this.description
             : description as String?,
+        latitude:
+            latitude == _sentinel ? this.latitude : latitude as double?,
+        longitude:
+            longitude == _sentinel ? this.longitude : longitude as double?,
         createdAt: createdAt ?? this.createdAt,
         syncStatus: syncStatus ?? this.syncStatus,
       );
@@ -38,6 +48,8 @@ class LocationModel {
         'id': id,
         'name': name,
         'description': description,
+        'latitude': latitude,
+        'longitude': longitude,
         'createdAt': createdAt.toIso8601String(),
         'syncStatus': syncStatus.name,
       };

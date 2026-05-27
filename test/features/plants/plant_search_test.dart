@@ -10,7 +10,7 @@ void main() {
       popularName: 'Rose',
       scientificName: 'Rosa',
       defaultIrrigationFrequencyDays: 3,
-      recommendedSoilTypes: [SoilType.loamy],
+      recommendedSoilIds: ['loamy'],
       createdAt: DateTime.now(),
     );
 
@@ -19,7 +19,7 @@ void main() {
       popularName: 'Cactus',
       scientificName: 'Cactaceae',
       defaultIrrigationFrequencyDays: 10,
-      recommendedSoilTypes: [SoilType.sandy],
+      recommendedSoilIds: ['sandy'],
       createdAt: DateTime.now(),
     );
 
@@ -29,7 +29,7 @@ void main() {
           id: 'p1',
           speciesId: 's1',
           nickname: 'Red Rose',
-          soilType: SoilType.loamy,
+          soilId: 'loamy',
           acquisitionDate: DateTime(2023, 1, 1),
           createdAt: DateTime(2023, 1, 1),
           lastIrrigatedAt:
@@ -42,7 +42,7 @@ void main() {
           id: 'p2',
           speciesId: 's2',
           nickname: 'Desert Cactus',
-          soilType: SoilType.sandy,
+          soilId: 'sandy',
           acquisitionDate: DateTime(2023, 2, 1),
           createdAt: DateTime(2023, 2, 1),
           lastIrrigatedAt:
@@ -55,7 +55,7 @@ void main() {
           id: 'p3',
           speciesId: 's1',
           nickname: 'White Rose',
-          soilType: SoilType.loamy,
+          soilId: 'loamy',
           acquisitionDate: DateTime(2023, 3, 1),
           createdAt: DateTime(2023, 3, 1),
           lastIrrigatedAt:

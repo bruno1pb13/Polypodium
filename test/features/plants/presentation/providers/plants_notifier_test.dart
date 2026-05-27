@@ -9,8 +9,10 @@ import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/entries/domain/entry_model.dart';
 import 'package:polypodium/features/species/domain/species_model.dart';
 import 'package:polypodium/features/locations/domain/location_model.dart';
+import 'package:polypodium/features/soils/domain/soil_model.dart';
 import 'package:polypodium/features/species/presentation/providers/species_providers.dart';
 import 'package:polypodium/features/locations/presentation/providers/locations_providers.dart';
+import 'package:polypodium/features/soils/presentation/providers/soils_providers.dart';
 import 'package:polypodium/core/enums.dart';
 
 class MockPlantsRepository extends Mock implements PlantsRepository {}
@@ -26,6 +28,17 @@ class MockSpeciesNotifier extends SpeciesNotifier with Mock {
 class MockLocationsNotifier extends LocationsNotifier with Mock {
   @override
   Future<List<LocationModel>> build() async => [];
+}
+
+class MockSoilsNotifier extends SoilsNotifier with Mock {
+  @override
+  Future<List<SoilModel>> build() async => [
+        SoilModel(
+            id: 'loamy',
+            name: 'Franco',
+            createdAt: DateTime.now(),
+            syncStatus: SyncStatus.synced),
+      ];
 }
 
 class MockEntriesNotifier extends EntriesNotifier with Mock {
@@ -53,7 +66,7 @@ void main() {
       id: '',
       speciesId: '',
       nickname: '',
-      soilType: SoilType.loamy,
+      soilId: 'loamy',
       acquisitionDate: now,
       createdAt: now,
     ));
@@ -69,6 +82,7 @@ void main() {
         entriesRepositoryProvider.overrideWithValue(mockEntriesRepo),
         speciesNotifierProvider.overrideWith(() => MockSpeciesNotifier()),
         locationsNotifierProvider.overrideWith(() => MockLocationsNotifier()),
+        soilsNotifierProvider.overrideWith(() => MockSoilsNotifier()),
         // For family providers, we need to override the specific instance or use the whole family
         // entriesNotifierProvider.overrideWith((p) => MockEntriesNotifier()) is not correct for riverpod_generator
         // We can override each call or use a different strategy.
@@ -87,7 +101,7 @@ void main() {
         id: 'p1',
         speciesId: 's1',
         nickname: 'Ferny',
-        soilType: SoilType.loamy,
+        soilId: 'loamy',
         acquisitionDate: DateTime(2024, 1, 1),
         createdAt: now,
       );
@@ -105,6 +119,7 @@ void main() {
           entriesRepositoryProvider.overrideWithValue(mockEntriesRepo),
           speciesNotifierProvider.overrideWith(() => MockSpeciesNotifier()),
           locationsNotifierProvider.overrideWith(() => MockLocationsNotifier()),
+          soilsNotifierProvider.overrideWith(() => MockSoilsNotifier()),
           entriesNotifierProvider('p1')
               .overrideWith(() => MockEntriesNotifier()),
         ],
@@ -129,7 +144,7 @@ void main() {
         id: 'p1',
         speciesId: 's1',
         nickname: 'Ferny',
-        soilType: SoilType.loamy,
+        soilId: 'loamy',
         acquisitionDate: DateTime(2024, 1, 1),
         createdAt: now,
       );
@@ -146,6 +161,7 @@ void main() {
           entriesRepositoryProvider.overrideWithValue(mockEntriesRepo),
           speciesNotifierProvider.overrideWith(() => MockSpeciesNotifier()),
           locationsNotifierProvider.overrideWith(() => MockLocationsNotifier()),
+          soilsNotifierProvider.overrideWith(() => MockSoilsNotifier()),
           entriesNotifierProvider('p1')
               .overrideWith(() => MockEntriesNotifier()),
         ],

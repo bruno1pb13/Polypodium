@@ -23,7 +23,7 @@ final speciesRepositoryProvider = Provider<SpeciesRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SpeciesRepositoryRef = ProviderRef<SpeciesRepository>;
-String _$speciesNotifierHash() => r'f342719fe1ffc2c9182cdcacc6820b518a481dbf';
+String _$speciesNotifierHash() => r'd9a87abedcf555f4baec8d4691cf6611a0331f0e';
 
 /// See also [SpeciesNotifier].
 @ProviderFor(SpeciesNotifier)

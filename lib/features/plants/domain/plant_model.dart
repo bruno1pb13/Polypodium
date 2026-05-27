@@ -8,7 +8,7 @@ class PlantModel {
   final String id;
   final String speciesId;
   final String nickname;
-  final SoilType soilType;
+  final String soilId;
 
   /// Null means: use species.defaultIrrigationFrequencyDays
   final int? irrigationFrequencyDays;
@@ -24,7 +24,7 @@ class PlantModel {
     required this.id,
     required this.speciesId,
     required this.nickname,
-    required this.soilType,
+    required this.soilId,
     this.irrigationFrequencyDays,
     required this.acquisitionDate,
     this.location,
@@ -38,7 +38,7 @@ class PlantModel {
     String? id,
     String? speciesId,
     String? nickname,
-    SoilType? soilType,
+    String? soilId,
     Object? irrigationFrequencyDays = _sentinel,
     DateTime? acquisitionDate,
     Object? location = _sentinel,
@@ -51,7 +51,7 @@ class PlantModel {
         id: id ?? this.id,
         speciesId: speciesId ?? this.speciesId,
         nickname: nickname ?? this.nickname,
-        soilType: soilType ?? this.soilType,
+        soilId: soilId ?? this.soilId,
         irrigationFrequencyDays: irrigationFrequencyDays == _sentinel
             ? this.irrigationFrequencyDays
             : irrigationFrequencyDays as int?,
@@ -71,7 +71,7 @@ class PlantModel {
         'id': id,
         'speciesId': speciesId,
         'nickname': nickname,
-        'soilType': soilType.name,
+        'soilId': soilId,
         'irrigationFrequencyDays': irrigationFrequencyDays,
         'acquisitionDate': acquisitionDate.toIso8601String(),
         'location': location,

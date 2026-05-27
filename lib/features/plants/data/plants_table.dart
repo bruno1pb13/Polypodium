@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../../core/database/converters.dart';
 import '../../locations/data/locations_table.dart';
+import '../../soils/data/soils_table.dart';
 import '../../species/data/species_table.dart';
 
 class PlantsTable extends Table {
@@ -12,7 +13,7 @@ class PlantsTable extends Table {
   TextColumn get speciesId =>
       text().references(SpeciesTable, #id, onDelete: KeyAction.restrict)();
   TextColumn get nickname => text()();
-  TextColumn get soilType => text().map(const SoilTypeConverter())();
+  TextColumn get soilType => text().references(SoilsTable, #id)();
 
   /// Null means: inherit from species.defaultIrrigationFrequencyDays
   IntColumn get irrigationFrequencyDays => integer().nullable()();

@@ -28,6 +28,18 @@ class SoilTypeListConverter extends TypeConverter<List<SoilType>, String> {
       jsonEncode(value.map((s) => s.name).toList());
 }
 
+class StringListConverter extends TypeConverter<List<String>, String> {
+  const StringListConverter();
+
+  @override
+  List<String> fromSql(String fromDb) {
+    return (jsonDecode(fromDb) as List<dynamic>).cast<String>();
+  }
+
+  @override
+  String toSql(List<String> value) => jsonEncode(value);
+}
+
 class EntryTypeConverter extends TypeConverter<EntryType, String> {
   const EntryTypeConverter();
 

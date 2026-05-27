@@ -34,11 +34,11 @@ class $SpeciesTableTable extends SpeciesTable
           'default_irrigation_frequency_days', aliasedName, true,
           type: DriftSqlType.int, requiredDuringInsert: false);
   @override
-  late final GeneratedColumnWithTypeConverter<List<SoilType>, String>
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
       recommendedSoilTypes = GeneratedColumn<String>(
               'recommended_soil_types', aliasedName, false,
               type: DriftSqlType.string, requiredDuringInsert: true)
-          .withConverter<List<SoilType>>(
+          .withConverter<List<String>>(
               $SpeciesTableTable.$converterrecommendedSoilTypes);
   @override
   late final GeneratedColumnWithTypeConverter<SyncStatus, String> syncStatus =
@@ -141,8 +141,8 @@ class $SpeciesTableTable extends SpeciesTable
     return $SpeciesTableTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<List<SoilType>, String> $converterrecommendedSoilTypes =
-      const SoilTypeListConverter();
+  static TypeConverter<List<String>, String> $converterrecommendedSoilTypes =
+      const StringListConverter();
   static TypeConverter<SyncStatus, String> $convertersyncStatus =
       const SyncStatusConverter();
 }
@@ -154,8 +154,8 @@ class SpeciesTableData extends DataClass
   final String popularName;
   final int? defaultIrrigationFrequencyDays;
 
-  /// JSON-encoded list of SoilType names
-  final List<SoilType> recommendedSoilTypes;
+  /// JSON-encoded list of soil IDs
+  final List<String> recommendedSoilTypes;
   final SyncStatus syncStatus;
   final DateTime createdAt;
   const SpeciesTableData(
@@ -214,7 +214,7 @@ class SpeciesTableData extends DataClass
       defaultIrrigationFrequencyDays:
           serializer.fromJson<int?>(json['defaultIrrigationFrequencyDays']),
       recommendedSoilTypes:
-          serializer.fromJson<List<SoilType>>(json['recommendedSoilTypes']),
+          serializer.fromJson<List<String>>(json['recommendedSoilTypes']),
       syncStatus: serializer.fromJson<SyncStatus>(json['syncStatus']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
@@ -229,7 +229,7 @@ class SpeciesTableData extends DataClass
       'defaultIrrigationFrequencyDays':
           serializer.toJson<int?>(defaultIrrigationFrequencyDays),
       'recommendedSoilTypes':
-          serializer.toJson<List<SoilType>>(recommendedSoilTypes),
+          serializer.toJson<List<String>>(recommendedSoilTypes),
       'syncStatus': serializer.toJson<SyncStatus>(syncStatus),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
@@ -240,7 +240,7 @@ class SpeciesTableData extends DataClass
           String? scientificName,
           String? popularName,
           Value<int?> defaultIrrigationFrequencyDays = const Value.absent(),
-          List<SoilType>? recommendedSoilTypes,
+          List<String>? recommendedSoilTypes,
           SyncStatus? syncStatus,
           DateTime? createdAt}) =>
       SpeciesTableData(
@@ -318,7 +318,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
   final Value<String> scientificName;
   final Value<String> popularName;
   final Value<int?> defaultIrrigationFrequencyDays;
-  final Value<List<SoilType>> recommendedSoilTypes;
+  final Value<List<String>> recommendedSoilTypes;
   final Value<SyncStatus> syncStatus;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
@@ -337,7 +337,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
     required String scientificName,
     required String popularName,
     this.defaultIrrigationFrequencyDays = const Value.absent(),
-    required List<SoilType> recommendedSoilTypes,
+    required List<String> recommendedSoilTypes,
     this.syncStatus = const Value.absent(),
     required DateTime createdAt,
     this.rowid = const Value.absent(),
@@ -375,7 +375,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
       Value<String>? scientificName,
       Value<String>? popularName,
       Value<int?>? defaultIrrigationFrequencyDays,
-      Value<List<SoilType>>? recommendedSoilTypes,
+      Value<List<String>>? recommendedSoilTypes,
       Value<SyncStatus>? syncStatus,
       Value<DateTime>? createdAt,
       Value<int>? rowid}) {
@@ -443,6 +443,321 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
   }
 }
 
+class $SoilsTableTable extends SoilsTable
+    with TableInfo<$SoilsTableTable, SoilsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SoilsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _compositionMeta =
+      const VerificationMeta('composition');
+  @override
+  late final GeneratedColumn<String> composition = GeneratedColumn<String>(
+      'composition', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  late final GeneratedColumnWithTypeConverter<SyncStatus, String> syncStatus =
+      GeneratedColumn<String>('sync_status', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('pending'))
+          .withConverter<SyncStatus>($SoilsTableTable.$convertersyncStatus);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, composition, createdAt, syncStatus];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'soils';
+  @override
+  VerificationContext validateIntegrity(Insertable<SoilsTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('composition')) {
+      context.handle(
+          _compositionMeta,
+          composition.isAcceptableOrUnknown(
+              data['composition']!, _compositionMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SoilsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SoilsTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      composition: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}composition']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      syncStatus: $SoilsTableTable.$convertersyncStatus.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sync_status'])!),
+    );
+  }
+
+  @override
+  $SoilsTableTable createAlias(String alias) {
+    return $SoilsTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<SyncStatus, String> $convertersyncStatus =
+      const SyncStatusConverter();
+}
+
+class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
+  final String id;
+  final String name;
+  final String? composition;
+  final DateTime createdAt;
+  final SyncStatus syncStatus;
+  const SoilsTableData(
+      {required this.id,
+      required this.name,
+      this.composition,
+      required this.createdAt,
+      required this.syncStatus});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || composition != null) {
+      map['composition'] = Variable<String>(composition);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    {
+      map['sync_status'] = Variable<String>(
+          $SoilsTableTable.$convertersyncStatus.toSql(syncStatus));
+    }
+    return map;
+  }
+
+  SoilsTableCompanion toCompanion(bool nullToAbsent) {
+    return SoilsTableCompanion(
+      id: Value(id),
+      name: Value(name),
+      composition: composition == null && nullToAbsent
+          ? const Value.absent()
+          : Value(composition),
+      createdAt: Value(createdAt),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory SoilsTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SoilsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      composition: serializer.fromJson<String?>(json['composition']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      syncStatus: serializer.fromJson<SyncStatus>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'composition': serializer.toJson<String?>(composition),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'syncStatus': serializer.toJson<SyncStatus>(syncStatus),
+    };
+  }
+
+  SoilsTableData copyWith(
+          {String? id,
+          String? name,
+          Value<String?> composition = const Value.absent(),
+          DateTime? createdAt,
+          SyncStatus? syncStatus}) =>
+      SoilsTableData(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        composition: composition.present ? composition.value : this.composition,
+        createdAt: createdAt ?? this.createdAt,
+        syncStatus: syncStatus ?? this.syncStatus,
+      );
+  SoilsTableData copyWithCompanion(SoilsTableCompanion data) {
+    return SoilsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      composition:
+          data.composition.present ? data.composition.value : this.composition,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      syncStatus:
+          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SoilsTableData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('composition: $composition, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, composition, createdAt, syncStatus);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SoilsTableData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.composition == this.composition &&
+          other.createdAt == this.createdAt &&
+          other.syncStatus == this.syncStatus);
+}
+
+class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String?> composition;
+  final Value<DateTime> createdAt;
+  final Value<SyncStatus> syncStatus;
+  final Value<int> rowid;
+  const SoilsTableCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.composition = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SoilsTableCompanion.insert({
+    required String id,
+    required String name,
+    this.composition = const Value.absent(),
+    required DateTime createdAt,
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        createdAt = Value(createdAt);
+  static Insertable<SoilsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? composition,
+    Expression<DateTime>? createdAt,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (composition != null) 'composition': composition,
+      if (createdAt != null) 'created_at': createdAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SoilsTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String?>? composition,
+      Value<DateTime>? createdAt,
+      Value<SyncStatus>? syncStatus,
+      Value<int>? rowid}) {
+    return SoilsTableCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      composition: composition ?? this.composition,
+      createdAt: createdAt ?? this.createdAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (composition.present) {
+      map['composition'] = Variable<String>(composition.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(
+          $SoilsTableTable.$convertersyncStatus.toSql(syncStatus.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SoilsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('composition: $composition, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $LocationsTableTable extends LocationsTable
     with TableInfo<$LocationsTableTable, LocationsTableData> {
   @override
@@ -465,6 +780,18 @@ class $LocationsTableTable extends LocationsTable
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _latitudeMeta =
+      const VerificationMeta('latitude');
+  @override
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+      'latitude', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _longitudeMeta =
+      const VerificationMeta('longitude');
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+      'longitude', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -480,7 +807,7 @@ class $LocationsTableTable extends LocationsTable
           .withConverter<SyncStatus>($LocationsTableTable.$convertersyncStatus);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, description, createdAt, syncStatus];
+      [id, name, description, latitude, longitude, createdAt, syncStatus];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -508,6 +835,14 @@ class $LocationsTableTable extends LocationsTable
           description.isAcceptableOrUnknown(
               data['description']!, _descriptionMeta));
     }
+    if (data.containsKey('latitude')) {
+      context.handle(_latitudeMeta,
+          latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta));
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(_longitudeMeta,
+          longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -529,6 +864,10 @@ class $LocationsTableTable extends LocationsTable
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       description: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}description']),
+      latitude: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}latitude']),
+      longitude: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}longitude']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       syncStatus: $LocationsTableTable.$convertersyncStatus.fromSql(
@@ -551,12 +890,16 @@ class LocationsTableData extends DataClass
   final String id;
   final String name;
   final String? description;
+  final double? latitude;
+  final double? longitude;
   final DateTime createdAt;
   final SyncStatus syncStatus;
   const LocationsTableData(
       {required this.id,
       required this.name,
       this.description,
+      this.latitude,
+      this.longitude,
       required this.createdAt,
       required this.syncStatus});
   @override
@@ -566,6 +909,12 @@ class LocationsTableData extends DataClass
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || latitude != null) {
+      map['latitude'] = Variable<double>(latitude);
+    }
+    if (!nullToAbsent || longitude != null) {
+      map['longitude'] = Variable<double>(longitude);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     {
@@ -582,6 +931,12 @@ class LocationsTableData extends DataClass
       description: description == null && nullToAbsent
           ? const Value.absent()
           : Value(description),
+      latitude: latitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(latitude),
+      longitude: longitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(longitude),
       createdAt: Value(createdAt),
       syncStatus: Value(syncStatus),
     );
@@ -594,6 +949,8 @@ class LocationsTableData extends DataClass
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
+      latitude: serializer.fromJson<double?>(json['latitude']),
+      longitude: serializer.fromJson<double?>(json['longitude']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       syncStatus: serializer.fromJson<SyncStatus>(json['syncStatus']),
     );
@@ -605,6 +962,8 @@ class LocationsTableData extends DataClass
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
+      'latitude': serializer.toJson<double?>(latitude),
+      'longitude': serializer.toJson<double?>(longitude),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'syncStatus': serializer.toJson<SyncStatus>(syncStatus),
     };
@@ -614,12 +973,16 @@ class LocationsTableData extends DataClass
           {String? id,
           String? name,
           Value<String?> description = const Value.absent(),
+          Value<double?> latitude = const Value.absent(),
+          Value<double?> longitude = const Value.absent(),
           DateTime? createdAt,
           SyncStatus? syncStatus}) =>
       LocationsTableData(
         id: id ?? this.id,
         name: name ?? this.name,
         description: description.present ? description.value : this.description,
+        latitude: latitude.present ? latitude.value : this.latitude,
+        longitude: longitude.present ? longitude.value : this.longitude,
         createdAt: createdAt ?? this.createdAt,
         syncStatus: syncStatus ?? this.syncStatus,
       );
@@ -629,6 +992,8 @@ class LocationsTableData extends DataClass
       name: data.name.present ? data.name.value : this.name,
       description:
           data.description.present ? data.description.value : this.description,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       syncStatus:
           data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
@@ -641,6 +1006,8 @@ class LocationsTableData extends DataClass
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
           ..write('createdAt: $createdAt, ')
           ..write('syncStatus: $syncStatus')
           ..write(')'))
@@ -648,7 +1015,8 @@ class LocationsTableData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, name, description, createdAt, syncStatus);
+  int get hashCode => Object.hash(
+      id, name, description, latitude, longitude, createdAt, syncStatus);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -656,6 +1024,8 @@ class LocationsTableData extends DataClass
           other.id == this.id &&
           other.name == this.name &&
           other.description == this.description &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
           other.createdAt == this.createdAt &&
           other.syncStatus == this.syncStatus);
 }
@@ -664,6 +1034,8 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
   final Value<String> id;
   final Value<String> name;
   final Value<String?> description;
+  final Value<double?> latitude;
+  final Value<double?> longitude;
   final Value<DateTime> createdAt;
   final Value<SyncStatus> syncStatus;
   final Value<int> rowid;
@@ -671,6 +1043,8 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -679,6 +1053,8 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     required String id,
     required String name,
     this.description = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
     required DateTime createdAt,
     this.syncStatus = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -689,6 +1065,8 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? description,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
     Expression<DateTime>? createdAt,
     Expression<String>? syncStatus,
     Expression<int>? rowid,
@@ -697,6 +1075,8 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
       if (createdAt != null) 'created_at': createdAt,
       if (syncStatus != null) 'sync_status': syncStatus,
       if (rowid != null) 'rowid': rowid,
@@ -707,6 +1087,8 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
       {Value<String>? id,
       Value<String>? name,
       Value<String?>? description,
+      Value<double?>? latitude,
+      Value<double?>? longitude,
       Value<DateTime>? createdAt,
       Value<SyncStatus>? syncStatus,
       Value<int>? rowid}) {
@@ -714,6 +1096,8 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
       createdAt: createdAt ?? this.createdAt,
       syncStatus: syncStatus ?? this.syncStatus,
       rowid: rowid ?? this.rowid,
@@ -731,6 +1115,12 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
+    }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -751,6 +1141,8 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
           ..write('createdAt: $createdAt, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('rowid: $rowid')
@@ -785,11 +1177,15 @@ class $PlantsTableTable extends PlantsTable
   late final GeneratedColumn<String> nickname = GeneratedColumn<String>(
       'nickname', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _soilTypeMeta =
+      const VerificationMeta('soilType');
   @override
-  late final GeneratedColumnWithTypeConverter<SoilType, String> soilType =
-      GeneratedColumn<String>('soil_type', aliasedName, false,
-              type: DriftSqlType.string, requiredDuringInsert: true)
-          .withConverter<SoilType>($PlantsTableTable.$convertersoilType);
+  late final GeneratedColumn<String> soilType = GeneratedColumn<String>(
+      'soil_type', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES soils (id)'));
   static const VerificationMeta _irrigationFrequencyDaysMeta =
       const VerificationMeta('irrigationFrequencyDays');
   @override
@@ -877,6 +1273,12 @@ class $PlantsTableTable extends PlantsTable
     } else if (isInserting) {
       context.missing(_nicknameMeta);
     }
+    if (data.containsKey('soil_type')) {
+      context.handle(_soilTypeMeta,
+          soilType.isAcceptableOrUnknown(data['soil_type']!, _soilTypeMeta));
+    } else if (isInserting) {
+      context.missing(_soilTypeMeta);
+    }
     if (data.containsKey('irrigation_frequency_days')) {
       context.handle(
           _irrigationFrequencyDaysMeta,
@@ -929,9 +1331,8 @@ class $PlantsTableTable extends PlantsTable
           .read(DriftSqlType.string, data['${effectivePrefix}species_id'])!,
       nickname: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}nickname'])!,
-      soilType: $PlantsTableTable.$convertersoilType.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}soil_type'])!),
+      soilType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}soil_type'])!,
       irrigationFrequencyDays: attachedDatabase.typeMapping.read(
           DriftSqlType.int,
           data['${effectivePrefix}irrigation_frequency_days']),
@@ -956,8 +1357,6 @@ class $PlantsTableTable extends PlantsTable
     return $PlantsTableTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<SoilType, String> $convertersoilType =
-      const SoilTypeConverter();
   static TypeConverter<SyncStatus, String> $convertersyncStatus =
       const SyncStatusConverter();
 }
@@ -966,7 +1365,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
   final String id;
   final String speciesId;
   final String nickname;
-  final SoilType soilType;
+  final String soilType;
 
   /// Null means: inherit from species.defaultIrrigationFrequencyDays
   final int? irrigationFrequencyDays;
@@ -994,10 +1393,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
     map['id'] = Variable<String>(id);
     map['species_id'] = Variable<String>(speciesId);
     map['nickname'] = Variable<String>(nickname);
-    {
-      map['soil_type'] = Variable<String>(
-          $PlantsTableTable.$convertersoilType.toSql(soilType));
-    }
+    map['soil_type'] = Variable<String>(soilType);
     if (!nullToAbsent || irrigationFrequencyDays != null) {
       map['irrigation_frequency_days'] = Variable<int>(irrigationFrequencyDays);
     }
@@ -1050,7 +1446,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       id: serializer.fromJson<String>(json['id']),
       speciesId: serializer.fromJson<String>(json['speciesId']),
       nickname: serializer.fromJson<String>(json['nickname']),
-      soilType: serializer.fromJson<SoilType>(json['soilType']),
+      soilType: serializer.fromJson<String>(json['soilType']),
       irrigationFrequencyDays:
           serializer.fromJson<int?>(json['irrigationFrequencyDays']),
       acquisitionDate: serializer.fromJson<DateTime>(json['acquisitionDate']),
@@ -1068,7 +1464,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       'id': serializer.toJson<String>(id),
       'speciesId': serializer.toJson<String>(speciesId),
       'nickname': serializer.toJson<String>(nickname),
-      'soilType': serializer.toJson<SoilType>(soilType),
+      'soilType': serializer.toJson<String>(soilType),
       'irrigationFrequencyDays':
           serializer.toJson<int?>(irrigationFrequencyDays),
       'acquisitionDate': serializer.toJson<DateTime>(acquisitionDate),
@@ -1084,7 +1480,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           {String? id,
           String? speciesId,
           String? nickname,
-          SoilType? soilType,
+          String? soilType,
           Value<int?> irrigationFrequencyDays = const Value.absent(),
           DateTime? acquisitionDate,
           Value<String?> location = const Value.absent(),
@@ -1185,7 +1581,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
   final Value<String> id;
   final Value<String> speciesId;
   final Value<String> nickname;
-  final Value<SoilType> soilType;
+  final Value<String> soilType;
   final Value<int?> irrigationFrequencyDays;
   final Value<DateTime> acquisitionDate;
   final Value<String?> location;
@@ -1212,7 +1608,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     required String id,
     required String speciesId,
     required String nickname,
-    required SoilType soilType,
+    required String soilType,
     this.irrigationFrequencyDays = const Value.absent(),
     required DateTime acquisitionDate,
     this.location = const Value.absent(),
@@ -1262,7 +1658,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       {Value<String>? id,
       Value<String>? speciesId,
       Value<String>? nickname,
-      Value<SoilType>? soilType,
+      Value<String>? soilType,
       Value<int?>? irrigationFrequencyDays,
       Value<DateTime>? acquisitionDate,
       Value<String?>? location,
@@ -1301,8 +1697,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       map['nickname'] = Variable<String>(nickname.value);
     }
     if (soilType.present) {
-      map['soil_type'] = Variable<String>(
-          $PlantsTableTable.$convertersoilType.toSql(soilType.value));
+      map['soil_type'] = Variable<String>(soilType.value);
     }
     if (irrigationFrequencyDays.present) {
       map['irrigation_frequency_days'] =
@@ -2168,6 +2563,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $SpeciesTableTable speciesTable = $SpeciesTableTable(this);
+  late final $SoilsTableTable soilsTable = $SoilsTableTable(this);
   late final $LocationsTableTable locationsTable = $LocationsTableTable(this);
   late final $PlantsTableTable plantsTable = $PlantsTableTable(this);
   late final $EntriesTableTable entriesTable = $EntriesTableTable(this);
@@ -2176,8 +2572,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [speciesTable, locationsTable, plantsTable, entriesTable, syncQueueTable];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        speciesTable,
+        soilsTable,
+        locationsTable,
+        plantsTable,
+        entriesTable,
+        syncQueueTable
+      ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [
@@ -2205,7 +2607,7 @@ typedef $$SpeciesTableTableCreateCompanionBuilder = SpeciesTableCompanion
   required String scientificName,
   required String popularName,
   Value<int?> defaultIrrigationFrequencyDays,
-  required List<SoilType> recommendedSoilTypes,
+  required List<String> recommendedSoilTypes,
   Value<SyncStatus> syncStatus,
   required DateTime createdAt,
   Value<int> rowid,
@@ -2216,7 +2618,7 @@ typedef $$SpeciesTableTableUpdateCompanionBuilder = SpeciesTableCompanion
   Value<String> scientificName,
   Value<String> popularName,
   Value<int?> defaultIrrigationFrequencyDays,
-  Value<List<SoilType>> recommendedSoilTypes,
+  Value<List<String>> recommendedSoilTypes,
   Value<SyncStatus> syncStatus,
   Value<DateTime> createdAt,
   Value<int> rowid,
@@ -2265,7 +2667,7 @@ class $$SpeciesTableTableFilterComposer
       column: $table.defaultIrrigationFrequencyDays,
       builder: (column) => ColumnFilters(column));
 
-  ColumnWithTypeConverterFilters<List<SoilType>, List<SoilType>, String>
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
       get recommendedSoilTypes => $composableBuilder(
           column: $table.recommendedSoilTypes,
           builder: (column) => ColumnWithTypeConverterFilters(column));
@@ -2356,7 +2758,7 @@ class $$SpeciesTableTableAnnotationComposer
       column: $table.defaultIrrigationFrequencyDays,
       builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<SoilType>, String>
+  GeneratedColumnWithTypeConverter<List<String>, String>
       get recommendedSoilTypes => $composableBuilder(
           column: $table.recommendedSoilTypes, builder: (column) => column);
 
@@ -2416,7 +2818,7 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             Value<String> scientificName = const Value.absent(),
             Value<String> popularName = const Value.absent(),
             Value<int?> defaultIrrigationFrequencyDays = const Value.absent(),
-            Value<List<SoilType>> recommendedSoilTypes = const Value.absent(),
+            Value<List<String>> recommendedSoilTypes = const Value.absent(),
             Value<SyncStatus> syncStatus = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -2436,7 +2838,7 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             required String scientificName,
             required String popularName,
             Value<int?> defaultIrrigationFrequencyDays = const Value.absent(),
-            required List<SoilType> recommendedSoilTypes,
+            required List<String> recommendedSoilTypes,
             Value<SyncStatus> syncStatus = const Value.absent(),
             required DateTime createdAt,
             Value<int> rowid = const Value.absent(),
@@ -2496,11 +2898,269 @@ typedef $$SpeciesTableTableProcessedTableManager = ProcessedTableManager<
     (SpeciesTableData, $$SpeciesTableTableReferences),
     SpeciesTableData,
     PrefetchHooks Function({bool plantsTableRefs})>;
+typedef $$SoilsTableTableCreateCompanionBuilder = SoilsTableCompanion Function({
+  required String id,
+  required String name,
+  Value<String?> composition,
+  required DateTime createdAt,
+  Value<SyncStatus> syncStatus,
+  Value<int> rowid,
+});
+typedef $$SoilsTableTableUpdateCompanionBuilder = SoilsTableCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String?> composition,
+  Value<DateTime> createdAt,
+  Value<SyncStatus> syncStatus,
+  Value<int> rowid,
+});
+
+final class $$SoilsTableTableReferences
+    extends BaseReferences<_$AppDatabase, $SoilsTableTable, SoilsTableData> {
+  $$SoilsTableTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$PlantsTableTable, List<PlantsTableData>>
+      _plantsTableRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.plantsTable,
+          aliasName:
+              $_aliasNameGenerator(db.soilsTable.id, db.plantsTable.soilType));
+
+  $$PlantsTableTableProcessedTableManager get plantsTableRefs {
+    final manager = $$PlantsTableTableTableManager($_db, $_db.plantsTable)
+        .filter((f) => f.soilType.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_plantsTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$SoilsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SoilsTableTable> {
+  $$SoilsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get composition => $composableBuilder(
+      column: $table.composition, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, String>
+      get syncStatus => $composableBuilder(
+          column: $table.syncStatus,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  Expression<bool> plantsTableRefs(
+      Expression<bool> Function($$PlantsTableTableFilterComposer f) f) {
+    final $$PlantsTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.plantsTable,
+        getReferencedColumn: (t) => t.soilType,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PlantsTableTableFilterComposer(
+              $db: $db,
+              $table: $db.plantsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$SoilsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SoilsTableTable> {
+  $$SoilsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get composition => $composableBuilder(
+      column: $table.composition, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+}
+
+class $$SoilsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SoilsTableTable> {
+  $$SoilsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get composition => $composableBuilder(
+      column: $table.composition, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<SyncStatus, String> get syncStatus =>
+      $composableBuilder(
+          column: $table.syncStatus, builder: (column) => column);
+
+  Expression<T> plantsTableRefs<T extends Object>(
+      Expression<T> Function($$PlantsTableTableAnnotationComposer a) f) {
+    final $$PlantsTableTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.plantsTable,
+        getReferencedColumn: (t) => t.soilType,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PlantsTableTableAnnotationComposer(
+              $db: $db,
+              $table: $db.plantsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$SoilsTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $SoilsTableTable,
+    SoilsTableData,
+    $$SoilsTableTableFilterComposer,
+    $$SoilsTableTableOrderingComposer,
+    $$SoilsTableTableAnnotationComposer,
+    $$SoilsTableTableCreateCompanionBuilder,
+    $$SoilsTableTableUpdateCompanionBuilder,
+    (SoilsTableData, $$SoilsTableTableReferences),
+    SoilsTableData,
+    PrefetchHooks Function({bool plantsTableRefs})> {
+  $$SoilsTableTableTableManager(_$AppDatabase db, $SoilsTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SoilsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SoilsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SoilsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String?> composition = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<SyncStatus> syncStatus = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SoilsTableCompanion(
+            id: id,
+            name: name,
+            composition: composition,
+            createdAt: createdAt,
+            syncStatus: syncStatus,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            Value<String?> composition = const Value.absent(),
+            required DateTime createdAt,
+            Value<SyncStatus> syncStatus = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SoilsTableCompanion.insert(
+            id: id,
+            name: name,
+            composition: composition,
+            createdAt: createdAt,
+            syncStatus: syncStatus,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$SoilsTableTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({plantsTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (plantsTableRefs) db.plantsTable],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (plantsTableRefs)
+                    await $_getPrefetchedData<SoilsTableData, $SoilsTableTable,
+                            PlantsTableData>(
+                        currentTable: table,
+                        referencedTable: $$SoilsTableTableReferences
+                            ._plantsTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$SoilsTableTableReferences(db, table, p0)
+                                .plantsTableRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.soilType == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$SoilsTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $SoilsTableTable,
+    SoilsTableData,
+    $$SoilsTableTableFilterComposer,
+    $$SoilsTableTableOrderingComposer,
+    $$SoilsTableTableAnnotationComposer,
+    $$SoilsTableTableCreateCompanionBuilder,
+    $$SoilsTableTableUpdateCompanionBuilder,
+    (SoilsTableData, $$SoilsTableTableReferences),
+    SoilsTableData,
+    PrefetchHooks Function({bool plantsTableRefs})>;
 typedef $$LocationsTableTableCreateCompanionBuilder = LocationsTableCompanion
     Function({
   required String id,
   required String name,
   Value<String?> description,
+  Value<double?> latitude,
+  Value<double?> longitude,
   required DateTime createdAt,
   Value<SyncStatus> syncStatus,
   Value<int> rowid,
@@ -2510,6 +3170,8 @@ typedef $$LocationsTableTableUpdateCompanionBuilder = LocationsTableCompanion
   Value<String> id,
   Value<String> name,
   Value<String?> description,
+  Value<double?> latitude,
+  Value<double?> longitude,
   Value<DateTime> createdAt,
   Value<SyncStatus> syncStatus,
   Value<int> rowid,
@@ -2553,6 +3215,12 @@ class $$LocationsTableTableFilterComposer
 
   ColumnFilters<String> get description => $composableBuilder(
       column: $table.description, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get latitude => $composableBuilder(
+      column: $table.latitude, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+      column: $table.longitude, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -2602,6 +3270,12 @@ class $$LocationsTableTableOrderingComposer
   ColumnOrderings<String> get description => $composableBuilder(
       column: $table.description, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<double> get latitude => $composableBuilder(
+      column: $table.latitude, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+      column: $table.longitude, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -2626,6 +3300,12 @@ class $$LocationsTableTableAnnotationComposer
 
   GeneratedColumn<String> get description => $composableBuilder(
       column: $table.description, builder: (column) => column);
+
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -2683,6 +3363,8 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String?> description = const Value.absent(),
+            Value<double?> latitude = const Value.absent(),
+            Value<double?> longitude = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<SyncStatus> syncStatus = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -2691,6 +3373,8 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             id: id,
             name: name,
             description: description,
+            latitude: latitude,
+            longitude: longitude,
             createdAt: createdAt,
             syncStatus: syncStatus,
             rowid: rowid,
@@ -2699,6 +3383,8 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             required String id,
             required String name,
             Value<String?> description = const Value.absent(),
+            Value<double?> latitude = const Value.absent(),
+            Value<double?> longitude = const Value.absent(),
             required DateTime createdAt,
             Value<SyncStatus> syncStatus = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -2707,6 +3393,8 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             id: id,
             name: name,
             description: description,
+            latitude: latitude,
+            longitude: longitude,
             createdAt: createdAt,
             syncStatus: syncStatus,
             rowid: rowid,
@@ -2761,7 +3449,7 @@ typedef $$PlantsTableTableCreateCompanionBuilder = PlantsTableCompanion
   required String id,
   required String speciesId,
   required String nickname,
-  required SoilType soilType,
+  required String soilType,
   Value<int?> irrigationFrequencyDays,
   required DateTime acquisitionDate,
   Value<String?> location,
@@ -2776,7 +3464,7 @@ typedef $$PlantsTableTableUpdateCompanionBuilder = PlantsTableCompanion
   Value<String> id,
   Value<String> speciesId,
   Value<String> nickname,
-  Value<SoilType> soilType,
+  Value<String> soilType,
   Value<int?> irrigationFrequencyDays,
   Value<DateTime> acquisitionDate,
   Value<String?> location,
@@ -2801,6 +3489,21 @@ final class $$PlantsTableTableReferences
     final manager = $$SpeciesTableTableTableManager($_db, $_db.speciesTable)
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_speciesIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $SoilsTableTable _soilTypeTable(_$AppDatabase db) =>
+      db.soilsTable.createAlias(
+          $_aliasNameGenerator(db.plantsTable.soilType, db.soilsTable.id));
+
+  $$SoilsTableTableProcessedTableManager get soilType {
+    final $_column = $_itemColumn<String>('soil_type')!;
+
+    final manager = $$SoilsTableTableTableManager($_db, $_db.soilsTable)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_soilTypeTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
@@ -2852,11 +3555,6 @@ class $$PlantsTableTableFilterComposer
   ColumnFilters<String> get nickname => $composableBuilder(
       column: $table.nickname, builder: (column) => ColumnFilters(column));
 
-  ColumnWithTypeConverterFilters<SoilType, SoilType, String> get soilType =>
-      $composableBuilder(
-          column: $table.soilType,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
-
   ColumnFilters<int> get irrigationFrequencyDays => $composableBuilder(
       column: $table.irrigationFrequencyDays,
       builder: (column) => ColumnFilters(column));
@@ -2892,6 +3590,26 @@ class $$PlantsTableTableFilterComposer
             $$SpeciesTableTableFilterComposer(
               $db: $db,
               $table: $db.speciesTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$SoilsTableTableFilterComposer get soilType {
+    final $$SoilsTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.soilType,
+        referencedTable: $db.soilsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SoilsTableTableFilterComposer(
+              $db: $db,
+              $table: $db.soilsTable,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -2957,9 +3675,6 @@ class $$PlantsTableTableOrderingComposer
   ColumnOrderings<String> get nickname => $composableBuilder(
       column: $table.nickname, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get soilType => $composableBuilder(
-      column: $table.soilType, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<int> get irrigationFrequencyDays => $composableBuilder(
       column: $table.irrigationFrequencyDays,
       builder: (column) => ColumnOrderings(column));
@@ -2993,6 +3708,26 @@ class $$PlantsTableTableOrderingComposer
             $$SpeciesTableTableOrderingComposer(
               $db: $db,
               $table: $db.speciesTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$SoilsTableTableOrderingComposer get soilType {
+    final $$SoilsTableTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.soilType,
+        referencedTable: $db.soilsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SoilsTableTableOrderingComposer(
+              $db: $db,
+              $table: $db.soilsTable,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -3037,9 +3772,6 @@ class $$PlantsTableTableAnnotationComposer
   GeneratedColumn<String> get nickname =>
       $composableBuilder(column: $table.nickname, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<SoilType, String> get soilType =>
-      $composableBuilder(column: $table.soilType, builder: (column) => column);
-
   GeneratedColumn<int> get irrigationFrequencyDays => $composableBuilder(
       column: $table.irrigationFrequencyDays, builder: (column) => column);
 
@@ -3071,6 +3803,26 @@ class $$PlantsTableTableAnnotationComposer
             $$SpeciesTableTableAnnotationComposer(
               $db: $db,
               $table: $db.speciesTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$SoilsTableTableAnnotationComposer get soilType {
+    final $$SoilsTableTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.soilType,
+        referencedTable: $db.soilsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SoilsTableTableAnnotationComposer(
+              $db: $db,
+              $table: $db.soilsTable,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -3133,7 +3885,10 @@ class $$PlantsTableTableTableManager extends RootTableManager<
     (PlantsTableData, $$PlantsTableTableReferences),
     PlantsTableData,
     PrefetchHooks Function(
-        {bool speciesId, bool locationId, bool entriesTableRefs})> {
+        {bool speciesId,
+        bool soilType,
+        bool locationId,
+        bool entriesTableRefs})> {
   $$PlantsTableTableTableManager(_$AppDatabase db, $PlantsTableTable table)
       : super(TableManagerState(
           db: db,
@@ -3148,7 +3903,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             Value<String> speciesId = const Value.absent(),
             Value<String> nickname = const Value.absent(),
-            Value<SoilType> soilType = const Value.absent(),
+            Value<String> soilType = const Value.absent(),
             Value<int?> irrigationFrequencyDays = const Value.absent(),
             Value<DateTime> acquisitionDate = const Value.absent(),
             Value<String?> location = const Value.absent(),
@@ -3176,7 +3931,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             required String id,
             required String speciesId,
             required String nickname,
-            required SoilType soilType,
+            required String soilType,
             Value<int?> irrigationFrequencyDays = const Value.absent(),
             required DateTime acquisitionDate,
             Value<String?> location = const Value.absent(),
@@ -3208,6 +3963,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
               .toList(),
           prefetchHooksCallback: (
               {speciesId = false,
+              soilType = false,
               locationId = false,
               entriesTableRefs = false}) {
             return PrefetchHooks(
@@ -3234,6 +3990,16 @@ class $$PlantsTableTableTableManager extends RootTableManager<
                         $$PlantsTableTableReferences._speciesIdTable(db),
                     referencedColumn:
                         $$PlantsTableTableReferences._speciesIdTable(db).id,
+                  ) as T;
+                }
+                if (soilType) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.soilType,
+                    referencedTable:
+                        $$PlantsTableTableReferences._soilTypeTable(db),
+                    referencedColumn:
+                        $$PlantsTableTableReferences._soilTypeTable(db).id,
                   ) as T;
                 }
                 if (locationId) {
@@ -3283,7 +4049,10 @@ typedef $$PlantsTableTableProcessedTableManager = ProcessedTableManager<
     (PlantsTableData, $$PlantsTableTableReferences),
     PlantsTableData,
     PrefetchHooks Function(
-        {bool speciesId, bool locationId, bool entriesTableRefs})>;
+        {bool speciesId,
+        bool soilType,
+        bool locationId,
+        bool entriesTableRefs})>;
 typedef $$EntriesTableTableCreateCompanionBuilder = EntriesTableCompanion
     Function({
   required String id,
@@ -3813,6 +4582,8 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$SpeciesTableTableTableManager get speciesTable =>
       $$SpeciesTableTableTableManager(_db, _db.speciesTable);
+  $$SoilsTableTableTableManager get soilsTable =>
+      $$SoilsTableTableTableManager(_db, _db.soilsTable);
   $$LocationsTableTableTableManager get locationsTable =>
       $$LocationsTableTableTableManager(_db, _db.locationsTable);
   $$PlantsTableTableTableManager get plantsTable =>
