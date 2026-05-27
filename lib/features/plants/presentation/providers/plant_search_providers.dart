@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/enums.dart';
+import '../../../../core/utils/string_utils.dart';
 import '../providers/plants_providers.dart';
 import '../../domain/plant_model.dart';
 
@@ -8,10 +10,20 @@ part 'plant_search_providers.g.dart';
 
 @riverpod
 class PlantSearchQuery extends _$PlantSearchQuery {
-  @override
-  String build() => '';
+  Timer? _debounceTimer;
 
-  void setQuery(String query) => state = query;
+  @override
+  String build() {
+    ref.onDispose(() => _debounceTimer?.cancel());
+    return '';
+  }
+
+  void setQuery(String query) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      state = query;
+    });
+  }
 }
 
 @riverpod
@@ -25,7 +37,7 @@ class PlantSortOptionNotifier extends _$PlantSortOptionNotifier {
 @riverpod
 Future<List<PlantWithSpecies>> filteredSortedPlants(Ref ref) async {
   // Watch synchronous providers FIRST to ensure they are not disposed during await
-  final query = ref.watch(plantSearchQueryProvider).toLowerCase();
+  final query = ref.watch(plantSearchQueryProvider).normalize();
   final sortOption = ref.watch(plantSortOptionNotifierProvider);
 
   final plantsAsync = await ref.watch(plantsWithSpeciesProvider.future);
@@ -34,9 +46,9 @@ Future<List<PlantWithSpecies>> filteredSortedPlants(Ref ref) async {
 
   if (query.isNotEmpty) {
     filtered = filtered.where((p) =>
-        p.plant.nickname.toLowerCase().contains(query) ||
-        p.species.popularName.toLowerCase().contains(query) ||
-        p.species.scientificName.toLowerCase().contains(query));
+        p.plant.nickname.normalize().contains(query) ||
+        p.species.popularName.normalize().contains(query) ||
+        p.species.scientificName.normalize().contains(query));
   }
 
   final sorted = filtered.toList();
