@@ -28,6 +28,7 @@ dependencies:
   http: ^1.2.1
   archive: ^3.6.1
   csv: ^6.0.0
+  geolocator: ^13.0.2
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
