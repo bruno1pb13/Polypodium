@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/enums.dart';
 import '../../../../core/widgets/app_search_bar.dart';
 import '../../domain/soil_model.dart';
-import '../providers/soils_providers.dart';
 import '../providers/soils_search_providers.dart';
 import '../screens/add_edit_soil_screen.dart';
 
