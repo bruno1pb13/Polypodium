@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../species/presentation/screens/species_list_screen.dart';
 // ignore: unused_import
 import '../../../locations/presentation/screens/locations_list_screen.dart';
+import '../../../../core/widgets/app_search_bar.dart';
 import '../providers/plant_search_providers.dart';
 import '../../../../core/enums.dart';
 import '../../../../core/widgets/app_drawer.dart';
@@ -88,95 +89,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           SafeArea(
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.3),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                ),
-                              ),
-                              child: TextField(
-                                controller: _searchController,
-                                style: const TextStyle(color: Colors.white),
-                                decoration: InputDecoration(
-                                  hintText: 'Buscar plantas...',
-                                  hintStyle: TextStyle(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.6)),
-                                  prefixIcon: const Icon(Icons.search,
-                                      color: Colors.white70),
-                                  border: InputBorder.none,
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(vertical: 15),
-                                ),
-                                onChanged: (value) {
-                                  ref
-                                      .read(plantSearchQueryProvider.notifier)
-                                      .setQuery(value);
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withValues(alpha: 0.7),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: PopupMenuButton<PlantSortOption>(
-                              icon: const Icon(Icons.tune, color: Colors.white),
-                              onSelected: (option) {
-                                ref
-                                    .read(plantSortOptionNotifierProvider.notifier)
-                                    .setSortOption(option);
-                              },
-                              itemBuilder: (context) => [
-                                const PopupMenuItem(
-                                  value: PlantSortOption.wateringNeeds,
-                                  child: Text('Necessidade de rega'),
-                                ),
-                                const PopupMenuItem(
-                                  value: PlantSortOption.nameAZ,
-                                  child: Text('Nome (A-Z)'),
-                                ),
-                                const PopupMenuItem(
-                                  value: PlantSortOption.nameZA,
-                                  child: Text('Nome (Z-A)'),
-                                ),
-                                const PopupMenuItem(
-                                  value: PlantSortOption.lastWatered,
-                                  child: Text('Última rega'),
-                                ),
-                                const PopupMenuItem(
-                                  value: PlantSortOption.dateAdded,
-                                  child: Text('Data de adição'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                AppSearchBar<PlantSortOption>(
+                  controller: _searchController,
+                  hintText: 'Buscar plantas...',
+                  onChanged: (value) {
+                    ref.read(plantSearchQueryProvider.notifier).setQuery(value);
+                  },
+                  onSortSelected: (option) {
+                    ref
+                        .read(plantSortOptionNotifierProvider.notifier)
+                        .setSortOption(option);
+                  },
+                  sortOptions: const [
+                    PopupMenuItem(
+                      value: PlantSortOption.wateringNeeds,
+                      child: Text('Necessidade de rega'),
+                    ),
+                    PopupMenuItem(
+                      value: PlantSortOption.nameAZ,
+                      child: Text('Nome (A-Z)'),
+                    ),
+                    PopupMenuItem(
+                      value: PlantSortOption.nameZA,
+                      child: Text('Nome (Z-A)'),
+                    ),
+                    PopupMenuItem(
+                      value: PlantSortOption.lastWatered,
+                      child: Text('Última rega'),
+                    ),
+                    PopupMenuItem(
+                      value: PlantSortOption.dateAdded,
+                      child: Text('Data de adição'),
+                    ),
+                  ],
                 ),
                 Expanded(
                   child: plantsAsync.when(

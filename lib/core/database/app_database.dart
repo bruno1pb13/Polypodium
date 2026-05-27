@@ -44,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -55,6 +55,21 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) async {
+          await m.createAll();
+          // Seed all soils on creation
+          for (final type in SoilType.values) {
+            await into(soilsTable).insert(
+              SoilsTableCompanion.insert(
+                id: type.name,
+                name: type.label,
+                composition: Value(type.description),
+                createdAt: DateTime.now(),
+                syncStatus: const Value(SyncStatus.synced),
+              ),
+            );
+          }
+        },
         onUpgrade: (m, from, to) async {
           if (from < 2) {
             // ... (existing code for v1 to v2)
@@ -95,6 +110,22 @@ class AppDatabase extends _$AppDatabase {
           if (from < 5) {
             await m.addColumn(locationsTable, locationsTable.latitude);
             await m.addColumn(locationsTable, locationsTable.longitude);
+          }
+          if (from < 6) {
+            // Seed new soils introduced in SoilType enum
+            // We use insertOrReplace to update existing ones with descriptions too
+            for (final type in SoilType.values) {
+              await into(soilsTable).insert(
+                SoilsTableCompanion.insert(
+                  id: type.name,
+                  name: type.label,
+                  composition: Value(type.description),
+                  createdAt: DateTime.now(),
+                  syncStatus: const Value(SyncStatus.synced),
+                ),
+                mode: InsertMode.insertOrReplace,
+              );
+            }
           }
         },
       );
