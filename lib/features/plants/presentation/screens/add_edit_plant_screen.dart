@@ -12,6 +12,8 @@ import '../../../locations/presentation/providers/locations_providers.dart';
 import '../../../locations/presentation/screens/add_edit_location_screen.dart';
 import '../../../soils/domain/soil_model.dart';
 import '../../../soils/presentation/providers/soils_providers.dart';
+import '../../../soils/presentation/widgets/soil_selection_field.dart';
+import '../../../soils/presentation/screens/add_edit_soil_screen.dart';
 import '../../domain/plant_model.dart';
 import '../providers/plants_providers.dart';
 
@@ -205,16 +207,49 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                               children: [
                                 const _SectionTitle('Cuidados'),
                                 const SizedBox(height: 12),
-                                _SoilTypeDropdown(
-                                  value: _selectedSoilId,
-                                  soils: soils,
-                                  isRecommended: _isSoilAutoFilled,
-                                  onChanged: (v) {
-                                    setState(() {
-                                      _selectedSoilId = v;
-                                      _isSoilAutoFilled = false;
-                                    });
-                                  },
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: SoilSelectionField(
+                                        selectedSoil: soils.cast<SoilModel?>().firstWhere(
+                                              (s) => s?.id == _selectedSoilId,
+                                              orElse: () => null,
+                                            ),
+                                        isRecommended: _isSoilAutoFilled,
+                                        onSoilSelected: (soil) {
+                                          setState(() {
+                                            _selectedSoilId = soil?.id;
+                                            _isSoilAutoFilled = false;
+                                          });
+                                        },
+                                        errorText: _selectedSoilId == null ? null : null, // Handled in submit
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: IconButton.filled(
+                                        icon: const Icon(Icons.add_circle_outline),
+                                        tooltip: 'Novo tipo de solo',
+                                        style: IconButton.styleFrom(
+                                          backgroundColor:
+                                              Colors.white.withValues(alpha: 0.1),
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        onPressed: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                const AddEditSoilScreen(),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 16),
                                 TextFormField(
@@ -582,41 +617,6 @@ class _DatePickerTile extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _SoilTypeDropdown extends StatelessWidget {
-  final String? value;
-  final List<SoilModel> soils;
-  final bool isRecommended;
-  final ValueChanged<String?> onChanged;
-
-  const _SoilTypeDropdown({
-    required this.value,
-    required this.soils,
-    this.isRecommended = false,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      // ignore: deprecated_member_use
-      value: value,
-      isExpanded: true,
-      dropdownColor: const Color(0xFF1E1E1E),
-      iconEnabledColor: Colors.white70,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        labelText: 'Tipo de solo *${isRecommended ? ' (recomendado)' : ''}',
-        prefixIcon: const Icon(Icons.terrain_outlined),
-      ),
-      items: soils
-          .map((s) => DropdownMenuItem(value: s.id, child: Text(s.name)))
-          .toList(),
-      onChanged: onChanged,
-      validator: (v) => v == null ? 'Selecione um tipo de solo' : null,
     );
   }
 }
