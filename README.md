@@ -1,53 +1,43 @@
-# Polypodium
+# Polypodium — app
 
-App de acompanhamento de plantas - offline-first.
+App mobile de gerenciamento de coleção de plantas. Offline-first: todos os dados vivem no SQLite local; a sincronização com o servidor é opcional.
 
-O **Polypodium** é uma ferramenta para ajudar entusiastas de botânica a gerenciar suas coleções de plantas, registrar atividades e receber lembretes de cuidados, tudo funcionando de forma independente de conexão com a internet.
+## Dependências
 
-## 🚀 Funcionalidades
+| Pacote | Uso |
+|---|---|
+| Flutter ≥ 3.32 / Dart ≥ 3.5 | framework |
+| `drift` + `drift_dev` | banco de dados SQLite local |
+| `flutter_riverpod` + `riverpod_generator` | estado e DI |
+| `workmanager` | tarefa periódica de verificação de irrigação |
+| `flutter_local_notifications` | notificações locais |
+| `http` | chamadas HTTP para o servidor de sync |
+| `shared_preferences` | token JWT e cursor de sync |
+| `image_picker` | fotos das plantas |
+| `geolocator` | coordenadas para localizações |
+| `uuid` | geração de UUIDs no cliente |
 
-- **Gerenciamento de Plantas:** Adicione e edite informações sobre suas plantas, incluindo fotos, espécies e localização.
-- **Histórico de Atividades:** Registre regas, adubações, podas e outras manutenções (Entradas).
-- **Espécies e Locais:** Organize suas plantas por espécies e os locais onde elas estão dispostas.
-- **Notificações:** Receba lembretes para não esquecer de cuidar das suas plantas.
-- **Offline-first:** Todos os dados são armazenados localmente no dispositivo.
+## Build e execução
 
-## 🌿 Dados Oficiais
+```bash
+# 1. Instalar dependências
+flutter pub get
 
-O aplicativo integra dados oficiais do projeto **Flora e Funga do Brasil**, coordenado pelo **Jardim Botânico do Rio de Janeiro (JBRJ)**.
+# 2. Gerar código (Drift + Riverpod) — obrigatório após clonar ou alterar tabelas/providers
+flutter pub run build_runner build --delete-conflicting-outputs
 
-- **Base de Dados:** Inclui milhares de espécies cadastradas com nomes populares e científicos.
-*   **Atualização:** O usuário pode baixar versões atualizadas do dataset diretamente pela interface do aplicativo.
-*   **Busca Inteligente:** Autocomplete integrado que combina espécies locais (cadastradas pelo usuário) com a base oficial do JBRJ.
+# 3. Rodar no dispositivo/emulador conectado
+flutter run
 
-## 🛠️ Tech Stack
+# Outros comandos úteis
+flutter analyze          # lint
+flutter test             # testes
+```
 
-- **Framework:** [Flutter](https://flutter.dev)
-- **Gerenciamento de Estado:** [Riverpod](https://riverpod.dev) com `riverpod_generator`
-- **Banco de Dados Local:** [Drift](https://drift.simonbinder.eu) (SQLite)
-- **Tarefas em Segundo Plano:** [Workmanager](https://pub.dev/packages/workmanager)
-- **Notificações:** [Flutter Local Notifications](https://pub.dev/packages/flutter_local_notifications)
-- **Injeção de Dependências:** Riverpod
+> O gerador de código precisa ser reexecutado sempre que arquivos `*.dart` anotados com `@riverpod`, `@DriftDatabase` ou `@DriftAccessor` forem modificados.
 
-## 🏁 Como Iniciar
+## Sincronização (opcional)
 
-### Pré-requisitos
+Em **Configurações → Servidor** informe a URL e faça login. A partir daí o botão de sync aparece na mesma tela.
 
-- Flutter SDK instalado (versão compatível com o `pubspec.yaml`).
-- Dispositivo Android/iOS ou emulador configurado.
-
-### Configuração
-
-1. Clone o repositório.
-2. Instale as dependências:
-   ```bash
-   flutter pub get
-   ```
-3. Execute o gerador de código (necessário para Drift e Riverpod):
-   ```bash
-   dart run build_runner build --delete-conflicting-outputs
-   ```
-4. Execute o aplicativo:
-   ```bash
-   flutter run
-   ```
+O sync é manual — não há sincronização automática em segundo plano. O WorkManager só executa a verificação de notificações de irrigação.
