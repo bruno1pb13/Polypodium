@@ -31,7 +31,7 @@ class LocationsRepository {
     await _syncQueueDao.enqueue(
       entityType: 'location',
       entityId: location.id,
-      operation: 'upsert',
+      operation: 'create',
       payload: location.toJsonString(),
     );
   }

@@ -21,6 +21,11 @@ class LocationsListScreen extends ConsumerStatefulWidget {
 class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
   final _searchController = TextEditingController();
 
+  Future<void> _refresh() async {
+    ref.invalidate(locationsNotifierProvider);
+    await ref.read(filteredSortedLocationsProvider.future).catchError((_) {});
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -100,41 +105,55 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
                   ],
                 ),
                 Expanded(
-                  child: locationsAsync.when(
-                    loading: () => const Center(
-                      child: CircularProgressIndicator(color: Colors.white),
-                    ),
-                    error: (e, _) => Center(
-                      child: Text(
-                        'Erro: $e',
-                        style: const TextStyle(color: Colors.white),
+                  child: RefreshIndicator(
+                    onRefresh: _refresh,
+                    color: Colors.white,
+                    backgroundColor: Colors.black54,
+                    child: locationsAsync.when(
+                      loading: () => const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
                       ),
-                    ),
-                    data: (locations) {
-                      if (locations.isEmpty) {
-                        return _searchController.text.isNotEmpty
-                            ? const Center(
-                                child: Text('Nenhuma localização encontrada',
-                                    style: TextStyle(color: Colors.white)))
-                            : const _EmptyState();
-                      }
-                      return ListView.builder(
-                        padding: const EdgeInsets.only(top: 8, bottom: 80),
-                        itemCount: locations.length,
-                        itemBuilder: (ctx, i) => _LocationListItem(
-                          location: locations[i],
-                          onEdit: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  AddEditLocationScreen(location: locations[i]),
-                            ),
-                          ),
-                          onDelete: () =>
-                              _confirmDelete(context, ref, locations[i].id),
+                      error: (e, _) => Center(
+                        child: Text(
+                          'Erro: $e',
+                          style: const TextStyle(color: Colors.white),
                         ),
-                      );
-                    },
+                      ),
+                      data: (locations) {
+                        if (locations.isEmpty) {
+                          return LayoutBuilder(
+                            builder: (_, constraints) => SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: SizedBox(
+                                height: constraints.maxHeight,
+                                child: _searchController.text.isNotEmpty
+                                    ? const Center(
+                                        child: Text('Nenhuma localização encontrada',
+                                            style: TextStyle(color: Colors.white)))
+                                    : const _EmptyState(),
+                              ),
+                            ),
+                          );
+                        }
+                        return ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(top: 8, bottom: 80),
+                          itemCount: locations.length,
+                          itemBuilder: (ctx, i) => _LocationListItem(
+                            location: locations[i],
+                            onEdit: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    AddEditLocationScreen(location: locations[i]),
+                              ),
+                            ),
+                            onDelete: () =>
+                                _confirmDelete(context, ref, locations[i].id),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -281,6 +300,17 @@ class _LocationListItem extends ConsumerWidget {
                         ],
                       ),
                     ),
+                    if (location.syncStatus == SyncStatus.pending)
+                      Tooltip(
+                        message: 'Pendente de sincronização',
+                        child: Icon(
+                          Icons.cloud_upload_outlined,
+                          size: 16,
+                          color: transparencyEnabled
+                              ? Colors.orangeAccent
+                              : Colors.orange,
+                        ),
+                      ),
                     IconButton(
                       icon: const Icon(Icons.edit_outlined),
                       color: transparencyEnabled

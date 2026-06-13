@@ -27,8 +27,8 @@ PlantsRepository plantsRepository(Ref ref) {
 @riverpod
 class PlantsNotifier extends _$PlantsNotifier {
   @override
-  Future<List<PlantModel>> build() =>
-      ref.watch(plantsRepositoryProvider).getAll();
+  Stream<List<PlantModel>> build() =>
+      ref.watch(plantsRepositoryProvider).watchAll();
 
   Future<void> save(PlantModel plant) async {
     final oldPlants = await future;
@@ -51,9 +51,6 @@ class PlantsNotifier extends _$PlantsNotifier {
       // but for history it just creates the entry and invalidates entries.
       await ref.read(entriesNotifierProvider(plant.id).notifier).create(entry);
     }
-
-    ref.invalidateSelf();
-    await future;
   }
 
   Future<String?> _generateHistoryNote(PlantModel? old, PlantModel next) async {
@@ -132,14 +129,10 @@ class PlantsNotifier extends _$PlantsNotifier {
 
   Future<void> irrigate(String plantId) async {
     await ref.read(plantsRepositoryProvider).irrigate(plantId);
-    ref.invalidateSelf();
-    await future;
   }
 
   Future<void> delete(String plantId) async {
     await ref.read(plantsRepositoryProvider).delete(plantId);
-    ref.invalidateSelf();
-    await future;
   }
 }
 

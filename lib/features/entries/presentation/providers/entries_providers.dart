@@ -11,9 +11,9 @@ import '../../domain/entry_model.dart';
 part 'entries_providers.g.dart';
 
 final latestPlantPhotoProvider =
-    FutureProvider.autoDispose.family<String?, String>((ref, plantId) async {
+    StreamProvider.autoDispose.family<String?, String>((ref, plantId) {
   final db = ref.watch(appDatabaseProvider);
-  return db.entriesDao.getLatestPhotoPath(plantId);
+  return db.entriesDao.watchLatestPhotoPath(plantId);
 });
 
 @Riverpod(keepAlive: true)
@@ -30,17 +30,14 @@ EntriesRepository entriesRepository(Ref ref) {
 @riverpod
 class EntriesNotifier extends _$EntriesNotifier {
   @override
-  Future<List<EntryModel>> build(String plantId) =>
-      ref.watch(entriesRepositoryProvider).getByPlant(plantId);
+  Stream<List<EntryModel>> build(String plantId) =>
+      ref.watch(entriesRepositoryProvider).watchByPlant(plantId);
 
   Future<void> create(EntryModel entry) async {
     await ref.read(entriesRepositoryProvider).create(entry);
     if (entry.type == EntryType.irrigation) {
       await ref.read(plantsRepositoryProvider).refreshPlantStatus(plantId);
-      ref.invalidate(plantsNotifierProvider);
     }
-    ref.invalidateSelf();
-    await future;
   }
 
   Future<void> delete(String id, {String? photoPath}) async {
@@ -52,9 +49,6 @@ class EntriesNotifier extends _$EntriesNotifier {
 
     if (entry?.type == EntryType.irrigation) {
       await ref.read(plantsRepositoryProvider).refreshPlantStatus(plantId);
-      ref.invalidate(plantsNotifierProvider);
     }
-    ref.invalidateSelf();
-    await future;
   }
 }

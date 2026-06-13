@@ -15,18 +15,14 @@ LocationsRepository locationsRepository(Ref ref) {
 @riverpod
 class LocationsNotifier extends _$LocationsNotifier {
   @override
-  Future<List<LocationModel>> build() =>
-      ref.watch(locationsRepositoryProvider).getAll();
+  Stream<List<LocationModel>> build() =>
+      ref.watch(locationsRepositoryProvider).watchAll();
 
   Future<void> save(LocationModel location) async {
     await ref.read(locationsRepositoryProvider).save(location);
-    ref.invalidateSelf();
-    await future;
   }
 
   Future<void> delete(String locationId) async {
     await ref.read(locationsRepositoryProvider).delete(locationId);
-    ref.invalidateSelf();
-    await future;
   }
 }

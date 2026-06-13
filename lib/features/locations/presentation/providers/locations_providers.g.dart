@@ -24,11 +24,11 @@ final locationsRepositoryProvider = Provider<LocationsRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef LocationsRepositoryRef = ProviderRef<LocationsRepository>;
-String _$locationsNotifierHash() => r'e4c8e3fc78823f533fcb386de98ba8b3fddd3e76';
+String _$locationsNotifierHash() => r'c7d2d54f2922d5d7bc59e2edf89567b1cbe852f3';
 
 /// See also [LocationsNotifier].
 @ProviderFor(LocationsNotifier)
-final locationsNotifierProvider = AutoDisposeAsyncNotifierProvider<
+final locationsNotifierProvider = AutoDisposeStreamNotifierProvider<
     LocationsNotifier, List<LocationModel>>.internal(
   LocationsNotifier.new,
   name: r'locationsNotifierProvider',
@@ -39,6 +39,6 @@ final locationsNotifierProvider = AutoDisposeAsyncNotifierProvider<
   allTransitiveDependencies: null,
 );
 
-typedef _$LocationsNotifier = AutoDisposeAsyncNotifier<List<LocationModel>>;
+typedef _$LocationsNotifier = AutoDisposeStreamNotifier<List<LocationModel>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

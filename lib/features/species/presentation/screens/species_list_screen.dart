@@ -22,6 +22,11 @@ class SpeciesListScreen extends ConsumerStatefulWidget {
 class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
   final _searchController = TextEditingController();
 
+  Future<void> _refresh() async {
+    ref.invalidate(speciesNotifierProvider);
+    await ref.read(filteredSortedSpeciesProvider.future).catchError((_) {});
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -110,41 +115,55 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                 ),
                 _InfoBanner(),
                 Expanded(
-                  child: speciesAsync.when(
-                    loading: () => const Center(
-                      child: CircularProgressIndicator(color: Colors.white),
-                    ),
-                    error: (e, _) => Center(
-                      child: Text(
-                        'Erro: $e',
-                        style: const TextStyle(color: Colors.white),
+                  child: RefreshIndicator(
+                    onRefresh: _refresh,
+                    color: Colors.white,
+                    backgroundColor: Colors.black54,
+                    child: speciesAsync.when(
+                      loading: () => const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
                       ),
-                    ),
-                    data: (species) {
-                      if (species.isEmpty) {
-                        return _searchController.text.isNotEmpty
-                            ? const Center(
-                                child: Text('Nenhuma espécie encontrada',
-                                    style: TextStyle(color: Colors.white)))
-                            : const _EmptyState();
-                      }
-                      return ListView.builder(
-                        padding: const EdgeInsets.only(top: 8, bottom: 80),
-                        itemCount: species.length,
-                        itemBuilder: (ctx, i) => _SpeciesListItem(
-                          species: species[i],
-                          onEdit: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  AddSpeciesScreen(species: species[i]),
-                            ),
-                          ),
-                          onDelete: () =>
-                              _confirmDelete(context, ref, species[i].id),
+                      error: (e, _) => Center(
+                        child: Text(
+                          'Erro: $e',
+                          style: const TextStyle(color: Colors.white),
                         ),
-                      );
-                    },
+                      ),
+                      data: (species) {
+                        if (species.isEmpty) {
+                          return LayoutBuilder(
+                            builder: (_, constraints) => SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: SizedBox(
+                                height: constraints.maxHeight,
+                                child: _searchController.text.isNotEmpty
+                                    ? const Center(
+                                        child: Text('Nenhuma espécie encontrada',
+                                            style: TextStyle(color: Colors.white)))
+                                    : const _EmptyState(),
+                              ),
+                            ),
+                          );
+                        }
+                        return ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(top: 8, bottom: 80),
+                          itemCount: species.length,
+                          itemBuilder: (ctx, i) => _SpeciesListItem(
+                            species: species[i],
+                            onEdit: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    AddSpeciesScreen(species: species[i]),
+                              ),
+                            ),
+                            onDelete: () =>
+                                _confirmDelete(context, ref, species[i].id),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -432,6 +451,17 @@ class _SpeciesListItem extends ConsumerWidget {
                         ],
                       ),
                     ),
+                    if (species.syncStatus == SyncStatus.pending)
+                      Tooltip(
+                        message: 'Pendente de sincronização',
+                        child: Icon(
+                          Icons.cloud_upload_outlined,
+                          size: 16,
+                          color: transparencyEnabled
+                              ? Colors.orangeAccent
+                              : Colors.orange,
+                        ),
+                      ),
                     IconButton(
                       icon: const Icon(Icons.edit_outlined),
                       color: transparencyEnabled

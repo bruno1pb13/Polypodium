@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/enums.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/plant_model.dart';
@@ -89,6 +90,20 @@ class PlantListItem extends ConsumerWidget {
                                   ),
                                 ),
                               ),
+                              if (pws.plant.syncStatus == SyncStatus.pending)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 4),
+                                  child: Tooltip(
+                                    message: 'Pendente de sincronização',
+                                    child: Icon(
+                                      Icons.cloud_upload_outlined,
+                                      size: 16,
+                                      color: transparencyEnabled
+                                          ? Colors.orangeAccent
+                                          : Colors.orange,
+                                    ),
+                                  ),
+                                ),
                               Icon(
                                 Icons.more_vert,
                                 size: 20,

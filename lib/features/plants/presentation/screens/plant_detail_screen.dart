@@ -124,7 +124,18 @@ class PlantDetailScreen extends ConsumerWidget {
                 ),
               ),
               SafeArea(
-                child: CustomScrollView(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(plantsNotifierProvider);
+                    ref.invalidate(entriesNotifierProvider(plantId));
+                    await Future.wait([
+                      ref.read(plantsNotifierProvider.future).catchError((_) {}),
+                      ref.read(entriesNotifierProvider(plantId).future).catchError((_) {}),
+                    ]);
+                  },
+                  color: Colors.white,
+                  backgroundColor: Colors.black54,
+                  child: CustomScrollView(
                   slivers: [
                     SliverToBoxAdapter(
                       child: _HeaderSection(plant: plant, pws: pws),
@@ -182,6 +193,7 @@ class PlantDetailScreen extends ConsumerWidget {
                     ),
                     const SliverToBoxAdapter(child: SizedBox(height: 120)),
                   ],
+                  ),
                 ),
               ),
             ],

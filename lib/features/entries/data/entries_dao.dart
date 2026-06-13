@@ -37,6 +37,9 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
   Future<void> insert(EntriesTableCompanion companion) =>
       into(entriesTable).insert(companion);
 
+  Future<void> upsert(EntriesTableCompanion companion) =>
+      into(entriesTable).insertOnConflictUpdate(companion);
+
   Future<void> updateSyncStatus(String id, SyncStatus status) =>
       (update(entriesTable)..where((t) => t.id.equals(id)))
           .write(EntriesTableCompanion(syncStatus: Value(status)));
@@ -58,6 +61,15 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
           ..limit(1))
         .getSingleOrNull();
     return row?.photoPath;
+  }
+
+  Stream<String?> watchLatestPhotoPath(String plantId) {
+    return (select(entriesTable)
+          ..where((t) => t.plantId.equals(plantId) & t.photoPath.isNotNull())
+          ..orderBy([(t) => OrderingTerm.desc(t.date)])
+          ..limit(1))
+        .watchSingleOrNull()
+        .map((row) => row?.photoPath);
   }
 
   /// Returns the IDs (and photo paths) of entries that exceed the retention

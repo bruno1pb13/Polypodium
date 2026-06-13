@@ -16,19 +16,15 @@ SpeciesRepository speciesRepository(Ref ref) {
 @riverpod
 class SpeciesNotifier extends _$SpeciesNotifier {
   @override
-  Future<List<SpeciesModel>> build() =>
-      ref.watch(speciesRepositoryProvider).getAll();
+  Stream<List<SpeciesModel>> build() =>
+      ref.watch(speciesRepositoryProvider).watchAll();
 
   Future<void> save(SpeciesModel species) async {
     await ref.read(speciesRepositoryProvider).save(species);
-    ref.invalidateSelf();
-    await future;
   }
 
   Future<void> delete(String id) async {
     await ref.read(speciesRepositoryProvider).delete(id);
-    ref.invalidateSelf();
-    await future;
   }
 
   Future<String> getOrCreateFromExternal({
