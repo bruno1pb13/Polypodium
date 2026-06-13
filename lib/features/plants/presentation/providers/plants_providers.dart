@@ -14,6 +14,8 @@ import '../../../locations/presentation/providers/locations_providers.dart';
 import '../../../soils/presentation/providers/soils_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
 
+import '../../../../core/sync/sync_providers.dart';
+
 part 'plants_providers.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -27,8 +29,8 @@ PlantsRepository plantsRepository(Ref ref) {
 @riverpod
 class PlantsNotifier extends _$PlantsNotifier {
   @override
-  Future<List<PlantModel>> build() =>
-      ref.watch(plantsRepositoryProvider).getAll();
+  Stream<List<PlantModel>> build() =>
+      ref.watch(plantsRepositoryProvider).watchAll();
 
   Future<void> save(PlantModel plant) async {
     final oldPlants = await future;
@@ -51,9 +53,16 @@ class PlantsNotifier extends _$PlantsNotifier {
       // but for history it just creates the entry and invalidates entries.
       await ref.read(entriesNotifierProvider(plant.id).notifier).create(entry);
     }
-
-    ref.invalidateSelf();
-    await future;
+    
+    // Trigger immediate sync if logged in
+    try {
+      final syncService = ref.read(syncServiceProvider);
+      if (syncService.isLoggedIn) {
+        ref.read(syncNotifierProvider.notifier).sync().catchError((_) {});
+      }
+    } catch (_) {
+      // SharedPreferences might not be ready in tests
+    }
   }
 
   Future<String?> _generateHistoryNote(PlantModel? old, PlantModel next) async {
@@ -132,14 +141,30 @@ class PlantsNotifier extends _$PlantsNotifier {
 
   Future<void> irrigate(String plantId) async {
     await ref.read(plantsRepositoryProvider).irrigate(plantId);
-    ref.invalidateSelf();
-    await future;
+
+    // Trigger immediate sync if logged in
+    try {
+      final syncService = ref.read(syncServiceProvider);
+      if (syncService.isLoggedIn) {
+        ref.read(syncNotifierProvider.notifier).sync().catchError((_) {});
+      }
+    } catch (_) {
+      // SharedPreferences might not be ready in tests
+    }
   }
 
   Future<void> delete(String plantId) async {
     await ref.read(plantsRepositoryProvider).delete(plantId);
-    ref.invalidateSelf();
-    await future;
+
+    // Trigger immediate sync if logged in
+    try {
+      final syncService = ref.read(syncServiceProvider);
+      if (syncService.isLoggedIn) {
+        ref.read(syncNotifierProvider.notifier).sync().catchError((_) {});
+      }
+    } catch (_) {
+      // SharedPreferences might not be ready in tests
+    }
   }
 }
 
@@ -147,23 +172,48 @@ class PlantsNotifier extends _$PlantsNotifier {
 @riverpod
 Future<List<PlantWithSpecies>> plantsWithSpecies(Ref ref) async {
   // Watch all futures at once to keep them alive and potentially run in parallel
-  final plantsFuture = ref.watch(plantsNotifierProvider.future);
-  final speciesFuture = ref.watch(speciesNotifierProvider.future);
-  final locationsFuture = ref.watch(locationsNotifierProvider.future);
+  final plantsStream = ref.watch(plantsNotifierProvider.future);
+  final speciesStream = ref.watch(speciesNotifierProvider.future);
+  final locationsStream = ref.watch(locationsNotifierProvider.future);
 
-  final plants = await plantsFuture;
-  final species = await speciesFuture;
-  final locations = await locationsFuture;
+  final plants = await plantsStream;
+  final species = await speciesStream;
+  final locations = await locationsStream;
 
   final speciesById = {for (final s in species) s.id: s};
   final locationsById = {for (final l in locations) l.id: l};
 
-  return plants
-      .where((p) => speciesById.containsKey(p.speciesId))
-      .map((p) => PlantWithSpecies(
-            plant: p,
-            species: speciesById[p.speciesId]!,
-            location: p.locationId != null ? locationsById[p.locationId] : null,
-          ))
-      .toList();
+  // Pre-fetch entries sync status for all plants to avoid N+1 queries if possible,
+  // but for simplicity we'll fetch per plant for now as it's a small list.
+  final db = ref.watch(appDatabaseProvider);
+
+  final results = <PlantWithSpecies>[];
+  for (final p in plants) {
+    if (!speciesById.containsKey(p.speciesId)) continue;
+
+    final species = speciesById[p.speciesId]!;
+    
+    // Check if any entry for this plant is pending sync
+    final hasPendingEntries = await db.entriesDao.hasPendingSync(p.id);
+    
+    // Check if the location is pending sync
+    final location = p.locationId != null ? locationsById[p.locationId] : null;
+    final locationPending = location?.syncStatus == SyncStatus.pending;
+    
+    // Determine overall sync status: if plant, species, location, or any entry is pending, overall is pending
+    final overallSyncStatus = (p.syncStatus == SyncStatus.pending || 
+                               species.syncStatus == SyncStatus.pending || 
+                               locationPending ||
+                               hasPendingEntries) 
+                               ? SyncStatus.pending 
+                               : SyncStatus.synced;
+
+    results.add(PlantWithSpecies(
+      plant: p.copyWith(syncStatus: overallSyncStatus),
+      species: species,
+      location: location,
+    ));
+  }
+
+  return results;
 }

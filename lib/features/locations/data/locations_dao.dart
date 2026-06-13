@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/enums.dart';
 
 part 'locations_dao.g.dart';
 
@@ -22,6 +23,10 @@ class LocationsDao extends DatabaseAccessor<AppDatabase>
 
   Future<void> upsert(LocationsTableCompanion companion) =>
       into(locationsTable).insertOnConflictUpdate(companion);
+
+  Future<void> updateSyncStatus(String id, SyncStatus status) =>
+      (update(locationsTable)..where((t) => t.id.equals(id)))
+          .write(LocationsTableCompanion(syncStatus: Value(status)));
 
   Future<int> deleteById(String id) =>
       (delete(locationsTable)..where((t) => t.id.equals(id))).go();

@@ -23,11 +23,11 @@ final speciesRepositoryProvider = Provider<SpeciesRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SpeciesRepositoryRef = ProviderRef<SpeciesRepository>;
-String _$speciesNotifierHash() => r'd9a87abedcf555f4baec8d4691cf6611a0331f0e';
+String _$speciesNotifierHash() => r'ea206e61abd4084068d9bc903b7bb74ac334d190';
 
 /// See also [SpeciesNotifier].
 @ProviderFor(SpeciesNotifier)
-final speciesNotifierProvider = AutoDisposeAsyncNotifierProvider<
+final speciesNotifierProvider = AutoDisposeStreamNotifierProvider<
     SpeciesNotifier, List<SpeciesModel>>.internal(
   SpeciesNotifier.new,
   name: r'speciesNotifierProvider',
@@ -38,6 +38,6 @@ final speciesNotifierProvider = AutoDisposeAsyncNotifierProvider<
   allTransitiveDependencies: null,
 );
 
-typedef _$SpeciesNotifier = AutoDisposeAsyncNotifier<List<SpeciesModel>>;
+typedef _$SpeciesNotifier = AutoDisposeStreamNotifier<List<SpeciesModel>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

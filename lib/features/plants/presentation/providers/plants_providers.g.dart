@@ -44,12 +44,12 @@ final plantsWithSpeciesProvider =
 // ignore: unused_element
 typedef PlantsWithSpeciesRef
     = AutoDisposeFutureProviderRef<List<PlantWithSpecies>>;
-String _$plantsNotifierHash() => r'3fc702c4980cdc912600d6d55b606c93488f205f';
+String _$plantsNotifierHash() => r'5923869115407d518770d8cb77fcbf9c3c873f08';
 
 /// See also [PlantsNotifier].
 @ProviderFor(PlantsNotifier)
-final plantsNotifierProvider =
-    AutoDisposeAsyncNotifierProvider<PlantsNotifier, List<PlantModel>>.internal(
+final plantsNotifierProvider = AutoDisposeStreamNotifierProvider<PlantsNotifier,
+    List<PlantModel>>.internal(
   PlantsNotifier.new,
   name: r'plantsNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -59,6 +59,6 @@ final plantsNotifierProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$PlantsNotifier = AutoDisposeAsyncNotifier<List<PlantModel>>;
+typedef _$PlantsNotifier = AutoDisposeStreamNotifier<List<PlantModel>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

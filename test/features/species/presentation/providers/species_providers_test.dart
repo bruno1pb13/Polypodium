@@ -55,6 +55,9 @@ void main() {
       
       expect(resultId, isNotNull);
       
+      // Wait for the stream to emit the new data. 
+      // We might need to give it a moment for the DB stream to fire.
+      await Future.delayed(const Duration(milliseconds: 100));
       final all = await container.read(speciesNotifierProvider.future);
       expect(all.length, 1);
       expect(all.first.id, resultId);

@@ -23,12 +23,12 @@ final soilsRepositoryProvider = Provider<SoilsRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SoilsRepositoryRef = ProviderRef<SoilsRepository>;
-String _$soilsNotifierHash() => r'fe044d6e3d7690b042aa01486c8de2cc61098c69';
+String _$soilsNotifierHash() => r'168d1f0b68dba6e4a265c1cdb41e5b180fb36c97';
 
 /// See also [SoilsNotifier].
 @ProviderFor(SoilsNotifier)
 final soilsNotifierProvider =
-    AutoDisposeAsyncNotifierProvider<SoilsNotifier, List<SoilModel>>.internal(
+    AutoDisposeStreamNotifierProvider<SoilsNotifier, List<SoilModel>>.internal(
   SoilsNotifier.new,
   name: r'soilsNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -38,6 +38,6 @@ final soilsNotifierProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$SoilsNotifier = AutoDisposeAsyncNotifier<List<SoilModel>>;
+typedef _$SoilsNotifier = AutoDisposeStreamNotifier<List<SoilModel>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

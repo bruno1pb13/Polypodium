@@ -7,6 +7,7 @@ class SettingsRepository {
   static const _notificationsEnabledKey = 'notifications_enabled';
   static const _transparencyEnabledKey = 'transparency_enabled';
   static const _themeModeKey = 'theme_mode';
+  static const _syncServerUrlKey = 'sync_server_url';
 
   final SharedPreferences _prefs;
 
@@ -34,6 +35,16 @@ class SettingsRepository {
 
   Future<void> setThemeMode(String themeMode) async {
     await _prefs.setString(_themeModeKey, themeMode);
+  }
+
+  String? getSyncServerUrl() => _prefs.getString(_syncServerUrlKey);
+
+  Future<void> setSyncServerUrl(String? url) async {
+    if (url == null) {
+      await _prefs.remove(_syncServerUrlKey);
+    } else {
+      await _prefs.setString(_syncServerUrlKey, url);
+    }
   }
 
   Future<void> rescheduleAllNotifications(Ref ref) async {

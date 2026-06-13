@@ -39,7 +39,7 @@ final entriesRepositoryProvider = Provider<EntriesRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef EntriesRepositoryRef = ProviderRef<EntriesRepository>;
-String _$entriesNotifierHash() => r'28ff728cd4ab6acc2e2692ceac6576b229530f72';
+String _$entriesNotifierHash() => r'98d970a6b41e2da5ee8e570804d182d7ffc37afd';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -63,10 +63,10 @@ class _SystemHash {
 }
 
 abstract class _$EntriesNotifier
-    extends BuildlessAutoDisposeAsyncNotifier<List<EntryModel>> {
+    extends BuildlessAutoDisposeStreamNotifier<List<EntryModel>> {
   late final String plantId;
 
-  FutureOr<List<EntryModel>> build(
+  Stream<List<EntryModel>> build(
     String plantId,
   );
 }
@@ -114,7 +114,7 @@ class EntriesNotifierFamily extends Family<AsyncValue<List<EntryModel>>> {
 }
 
 /// See also [EntriesNotifier].
-class EntriesNotifierProvider extends AutoDisposeAsyncNotifierProviderImpl<
+class EntriesNotifierProvider extends AutoDisposeStreamNotifierProviderImpl<
     EntriesNotifier, List<EntryModel>> {
   /// See also [EntriesNotifier].
   EntriesNotifierProvider(
@@ -146,7 +146,7 @@ class EntriesNotifierProvider extends AutoDisposeAsyncNotifierProviderImpl<
   final String plantId;
 
   @override
-  FutureOr<List<EntryModel>> runNotifierBuild(
+  Stream<List<EntryModel>> runNotifierBuild(
     covariant EntriesNotifier notifier,
   ) {
     return notifier.build(
@@ -171,7 +171,7 @@ class EntriesNotifierProvider extends AutoDisposeAsyncNotifierProviderImpl<
   }
 
   @override
-  AutoDisposeAsyncNotifierProviderElement<EntriesNotifier, List<EntryModel>>
+  AutoDisposeStreamNotifierProviderElement<EntriesNotifier, List<EntryModel>>
       createElement() {
     return _EntriesNotifierProviderElement(this);
   }
@@ -193,13 +193,13 @@ class EntriesNotifierProvider extends AutoDisposeAsyncNotifierProviderImpl<
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 mixin EntriesNotifierRef
-    on AutoDisposeAsyncNotifierProviderRef<List<EntryModel>> {
+    on AutoDisposeStreamNotifierProviderRef<List<EntryModel>> {
   /// The parameter `plantId` of this provider.
   String get plantId;
 }
 
 class _EntriesNotifierProviderElement
-    extends AutoDisposeAsyncNotifierProviderElement<EntriesNotifier,
+    extends AutoDisposeStreamNotifierProviderElement<EntriesNotifier,
         List<EntryModel>> with EntriesNotifierRef {
   _EntriesNotifierProviderElement(super.provider);
 

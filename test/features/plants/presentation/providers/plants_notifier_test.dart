@@ -22,28 +22,28 @@ class MockEntriesRepository extends Mock implements EntriesRepository {}
 // Simple mocks for notifiers
 class MockSpeciesNotifier extends SpeciesNotifier with Mock {
   @override
-  Future<List<SpeciesModel>> build() async => [];
+  Stream<List<SpeciesModel>> build() => Stream.value([]);
 }
 
 class MockLocationsNotifier extends LocationsNotifier with Mock {
   @override
-  Future<List<LocationModel>> build() async => [];
+  Stream<List<LocationModel>> build() => Stream.value([]);
 }
 
 class MockSoilsNotifier extends SoilsNotifier with Mock {
   @override
-  Future<List<SoilModel>> build() async => [
+  Stream<List<SoilModel>> build() => Stream.value([
         SoilModel(
             id: 'loamy',
             name: 'Franco',
             createdAt: DateTime.now(),
             syncStatus: SyncStatus.synced),
-      ];
+      ]);
 }
 
 class MockEntriesNotifier extends EntriesNotifier with Mock {
   @override
-  Future<List<EntryModel>> build(String plantId) async => [];
+  Stream<List<EntryModel>> build(String plantId) => Stream.value([]);
 }
 
 void main() {
@@ -106,7 +106,7 @@ void main() {
         createdAt: now,
       );
 
-      when(() => mockPlantsRepo.getAll()).thenAnswer((_) async => []);
+      when(() => mockPlantsRepo.watchAll()).thenAnswer((_) => Stream.value([]));
       when(() => mockPlantsRepo.save(any())).thenAnswer((_) async => {});
       when(() => mockEntriesRepo.create(any())).thenAnswer((_) async => {});
 
@@ -151,7 +151,8 @@ void main() {
 
       final newPlant = oldPlant.copyWith(nickname: 'Ferny Updated');
 
-      when(() => mockPlantsRepo.getAll()).thenAnswer((_) async => [oldPlant]);
+      when(() => mockPlantsRepo.watchAll())
+          .thenAnswer((_) => Stream.value([oldPlant]));
       when(() => mockPlantsRepo.save(any())).thenAnswer((_) async => {});
       when(() => mockEntriesRepo.create(any())).thenAnswer((_) async => {});
 
@@ -182,11 +183,12 @@ void main() {
       expect(capturedEntry.note, contains('Apelido: Ferny → Ferny Updated'));
     });
 
-    test('irrigate calls repository and invalidates self', () async {
+    test('irrigate calls repository', () async {
       const plantId = 'p1';
       when(() => mockPlantsRepo.irrigate(plantId))
           .thenAnswer((_) async => null);
-      when(() => mockPlantsRepo.getAll()).thenAnswer((_) async => []);
+      when(() => mockPlantsRepo.watchAll())
+          .thenAnswer((_) => Stream.value([]));
 
       final notifier = container.read(plantsNotifierProvider.notifier);
       await notifier.irrigate(plantId);

@@ -39,11 +39,10 @@ class PlantsRepository {
 
   Future<void> save(PlantModel plant) async {
     await _dao.upsert(_toCompanion(plant));
-    // TODO(sync): Enqueue for server sync
     await _syncQueueDao.enqueue(
       entityType: 'plant',
       entityId: plant.id,
-      operation: 'upsert',
+      operation: 'create',
       payload: plant.toJsonString(),
     );
     await _rescheduleNotification(plant);
@@ -53,15 +52,16 @@ class PlantsRepository {
   Future<PlantModel?> irrigate(String plantId) async {
     final now = DateTime.now();
     await _dao.updateLastIrrigated(plantId, now);
-    // TODO(sync): Enqueue irrigation update for server sync
-    await _syncQueueDao.enqueue(
-      entityType: 'plant',
-      entityId: plantId,
-      operation: 'irrigate',
-      payload: '{"id":"$plantId","lastIrrigatedAt":"${now.toIso8601String()}"}',
-    );
     final updated = await getById(plantId);
-    if (updated != null) await _rescheduleNotification(updated);
+    if (updated != null) {
+      await _syncQueueDao.enqueue(
+        entityType: 'plant',
+        entityId: plantId,
+        operation: 'update',
+        payload: updated.toJsonString(),
+      );
+      await _rescheduleNotification(updated);
+    }
     return updated;
   }
 
