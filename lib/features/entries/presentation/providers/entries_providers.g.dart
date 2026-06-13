@@ -39,7 +39,7 @@ final entriesRepositoryProvider = Provider<EntriesRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef EntriesRepositoryRef = ProviderRef<EntriesRepository>;
-String _$entriesNotifierHash() => r'e985db80079eb12b56c87d710c4be95a8ae72e50';
+String _$entriesNotifierHash() => r'98d970a6b41e2da5ee8e570804d182d7ffc37afd';
 
 /// Copied from Dart SDK
 class _SystemHash {

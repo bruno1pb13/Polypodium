@@ -32,7 +32,13 @@ class SyncService {
   String? get serverUrl => _prefs.getString(_serverUrlKey);
   int get cursor => _prefs.getInt(_cursorKey) ?? 0;
   String? get userEmail => _prefs.getString(_userEmailKey);
-  bool get isLoggedIn => token != null && serverUrl != null;
+  bool get isLoggedIn {
+    try {
+      return token != null && serverUrl != null;
+    } catch (_) {
+      return false;
+    }
+  }
 
   DateTime? get lastSyncAt {
     final s = _prefs.getString(_lastSyncAtKey);
@@ -271,16 +277,25 @@ class SyncService {
       await _db.entriesDao.deleteById(p['id'] as String);
       return;
     }
+    final plantId = p['plantId'] as String;
+    final type = EntryType.values.byName(p['type'] as String);
+
     await _db.entriesDao.upsert(EntriesTableCompanion.insert(
       id: p['id'] as String,
-      plantId: p['plantId'] as String,
+      plantId: plantId,
       date: DateTime.parse(p['date'] as String),
       photoPath: Value(p['photoPath'] as String?),
       note: Value(p['note'] as String?),
-      type: EntryType.values.byName(p['type'] as String),
+      type: type,
       createdAt: DateTime.parse(p['createdAt'] as String),
       syncStatus: const Value(SyncStatus.synced),
     ));
+
+    // If this is an irrigation, we MUST update the plant's lastIrrigatedAt
+    if (type == EntryType.irrigation) {
+      final lastDate = await _db.entriesDao.getLastIrrigationDate(plantId);
+      await _db.plantsDao.updateLastIrrigated(plantId, lastDate);
+    }
   }
 
   Future<void> _applyLocationEvent(String op, Map<String, dynamic> p) async {

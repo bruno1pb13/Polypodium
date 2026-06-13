@@ -23,7 +23,9 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
 
   Future<void> _refresh() async {
     ref.invalidate(locationsNotifierProvider);
-    await ref.read(filteredSortedLocationsProvider.future).catchError((_) {});
+    try {
+      await ref.read(filteredSortedLocationsProvider.future);
+    } catch (_) {}
   }
 
   @override

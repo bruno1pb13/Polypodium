@@ -128,10 +128,12 @@ class PlantDetailScreen extends ConsumerWidget {
                   onRefresh: () async {
                     ref.invalidate(plantsNotifierProvider);
                     ref.invalidate(entriesNotifierProvider(plantId));
-                    await Future.wait([
-                      ref.read(plantsNotifierProvider.future).catchError((_) {}),
-                      ref.read(entriesNotifierProvider(plantId).future).catchError((_) {}),
-                    ]);
+                    try {
+                      await Future.wait([
+                        ref.read(plantsNotifierProvider.future),
+                        ref.read(entriesNotifierProvider(plantId).future),
+                      ]);
+                    } catch (_) {}
                   },
                   color: Colors.white,
                   backgroundColor: Colors.black54,

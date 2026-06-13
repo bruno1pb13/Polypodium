@@ -24,7 +24,9 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
 
   Future<void> _refresh() async {
     ref.invalidate(soilsNotifierProvider);
-    await ref.read(filteredSortedSoilsProvider.future).catchError((_) {});
+    try {
+      await ref.read(filteredSortedSoilsProvider.future);
+    } catch (_) {}
   }
 
   @override

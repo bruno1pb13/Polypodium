@@ -24,7 +24,9 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
 
   Future<void> _refresh() async {
     ref.invalidate(speciesNotifierProvider);
-    await ref.read(filteredSortedSpeciesProvider.future).catchError((_) {});
+    try {
+      await ref.read(filteredSortedSpeciesProvider.future);
+    } catch (_) {}
   }
 
   @override

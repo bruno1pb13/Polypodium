@@ -82,4 +82,13 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
     if (all.length <= keepCount) return [];
     return all.sublist(keepCount); // oldest entries beyond the limit
   }
+
+  Future<bool> hasPendingSync(String plantId) async {
+    final query = select(entriesTable)
+      ..where((t) =>
+          t.plantId.equals(plantId) & t.syncStatus.equalsValue(SyncStatus.pending))
+      ..limit(1);
+    final row = await query.getSingleOrNull();
+    return row != null;
+  }
 }

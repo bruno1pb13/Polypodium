@@ -26,7 +26,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _refresh() async {
     ref.invalidate(plantsNotifierProvider);
-    await ref.read(filteredSortedPlantsProvider.future).catchError((_) {});
+    try {
+      await ref.read(filteredSortedPlantsProvider.future);
+    } catch (_) {}
   }
 
   @override
