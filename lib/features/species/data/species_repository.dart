@@ -32,7 +32,7 @@ class SpeciesRepository {
     await _syncQueueDao.enqueue(
       entityType: 'species',
       entityId: species.id,
-      operation: 'upsert',
+      operation: 'create',
       payload: species.toJsonString(),
     );
   }

@@ -37,6 +37,9 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
   Future<void> insert(EntriesTableCompanion companion) =>
       into(entriesTable).insert(companion);
 
+  Future<void> upsert(EntriesTableCompanion companion) =>
+      into(entriesTable).insertOnConflictUpdate(companion);
+
   Future<void> updateSyncStatus(String id, SyncStatus status) =>
       (update(entriesTable)..where((t) => t.id.equals(id)))
           .write(EntriesTableCompanion(syncStatus: Value(status)));
@@ -60,6 +63,15 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
     return row?.photoPath;
   }
 
+  Stream<String?> watchLatestPhotoPath(String plantId) {
+    return (select(entriesTable)
+          ..where((t) => t.plantId.equals(plantId) & t.photoPath.isNotNull())
+          ..orderBy([(t) => OrderingTerm.desc(t.date)])
+          ..limit(1))
+        .watchSingleOrNull()
+        .map((row) => row?.photoPath);
+  }
+
   /// Returns the IDs (and photo paths) of entries that exceed the retention
   /// limit, ordered oldest-first so the caller can delete them.
   Future<List<EntriesTableData>> getOverRetentionLimit(
@@ -69,5 +81,14 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
     final all = await getByPlant(plantId); // newest first
     if (all.length <= keepCount) return [];
     return all.sublist(keepCount); // oldest entries beyond the limit
+  }
+
+  Future<bool> hasPendingSync(String plantId) async {
+    final query = select(entriesTable)
+      ..where((t) =>
+          t.plantId.equals(plantId) & t.syncStatus.equalsValue(SyncStatus.pending))
+      ..limit(1);
+    final row = await query.getSingleOrNull();
+    return row != null;
   }
 }

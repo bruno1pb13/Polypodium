@@ -22,6 +22,13 @@ class SoilsListScreen extends ConsumerStatefulWidget {
 class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
   final _searchController = TextEditingController();
 
+  Future<void> _refresh() async {
+    ref.invalidate(soilsNotifierProvider);
+    try {
+      await ref.read(filteredSortedSoilsProvider.future);
+    } catch (_) {}
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -101,39 +108,53 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
                   ],
                 ),
                 Expanded(
-                  child: soilsAsync.when(
-                    loading: () => const Center(
-                      child: CircularProgressIndicator(color: Colors.white),
-                    ),
-                    error: (e, _) => Center(
-                      child: Text(
-                        'Erro: $e',
-                        style: const TextStyle(color: Colors.white),
+                  child: RefreshIndicator(
+                    onRefresh: _refresh,
+                    color: Colors.white,
+                    backgroundColor: Colors.black54,
+                    child: soilsAsync.when(
+                      loading: () => const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
                       ),
-                    ),
-                    data: (soils) {
-                      if (soils.isEmpty) {
-                        return _searchController.text.isNotEmpty
-                            ? const Center(
-                                child: Text('Nenhum solo encontrado',
-                                    style: TextStyle(color: Colors.white)))
-                            : const _EmptyState();
-                      }
-                      return ListView.builder(
-                        padding: const EdgeInsets.only(top: 8, bottom: 80),
-                        itemCount: soils.length,
-                        itemBuilder: (ctx, i) => _SoilListItem(
-                          soil: soils[i],
-                          onEdit: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => AddEditSoilScreen(soil: soils[i]),
-                            ),
-                          ),
-                          onDelete: () => _confirmDelete(context, ref, soils[i].id),
+                      error: (e, _) => Center(
+                        child: Text(
+                          'Erro: $e',
+                          style: const TextStyle(color: Colors.white),
                         ),
-                      );
-                    },
+                      ),
+                      data: (soils) {
+                        if (soils.isEmpty) {
+                          return LayoutBuilder(
+                            builder: (_, constraints) => SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: SizedBox(
+                                height: constraints.maxHeight,
+                                child: _searchController.text.isNotEmpty
+                                    ? const Center(
+                                        child: Text('Nenhum solo encontrado',
+                                            style: TextStyle(color: Colors.white)))
+                                    : const _EmptyState(),
+                              ),
+                            ),
+                          );
+                        }
+                        return ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(top: 8, bottom: 80),
+                          itemCount: soils.length,
+                          itemBuilder: (ctx, i) => _SoilListItem(
+                            soil: soils[i],
+                            onEdit: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AddEditSoilScreen(soil: soils[i]),
+                              ),
+                            ),
+                            onDelete: () => _confirmDelete(context, ref, soils[i].id),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],

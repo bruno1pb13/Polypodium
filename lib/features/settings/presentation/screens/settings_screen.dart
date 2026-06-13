@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/settings_providers.dart';
+import '../../../../core/sync/sync_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -73,6 +74,9 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const Divider(),
+          _SectionHeader(title: 'Sincronização'),
+          const _SyncSection(),
+          const Divider(),
           const AboutListTile(
             icon: Icon(Icons.info_outline),
             applicationName: 'Polypodium',
@@ -85,6 +89,290 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+
+class _SyncSection extends ConsumerWidget {
+  const _SyncSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final syncService = ref.watch(syncServiceProvider);
+    final syncState = ref.watch(syncNotifierProvider);
+    final pendingAsync = ref.watch(pendingSyncCountProvider);
+
+    if (!syncService.isLoggedIn) {
+      return ListTile(
+        leading: const Icon(Icons.cloud_off_outlined),
+        title: const Text('Não configurado'),
+        subtitle: const Text('Conecte a um servidor para sincronizar entre dispositivos'),
+        trailing: TextButton(
+          onPressed: () => _showLoginDialog(context, ref),
+          child: const Text('Configurar'),
+        ),
+      );
+    }
+
+    final lastSync = syncService.lastSyncAt;
+    final lastSyncText = lastSync == null
+        ? 'Nunca sincronizado'
+        : 'Último sync: ${_formatRelative(lastSync)}';
+
+    final pendingText = pendingAsync.when(
+      data: (n) => n == 0 ? 'Tudo sincronizado' : '$n evento(s) pendente(s)',
+      loading: () => '...',
+      error: (_, __) => '',
+    );
+
+    final isLoading = syncState.isLoading;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.cloud_done_outlined),
+          title: Text(syncService.userEmail ?? 'Conectado'),
+          subtitle: Text(syncService.serverUrl ?? ''),
+          trailing: IconButton(
+            icon: const Icon(Icons.logout, size: 20),
+            tooltip: 'Desconectar',
+            onPressed: isLoading
+                ? null
+                : () => _confirmLogout(context, ref),
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.sync_outlined),
+          title: Text(lastSyncText),
+          subtitle: Text(pendingText),
+          trailing: syncState.hasError
+              ? IconButton(
+                  icon: const Icon(Icons.error_outline, color: Colors.red),
+                  tooltip: syncState.error.toString(),
+                  onPressed: () => _showError(context, syncState.error.toString()),
+                )
+              : null,
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+          child: SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: isLoading
+                  ? null
+                  : () => ref.read(syncNotifierProvider.notifier).sync(),
+              icon: isLoading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.sync),
+              label: Text(isLoading ? 'Sincronizando...' : 'Sincronizar Agora'),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showLoginDialog(BuildContext context, WidgetRef ref) async {
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => _LoginDialog(ref: ref),
+    );
+  }
+
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Desconectar'),
+        content: const Text(
+          'Seus dados locais não serão apagados. '
+          'Para sincronizar novamente, faça login.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Desconectar'),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await ref.read(syncNotifierProvider.notifier).logout();
+    }
+  }
+
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  String _formatRelative(DateTime dt) {
+    final diff = DateTime.now().difference(dt);
+    if (diff.inMinutes < 1) return 'agora mesmo';
+    if (diff.inMinutes < 60) return 'há ${diff.inMinutes} min';
+    if (diff.inHours < 24) return 'há ${diff.inHours}h';
+    return 'há ${diff.inDays}d';
+  }
+}
+
+// ---------------------------------------------------------------------------
+
+class _LoginDialog extends StatefulWidget {
+  const _LoginDialog({required this.ref});
+  final WidgetRef ref;
+
+  @override
+  State<_LoginDialog> createState() => _LoginDialogState();
+}
+
+class _LoginDialogState extends State<_LoginDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _urlController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  bool _loading = false;
+  bool _obscurePassword = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    final service = widget.ref.read(syncServiceProvider);
+    if (service.serverUrl != null) _urlController.text = service.serverUrl!;
+    if (service.userEmail != null) _emailController.text = service.userEmail!;
+  }
+
+  @override
+  void dispose() {
+    _urlController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      await widget.ref.read(syncNotifierProvider.notifier).login(
+            _urlController.text.trim(),
+            _emailController.text.trim(),
+            _passwordController.text,
+          );
+      if (mounted) Navigator.pop(context);
+    } on Exception catch (e) {
+      setState(() {
+        _error = e.toString().replaceFirst('Exception: ', '');
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Conectar ao servidor'),
+      content: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _urlController,
+                decoration: const InputDecoration(
+                  labelText: 'URL do servidor',
+                  hintText: 'https://meu-servidor.com',
+                  prefixIcon: Icon(Icons.dns_outlined),
+                ),
+                keyboardType: TextInputType.url,
+                autocorrect: false,
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return 'Obrigatório';
+                  if (!v.trim().startsWith('http')) {
+                    return 'Deve começar com http:// ou https://';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(Icons.email_outlined),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                autocorrect: false,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Obrigatório' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Senha',
+                  prefixIcon: const Icon(Icons.lock_outlined),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscurePassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined),
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+                ),
+                obscureText: _obscurePassword,
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'Obrigatório' : null,
+              ),
+              if (_error != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  _error!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _loading ? null : () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: _loading ? null : _submit,
+          child: _loading
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Entrar'),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 
 class _SectionHeader extends StatelessWidget {
   final String title;

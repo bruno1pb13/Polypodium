@@ -7,6 +7,7 @@ import '../../../species/presentation/screens/species_list_screen.dart';
 import '../../../locations/presentation/screens/locations_list_screen.dart';
 import '../../../../core/widgets/app_search_bar.dart';
 import '../providers/plant_search_providers.dart';
+import '../providers/plants_providers.dart';
 import '../../../../core/enums.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../widgets/plant_list_item.dart';
@@ -22,6 +23,13 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _searchController = TextEditingController();
+
+  Future<void> _refresh() async {
+    ref.invalidate(plantsNotifierProvider);
+    try {
+      await ref.read(filteredSortedPlantsProvider.future);
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -123,36 +131,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
                 Expanded(
-                  child: plantsAsync.when(
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Center(
-                        child: Text('Erro ao carregar plantas: $e',
-                            style: const TextStyle(color: Colors.white))),
-                    data: (plants) {
-                      if (plants.isEmpty) {
-                        return _searchController.text.isNotEmpty
-                            ? const Center(
-                                child: Text('Nenhuma planta encontrada',
-                                    style: TextStyle(color: Colors.white)))
-                            : const _EmptyState();
-                      }
-
-                      return ListView.builder(
-                        padding: const EdgeInsets.only(bottom: 80),
-                        itemCount: plants.length,
-                        itemBuilder: (ctx, i) => PlantListItem(
-                          plantWithSpecies: plants[i],
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PlantDetailScreen(
-                                  plantId: plants[i].plant.id),
+                  child: RefreshIndicator(
+                    onRefresh: _refresh,
+                    color: Colors.white,
+                    backgroundColor: Colors.black54,
+                    child: plantsAsync.when(
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (e, _) => Center(
+                          child: Text('Erro ao carregar plantas: $e',
+                              style: const TextStyle(color: Colors.white))),
+                      data: (plants) {
+                        if (plants.isEmpty) {
+                          return LayoutBuilder(
+                            builder: (_, constraints) => SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: SizedBox(
+                                height: constraints.maxHeight,
+                                child: _searchController.text.isNotEmpty
+                                    ? const Center(
+                                        child: Text('Nenhuma planta encontrada',
+                                            style: TextStyle(color: Colors.white)))
+                                    : const _EmptyState(),
+                              ),
+                            ),
+                          );
+                        }
+                        return ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(bottom: 80),
+                          itemCount: plants.length,
+                          itemBuilder: (ctx, i) => PlantListItem(
+                            plantWithSpecies: plants[i],
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PlantDetailScreen(
+                                    plantId: plants[i].plant.id),
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],

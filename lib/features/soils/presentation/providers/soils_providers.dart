@@ -15,18 +15,14 @@ SoilsRepository soilsRepository(Ref ref) {
 @riverpod
 class SoilsNotifier extends _$SoilsNotifier {
   @override
-  Future<List<SoilModel>> build() =>
-      ref.watch(soilsRepositoryProvider).getAll();
+  Stream<List<SoilModel>> build() =>
+      ref.watch(soilsRepositoryProvider).watchAll();
 
   Future<void> save(SoilModel soil) async {
     await ref.read(soilsRepositoryProvider).save(soil);
-    ref.invalidateSelf();
-    await future;
   }
 
   Future<void> delete(String soilId) async {
     await ref.read(soilsRepositoryProvider).delete(soilId);
-    ref.invalidateSelf();
-    await future;
   }
 }
