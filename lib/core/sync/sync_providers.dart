@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../database/database_provider.dart';
+import '../storage/photo_storage.dart';
 import '../../features/settings/presentation/providers/settings_providers.dart';
 import 'sync_service.dart';
 
@@ -11,7 +12,7 @@ part 'sync_providers.g.dart';
 SyncService syncService(Ref ref) {
   final db = ref.watch(appDatabaseProvider);
   final prefs = ref.watch(sharedPreferencesProvider).requireValue;
-  return SyncService(db, prefs);
+  return SyncService(db, prefs, PhotoStorage());
 }
 
 @riverpod
