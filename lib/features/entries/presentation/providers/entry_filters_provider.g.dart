@@ -26,7 +26,7 @@ final availableEntryTypesProvider =
 // ignore: unused_element
 typedef AvailableEntryTypesRef = AutoDisposeProviderRef<List<EntryType>>;
 String _$entryFiltersNotifierHash() =>
-    r'011ab778eafb55037b5b3d87c78636655a250320';
+    r'633506304dacb568faf50cfae400a056f7551868';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -192,6 +192,152 @@ class _EntryFiltersNotifierProviderElement
 
   @override
   String get plantId => (origin as EntryFiltersNotifierProvider).plantId;
+}
+
+String _$entrySortNotifierHash() => r'ce0f5f1d427b45abeed8058d6b8483b4ca890b4d';
+
+abstract class _$EntrySortNotifier
+    extends BuildlessAutoDisposeNotifier<EntrySortOption> {
+  late final String plantId;
+
+  EntrySortOption build(
+    String plantId,
+  );
+}
+
+/// See also [EntrySortNotifier].
+@ProviderFor(EntrySortNotifier)
+const entrySortNotifierProvider = EntrySortNotifierFamily();
+
+/// See also [EntrySortNotifier].
+class EntrySortNotifierFamily extends Family<EntrySortOption> {
+  /// See also [EntrySortNotifier].
+  const EntrySortNotifierFamily();
+
+  /// See also [EntrySortNotifier].
+  EntrySortNotifierProvider call(
+    String plantId,
+  ) {
+    return EntrySortNotifierProvider(
+      plantId,
+    );
+  }
+
+  @override
+  EntrySortNotifierProvider getProviderOverride(
+    covariant EntrySortNotifierProvider provider,
+  ) {
+    return call(
+      provider.plantId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'entrySortNotifierProvider';
+}
+
+/// See also [EntrySortNotifier].
+class EntrySortNotifierProvider extends AutoDisposeNotifierProviderImpl<
+    EntrySortNotifier, EntrySortOption> {
+  /// See also [EntrySortNotifier].
+  EntrySortNotifierProvider(
+    String plantId,
+  ) : this._internal(
+          () => EntrySortNotifier()..plantId = plantId,
+          from: entrySortNotifierProvider,
+          name: r'entrySortNotifierProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$entrySortNotifierHash,
+          dependencies: EntrySortNotifierFamily._dependencies,
+          allTransitiveDependencies:
+              EntrySortNotifierFamily._allTransitiveDependencies,
+          plantId: plantId,
+        );
+
+  EntrySortNotifierProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.plantId,
+  }) : super.internal();
+
+  final String plantId;
+
+  @override
+  EntrySortOption runNotifierBuild(
+    covariant EntrySortNotifier notifier,
+  ) {
+    return notifier.build(
+      plantId,
+    );
+  }
+
+  @override
+  Override overrideWith(EntrySortNotifier Function() create) {
+    return ProviderOverride(
+      origin: this,
+      override: EntrySortNotifierProvider._internal(
+        () => create()..plantId = plantId,
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        plantId: plantId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeNotifierProviderElement<EntrySortNotifier, EntrySortOption>
+      createElement() {
+    return _EntrySortNotifierProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is EntrySortNotifierProvider && other.plantId == plantId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, plantId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin EntrySortNotifierRef on AutoDisposeNotifierProviderRef<EntrySortOption> {
+  /// The parameter `plantId` of this provider.
+  String get plantId;
+}
+
+class _EntrySortNotifierProviderElement
+    extends AutoDisposeNotifierProviderElement<EntrySortNotifier,
+        EntrySortOption> with EntrySortNotifierRef {
+  _EntrySortNotifierProviderElement(super.provider);
+
+  @override
+  String get plantId => (origin as EntrySortNotifierProvider).plantId;
 }
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

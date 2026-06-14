@@ -6,7 +6,7 @@ import 'package:workmanager/workmanager.dart';
 
 import 'core/notifications/notification_service.dart';
 import 'core/theme/app_theme.dart';
-import 'features/plants/presentation/screens/home_screen.dart';
+import 'core/widgets/app_shell.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
 
 /// Background entry point for WorkManager tasks (Android only).
@@ -57,7 +57,7 @@ class PolypodiumApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
-      home: const HomeScreen(),
+      home: const AppShell(),
       debugShowCheckedModeBanner: false,
     );
   }

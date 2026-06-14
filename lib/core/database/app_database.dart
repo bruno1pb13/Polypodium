@@ -44,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -151,6 +151,10 @@ class AppDatabase extends _$AppDatabase {
                 mode: InsertMode.insertOrReplace,
               );
             }
+          }
+          if (from < 9) {
+            await m.addColumn(entriesTable, entriesTable.numericValue);
+            await m.addColumn(entriesTable, entriesTable.extraData);
           }
         },
       );

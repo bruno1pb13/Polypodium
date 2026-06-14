@@ -96,6 +96,8 @@ class EntriesRepository {
         photoPath: row.photoPath,
         note: row.note,
         type: row.type,
+        numericValue: row.numericValue,
+        extraData: row.extraData,
         createdAt: row.createdAt,
         syncStatus: row.syncStatus,
       );
@@ -108,6 +110,8 @@ class EntriesRepository {
         photoPath: Value(m.photoPath),
         note: Value(m.note),
         type: m.type,
+        numericValue: Value(m.numericValue),
+        extraData: Value(m.extraData),
         createdAt: m.createdAt,
         syncStatus: Value(m.syncStatus),
       );
