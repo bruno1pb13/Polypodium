@@ -282,10 +282,7 @@ class PlantDetailScreen extends ConsumerWidget {
       ),
     );
     if (confirmed == true) {
-      await ref.read(entriesNotifierProvider(plantId).notifier).delete(
-            entry.id,
-            photoPath: entry.photoPath,
-          );
+      await ref.read(entriesNotifierProvider(plantId).notifier).delete(entry.id);
     }
   }
 

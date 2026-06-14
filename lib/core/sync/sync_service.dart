@@ -172,9 +172,12 @@ class SyncService {
           item.operation != 'delete' &&
           payload['photoPath'] != null) {
         final localPath = payload['photoPath'] as String;
-        final photoKey = await _uploadPhoto(item.entityId, localPath);
         payload.remove('photoPath');
-        if (photoKey != null) payload['photoKey'] = photoKey;
+        final photoKey = await _uploadPhoto(item.entityId, localPath);
+        if (photoKey == null) {
+          continue; // upload falhou — deixa na fila para retry
+        }
+        payload['photoKey'] = photoKey;
       }
 
       events.add({
@@ -341,6 +344,10 @@ class SyncService {
 
   Future<void> _applyEntryEvent(String op, Map<String, dynamic> p) async {
     if (op == 'delete') {
+      final existing = await _db.entriesDao.getById(p['id'] as String);
+      if (existing?.photoPath != null) {
+        await _photoStorage.deletePhoto(existing!.photoPath!);
+      }
       await _db.entriesDao.deleteById(p['id'] as String);
       return;
     }
@@ -353,11 +360,17 @@ class SyncService {
       localPhotoPath = await _downloadPhoto(photoKey);
     }
 
+    // Usa Value.absent() quando não há foto no evento ou o download falhou,
+    // preservando o photoPath já existente no DB em caso de UPDATE.
+    final photoPathValue = localPhotoPath != null
+        ? Value<String?>(localPhotoPath)
+        : const Value<String?>.absent();
+
     await _db.entriesDao.upsert(EntriesTableCompanion.insert(
       id: p['id'] as String,
       plantId: plantId,
       date: DateTime.parse(p['date'] as String),
-      photoPath: Value(localPhotoPath),
+      photoPath: photoPathValue,
       note: Value(p['note'] as String?),
       type: type,
       createdAt: DateTime.parse(p['createdAt'] as String),

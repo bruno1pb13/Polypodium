@@ -54,6 +54,13 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
     return rows.map((r) => r.photoPath!).toList();
   }
 
+  Future<List<String>> getAllPhotoPaths() async {
+    final rows = await (select(entriesTable)
+          ..where((t) => t.photoPath.isNotNull()))
+        .get();
+    return rows.map((r) => r.photoPath!).toList();
+  }
+
   Future<String?> getLatestPhotoPath(String plantId) async {
     final row = await (select(entriesTable)
           ..where((t) => t.plantId.equals(plantId) & t.photoPath.isNotNull())
@@ -72,15 +79,17 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
         .map((row) => row?.photoPath);
   }
 
-  /// Returns the IDs (and photo paths) of entries that exceed the retention
-  /// limit, ordered oldest-first so the caller can delete them.
+  /// Returns entries beyond [keepCount] (oldest first) using a SQL OFFSET,
+  /// evitando carregar todas as entradas da planta em memória.
   Future<List<EntriesTableData>> getOverRetentionLimit(
     String plantId, {
     int keepCount = 30,
-  }) async {
-    final all = await getByPlant(plantId); // newest first
-    if (all.length <= keepCount) return [];
-    return all.sublist(keepCount); // oldest entries beyond the limit
+  }) {
+    return (select(entriesTable)
+          ..where((t) => t.plantId.equals(plantId))
+          ..orderBy([(t) => OrderingTerm.desc(t.date)])
+          ..limit(0x7fffffff, offset: keepCount))
+        .get();
   }
 
   Future<bool> hasPendingSync(String plantId) async {
