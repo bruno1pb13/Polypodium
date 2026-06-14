@@ -373,6 +373,8 @@ class SyncService {
       photoPath: photoPathValue,
       note: Value(p['note'] as String?),
       type: type,
+      numericValue: Value((p['numericValue'] as num?)?.toDouble()),
+      extraData: Value(p['extraData'] as String?),
       createdAt: DateTime.parse(p['createdAt'] as String),
       syncStatus: const Value(SyncStatus.synced),
     ));
