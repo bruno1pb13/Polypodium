@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/enums.dart';
 
 part 'soils_dao.g.dart';
 
@@ -22,4 +23,8 @@ class SoilsDao extends DatabaseAccessor<AppDatabase> with _$SoilsDaoMixin {
       
   Future<SoilsTableData?> getSoilById(String id) =>
       (select(soilsTable)..where((t) => t.id.equals(id))).getSingleOrNull();
+
+  Future<void> updateSyncStatus(String id, SyncStatus status) =>
+      (update(soilsTable)..where((t) => t.id.equals(id)))
+          .write(SoilsTableCompanion(syncStatus: Value(status)));
 }
