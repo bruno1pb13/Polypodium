@@ -26,6 +26,16 @@ class PhotoStorage {
     if (file.existsSync()) await file.delete();
   }
 
+  /// Saves raw [bytes] as a new photo file and returns the saved path.
+  Future<String> savePhotoBytes(List<int> bytes, String fileName) async {
+    final dir = await _photosDir();
+    final ext = p.extension(fileName);
+    final name = '${DateTime.now().millisecondsSinceEpoch}$ext';
+    final dest = File(p.join(dir.path, name));
+    await dest.writeAsBytes(bytes);
+    return dest.path;
+  }
+
   /// Removes photo files whose paths are not in [referencedPaths].
   Future<void> cleanOrphanPhotos(List<String> referencedPaths) async {
     final dir = await _photosDir();

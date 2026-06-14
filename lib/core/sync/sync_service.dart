@@ -1,12 +1,15 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../database/app_database.dart';
 import '../enums.dart';
+import '../storage/photo_storage.dart';
 
 class SyncResult {
   final int pulled;
@@ -15,10 +18,11 @@ class SyncResult {
 }
 
 class SyncService {
-  SyncService(this._db, this._prefs);
+  SyncService(this._db, this._prefs, this._photoStorage);
 
   final AppDatabase _db;
   final SharedPreferences _prefs;
+  final PhotoStorage _photoStorage;
 
   static const _tokenKey = 'sync_token';
   static const _deviceIdKey = 'sync_device_id';
@@ -145,22 +149,33 @@ class SyncService {
     final pending = await _db.syncQueueDao.getPending();
     if (pending.isEmpty) return 0;
 
-    final events = pending.map((e) {
+    final events = <Map<String, dynamic>>[];
+    for (final item in pending) {
       Map<String, dynamic> payload;
       try {
-        payload = jsonDecode(e.payload) as Map<String, dynamic>;
+        payload = jsonDecode(item.payload) as Map<String, dynamic>;
       } catch (_) {
-        payload = {'raw': e.payload};
+        payload = {'raw': item.payload};
       }
-      return {
-        'localQueueId': e.id,
-        'entityType': e.entityType,
-        'entityId': e.entityId,
-        'operation': e.operation,
+
+      if (item.entityType == 'entry' &&
+          item.operation != 'delete' &&
+          payload['photoPath'] != null) {
+        final localPath = payload['photoPath'] as String;
+        final photoKey = await _uploadPhoto(item.entityId, localPath);
+        payload.remove('photoPath');
+        if (photoKey != null) payload['photoKey'] = photoKey;
+      }
+
+      events.add({
+        'localQueueId': item.id,
+        'entityType': item.entityType,
+        'entityId': item.entityId,
+        'operation': item.operation,
         'payload': payload,
-        'clientTimestamp': e.createdAt.toIso8601String(),
-      };
-    }).toList();
+        'clientTimestamp': item.createdAt.toIso8601String(),
+      });
+    }
 
     final response = await http
         .post(
@@ -200,6 +215,48 @@ class SyncService {
         await _db.entriesDao.updateSyncStatus(entityId, SyncStatus.synced);
       case 'location':
         await _db.locationsDao.updateSyncStatus(entityId, SyncStatus.synced);
+      case 'soil':
+        await _db.soilsDao.updateSyncStatus(entityId, SyncStatus.synced);
+    }
+  }
+
+  /// Uploads a local photo to the server and returns the photo key, or null on failure.
+  Future<String?> _uploadPhoto(String entryId, String localPath) async {
+    try {
+      final file = File(localPath);
+      if (!file.existsSync()) return null;
+      final ext = p.extension(localPath);
+      final photoKey = '$entryId$ext';
+      final bytes = await file.readAsBytes();
+      final response = await http
+          .put(
+            Uri.parse('$serverUrl/api/v1/photos/$photoKey'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/octet-stream',
+            },
+            body: bytes,
+          )
+          .timeout(const Duration(seconds: 60));
+      return response.statusCode == 200 ? photoKey : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Downloads a photo from the server and saves it locally, returning the local path.
+  Future<String?> _downloadPhoto(String photoKey) async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse('$serverUrl/api/v1/photos/$photoKey'),
+            headers: _authHeaders,
+          )
+          .timeout(const Duration(seconds: 60));
+      if (response.statusCode != 200) return null;
+      return await _photoStorage.savePhotoBytes(response.bodyBytes, photoKey);
+    } catch (_) {
+      return null;
     }
   }
 
@@ -280,11 +337,17 @@ class SyncService {
     final plantId = p['plantId'] as String;
     final type = EntryType.values.byName(p['type'] as String);
 
+    String? localPhotoPath;
+    final photoKey = p['photoKey'] as String?;
+    if (photoKey != null) {
+      localPhotoPath = await _downloadPhoto(photoKey);
+    }
+
     await _db.entriesDao.upsert(EntriesTableCompanion.insert(
       id: p['id'] as String,
       plantId: plantId,
       date: DateTime.parse(p['date'] as String),
-      photoPath: Value(p['photoPath'] as String?),
+      photoPath: Value(localPhotoPath),
       note: Value(p['note'] as String?),
       type: type,
       createdAt: DateTime.parse(p['createdAt'] as String),
