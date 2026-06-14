@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:workmanager/workmanager.dart';
@@ -7,7 +9,7 @@ import 'core/theme/app_theme.dart';
 import 'features/plants/presentation/screens/home_screen.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
 
-/// Background entry point for WorkManager tasks (must be a top-level function).
+/// Background entry point for WorkManager tasks (Android only).
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
@@ -24,13 +26,15 @@ Future<void> main() async {
 
   await NotificationService.initialize();
 
-  await Workmanager().initialize(callbackDispatcher);
-  await Workmanager().registerPeriodicTask(
-    'irrigation-check',
-    NotificationService.irrigationCheckTask,
-    frequency: const Duration(hours: 12),
-    existingWorkPolicy: ExistingPeriodicWorkPolicy.replace,
-  );
+  if (Platform.isAndroid) {
+    await Workmanager().initialize(callbackDispatcher);
+    await Workmanager().registerPeriodicTask(
+      'irrigation-check',
+      NotificationService.irrigationCheckTask,
+      frequency: const Duration(hours: 12),
+      existingWorkPolicy: ExistingPeriodicWorkPolicy.replace,
+    );
+  }
 
   runApp(const ProviderScope(child: PolypodiumApp()));
 }
