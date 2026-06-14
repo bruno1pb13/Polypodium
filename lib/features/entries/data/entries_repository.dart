@@ -50,8 +50,6 @@ class EntriesRepository {
     }
     if (photoPath != null) await _photoStorage.deletePhoto(photoPath);
     await _dao.deleteById(id);
-
-    // TODO(sync): Enqueue deletion for server sync
     await _syncQueueDao.enqueue(
       entityType: 'entry',
       entityId: id,
