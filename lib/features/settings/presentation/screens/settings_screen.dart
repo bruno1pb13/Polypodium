@@ -217,9 +217,15 @@ class _SyncSection extends ConsumerWidget {
 
   String _formatRelative(DateTime dt) {
     final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1) return 'agora mesmo';
-    if (diff.inMinutes < 60) return 'há ${diff.inMinutes} min';
-    if (diff.inHours < 24) return 'há ${diff.inHours}h';
+    if (diff.inMinutes < 1) {
+      return 'agora mesmo';
+    }
+    if (diff.inMinutes < 60) {
+      return 'há ${diff.inMinutes} min';
+    }
+    if (diff.inHours < 24) {
+      return 'há ${diff.inHours}h';
+    }
     return 'há ${diff.inDays}d';
   }
 }
@@ -250,8 +256,12 @@ class _LoginDialogState extends State<_LoginDialog> {
   void initState() {
     super.initState();
     final service = widget.ref.read(syncServiceProvider);
-    if (service.serverUrl != null) _urlController.text = service.serverUrl!;
-    if (service.userEmail != null) _emailController.text = service.userEmail!;
+    if (service.serverUrl != null) {
+      _urlController.text = service.serverUrl!;
+    }
+    if (service.userEmail != null) {
+      _emailController.text = service.userEmail!;
+    }
   }
 
   @override
@@ -263,11 +273,15 @@ class _LoginDialogState extends State<_LoginDialog> {
   }
 
   Future<void> _checkServer() async {
-    if (!_serverFormKey.currentState!.validate()) return;
+    if (!_serverFormKey.currentState!.validate()) {
+      return;
+    }
     setState(() { _loading = true; _error = null; });
     try {
       await widget.ref.read(syncServiceProvider).checkServer(_urlController.text.trim());
-      if (mounted) setState(() { _step = 1; _loading = false; });
+      if (mounted) {
+        setState(() { _step = 1; _loading = false; });
+      }
     } on Exception catch (e) {
       if (mounted) {
         setState(() {
@@ -286,14 +300,18 @@ class _LoginDialogState extends State<_LoginDialog> {
   }
 
   Future<void> _submit() async {
-    if (!_credFormKey.currentState!.validate()) return;
+    if (!_credFormKey.currentState!.validate()) {
+      return;
+    }
     setState(() { _loading = true; _error = null; });
     await widget.ref.read(syncNotifierProvider.notifier).login(
       _urlController.text.trim(),
       _emailController.text.trim(),
       _passwordController.text,
     );
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     final state = widget.ref.read(syncNotifierProvider);
     if (state.hasError) {
       setState(() {
@@ -332,8 +350,12 @@ class _LoginDialogState extends State<_LoginDialog> {
             autofocus: true,
             onFieldSubmitted: (_) => _checkServer(),
             validator: (v) {
-              if (v == null || v.trim().isEmpty) return 'Obrigatório';
-              if (!v.trim().startsWith('http')) return 'Deve começar com http:// ou https://';
+              if (v == null || v.trim().isEmpty) {
+                return 'Obrigatório';
+              }
+              if (!v.trim().startsWith('http')) {
+                return 'Deve começar com http:// ou https://';
+              }
               return null;
             },
           ),
