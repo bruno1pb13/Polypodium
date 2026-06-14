@@ -46,27 +46,27 @@ class NotificationService implements INotificationService {
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
-
-    await _plugin.initialize(
-      const InitializationSettings(android: android, iOS: iOS),
+    const linux = LinuxInitializationSettings(
+      defaultActionName: 'Open',
     );
 
-    final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    await _plugin.initialize(
+      const InitializationSettings(android: android, iOS: iOS, linux: linux),
+    );
 
-    await androidPlugin?.requestNotificationsPermission();
-    await androidPlugin?.requestExactAlarmsPermission();
-
-    await _plugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(
-          const AndroidNotificationChannel(
-            _channelId,
-            _channelName,
-            importance: Importance.defaultImportance,
-          ),
-        );
+    if (Platform.isAndroid) {
+      final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      await androidPlugin?.requestNotificationsPermission();
+      await androidPlugin?.requestExactAlarmsPermission();
+      await androidPlugin?.createNotificationChannel(
+        const AndroidNotificationChannel(
+          _channelId,
+          _channelName,
+          importance: Importance.defaultImportance,
+        ),
+      );
+    }
   }
 
   // INotificationService --------------------------------------------------
@@ -104,6 +104,10 @@ class NotificationService implements INotificationService {
       await cancelNotification(plant.id);
       return;
     }
+
+    // Linux does not support background daemons, so scheduled notifications
+    // are unavailable — they would be lost when the app closes anyway.
+    if (Platform.isLinux) return;
 
     final scheduledDate =
         _nextIrrigationTime(plant.lastIrrigatedAt, frequencyDays);

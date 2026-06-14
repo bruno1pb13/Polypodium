@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:geolocator/geolocator.dart';
 
 class DeviceCoordinates {
@@ -24,6 +26,11 @@ class GeolocatorLocationService implements ILocationService {
 
   @override
   Future<DeviceCoordinates> getCurrentPosition() async {
+    if (Platform.isLinux) {
+      throw const LocationServiceException(
+          'Geolocalização não é suportada no desktop Linux.');
+    }
+
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       throw const LocationServiceException(

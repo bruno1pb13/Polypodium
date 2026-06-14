@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Polypodium
+Comment=Acompanhamento de plantas — offline-first
+Exec=polypodium
+Icon=com.polypodium.polypodium
+Type=Application
+Categories=Utility;Science;
+Keywords=plantas;plants;jardim;garden;
+StartupWMClass=polypodium
