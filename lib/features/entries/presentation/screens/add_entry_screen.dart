@@ -224,7 +224,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                                 onPressed: () {
                                   final path = _photoPath;
                                   setState(() => _photoPath = null);
-                                  if (path != null) _photoStorage.deletePhoto(path);
+                                  if (path != null) {
+                                    _photoStorage.deletePhoto(path);
+                                  }
                                 },
                                 icon: const Icon(Icons.close, size: 20),
                                 style: IconButton.styleFrom(

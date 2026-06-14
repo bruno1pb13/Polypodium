@@ -55,7 +55,9 @@ class EntriesRepository {
       operation: 'delete',
       payload: '{"id":"$id"}',
     );
-    if (entry?.photoPath != null) await _photoStorage.deletePhoto(entry!.photoPath!);
+    if (entry?.photoPath != null) {
+      await _photoStorage.deletePhoto(entry!.photoPath!);
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -65,7 +67,9 @@ class EntriesRepository {
   Future<void> _enforceRetentionPolicy(String plantId) async {
     final overflow =
         await _dao.getOverRetentionLimit(plantId, keepCount: _retentionLimit);
-    if (overflow.isEmpty) return;
+    if (overflow.isEmpty) {
+      return;
+    }
 
     for (final row in overflow) {
       await _dao.deleteById(row.id);

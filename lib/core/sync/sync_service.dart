@@ -174,7 +174,9 @@ class SyncService {
         final localPath = payload['photoPath'] as String;
         payload.remove('photoPath');
         final photoKey = await _uploadPhoto(item.entityId, localPath);
-        if (photoKey == null) continue; // upload falhou — deixa na fila para retry
+        if (photoKey == null) {
+          continue; // upload falhou — deixa na fila para retry
+        }
         payload['photoKey'] = photoKey;
       }
 
