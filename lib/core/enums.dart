@@ -18,7 +18,17 @@ enum SoilType {
   manure,
 }
 
-enum EntryType { irrigation, fertilizer, pruning, observation, other, history }
+enum EntryType {
+  irrigation,
+  fertilizer,
+  pruning,
+  observation,
+  height,
+  chlorosis,
+  pest,
+  other,
+  history,
+}
 
 // TODO(sync): Tracks local changes pending server synchronization
 enum SyncStatus { synced, pending, conflict }
@@ -49,6 +59,20 @@ enum LocationSortOption {
   nameAZ,
   nameZA,
   dateAdded,
+}
+
+enum EntrySortOption {
+  dateDesc,
+  dateAsc,
+  typeAZ,
+}
+
+extension EntrySortOptionX on EntrySortOption {
+  String get label => switch (this) {
+        EntrySortOption.dateDesc => 'Mais recentes primeiro',
+        EntrySortOption.dateAsc => 'Mais antigos primeiro',
+        EntrySortOption.typeAZ => 'Por tipo',
+      };
 }
 
 extension SoilTypeX on SoilType {
@@ -152,6 +176,9 @@ extension EntryTypeX on EntryType {
         EntryType.fertilizer => 'Fertilização',
         EntryType.pruning => 'Poda',
         EntryType.observation => 'Observação',
+        EntryType.height => 'Altura',
+        EntryType.chlorosis => 'Clorose',
+        EntryType.pest => 'Parasitas',
         EntryType.other => 'Outro',
         EntryType.history => 'Histórico',
       };
@@ -161,6 +188,9 @@ extension EntryTypeX on EntryType {
         EntryType.fertilizer => '🌱',
         EntryType.pruning => '✂️',
         EntryType.observation => '👁',
+        EntryType.height => '📏',
+        EntryType.chlorosis => '🟡',
+        EntryType.pest => '🐛',
         EntryType.other => '📝',
         EntryType.history => '📜',
       };

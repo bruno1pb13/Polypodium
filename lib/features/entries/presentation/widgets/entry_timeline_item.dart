@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
@@ -94,6 +95,10 @@ class EntryTimelineItem extends ConsumerWidget {
                               ),
                             ],
                           ),
+                          _EntryDataBadge(
+                            entry: entry,
+                            transparent: transparencyEnabled,
+                          ),
                           if (entry.note != null && entry.note!.isNotEmpty) ...[
                             const SizedBox(height: 6),
                             Text(
@@ -155,6 +160,140 @@ class EntryTimelineItem extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Shows the structured data saved with an entry as a compact pill row.
+class _EntryDataBadge extends StatelessWidget {
+  final EntryModel entry;
+  final bool transparent;
+
+  const _EntryDataBadge({required this.entry, required this.transparent});
+
+  @override
+  Widget build(BuildContext context) {
+    final text = _summaryText();
+    if (text == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: transparent
+              ? Colors.white.withValues(alpha: 0.12)
+              : Theme.of(context)
+                  .colorScheme
+                  .secondaryContainer
+                  .withValues(alpha: 0.6),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: transparent
+                ? Colors.white.withValues(alpha: 0.85)
+                : Theme.of(context).colorScheme.onSecondaryContainer,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String? _summaryText() {
+    final nv = entry.numericValue;
+    final extra = entry.extraData != null
+        ? (jsonDecode(entry.extraData!) as Map<String, dynamic>)
+        : null;
+
+    return switch (entry.type) {
+      EntryType.height when nv != null => '📏 ${_fmt(nv)} cm',
+      EntryType.chlorosis when nv != null => nv.toInt() == 0
+          ? '💚 Curada'
+          : '🟡 ${_severityLabel(nv.toInt())}',
+      EntryType.pest => _pestSummary(extra, nv),
+      EntryType.irrigation when nv != null => '💧 ${_irrigationLabel(nv.toInt())}',
+      EntryType.fertilizer => _fertilizerSummary(extra),
+      EntryType.pruning when extra != null =>
+        '✂️ ${_pruningLabel(extra['reason'] as String?)}',
+      EntryType.observation when nv != null =>
+        '${_healthEmoji(nv.toInt())} Saúde ${nv.toInt()}/5 — ${_healthLabel(nv.toInt())}',
+      _ => null,
+    };
+  }
+
+  String? _pestSummary(Map<String, dynamic>? extra, double? nv) {
+    if (nv != null && nv.toInt() == 0) return '✅ Erradicada';
+    final pestType = extra?['pestType'] as String?;
+    final parts = [
+      if (pestType != null && pestType.isNotEmpty) pestType,
+      if (nv != null) _severityLabel(nv.toInt()),
+    ];
+    if (parts.isEmpty) return null;
+    return '🐛 ${parts.join(' · ')}';
+  }
+
+  String? _fertilizerSummary(Map<String, dynamic>? extra) {
+    if (extra == null) return null;
+    // New format: {"products": [{"name": "...", "dose": X}, ...]}
+    final products = extra['products'] as List<dynamic>?;
+    if (products != null && products.isNotEmpty) {
+      if (products.length == 1) {
+        final p = products[0] as Map<String, dynamic>;
+        final name = p['name'] as String? ?? '';
+        final dose = p['dose'];
+        final dosePart =
+            dose != null ? ' · ${_fmt((dose as num).toDouble())} ml' : '';
+        return '🌱 $name$dosePart';
+      }
+      return '🌱 ${products.length} produtos';
+    }
+    return null;
+  }
+
+  String _fmt(double v) =>
+      v == v.truncateToDouble() ? v.toInt().toString() : v.toStringAsFixed(1);
+
+  String _irrigationLabel(int v) => switch (v) {
+        1 => 'Escassa',
+        2 => 'Moderada',
+        3 => 'Intensa',
+        _ => '$v',
+      };
+
+  String _severityLabel(int v) => switch (v) {
+        1 => 'Leve',
+        2 => 'Moderada',
+        3 => 'Severa',
+        _ => '$v',
+      };
+
+  String _pruningLabel(String? key) => switch (key) {
+        'formacao' => 'Formação',
+        'limpeza' => 'Limpeza',
+        'rejuvenescimento' => 'Rejuvenescimento',
+        'colheita' => 'Colheita',
+        _ => key ?? '',
+      };
+
+  String _healthEmoji(int score) => switch (score) {
+        1 => '🔴',
+        2 => '🟠',
+        3 => '🟡',
+        4 => '🟢',
+        5 => '💚',
+        _ => '',
+      };
+
+  String _healthLabel(int score) => switch (score) {
+        1 => 'Crítica',
+        2 => 'Ruim',
+        3 => 'Regular',
+        4 => 'Boa',
+        5 => 'Ótima',
+        _ => '',
+      };
 }
 
 class SliverTimelineIndicator extends ConsumerWidget {
