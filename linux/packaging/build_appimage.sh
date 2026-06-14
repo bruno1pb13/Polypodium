@@ -7,6 +7,9 @@
 #   - libnotify and GTK3 dev libs installed
 #
 # Usage: ./linux/packaging/build_appimage.sh [--release | --profile]
+#
+# Version override (optional — defaults to pubspec.yaml values):
+#   BUILD_NAME=1.2.3 BUILD_NUMBER=5 ./linux/packaging/build_appimage.sh
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,7 +24,11 @@ APPIMAGE_ARCH="x86_64"
 
 echo "==> Building Flutter Linux bundle ($BUILD_TYPE)..."
 cd "$PROJECT_ROOT"
-flutter build linux "$BUILD_TYPE"
+
+FLUTTER_BUILD_ARGS=("build" "linux" "$BUILD_TYPE")
+[[ -n "${BUILD_NAME:-}" ]]   && FLUTTER_BUILD_ARGS+=("--build-name=$BUILD_NAME")
+[[ -n "${BUILD_NUMBER:-}" ]] && FLUTTER_BUILD_ARGS+=("--build-number=$BUILD_NUMBER")
+flutter "${FLUTTER_BUILD_ARGS[@]}"
 
 BUILD_MODE="release"
 [[ "$BUILD_TYPE" == "--profile" ]] && BUILD_MODE="profile"

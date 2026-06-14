@@ -94,6 +94,9 @@ jobs:
           sudo chmod +x /usr/local/bin/appimagetool
 
       - name: Build AppImage
+        env:
+          BUILD_NAME: ${{ needs.version.outputs.build_name }}
+          BUILD_NUMBER: ${{ needs.version.outputs.build_number }}
         run: ./linux/packaging/build_appimage.sh
 
       - uses: actions/upload-artifact@v4
