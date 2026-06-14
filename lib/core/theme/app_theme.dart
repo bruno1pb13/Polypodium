@@ -10,6 +10,9 @@ class AppTheme {
     builders: {
       TargetPlatform.android: const SmoothPageTransitionsBuilder(),
       TargetPlatform.iOS: const SmoothPageTransitionsBuilder(),
+      TargetPlatform.linux: const DesktopPageTransitionsBuilder(),
+      TargetPlatform.macOS: const DesktopPageTransitionsBuilder(),
+      TargetPlatform.windows: const DesktopPageTransitionsBuilder(),
     },
   );
 

@@ -14,6 +14,10 @@ class EntriesTable extends Table {
   TextColumn get photoPath => text().nullable()();
   TextColumn get note => text().nullable()();
   TextColumn get type => text().map(const EntryTypeConverter())();
+  // Numeric measurement: height in cm, chlorosis severity (1–3), etc.
+  RealColumn get numericValue => real().nullable()();
+  // JSON blob for extra structured data (e.g. {"pestType":"Cochonilha"})
+  TextColumn get extraData => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
 
   // TODO(sync): Pending/synced/conflict status for future server sync

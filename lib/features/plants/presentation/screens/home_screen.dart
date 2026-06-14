@@ -10,6 +10,7 @@ import '../providers/plant_search_providers.dart';
 import '../providers/plants_providers.dart';
 import '../../../../core/enums.dart';
 import '../../../../core/widgets/app_drawer.dart';
+import '../../../../core/widgets/app_shell.dart';
 import '../widgets/plant_list_item.dart';
 import 'add_edit_plant_screen.dart';
 import 'plant_detail_screen.dart';
@@ -49,25 +50,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'Polypodium',
-          style: TextStyle(
-            fontFamily: 'CormorantGaramond',
-            fontWeight: FontWeight.w600,
-            fontSize: 28,
-            letterSpacing: 0.5,
-            color: Colors.white,
-            shadows: [
-              Shadow(
-                color: Colors.black45,
-                offset: Offset(0, 2),
-                blurRadius: 4,
+        title: MediaQuery.sizeOf(context).width >= kWideBreakpoint
+            ? null
+            : const Text(
+                'Polypodium',
+                style: TextStyle(
+                  fontFamily: 'CormorantGaramond',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 28,
+                  letterSpacing: 0.5,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black45,
+                      offset: Offset(0, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
       ),
-      drawer: const AppDrawer(),
+      drawer: MediaQuery.sizeOf(context).width >= kWideBreakpoint
+          ? null
+          : const AppDrawer(),
       body: Stack(
         children: [
           // Background Image

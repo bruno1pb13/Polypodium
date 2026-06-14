@@ -25,6 +25,8 @@ class PlantListItem extends ConsumerWidget {
     final days = pws.daysRelativeToSchedule;
     final overdue = pws.needsWatering;
     final photoAsync = ref.watch(latestPlantPhotoProvider(pws.plant.id));
+    final alertStatus = ref.watch(plantAlertStatusProvider(pws.plant.id)).valueOrNull
+        ?? (hasActiveChlorosis: false, chlorosisSeverity: null, hasActivePest: false, pestSeverity: null);
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
 
     return Padding(
@@ -128,10 +130,31 @@ class PlantListItem extends ConsumerWidget {
                                       .withValues(alpha: 0.7),
                             ),
                           ),
-                          if (days != null && overdue) ...[
+                          if (days != null && overdue ||
+                              alertStatus.hasActiveChlorosis ||
+                              alertStatus.hasActivePest) ...[
                             const SizedBox(height: 8),
-                            _IrrigationBadge(
-                                daysRelative: days, overdue: overdue),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: [
+                                if (days != null && overdue)
+                                  _IrrigationBadge(
+                                      daysRelative: days, overdue: overdue),
+                                if (alertStatus.hasActiveChlorosis)
+                                  const _AlertBadge(
+                                    emoji: '🟡',
+                                    label: 'Clorose',
+                                    color: Color(0xFFEAB308),
+                                  ),
+                                if (alertStatus.hasActivePest)
+                                  const _AlertBadge(
+                                    emoji: '🐛',
+                                    label: 'Praga',
+                                    color: Color(0xFFF97316),
+                                  ),
+                              ],
+                            ),
                           ],
                         ],
                       ),
@@ -196,6 +219,45 @@ class _ThumbnailPlaceholder extends StatelessWidget {
   }
 }
 
+class _AlertBadge extends StatelessWidget {
+  final String emoji;
+  final String label;
+  final Color color;
+
+  const _AlertBadge({
+    required this.emoji,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 11)),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _IrrigationBadge extends StatelessWidget {
   final int daysRelative;
   final bool overdue;
@@ -205,12 +267,6 @@ class _IrrigationBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final label = overdue
-        ? daysRelative == 0
-            ? 'Hoje'
-            : '${daysRelative}d atrasada'
-        : 'em ${(-daysRelative)}d';
-
     final color = overdue ? colorScheme.onErrorContainer : Colors.white;
     final bgColor = overdue
         ? colorScheme.errorContainer.withValues(alpha: 0.8)
@@ -228,10 +284,10 @@ class _IrrigationBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.calendar_today_outlined, size: 12, color: color),
+          Icon(Icons.water_drop, size: 13, color: color),
           const SizedBox(width: 6),
           Text(
-            label,
+            'Irrigação',
             style: TextStyle(
               fontSize: 12,
               color: color,

@@ -43,9 +43,46 @@ class EntryFiltersNotifier extends _$EntryFiltersNotifier {
       newState.map((e) => e.name).toList(),
     );
   }
+
+  Future<void> selectAll() async {
+    state = EntryType.values.toSet();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      '$_prefPrefix$plantId',
+      EntryType.values.map((e) => e.name).toList(),
+    );
+  }
 }
 
 @riverpod
 List<EntryType> availableEntryTypes(AvailableEntryTypesRef ref) {
   return EntryType.values;
+}
+
+@riverpod
+class EntrySortNotifier extends _$EntrySortNotifier {
+  static const _prefPrefix = 'entry_sort_';
+
+  @override
+  EntrySortOption build(String plantId) {
+    _loadSort();
+    return EntrySortOption.dateDesc;
+  }
+
+  Future<void> _loadSort() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString('$_prefPrefix$plantId');
+    if (saved != null) {
+      state = EntrySortOption.values.firstWhere(
+        (s) => s.name == saved,
+        orElse: () => EntrySortOption.dateDesc,
+      );
+    }
+  }
+
+  Future<void> setSort(EntrySortOption sort) async {
+    state = sort;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('$_prefPrefix$plantId', sort.name);
+  }
 }

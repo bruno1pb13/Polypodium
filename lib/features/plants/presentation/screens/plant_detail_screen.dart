@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -33,6 +35,7 @@ class PlantDetailScreen extends ConsumerWidget {
     final soilsAsync = ref.watch(soilsNotifierProvider);
     final entriesAsync = ref.watch(entriesNotifierProvider(plantId));
     final activeFilters = ref.watch(entryFiltersNotifierProvider(plantId));
+    final activeSort = ref.watch(entrySortNotifierProvider(plantId));
 
     return plantsAsync.when(
       loading: () =>
@@ -149,9 +152,8 @@ class PlantDetailScreen extends ConsumerWidget {
                       SliverToBoxAdapter(
                         child: _IrrigationStatusCard(pws: pws),
                       ),
-                    // Filters
                     SliverToBoxAdapter(
-                      child: _FilterSection(plantId: plantId),
+                      child: _EntriesHeader(plantId: plantId),
                     ),
                     // Timeline Entries
                     entriesAsync.when(
@@ -165,6 +167,17 @@ class PlantDetailScreen extends ConsumerWidget {
                         final filteredEntries = entries
                             .where((e) => activeFilters.contains(e.type))
                             .toList();
+
+                        switch (activeSort) {
+                          case EntrySortOption.dateAsc:
+                            filteredEntries.sort(
+                                (a, b) => a.date.compareTo(b.date));
+                          case EntrySortOption.typeAZ:
+                            filteredEntries.sort(
+                                (a, b) => a.type.label.compareTo(b.type.label));
+                          case EntrySortOption.dateDesc:
+                            break;
+                        }
 
                         if (filteredEntries.isEmpty) {
                           return const SliverToBoxAdapter(
@@ -427,6 +440,8 @@ class _PlantInfoCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
+    final alertStatus = ref.watch(plantAlertStatusProvider(plant.id)).valueOrNull
+        ?? (hasActiveChlorosis: false, chlorosisSeverity: null, hasActivePest: false, pestSeverity: null);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -468,7 +483,9 @@ class _PlantInfoCard extends ConsumerWidget {
                         soilComposition!,
                         style: TextStyle(
                           fontSize: 12,
-                          color: transparencyEnabled ? Colors.white54 : Colors.black54,
+                          color: transparencyEnabled
+                              ? Colors.white54
+                              : Colors.black54,
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -501,6 +518,28 @@ class _PlantInfoCard extends ConsumerWidget {
                     transparencyEnabled,
                   ),
                 ],
+                if (alertStatus.hasActiveChlorosis) ...[
+                  const Divider(color: Colors.white10, height: 16),
+                  _alertRow(
+                    context,
+                    '🟡',
+                    'Clorose',
+                    _severityLabel(alertStatus.chlorosisSeverity),
+                    const Color(0xFFEAB308),
+                    transparencyEnabled,
+                  ),
+                ],
+                if (alertStatus.hasActivePest) ...[
+                  const Divider(color: Colors.white10, height: 16),
+                  _alertRow(
+                    context,
+                    '🐛',
+                    'Praga',
+                    _severityLabel(alertStatus.pestSeverity),
+                    const Color(0xFFF97316),
+                    transparencyEnabled,
+                  ),
+                ],
               ],
             ),
           ),
@@ -518,24 +557,57 @@ class _PlantInfoCard extends ConsumerWidget {
   ) =>
       Row(
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color: transparencyEnabled ? Colors.white60 : null,
-          ),
+          Icon(icon, size: 20, color: transparencyEnabled ? Colors.white60 : null),
           const SizedBox(width: 12),
-          Text(
-            label,
-            style: TextStyle(
-              color: transparencyEnabled ? Colors.white70 : null,
-            ),
-          ),
+          Text(label,
+              style: TextStyle(
+                  color: transparencyEnabled ? Colors.white70 : null)),
           const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: transparencyEnabled ? Colors.white : null,
+          Text(value,
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: transparencyEnabled ? Colors.white : null)),
+        ],
+      );
+
+  String _severityLabel(int? v) => switch (v) {
+        1 => 'Leve',
+        2 => 'Moderada',
+        3 => 'Severa',
+        _ => 'Ativa',
+      };
+
+  Widget _alertRow(
+    BuildContext context,
+    String emoji,
+    String label,
+    String badgeLabel,
+    Color alertColor,
+    bool transparencyEnabled,
+  ) =>
+      Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 18)),
+          const SizedBox(width: 10),
+          Text(label,
+              style: TextStyle(
+                  color: transparencyEnabled ? Colors.white70 : null)),
+          const Spacer(),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            decoration: BoxDecoration(
+              color: alertColor.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: alertColor.withValues(alpha: 0.5)),
+            ),
+            child: Text(
+              badgeLabel,
+              style: TextStyle(
+                color: alertColor,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
             ),
           ),
         ],
@@ -623,21 +695,22 @@ class _IrrigationStatusCard extends ConsumerWidget {
   }
 }
 
-class _FilterSection extends ConsumerWidget {
+class _EntriesHeader extends ConsumerWidget {
   final String plantId;
-
-  const _FilterSection({required this.plantId});
+  const _EntriesHeader({required this.plantId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activeFilters = ref.watch(entryFiltersNotifierProvider(plantId));
+    final activeSort = ref.watch(entrySortNotifierProvider(plantId));
+    final allSelected = activeFilters.length == EntryType.values.length;
+    final colorScheme = Theme.of(context).colorScheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(16, 24, 16, 12),
-          child: Text(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 4, 4),
+      child: Row(
+        children: [
+          const Text(
             'Registros',
             style: TextStyle(
               fontSize: 20,
@@ -645,41 +718,261 @@ class _FilterSection extends ConsumerWidget {
               color: Colors.white,
             ),
           ),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: EntryType.values.map((type) {
-              final isActive = activeFilters.contains(type);
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: FilterChip(
-                  label: Text(type.label),
-                  selected: isActive,
-                  onSelected: (_) => ref
-                      .read(entryFiltersNotifierProvider(plantId).notifier)
-                      .toggleFilter(type),
-                  backgroundColor: Colors.black.withValues(alpha: 0.2),
-                  selectedColor: Theme.of(context).colorScheme.primary,
-                  checkmarkColor: Colors.white,
-                  labelStyle: TextStyle(
-                    color: isActive ? Colors.white : Colors.white70,
-                    fontSize: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: BorderSide(
-                      color: isActive ? Colors.transparent : Colors.white24,
+          const Spacer(),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.filter_list, color: Colors.white70),
+                tooltip: 'Filtrar tipos',
+                onPressed: () {
+                  final isDesktop = switch (defaultTargetPlatform) {
+                    TargetPlatform.linux ||
+                    TargetPlatform.macOS ||
+                    TargetPlatform.windows =>
+                      true,
+                    _ => false,
+                  };
+                  if (isDesktop) {
+                    showDialog(
+                      context: context,
+                      barrierColor: Colors.black38,
+                      builder: (_) => _FilterDialog(plantId: plantId),
+                    );
+                  } else {
+                    showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.transparent,
+                      isScrollControlled: true,
+                      builder: (_) => _FilterSheet(plantId: plantId),
+                    );
+                  }
+                },
+              ),
+              if (!allSelected)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      shape: BoxShape.circle,
                     ),
                   ),
                 ),
-              );
-            }).toList(),
+            ],
+          ),
+          PopupMenuButton<EntrySortOption>(
+            icon: Icon(
+              Icons.sort,
+              color: activeSort != EntrySortOption.dateDesc
+                  ? colorScheme.primary
+                  : Colors.white70,
+            ),
+            tooltip: 'Ordenar',
+            onSelected: (sort) => ref
+                .read(entrySortNotifierProvider(plantId).notifier)
+                .setSort(sort),
+            itemBuilder: (ctx) => EntrySortOption.values
+                .map((s) => PopupMenuItem(
+                      value: s,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.check,
+                            size: 16,
+                            color: s == activeSort
+                                ? Theme.of(ctx).colorScheme.primary
+                                : Colors.transparent,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(s.label),
+                        ],
+                      ),
+                    ))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterSheet extends ConsumerWidget {
+  final String plantId;
+  const _FilterSheet({required this.plantId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activeFilters = ref.watch(entryFiltersNotifierProvider(plantId));
+    final allSelected = activeFilters.length == EntryType.values.length;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.65),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(20)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white30,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 8, 4),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'Tipos de registro',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Spacer(),
+                      if (!allSelected)
+                        TextButton(
+                          onPressed: () => ref
+                              .read(entryFiltersNotifierProvider(plantId)
+                                  .notifier)
+                              .selectAll(),
+                          child: Text(
+                            'Todos',
+                            style: TextStyle(color: colorScheme.primary),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                ...EntryType.values.map((type) {
+                  final selected = activeFilters.contains(type);
+                  return CheckboxListTile(
+                    value: selected,
+                    onChanged: (_) => ref
+                        .read(
+                            entryFiltersNotifierProvider(plantId).notifier)
+                        .toggleFilter(type),
+                    title: Text(
+                      '${type.emoji}  ${type.label}',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    checkColor: Colors.white,
+                    activeColor: colorScheme.primary,
+                    side: const BorderSide(color: Colors.white30),
+                    dense: true,
+                  );
+                }),
+                const SizedBox(height: 8),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 16),
-      ],
+      ),
+    );
+  }
+}
+
+class _FilterDialog extends ConsumerWidget {
+  final String plantId;
+  const _FilterDialog({required this.plantId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activeFilters = ref.watch(entryFiltersNotifierProvider(plantId));
+    final allSelected = activeFilters.length == EntryType.values.length;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            width: 360,
+            constraints: const BoxConstraints(maxWidth: 360),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.65),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 8, 4),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'Tipos de registro',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Spacer(),
+                      if (!allSelected)
+                        TextButton(
+                          onPressed: () => ref
+                              .read(entryFiltersNotifierProvider(plantId)
+                                  .notifier)
+                              .selectAll(),
+                          child: Text(
+                            'Todos',
+                            style: TextStyle(color: colorScheme.primary),
+                          ),
+                        ),
+                      IconButton(
+                        icon: const Icon(Icons.close,
+                            color: Colors.white54, size: 18),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+                ...EntryType.values.map((type) {
+                  final selected = activeFilters.contains(type);
+                  return CheckboxListTile(
+                    value: selected,
+                    onChanged: (_) => ref
+                        .read(
+                            entryFiltersNotifierProvider(plantId).notifier)
+                        .toggleFilter(type),
+                    title: Text(
+                      '${type.emoji}  ${type.label}',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    checkColor: Colors.white,
+                    activeColor: colorScheme.primary,
+                    side: const BorderSide(color: Colors.white30),
+                    dense: true,
+                  );
+                }),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1869,6 +1869,18 @@ class $EntriesTableTable extends EntriesTable
       GeneratedColumn<String>('type', aliasedName, false,
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<EntryType>($EntriesTableTable.$convertertype);
+  static const VerificationMeta _numericValueMeta =
+      const VerificationMeta('numericValue');
+  @override
+  late final GeneratedColumn<double> numericValue = GeneratedColumn<double>(
+      'numeric_value', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _extraDataMeta =
+      const VerificationMeta('extraData');
+  @override
+  late final GeneratedColumn<String> extraData = GeneratedColumn<String>(
+      'extra_data', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -1883,8 +1895,18 @@ class $EntriesTableTable extends EntriesTable
               defaultValue: const Constant('pending'))
           .withConverter<SyncStatus>($EntriesTableTable.$convertersyncStatus);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, plantId, date, photoPath, note, type, createdAt, syncStatus];
+  List<GeneratedColumn> get $columns => [
+        id,
+        plantId,
+        date,
+        photoPath,
+        note,
+        type,
+        numericValue,
+        extraData,
+        createdAt,
+        syncStatus
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1920,6 +1942,16 @@ class $EntriesTableTable extends EntriesTable
       context.handle(
           _noteMeta, note.isAcceptableOrUnknown(data['note']!, _noteMeta));
     }
+    if (data.containsKey('numeric_value')) {
+      context.handle(
+          _numericValueMeta,
+          numericValue.isAcceptableOrUnknown(
+              data['numeric_value']!, _numericValueMeta));
+    }
+    if (data.containsKey('extra_data')) {
+      context.handle(_extraDataMeta,
+          extraData.isAcceptableOrUnknown(data['extra_data']!, _extraDataMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -1948,6 +1980,10 @@ class $EntriesTableTable extends EntriesTable
       type: $EntriesTableTable.$convertertype.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}type'])!),
+      numericValue: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}numeric_value']),
+      extraData: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}extra_data']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       syncStatus: $EntriesTableTable.$convertersyncStatus.fromSql(
@@ -1975,6 +2011,8 @@ class EntriesTableData extends DataClass
   final String? photoPath;
   final String? note;
   final EntryType type;
+  final double? numericValue;
+  final String? extraData;
   final DateTime createdAt;
   final SyncStatus syncStatus;
   const EntriesTableData(
@@ -1984,6 +2022,8 @@ class EntriesTableData extends DataClass
       this.photoPath,
       this.note,
       required this.type,
+      this.numericValue,
+      this.extraData,
       required this.createdAt,
       required this.syncStatus});
   @override
@@ -2001,6 +2041,12 @@ class EntriesTableData extends DataClass
     {
       map['type'] =
           Variable<String>($EntriesTableTable.$convertertype.toSql(type));
+    }
+    if (!nullToAbsent || numericValue != null) {
+      map['numeric_value'] = Variable<double>(numericValue);
+    }
+    if (!nullToAbsent || extraData != null) {
+      map['extra_data'] = Variable<String>(extraData);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     {
@@ -2020,6 +2066,12 @@ class EntriesTableData extends DataClass
           : Value(photoPath),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       type: Value(type),
+      numericValue: numericValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(numericValue),
+      extraData: extraData == null && nullToAbsent
+          ? const Value.absent()
+          : Value(extraData),
       createdAt: Value(createdAt),
       syncStatus: Value(syncStatus),
     );
@@ -2035,6 +2087,8 @@ class EntriesTableData extends DataClass
       photoPath: serializer.fromJson<String?>(json['photoPath']),
       note: serializer.fromJson<String?>(json['note']),
       type: serializer.fromJson<EntryType>(json['type']),
+      numericValue: serializer.fromJson<double?>(json['numericValue']),
+      extraData: serializer.fromJson<String?>(json['extraData']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       syncStatus: serializer.fromJson<SyncStatus>(json['syncStatus']),
     );
@@ -2049,6 +2103,8 @@ class EntriesTableData extends DataClass
       'photoPath': serializer.toJson<String?>(photoPath),
       'note': serializer.toJson<String?>(note),
       'type': serializer.toJson<EntryType>(type),
+      'numericValue': serializer.toJson<double?>(numericValue),
+      'extraData': serializer.toJson<String?>(extraData),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'syncStatus': serializer.toJson<SyncStatus>(syncStatus),
     };
@@ -2061,6 +2117,8 @@ class EntriesTableData extends DataClass
           Value<String?> photoPath = const Value.absent(),
           Value<String?> note = const Value.absent(),
           EntryType? type,
+          Value<double?> numericValue = const Value.absent(),
+          Value<String?> extraData = const Value.absent(),
           DateTime? createdAt,
           SyncStatus? syncStatus}) =>
       EntriesTableData(
@@ -2070,6 +2128,9 @@ class EntriesTableData extends DataClass
         photoPath: photoPath.present ? photoPath.value : this.photoPath,
         note: note.present ? note.value : this.note,
         type: type ?? this.type,
+        numericValue:
+            numericValue.present ? numericValue.value : this.numericValue,
+        extraData: extraData.present ? extraData.value : this.extraData,
         createdAt: createdAt ?? this.createdAt,
         syncStatus: syncStatus ?? this.syncStatus,
       );
@@ -2081,6 +2142,10 @@ class EntriesTableData extends DataClass
       photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
       note: data.note.present ? data.note.value : this.note,
       type: data.type.present ? data.type.value : this.type,
+      numericValue: data.numericValue.present
+          ? data.numericValue.value
+          : this.numericValue,
+      extraData: data.extraData.present ? data.extraData.value : this.extraData,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       syncStatus:
           data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
@@ -2096,6 +2161,8 @@ class EntriesTableData extends DataClass
           ..write('photoPath: $photoPath, ')
           ..write('note: $note, ')
           ..write('type: $type, ')
+          ..write('numericValue: $numericValue, ')
+          ..write('extraData: $extraData, ')
           ..write('createdAt: $createdAt, ')
           ..write('syncStatus: $syncStatus')
           ..write(')'))
@@ -2103,8 +2170,8 @@ class EntriesTableData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, plantId, date, photoPath, note, type, createdAt, syncStatus);
+  int get hashCode => Object.hash(id, plantId, date, photoPath, note, type,
+      numericValue, extraData, createdAt, syncStatus);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2115,6 +2182,8 @@ class EntriesTableData extends DataClass
           other.photoPath == this.photoPath &&
           other.note == this.note &&
           other.type == this.type &&
+          other.numericValue == this.numericValue &&
+          other.extraData == this.extraData &&
           other.createdAt == this.createdAt &&
           other.syncStatus == this.syncStatus);
 }
@@ -2126,6 +2195,8 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
   final Value<String?> photoPath;
   final Value<String?> note;
   final Value<EntryType> type;
+  final Value<double?> numericValue;
+  final Value<String?> extraData;
   final Value<DateTime> createdAt;
   final Value<SyncStatus> syncStatus;
   final Value<int> rowid;
@@ -2136,6 +2207,8 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
     this.photoPath = const Value.absent(),
     this.note = const Value.absent(),
     this.type = const Value.absent(),
+    this.numericValue = const Value.absent(),
+    this.extraData = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2147,6 +2220,8 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
     this.photoPath = const Value.absent(),
     this.note = const Value.absent(),
     required EntryType type,
+    this.numericValue = const Value.absent(),
+    this.extraData = const Value.absent(),
     required DateTime createdAt,
     this.syncStatus = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2162,6 +2237,8 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
     Expression<String>? photoPath,
     Expression<String>? note,
     Expression<String>? type,
+    Expression<double>? numericValue,
+    Expression<String>? extraData,
     Expression<DateTime>? createdAt,
     Expression<String>? syncStatus,
     Expression<int>? rowid,
@@ -2173,6 +2250,8 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
       if (photoPath != null) 'photo_path': photoPath,
       if (note != null) 'note': note,
       if (type != null) 'type': type,
+      if (numericValue != null) 'numeric_value': numericValue,
+      if (extraData != null) 'extra_data': extraData,
       if (createdAt != null) 'created_at': createdAt,
       if (syncStatus != null) 'sync_status': syncStatus,
       if (rowid != null) 'rowid': rowid,
@@ -2186,6 +2265,8 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
       Value<String?>? photoPath,
       Value<String?>? note,
       Value<EntryType>? type,
+      Value<double?>? numericValue,
+      Value<String?>? extraData,
       Value<DateTime>? createdAt,
       Value<SyncStatus>? syncStatus,
       Value<int>? rowid}) {
@@ -2196,6 +2277,8 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
       photoPath: photoPath ?? this.photoPath,
       note: note ?? this.note,
       type: type ?? this.type,
+      numericValue: numericValue ?? this.numericValue,
+      extraData: extraData ?? this.extraData,
       createdAt: createdAt ?? this.createdAt,
       syncStatus: syncStatus ?? this.syncStatus,
       rowid: rowid ?? this.rowid,
@@ -2224,6 +2307,12 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
       map['type'] =
           Variable<String>($EntriesTableTable.$convertertype.toSql(type.value));
     }
+    if (numericValue.present) {
+      map['numeric_value'] = Variable<double>(numericValue.value);
+    }
+    if (extraData.present) {
+      map['extra_data'] = Variable<String>(extraData.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -2246,6 +2335,8 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
           ..write('photoPath: $photoPath, ')
           ..write('note: $note, ')
           ..write('type: $type, ')
+          ..write('numericValue: $numericValue, ')
+          ..write('extraData: $extraData, ')
           ..write('createdAt: $createdAt, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('rowid: $rowid')
@@ -4171,6 +4262,8 @@ typedef $$EntriesTableTableCreateCompanionBuilder = EntriesTableCompanion
   Value<String?> photoPath,
   Value<String?> note,
   required EntryType type,
+  Value<double?> numericValue,
+  Value<String?> extraData,
   required DateTime createdAt,
   Value<SyncStatus> syncStatus,
   Value<int> rowid,
@@ -4183,6 +4276,8 @@ typedef $$EntriesTableTableUpdateCompanionBuilder = EntriesTableCompanion
   Value<String?> photoPath,
   Value<String?> note,
   Value<EntryType> type,
+  Value<double?> numericValue,
+  Value<String?> extraData,
   Value<DateTime> createdAt,
   Value<SyncStatus> syncStatus,
   Value<int> rowid,
@@ -4233,6 +4328,12 @@ class $$EntriesTableTableFilterComposer
       $composableBuilder(
           column: $table.type,
           builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<double> get numericValue => $composableBuilder(
+      column: $table.numericValue, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get extraData => $composableBuilder(
+      column: $table.extraData, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -4287,6 +4388,13 @@ class $$EntriesTableTableOrderingComposer
   ColumnOrderings<String> get type => $composableBuilder(
       column: $table.type, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<double> get numericValue => $composableBuilder(
+      column: $table.numericValue,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get extraData => $composableBuilder(
+      column: $table.extraData, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -4337,6 +4445,12 @@ class $$EntriesTableTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<EntryType, String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<double> get numericValue => $composableBuilder(
+      column: $table.numericValue, builder: (column) => column);
+
+  GeneratedColumn<String> get extraData =>
+      $composableBuilder(column: $table.extraData, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -4395,6 +4509,8 @@ class $$EntriesTableTableTableManager extends RootTableManager<
             Value<String?> photoPath = const Value.absent(),
             Value<String?> note = const Value.absent(),
             Value<EntryType> type = const Value.absent(),
+            Value<double?> numericValue = const Value.absent(),
+            Value<String?> extraData = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<SyncStatus> syncStatus = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -4406,6 +4522,8 @@ class $$EntriesTableTableTableManager extends RootTableManager<
             photoPath: photoPath,
             note: note,
             type: type,
+            numericValue: numericValue,
+            extraData: extraData,
             createdAt: createdAt,
             syncStatus: syncStatus,
             rowid: rowid,
@@ -4417,6 +4535,8 @@ class $$EntriesTableTableTableManager extends RootTableManager<
             Value<String?> photoPath = const Value.absent(),
             Value<String?> note = const Value.absent(),
             required EntryType type,
+            Value<double?> numericValue = const Value.absent(),
+            Value<String?> extraData = const Value.absent(),
             required DateTime createdAt,
             Value<SyncStatus> syncStatus = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -4428,6 +4548,8 @@ class $$EntriesTableTableTableManager extends RootTableManager<
             photoPath: photoPath,
             note: note,
             type: type,
+            numericValue: numericValue,
+            extraData: extraData,
             createdAt: createdAt,
             syncStatus: syncStatus,
             rowid: rowid,

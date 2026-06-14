@@ -24,7 +24,7 @@ final locationsRepositoryProvider = Provider<LocationsRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef LocationsRepositoryRef = ProviderRef<LocationsRepository>;
-String _$locationsNotifierHash() => r'bebf0e021f8824bfa92d52af5d2a8e6a06763924';
+String _$locationsNotifierHash() => r'dc348c8912330f056b30ebfab0f1a5f9e3cc626c';
 
 /// See also [LocationsNotifier].
 @ProviderFor(LocationsNotifier)

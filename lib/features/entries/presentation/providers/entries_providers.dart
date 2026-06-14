@@ -12,6 +12,52 @@ import '../../../../core/sync/sync_providers.dart';
 
 part 'entries_providers.g.dart';
 
+/// For a given plant, tells whether chlorosis and/or pest are currently active,
+/// and what the severity of the most recent entry is.
+/// A condition is "active" when the most recent entry of that type has
+/// numericValue > 0. numericValue == 0 means the condition was resolved.
+final plantAlertStatusProvider = StreamProvider.autoDispose.family<
+    ({
+      bool hasActiveChlorosis,
+      int? chlorosisSeverity,
+      bool hasActivePest,
+      int? pestSeverity,
+    }),
+    String>(
+  (ref, plantId) {
+    return ref
+        .watch(entriesRepositoryProvider)
+        .watchByPlant(plantId)
+        .map((entries) {
+      EntryModel? lastChlorosis;
+      EntryModel? lastPest;
+
+      for (final e in entries) {
+        if (lastChlorosis == null && e.type == EntryType.chlorosis) {
+          lastChlorosis = e;
+        }
+        if (lastPest == null && e.type == EntryType.pest) {
+          lastPest = e;
+        }
+        if (lastChlorosis != null && lastPest != null) break;
+      }
+
+      final cNv = lastChlorosis?.numericValue;
+      final pNv = lastPest?.numericValue;
+      final chlorosisActive = lastChlorosis != null && (cNv ?? 1) > 0;
+      final pestActive = lastPest != null && (pNv ?? 1) > 0;
+
+      return (
+        hasActiveChlorosis: chlorosisActive,
+        chlorosisSeverity:
+            chlorosisActive && cNv != null ? cNv.toInt() : null,
+        hasActivePest: pestActive,
+        pestSeverity: pestActive && pNv != null ? pNv.toInt() : null,
+      );
+    });
+  },
+);
+
 final latestPlantPhotoProvider =
     StreamProvider.autoDispose.family<String?, String>((ref, plantId) {
   final db = ref.watch(appDatabaseProvider);
