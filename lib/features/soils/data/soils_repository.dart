@@ -1,11 +1,15 @@
 import 'package:drift/drift.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/database/sync_queue_dao.dart';
 import '../domain/soil_model.dart';
 
 class SoilsRepository {
-  final AppDatabase _db;
+  SoilsRepository(AppDatabase db)
+      : _db = db,
+        _syncQueueDao = db.syncQueueDao;
 
-  SoilsRepository(this._db);
+  final AppDatabase _db;
+  final SyncQueueDao _syncQueueDao;
 
   Future<List<SoilModel>> getAll() async {
     final rows = await _db.soilsDao.getAllSoils();
@@ -29,10 +33,22 @@ class SoilsRepository {
       syncStatus: Value(model.syncStatus),
     );
     await _db.soilsDao.insertSoil(companion);
+    await _syncQueueDao.enqueue(
+      entityType: 'soil',
+      entityId: model.id,
+      operation: 'create',
+      payload: model.toJsonString(),
+    );
   }
 
   Future<void> delete(String id) async {
     await _db.soilsDao.deleteSoil(id);
+    await _syncQueueDao.enqueue(
+      entityType: 'soil',
+      entityId: id,
+      operation: 'delete',
+      payload: '{"id":"$id"}',
+    );
   }
 
   SoilModel _toModel(SoilsTableData row) {

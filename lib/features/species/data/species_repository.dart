@@ -39,7 +39,6 @@ class SpeciesRepository {
 
   Future<void> delete(String id) async {
     await _dao.deleteById(id);
-    // TODO(sync): Enqueue deletion for server sync
     await _syncQueueDao.enqueue(
       entityType: 'species',
       entityId: id,
