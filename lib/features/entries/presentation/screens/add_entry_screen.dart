@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/enums.dart';
+import '../../../../core/storage/photo_storage.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 
@@ -24,10 +25,21 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   EntryType _type = EntryType.observation;
   String? _photoPath;
   bool _saving = false;
+  bool _submitted = false;
+  late final PhotoStorage _photoStorage;
+
+  @override
+  void initState() {
+    super.initState();
+    _photoStorage = ref.read(photoStorageProvider);
+  }
 
   @override
   void dispose() {
     _noteCtrl.dispose();
+    if (!_submitted && _photoPath != null) {
+      _photoStorage.deletePhoto(_photoPath!);
+    }
     super.dispose();
   }
 
@@ -209,8 +221,13 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                               top: 8,
                               right: 8,
                               child: IconButton.filled(
-                                onPressed: () =>
-                                    setState(() => _photoPath = null),
+                                onPressed: () {
+                                  final path = _photoPath;
+                                  setState(() => _photoPath = null);
+                                  if (path != null) {
+                                    _photoStorage.deletePhoto(path);
+                                  }
+                                },
                                 icon: const Icon(Icons.close, size: 20),
                                 style: IconButton.styleFrom(
                                   backgroundColor: Colors.black54,
@@ -283,9 +300,10 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     final xFile = await picker.pickImage(source: source, imageQuality: 85);
     if (xFile == null) return;
 
-    final savedPath =
-        await ref.read(photoStorageProvider).savePhoto(File(xFile.path));
+    final oldPath = _photoPath;
+    final savedPath = await _photoStorage.savePhoto(File(xFile.path));
     setState(() => _photoPath = savedPath);
+    if (oldPath != null) await _photoStorage.deletePhoto(oldPath);
   }
 
   Future<void> _submit() async {
@@ -303,6 +321,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
       await ref
           .read(entriesNotifierProvider(widget.plantId).notifier)
           .create(entry);
+      _submitted = true;
       if (mounted) Navigator.pop(context);
     } finally {
       if (mounted) setState(() => _saving = false);
