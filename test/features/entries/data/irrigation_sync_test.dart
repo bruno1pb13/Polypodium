@@ -21,6 +21,9 @@ class MockPhotoStorage implements PhotoStorage {
 
   @override
   Future<String> savePhoto(dynamic file) async => '';
+
+  @override
+  Future<String> savePhotoBytes(List<int> bytes, String fileName) async => '';
 }
 
 class MockNotificationService implements INotificationService {
