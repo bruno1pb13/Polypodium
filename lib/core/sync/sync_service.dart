@@ -54,6 +54,16 @@ class SyncService {
         'Content-Type': 'application/json',
       };
 
+  Future<void> checkServer(String serverUrl) async {
+    final response = await http
+        .get(Uri.parse('$serverUrl/api/v1/health'))
+        .timeout(const Duration(seconds: 10));
+
+    if (response.statusCode != 200) {
+      throw Exception('Servidor não disponível ou URL inválida');
+    }
+  }
+
   Future<void> login(String serverUrl, String email, String password) async {
     final id = deviceId ?? const Uuid().v4();
     final response = await http
