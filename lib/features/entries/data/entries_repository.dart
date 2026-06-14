@@ -43,12 +43,11 @@ class EntriesRepository {
     await _enforceRetentionPolicy(entry.plantId);
   }
 
-  Future<void> delete(String id, {String? photoPath}) async {
+  Future<void> delete(String id) async {
     final entry = await getById(id);
     if (entry?.type == EntryType.history) {
       throw Exception('Registros de histórico não podem ser removidos.');
     }
-    if (photoPath != null) await _photoStorage.deletePhoto(photoPath);
     await _dao.deleteById(id);
     await _syncQueueDao.enqueue(
       entityType: 'entry',
@@ -56,6 +55,7 @@ class EntriesRepository {
       operation: 'delete',
       payload: '{"id":"$id"}',
     );
+    if (entry?.photoPath != null) await _photoStorage.deletePhoto(entry!.photoPath!);
   }
 
   // ---------------------------------------------------------------------------
@@ -65,16 +65,23 @@ class EntriesRepository {
   Future<void> _enforceRetentionPolicy(String plantId) async {
     final overflow =
         await _dao.getOverRetentionLimit(plantId, keepCount: _retentionLimit);
+    if (overflow.isEmpty) return;
+
     for (final row in overflow) {
+      await _dao.deleteById(row.id);
+      await _syncQueueDao.enqueue(
+        entityType: 'entry',
+        entityId: row.id,
+        operation: 'delete',
+        payload: '{"id":"${row.id}"}',
+      );
       if (row.photoPath != null) {
         await _photoStorage.deletePhoto(row.photoPath!);
       }
-      await _dao.deleteById(row.id);
-      // TODO(sync): Enqueue soft-delete for these pruned entries if needed
     }
 
     // Remove any photos on disk that are no longer referenced by any entry
-    final referenced = await _dao.getPhotoPathsForPlant(plantId);
+    final referenced = await _dao.getAllPhotoPaths();
     await _photoStorage.cleanOrphanPhotos(referenced);
   }
 

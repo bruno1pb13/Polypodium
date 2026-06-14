@@ -39,9 +39,11 @@ class PhotoStorage {
   /// Removes photo files whose paths are not in [referencedPaths].
   Future<void> cleanOrphanPhotos(List<String> referencedPaths) async {
     final dir = await _photosDir();
-    final referenced = referencedPaths.toSet();
+    // Compara por basename para evitar falsos positivos causados por
+    // diferenças de resolução de symlinks entre chamadas (ex: Android).
+    final referenced = referencedPaths.map(p.basename).toSet();
     await for (final entity in dir.list()) {
-      if (entity is File && !referenced.contains(entity.path)) {
+      if (entity is File && !referenced.contains(p.basename(entity.path))) {
         await entity.delete();
       }
     }
