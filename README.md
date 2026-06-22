@@ -78,6 +78,28 @@ chmod +x build/Polypodium-x86_64.AppImage
 | Geolocalização | Indisponível — `geolocator` não suporta Linux |
 | Sync com servidor | Funciona normalmente via HTTP |
 
+## Build Windows
+
+### Gerar MSIX e ZIP
+
+O script de build automatiza a geração do instalador (`.msix`) e da versão portátil (`.zip`):
+
+```powershell
+.\windows\packaging\build_windows.ps1
+```
+
+Os artefatos de saída serão:
+- **Instalador:** `build\windows\x64\runner\Release\Polypodium.msix`
+- **Portátil:** `build\Polypodium-Windows-Portable.zip`
+
+### Limitações no Windows
+
+| Funcionalidade | Comportamento |
+|---|---|
+| Notificações de irrigação | Desabilitadas — `workmanager` não suporta Windows |
+| Geolocalização | Funciona normalmente via Windows Location Services |
+| Sync com servidor | Funciona normalmente via HTTP |
+
 ## Sincronização (opcional)
 
 Em **Configurações → Servidor** informe a URL e faça login. A partir daí o botão de sync aparece na mesma tela.

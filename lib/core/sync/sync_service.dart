@@ -156,6 +156,7 @@ class SyncService {
   }
 
   Future<int> _push() async {
+    await _bootstrapPending();
     final pending = await _db.syncQueueDao.getPending();
     if (pending.isEmpty) return 0;
 
