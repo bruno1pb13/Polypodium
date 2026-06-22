@@ -156,6 +156,7 @@ class SyncService {
   }
 
   Future<int> _push() async {
+    await _bootstrapPending();
     final pending = await _db.syncQueueDao.getPending();
     if (pending.isEmpty) return 0;
 
@@ -216,6 +217,121 @@ class SyncService {
     }
 
     return accepted.length;
+  }
+
+  /// Enqueues any entities with syncStatus=pending that are not yet in the
+  /// sync_queue. This covers data created before the enqueue call was wired
+  /// up in each repository's save(). Dependency order is intentional:
+  /// species/soils/locations must be pushed before plants, plants before entries.
+  Future<void> _bootstrapPending() async {
+    final queuedIds = await _db.syncQueueDao.getPendingEntityIds();
+
+    for (final row in await _db.speciesDao.getAll()) {
+      if (row.syncStatus == SyncStatus.pending && !queuedIds.contains(row.id)) {
+        await _db.syncQueueDao.enqueue(
+          entityType: 'species',
+          entityId: row.id,
+          operation: 'create',
+          payload: jsonEncode({
+            'id': row.id,
+            'scientificName': row.scientificName,
+            'popularName': row.popularName,
+            'defaultIrrigationFrequencyDays': row.defaultIrrigationFrequencyDays,
+            'recommendedSoilIds': row.recommendedSoilTypes,
+            'syncStatus': row.syncStatus.name,
+            'createdAt': row.createdAt.toIso8601String(),
+          }),
+          createdAt: row.createdAt,
+        );
+      }
+    }
+
+    for (final row in await _db.soilsDao.getAllSoils()) {
+      if (row.syncStatus == SyncStatus.pending && !queuedIds.contains(row.id)) {
+        await _db.syncQueueDao.enqueue(
+          entityType: 'soil',
+          entityId: row.id,
+          operation: 'create',
+          payload: jsonEncode({
+            'id': row.id,
+            'name': row.name,
+            'composition': row.composition,
+            'imagePath': row.imagePath,
+            'imageSource': row.imageSource,
+            'createdAt': row.createdAt.toIso8601String(),
+            'syncStatus': row.syncStatus.name,
+          }),
+          createdAt: row.createdAt,
+        );
+      }
+    }
+
+    for (final row in await _db.locationsDao.getAll()) {
+      if (row.syncStatus == SyncStatus.pending && !queuedIds.contains(row.id)) {
+        await _db.syncQueueDao.enqueue(
+          entityType: 'location',
+          entityId: row.id,
+          operation: 'create',
+          payload: jsonEncode({
+            'id': row.id,
+            'name': row.name,
+            'description': row.description,
+            'latitude': row.latitude,
+            'longitude': row.longitude,
+            'createdAt': row.createdAt.toIso8601String(),
+            'syncStatus': row.syncStatus.name,
+          }),
+          createdAt: row.createdAt,
+        );
+      }
+    }
+
+    for (final row in await _db.plantsDao.getAll()) {
+      if (row.syncStatus == SyncStatus.pending && !queuedIds.contains(row.id)) {
+        await _db.syncQueueDao.enqueue(
+          entityType: 'plant',
+          entityId: row.id,
+          operation: 'create',
+          payload: jsonEncode({
+            'id': row.id,
+            'speciesId': row.speciesId,
+            'nickname': row.nickname,
+            'soilId': row.soilType,
+            'irrigationFrequencyDays': row.irrigationFrequencyDays,
+            'acquisitionDate': row.acquisitionDate.toIso8601String(),
+            'location': row.location,
+            'locationId': row.locationId,
+            'lastIrrigatedAt': row.lastIrrigatedAt?.toIso8601String(),
+            'createdAt': row.createdAt.toIso8601String(),
+            'syncStatus': row.syncStatus.name,
+          }),
+          createdAt: row.createdAt,
+        );
+      }
+    }
+
+    for (final row in await _db.entriesDao.getAll()) {
+      if (row.syncStatus == SyncStatus.pending && !queuedIds.contains(row.id)) {
+        await _db.syncQueueDao.enqueue(
+          entityType: 'entry',
+          entityId: row.id,
+          operation: 'create',
+          payload: jsonEncode({
+            'id': row.id,
+            'plantId': row.plantId,
+            'date': row.date.toIso8601String(),
+            'photoPath': row.photoPath,
+            'note': row.note,
+            'type': row.type.name,
+            'numericValue': row.numericValue,
+            'extraData': row.extraData,
+            'createdAt': row.createdAt.toIso8601String(),
+            'syncStatus': row.syncStatus.name,
+          }),
+          createdAt: row.createdAt,
+        );
+      }
+    }
   }
 
   Future<void> _markEntitySynced(String entityType, String entityId) async {

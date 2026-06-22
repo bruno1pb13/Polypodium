@@ -117,9 +117,43 @@ jobs:
           name: appimage
           path: build/Polypodium-x86_64.AppImage
 
-  # ── GitHub Release (agrega APK + AppImage) ─────────────────────────────────
+  # ── Windows MSIX & ZIP ─────────────────────────────────────────────────────
+  build-windows:
+    needs: version
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          cache: true
+
+      - run: flutter config --enable-windows-desktop
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build Windows
+        shell: powershell
+        env:
+          BUILD_NAME: ${{ needs.version.outputs.build_name }}
+          BUILD_NUMBER: ${{ needs.version.outputs.build_number }}
+        run: .\windows\packaging\build_windows.ps1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-msix
+          path: build/windows/x64/runner/Release/Polypodium.msix
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-portable
+          path: build/Polypodium-Windows-Portable.zip
+
+  # ── GitHub Release (agrega APK + AppImage + Windows) ───────────────────────
   release:
-    needs: [version, build-apk, build-linux]
+    needs: [version, build-apk, build-linux, build-windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -134,11 +168,23 @@ jobs:
           name: appimage
           path: artifacts/
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-msix
+          path: artifacts/
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-portable
+          path: artifacts/
+
       - uses: softprops/action-gh-release@v2
         with:
           files: |
             artifacts/app-release.apk
             artifacts/Polypodium-x86_64.AppImage
+            artifacts/Polypodium.msix
+            artifacts/Polypodium-Windows-Portable.zip
           name: Release ${{ needs.version.outputs.tag_name }}
           tag_name: ${{ needs.version.outputs.tag_name }}
           draft: false

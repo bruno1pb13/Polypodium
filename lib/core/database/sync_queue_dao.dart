@@ -15,6 +15,7 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
     required String entityId,
     required String operation,
     required String payload,
+    DateTime? createdAt,
   }) =>
       into(syncQueueTable).insert(
         SyncQueueTableCompanion.insert(
@@ -22,9 +23,16 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
           entityId: entityId,
           operation: operation,
           payload: payload,
-          createdAt: DateTime.now(),
+          createdAt: createdAt ?? DateTime.now(),
         ),
       );
+
+  Future<Set<String>> getPendingEntityIds() async {
+    final rows = await (select(syncQueueTable)
+          ..where((t) => t.processed.equals(false)))
+        .get();
+    return {for (final r in rows) r.entityId};
+  }
 
   // TODO(sync): Called by the sync service to drain pending items
   Future<List<SyncQueueTableData>> getPending() => (select(syncQueueTable)

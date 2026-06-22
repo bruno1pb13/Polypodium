@@ -9,6 +9,8 @@ part 'entries_dao.g.dart';
 class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
   EntriesDao(super.db);
 
+  Future<List<EntriesTableData>> getAll() => select(entriesTable).get();
+
   Future<List<EntriesTableData>> getByPlant(String plantId) =>
       (select(entriesTable)
             ..where((t) => t.plantId.equals(plantId))
