@@ -39,6 +39,7 @@ dev_dependencies:
   riverpod_generator: ^2.6.5
   mocktail: ^1.0.5
   flutter_lints: ^6.0.0
+  msix: ^3.16.1
 
 flutter_launcher_icons:
   android: "ic_launcher"
@@ -56,6 +57,15 @@ flutter_launcher_icons:
   linux:
     generate: true
     image_path: "assets/images/logo.png"
+
+msix_config:
+  display_name: Polypodium
+  publisher_display_name: Polypodium
+  publisher: CN=Polypodium
+  identity_name: com.polypodium.polypodium
+  msix_version: 1.1.0.0
+  logo_path: assets/images/logo.png
+  capabilities: internetClient
 
 flutter:
   uses-material-design: true
