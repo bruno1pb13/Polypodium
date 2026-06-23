@@ -156,7 +156,7 @@ class SyncService {
   }
 
   Future<int> _push() async {
-    await _bootstrapPending();
+    await _enqueuePending();
     final pending = await _db.syncQueueDao.getPending();
     if (pending.isEmpty) return 0;
 
@@ -223,7 +223,7 @@ class SyncService {
   /// sync_queue. This covers data created before the enqueue call was wired
   /// up in each repository's save(). Dependency order is intentional:
   /// species/soils/locations must be pushed before plants, plants before entries.
-  Future<void> _bootstrapPending() async {
+  Future<void> _enqueuePending() async {
     final queuedIds = await _db.syncQueueDao.getPendingEntityIds();
 
     for (final row in await _db.speciesDao.getAll()) {
@@ -489,6 +489,8 @@ class SyncService {
       photoPath: photoPathValue,
       note: Value(p['note'] as String?),
       type: type,
+      numericValue: Value((p['numericValue'] as num?)?.toDouble()),
+      extraData: Value(p['extraData'] as String?),
       createdAt: DateTime.parse(p['createdAt'] as String),
       syncStatus: const Value(SyncStatus.synced),
     ));
