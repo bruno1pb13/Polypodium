@@ -17,7 +17,7 @@ flutter @BuildArgs
 
 # Ensure msix is available
 Write-Host "==> Generating MSIX Installer..." -ForegroundColor Cyan
-$MsixArgs = @("pub", "run", "msix:create")
+$MsixArgs = @("pub", "run", "msix:create", "--install-certificate=false")
 if ($env:BUILD_NAME) {
     # MSIX version must be in format x.x.x.x
     $MsixVer = $env:BUILD_NAME
