@@ -14,6 +14,9 @@ import 'package:uuid/uuid.dart';
 
 class MockPhotoStorage implements PhotoStorage {
   @override
+  String get baseDirName => 'plant_photos';
+
+  @override
   Future<void> cleanOrphanPhotos(List<String> referencedPaths) async {}
 
   @override

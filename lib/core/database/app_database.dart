@@ -40,7 +40,8 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase({String fileName = 'polypodium.db'})
+      : super(_openConnection(fileName));
   AppDatabase.forTesting(super.executor);
 
   @override
@@ -159,10 +160,10 @@ class AppDatabase extends _$AppDatabase {
         },
       );
 
-  static LazyDatabase _openConnection() {
+  static LazyDatabase _openConnection(String fileName) {
     return LazyDatabase(() async {
       final dir = await getApplicationDocumentsDirectory();
-      final file = File(p.join(dir.path, 'polypodium.db'));
+      final file = File(p.join(dir.path, fileName));
       return NativeDatabase.createInBackground(file);
     });
   }
