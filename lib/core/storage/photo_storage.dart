@@ -4,9 +4,15 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 class PhotoStorage {
-  static Future<Directory> _photosDir() async {
+  PhotoStorage({this.baseDirName = 'plant_photos'});
+
+  /// Subfolder of the app documents directory this instance reads/writes,
+  /// so each workspace can keep its photos isolated from the others.
+  final String baseDirName;
+
+  Future<Directory> _photosDir() async {
     final base = await getApplicationDocumentsDirectory();
-    final dir = Directory(p.join(base.path, 'plant_photos'));
+    final dir = Directory(p.join(base.path, baseDirName));
     if (!dir.existsSync()) await dir.create(recursive: true);
     return dir;
   }

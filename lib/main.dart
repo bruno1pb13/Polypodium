@@ -2,12 +2,14 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'core/notifications/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/app_shell.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
+import 'features/workspaces/data/workspace_repository.dart';
 
 /// Background entry point for WorkManager tasks (Android only).
 @pragma('vm:entry-point')
@@ -25,6 +27,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await NotificationService.initialize();
+
+  final prefs = await SharedPreferences.getInstance();
+  await WorkspaceRepository(prefs).ensureBootstrapped();
 
   if (Platform.isAndroid) {
     await Workmanager().initialize(callbackDispatcher);

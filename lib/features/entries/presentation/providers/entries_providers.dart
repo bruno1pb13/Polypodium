@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/database/database_provider.dart';
-import '../../../../core/storage/photo_storage.dart';
+import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../plants/presentation/providers/plants_providers.dart';
 import '../../../../core/enums.dart';
 import '../../data/entries_repository.dart';
@@ -63,9 +63,6 @@ final latestPlantPhotoProvider =
   final db = ref.watch(appDatabaseProvider);
   return db.entriesDao.watchLatestPhotoPath(plantId);
 });
-
-@Riverpod(keepAlive: true)
-PhotoStorage photoStorage(Ref ref) => PhotoStorage();
 
 @Riverpod(keepAlive: true)
 EntriesRepository entriesRepository(Ref ref) {
