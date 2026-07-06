@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/enums.dart';
 import '../../../../core/storage/photo_storage.dart';
+import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 

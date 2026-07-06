@@ -4,12 +4,13 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../features/workspaces/data/workspace_auth_client.dart';
 import '../database/app_database.dart';
 import '../enums.dart';
 import '../storage/photo_storage.dart';
+import 'workspace_config_store.dart';
 
 class SyncResult {
   final int pulled;
@@ -18,91 +19,59 @@ class SyncResult {
 }
 
 class SyncService {
-  SyncService(this._db, this._prefs, this._photoStorage);
+  SyncService(
+    this._db,
+    this._store,
+    this._photoStorage, {
+    WorkspaceAuthClient authClient = const WorkspaceAuthClient(),
+  }) : _authClient = authClient;
 
   final AppDatabase _db;
-  final SharedPreferences _prefs;
+  final WorkspaceConfigStore _store;
   final PhotoStorage _photoStorage;
+  final WorkspaceAuthClient _authClient;
 
-  static const _tokenKey = 'sync_token';
-  static const _deviceIdKey = 'sync_device_id';
-  static const _cursorKey = 'sync_cursor';
-  static const _serverUrlKey = 'sync_server_url';
-  static const _lastSyncAtKey = 'sync_last_at';
-  static const _userEmailKey = 'sync_user_email';
-
-  String? get token => _prefs.getString(_tokenKey);
-  String? get deviceId => _prefs.getString(_deviceIdKey);
-  String? get serverUrl => _prefs.getString(_serverUrlKey);
-  int get cursor => _prefs.getInt(_cursorKey) ?? 0;
-  String? get userEmail => _prefs.getString(_userEmailKey);
-  bool get isLoggedIn {
-    try {
-      return token != null && serverUrl != null;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  DateTime? get lastSyncAt {
-    final s = _prefs.getString(_lastSyncAtKey);
-    return s != null ? DateTime.tryParse(s) : null;
-  }
+  String? get token => _store.current.token;
+  String? get deviceId => _store.current.deviceId;
+  String? get serverUrl => _store.current.serverUrl;
+  int get cursor => _store.current.cursor;
+  String? get userEmail => _store.current.userEmail;
+  bool get isLoggedIn => _store.current.isLoggedIn;
+  DateTime? get lastSyncAt => _store.current.lastSyncAt;
 
   Map<String, String> get _authHeaders => {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       };
 
-  Future<void> checkServer(String serverUrl) async {
-    final response = await http
-        .get(Uri.parse('$serverUrl/api/v1/health'))
-        .timeout(const Duration(seconds: 10));
-
-    if (response.statusCode != 200) {
-      throw Exception('Servidor não disponível ou URL inválida');
-    }
-  }
+  Future<void> checkServer(String serverUrl) =>
+      _authClient.checkServer(serverUrl);
 
   Future<void> login(String serverUrl, String email, String password) async {
     final id = deviceId ?? const Uuid().v4();
-    final response = await http
-        .post(
-          Uri.parse('$serverUrl/api/v1/auth/login'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            'email': email,
-            'password': password,
-            'deviceId': id,
-            'deviceName': 'Polypodium',
-          }),
-        )
-        .timeout(const Duration(seconds: 15));
-
-    if (response.statusCode != 200) {
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
-      throw Exception(body['message'] ?? 'Falha ao autenticar');
-    }
-
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    await _prefs.setString(_tokenKey, data['token'] as String);
-    await _prefs.setString(_deviceIdKey, data['deviceId'] as String);
-    await _prefs.setString(_serverUrlKey, serverUrl);
-    await _prefs.setString(_userEmailKey, email);
+    final result = await _authClient.login(
+      serverUrl: serverUrl,
+      email: email,
+      password: password,
+      deviceId: id,
+    );
+    await _store.save(_store.current.copyWith(
+      token: result.token,
+      deviceId: result.deviceId,
+      serverUrl: serverUrl,
+      userEmail: email,
+    ));
   }
 
   Future<void> logout() async {
-    await _prefs.remove(_tokenKey);
-    await _prefs.remove(_cursorKey);
-    await _prefs.remove(_userEmailKey);
-    await _prefs.remove(_lastSyncAtKey);
+    await _store.save(_store.current.disconnected());
   }
 
   Future<SyncResult> sync() async {
     if (!isLoggedIn) throw Exception('Não autenticado');
     final pulled = await _pull();
     final pushed = await _push();
-    await _prefs.setString(_lastSyncAtKey, DateTime.now().toIso8601String());
+    await _store.save(_store.current.copyWith(lastSyncAt: DateTime.now()));
     return SyncResult(pulled: pulled, pushed: pushed);
   }
 
@@ -145,7 +114,7 @@ class SyncService {
               body: jsonEncode({'deviceId': deviceId, 'cursor': nextCursor}),
             )
             .timeout(const Duration(seconds: 10));
-        await _prefs.setInt(_cursorKey, nextCursor);
+        await _store.save(_store.current.copyWith(cursor: nextCursor));
         since = nextCursor;
       }
 
