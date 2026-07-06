@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/database/database_provider.dart';
+import '../../../../core/storage/photo_storage_provider.dart';
+import '../../../../core/sync/sync_providers.dart';
 import '../../../plants/presentation/screens/home_screen.dart';
 import '../../data/workspace_auth_client.dart';
+import '../../data/workspace_migration_service.dart';
 import '../../domain/workspace_model.dart';
 import '../providers/workspace_providers.dart';
 import '../widgets/workspace_login_dialog.dart';
@@ -76,11 +80,15 @@ class WorkspacesScreen extends ConsumerWidget {
   }
 
   Future<void> _addRemote(BuildContext context, WidgetRef ref) async {
+    const authClient = WorkspaceAuthClient();
+    const migrationService = WorkspaceMigrationService();
+
     final created = await showDialog<bool>(
       context: context,
       builder: (_) => WorkspaceLoginDialog(
         title: 'Adicionar workspace remoto',
-        checkServer: const WorkspaceAuthClient().checkServer,
+        checkServer: authClient.checkServer,
+        checkHasUsers: authClient.hasUsers,
         onSubmit: (serverUrl, email, password) async {
           final ws = await ref
               .read(workspacesNotifierProvider.notifier)
@@ -92,6 +100,35 @@ class WorkspacesScreen extends ConsumerWidget {
           await ref
               .read(activeWorkspaceIdNotifierProvider.notifier)
               .setActive(ws.id);
+        },
+        onRegister: (serverUrl, workspaceName, email, password) async {
+          final ws = await ref
+              .read(workspacesNotifierProvider.notifier)
+              .createAndRegisterRemote(
+                serverUrl: serverUrl,
+                name: workspaceName,
+                email: email,
+                password: password,
+              );
+          await ref
+              .read(activeWorkspaceIdNotifierProvider.notifier)
+              .setActive(ws.id);
+        },
+        hasLocalDataToMigrate: () => migrationService.hasPendingLocalData(
+          ref.read(workspacesNotifierProvider.notifier).getById(
+                Workspace.localId,
+              ),
+        ),
+        onMigrate: () async {
+          final local = ref
+              .read(workspacesNotifierProvider.notifier)
+              .getById(Workspace.localId);
+          await migrationService.migrateLocalInto(
+            local: local,
+            targetDb: ref.read(appDatabaseProvider),
+            targetPhotos: ref.read(photoStorageProvider),
+          );
+          await ref.read(syncServiceProvider).sync();
         },
       ),
     );
