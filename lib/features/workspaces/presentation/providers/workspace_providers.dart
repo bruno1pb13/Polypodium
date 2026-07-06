@@ -78,6 +78,35 @@ class WorkspacesNotifier extends _$WorkspacesNotifier {
     return workspace;
   }
 
+  /// Creates the very first account on [serverUrl] and adds the result as a
+  /// brand-new remote workspace named [name]. Only meant to be used for a
+  /// server that has no accounts yet (see WorkspaceAuthClient.hasUsers).
+  Future<Workspace> createAndRegisterRemote({
+    required String serverUrl,
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    const authClient = WorkspaceAuthClient();
+    final result = await authClient.register(
+      serverUrl: serverUrl,
+      email: email,
+      password: password,
+    );
+    final workspace = Workspace(
+      id: const Uuid().v4(),
+      name: name,
+      type: WorkspaceType.remote,
+      serverUrl: serverUrl,
+      userEmail: email,
+      token: result.token,
+      deviceId: result.deviceId,
+      createdAt: DateTime.now(),
+    );
+    await upsert(workspace);
+    return workspace;
+  }
+
   /// Re-authenticates a previously disconnected remote workspace, keeping its
   /// existing id/name/serverUrl/deviceId (and therefore its database file).
   Future<void> reconnectRemote(String id, String password) async {
