@@ -6,53 +6,129 @@ part of 'sync_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(syncService)
+final syncServiceProvider = SyncServiceProvider._();
+
+final class SyncServiceProvider
+    extends $FunctionalProvider<SyncService, SyncService, SyncService>
+    with $Provider<SyncService> {
+  SyncServiceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'syncServiceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$syncServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<SyncService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SyncService create(Ref ref) {
+    return syncService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SyncService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SyncService>(value),
+    );
+  }
+}
+
 String _$syncServiceHash() => r'791c01c68a6b89a1c88dfd019d65010eab2abceb';
 
-/// See also [syncService].
-@ProviderFor(syncService)
-final syncServiceProvider = Provider<SyncService>.internal(
-  syncService,
-  name: r'syncServiceProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$syncServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+@ProviderFor(pendingSyncCount)
+final pendingSyncCountProvider = PendingSyncCountProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SyncServiceRef = ProviderRef<SyncService>;
+final class PendingSyncCountProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, FutureOr<int>>
+    with $FutureModifier<int>, $FutureProvider<int> {
+  PendingSyncCountProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'pendingSyncCountProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$pendingSyncCountHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<int> create(Ref ref) {
+    return pendingSyncCount(ref);
+  }
+}
+
 String _$pendingSyncCountHash() => r'b6144ec8c6bb629afb7be76d1a8d9b34b0855313';
 
-/// See also [pendingSyncCount].
-@ProviderFor(pendingSyncCount)
-final pendingSyncCountProvider = AutoDisposeFutureProvider<int>.internal(
-  pendingSyncCount,
-  name: r'pendingSyncCountProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$pendingSyncCountHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+@ProviderFor(SyncNotifier)
+final syncNotifierProvider = SyncNotifierProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef PendingSyncCountRef = AutoDisposeFutureProviderRef<int>;
+final class SyncNotifierProvider
+    extends $NotifierProvider<SyncNotifier, AsyncValue<SyncResult?>> {
+  SyncNotifierProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'syncNotifierProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$syncNotifierHash();
+
+  @$internal
+  @override
+  SyncNotifier create() => SyncNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<SyncResult?> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<SyncResult?>>(value),
+    );
+  }
+}
+
 String _$syncNotifierHash() => r'6c65e0188b48666f6efa80f049834ee70d11eaf3';
 
-/// See also [SyncNotifier].
-@ProviderFor(SyncNotifier)
-final syncNotifierProvider =
-    AutoDisposeNotifierProvider<SyncNotifier, AsyncValue<SyncResult?>>.internal(
-  SyncNotifier.new,
-  name: r'syncNotifierProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$syncNotifierHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$SyncNotifier = AutoDisposeNotifier<AsyncValue<SyncResult?>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$SyncNotifier extends $Notifier<AsyncValue<SyncResult?>> {
+  AsyncValue<SyncResult?> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<SyncResult?>, AsyncValue<SyncResult?>>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<SyncResult?>, AsyncValue<SyncResult?>>,
+        AsyncValue<SyncResult?>,
+        Object?,
+        Object?>;
+    return element.handleCreate(ref, build);
+  }
+}

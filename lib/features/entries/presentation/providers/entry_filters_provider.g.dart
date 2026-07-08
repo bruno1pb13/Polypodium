@@ -6,338 +6,243 @@ part of 'entry_filters_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$availableEntryTypesHash() =>
-    r'b9e23a5368b0fd8b4190e6381ed627093081a6de';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [availableEntryTypes].
-@ProviderFor(availableEntryTypes)
-final availableEntryTypesProvider =
-    AutoDisposeProvider<List<EntryType>>.internal(
-  availableEntryTypes,
-  name: r'availableEntryTypesProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$availableEntryTypesHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+@ProviderFor(EntryFiltersNotifier)
+final entryFiltersNotifierProvider = EntryFiltersNotifierFamily._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AvailableEntryTypesRef = AutoDisposeProviderRef<List<EntryType>>;
-String _$entryFiltersNotifierHash() =>
-    r'633506304dacb568faf50cfae400a056f7551868';
+final class EntryFiltersNotifierProvider
+    extends $NotifierProvider<EntryFiltersNotifier, Set<EntryType>> {
+  EntryFiltersNotifierProvider._(
+      {required EntryFiltersNotifierFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'entryFiltersNotifierProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
+  @override
+  String debugGetCreateSourceHash() => _$entryFiltersNotifierHash();
 
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
+  @override
+  String toString() {
+    return r'entryFiltersNotifierProvider'
+        ''
+        '($argument)';
   }
 
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  @$internal
+  @override
+  EntryFiltersNotifier create() => EntryFiltersNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Set<EntryType> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Set<EntryType>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is EntryFiltersNotifierProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
   }
 }
 
-abstract class _$EntryFiltersNotifier
-    extends BuildlessAutoDisposeNotifier<Set<EntryType>> {
-  late final String plantId;
+String _$entryFiltersNotifierHash() =>
+    r'633506304dacb568faf50cfae400a056f7551868';
+
+final class EntryFiltersNotifierFamily extends $Family
+    with
+        $ClassFamilyOverride<EntryFiltersNotifier, Set<EntryType>,
+            Set<EntryType>, Set<EntryType>, String> {
+  EntryFiltersNotifierFamily._()
+      : super(
+          retry: null,
+          name: r'entryFiltersNotifierProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  EntryFiltersNotifierProvider call(
+    String plantId,
+  ) =>
+      EntryFiltersNotifierProvider._(argument: plantId, from: this);
+
+  @override
+  String toString() => r'entryFiltersNotifierProvider';
+}
+
+abstract class _$EntryFiltersNotifier extends $Notifier<Set<EntryType>> {
+  late final _$args = ref.$arg as String;
+  String get plantId => _$args;
 
   Set<EntryType> build(
     String plantId,
   );
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<Set<EntryType>, Set<EntryType>>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<Set<EntryType>, Set<EntryType>>,
+        Set<EntryType>,
+        Object?,
+        Object?>;
+    return element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
+  }
 }
 
-/// See also [EntryFiltersNotifier].
-@ProviderFor(EntryFiltersNotifier)
-const entryFiltersNotifierProvider = EntryFiltersNotifierFamily();
+@ProviderFor(availableEntryTypes)
+final availableEntryTypesProvider = AvailableEntryTypesProvider._();
 
-/// See also [EntryFiltersNotifier].
-class EntryFiltersNotifierFamily extends Family<Set<EntryType>> {
-  /// See also [EntryFiltersNotifier].
-  const EntryFiltersNotifierFamily();
-
-  /// See also [EntryFiltersNotifier].
-  EntryFiltersNotifierProvider call(
-    String plantId,
-  ) {
-    return EntryFiltersNotifierProvider(
-      plantId,
-    );
-  }
-
-  @override
-  EntryFiltersNotifierProvider getProviderOverride(
-    covariant EntryFiltersNotifierProvider provider,
-  ) {
-    return call(
-      provider.plantId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'entryFiltersNotifierProvider';
-}
-
-/// See also [EntryFiltersNotifier].
-class EntryFiltersNotifierProvider extends AutoDisposeNotifierProviderImpl<
-    EntryFiltersNotifier, Set<EntryType>> {
-  /// See also [EntryFiltersNotifier].
-  EntryFiltersNotifierProvider(
-    String plantId,
-  ) : this._internal(
-          () => EntryFiltersNotifier()..plantId = plantId,
-          from: entryFiltersNotifierProvider,
-          name: r'entryFiltersNotifierProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$entryFiltersNotifierHash,
-          dependencies: EntryFiltersNotifierFamily._dependencies,
-          allTransitiveDependencies:
-              EntryFiltersNotifierFamily._allTransitiveDependencies,
-          plantId: plantId,
+final class AvailableEntryTypesProvider extends $FunctionalProvider<
+    List<EntryType>,
+    List<EntryType>,
+    List<EntryType>> with $Provider<List<EntryType>> {
+  AvailableEntryTypesProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'availableEntryTypesProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
         );
 
-  EntryFiltersNotifierProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.plantId,
-  }) : super.internal();
+  @override
+  String debugGetCreateSourceHash() => _$availableEntryTypesHash();
 
-  final String plantId;
+  @$internal
+  @override
+  $ProviderElement<List<EntryType>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
 
   @override
-  Set<EntryType> runNotifierBuild(
-    covariant EntryFiltersNotifier notifier,
-  ) {
-    return notifier.build(
-      plantId,
-    );
+  List<EntryType> create(Ref ref) {
+    return availableEntryTypes(ref);
   }
 
-  @override
-  Override overrideWith(EntryFiltersNotifier Function() create) {
-    return ProviderOverride(
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<EntryType> value) {
+    return $ProviderOverride(
       origin: this,
-      override: EntryFiltersNotifierProvider._internal(
-        () => create()..plantId = plantId,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        plantId: plantId,
-      ),
+      providerOverride: $SyncValueProvider<List<EntryType>>(value),
     );
   }
+}
+
+String _$availableEntryTypesHash() =>
+    r'7ca540c3009a92648a95ea85151615a55b271c97';
+
+@ProviderFor(EntrySortNotifier)
+final entrySortNotifierProvider = EntrySortNotifierFamily._();
+
+final class EntrySortNotifierProvider
+    extends $NotifierProvider<EntrySortNotifier, EntrySortOption> {
+  EntrySortNotifierProvider._(
+      {required EntrySortNotifierFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'entrySortNotifierProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
-  AutoDisposeNotifierProviderElement<EntryFiltersNotifier, Set<EntryType>>
-      createElement() {
-    return _EntryFiltersNotifierProviderElement(this);
+  String debugGetCreateSourceHash() => _$entrySortNotifierHash();
+
+  @override
+  String toString() {
+    return r'entrySortNotifierProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  EntrySortNotifier create() => EntrySortNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EntrySortOption value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EntrySortOption>(value),
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return other is EntryFiltersNotifierProvider && other.plantId == plantId;
+    return other is EntrySortNotifierProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, plantId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin EntryFiltersNotifierRef
-    on AutoDisposeNotifierProviderRef<Set<EntryType>> {
-  /// The parameter `plantId` of this provider.
-  String get plantId;
-}
-
-class _EntryFiltersNotifierProviderElement
-    extends AutoDisposeNotifierProviderElement<EntryFiltersNotifier,
-        Set<EntryType>> with EntryFiltersNotifierRef {
-  _EntryFiltersNotifierProviderElement(super.provider);
-
-  @override
-  String get plantId => (origin as EntryFiltersNotifierProvider).plantId;
 }
 
 String _$entrySortNotifierHash() => r'ce0f5f1d427b45abeed8058d6b8483b4ca890b4d';
 
-abstract class _$EntrySortNotifier
-    extends BuildlessAutoDisposeNotifier<EntrySortOption> {
-  late final String plantId;
+final class EntrySortNotifierFamily extends $Family
+    with
+        $ClassFamilyOverride<EntrySortNotifier, EntrySortOption,
+            EntrySortOption, EntrySortOption, String> {
+  EntrySortNotifierFamily._()
+      : super(
+          retry: null,
+          name: r'entrySortNotifierProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  EntrySortNotifierProvider call(
+    String plantId,
+  ) =>
+      EntrySortNotifierProvider._(argument: plantId, from: this);
+
+  @override
+  String toString() => r'entrySortNotifierProvider';
+}
+
+abstract class _$EntrySortNotifier extends $Notifier<EntrySortOption> {
+  late final _$args = ref.$arg as String;
+  String get plantId => _$args;
 
   EntrySortOption build(
     String plantId,
   );
-}
-
-/// See also [EntrySortNotifier].
-@ProviderFor(EntrySortNotifier)
-const entrySortNotifierProvider = EntrySortNotifierFamily();
-
-/// See also [EntrySortNotifier].
-class EntrySortNotifierFamily extends Family<EntrySortOption> {
-  /// See also [EntrySortNotifier].
-  const EntrySortNotifierFamily();
-
-  /// See also [EntrySortNotifier].
-  EntrySortNotifierProvider call(
-    String plantId,
-  ) {
-    return EntrySortNotifierProvider(
-      plantId,
-    );
-  }
-
+  @$mustCallSuper
   @override
-  EntrySortNotifierProvider getProviderOverride(
-    covariant EntrySortNotifierProvider provider,
-  ) {
-    return call(
-      provider.plantId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'entrySortNotifierProvider';
-}
-
-/// See also [EntrySortNotifier].
-class EntrySortNotifierProvider extends AutoDisposeNotifierProviderImpl<
-    EntrySortNotifier, EntrySortOption> {
-  /// See also [EntrySortNotifier].
-  EntrySortNotifierProvider(
-    String plantId,
-  ) : this._internal(
-          () => EntrySortNotifier()..plantId = plantId,
-          from: entrySortNotifierProvider,
-          name: r'entrySortNotifierProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$entrySortNotifierHash,
-          dependencies: EntrySortNotifierFamily._dependencies,
-          allTransitiveDependencies:
-              EntrySortNotifierFamily._allTransitiveDependencies,
-          plantId: plantId,
-        );
-
-  EntrySortNotifierProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.plantId,
-  }) : super.internal();
-
-  final String plantId;
-
-  @override
-  EntrySortOption runNotifierBuild(
-    covariant EntrySortNotifier notifier,
-  ) {
-    return notifier.build(
-      plantId,
-    );
-  }
-
-  @override
-  Override overrideWith(EntrySortNotifier Function() create) {
-    return ProviderOverride(
-      origin: this,
-      override: EntrySortNotifierProvider._internal(
-        () => create()..plantId = plantId,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        plantId: plantId,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeNotifierProviderElement<EntrySortNotifier, EntrySortOption>
-      createElement() {
-    return _EntrySortNotifierProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is EntrySortNotifierProvider && other.plantId == plantId;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, plantId.hashCode);
-
-    return _SystemHash.finish(hash);
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<EntrySortOption, EntrySortOption>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<EntrySortOption, EntrySortOption>,
+        EntrySortOption,
+        Object?,
+        Object?>;
+    return element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
   }
 }
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin EntrySortNotifierRef on AutoDisposeNotifierProviderRef<EntrySortOption> {
-  /// The parameter `plantId` of this provider.
-  String get plantId;
-}
-
-class _EntrySortNotifierProviderElement
-    extends AutoDisposeNotifierProviderElement<EntrySortNotifier,
-        EntrySortOption> with EntrySortNotifierRef {
-  _EntrySortNotifierProviderElement(super.provider);
-
-  @override
-  String get plantId => (origin as EntrySortNotifierProvider).plantId;
-}
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

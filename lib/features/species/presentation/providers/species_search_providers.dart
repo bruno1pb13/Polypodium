@@ -34,7 +34,7 @@ class SpeciesSortOptionNotifier extends _$SpeciesSortOptionNotifier {
 }
 
 @riverpod
-Future<List<SpeciesModel>> filteredSortedSpecies(FilteredSortedSpeciesRef ref) async {
+Future<List<SpeciesModel>> filteredSortedSpecies(Ref ref) async {
   final query = ref.watch(speciesSearchQueryProvider).normalize();
   final sortOption = ref.watch(speciesSortOptionNotifierProvider);
 

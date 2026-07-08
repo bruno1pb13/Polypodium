@@ -6,38 +6,86 @@ part of 'soils_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(soilsRepository)
+final soilsRepositoryProvider = SoilsRepositoryProvider._();
+
+final class SoilsRepositoryProvider extends $FunctionalProvider<SoilsRepository,
+    SoilsRepository, SoilsRepository> with $Provider<SoilsRepository> {
+  SoilsRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'soilsRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$soilsRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<SoilsRepository> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SoilsRepository create(Ref ref) {
+    return soilsRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SoilsRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SoilsRepository>(value),
+    );
+  }
+}
+
 String _$soilsRepositoryHash() => r'adc2e770e2f6480e6a42f0b0acc7866f11675b53';
 
-/// See also [soilsRepository].
-@ProviderFor(soilsRepository)
-final soilsRepositoryProvider = Provider<SoilsRepository>.internal(
-  soilsRepository,
-  name: r'soilsRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$soilsRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+@ProviderFor(SoilsNotifier)
+final soilsNotifierProvider = SoilsNotifierProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SoilsRepositoryRef = ProviderRef<SoilsRepository>;
+final class SoilsNotifierProvider
+    extends $StreamNotifierProvider<SoilsNotifier, List<SoilModel>> {
+  SoilsNotifierProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'soilsNotifierProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$soilsNotifierHash();
+
+  @$internal
+  @override
+  SoilsNotifier create() => SoilsNotifier();
+}
+
 String _$soilsNotifierHash() => r'168d1f0b68dba6e4a265c1cdb41e5b180fb36c97';
 
-/// See also [SoilsNotifier].
-@ProviderFor(SoilsNotifier)
-final soilsNotifierProvider =
-    AutoDisposeStreamNotifierProvider<SoilsNotifier, List<SoilModel>>.internal(
-  SoilsNotifier.new,
-  name: r'soilsNotifierProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$soilsNotifierHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$SoilsNotifier = AutoDisposeStreamNotifier<List<SoilModel>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$SoilsNotifier extends $StreamNotifier<List<SoilModel>> {
+  Stream<List<SoilModel>> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<List<SoilModel>>, List<SoilModel>>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<SoilModel>>, List<SoilModel>>,
+        AsyncValue<List<SoilModel>>,
+        Object?,
+        Object?>;
+    return element.handleCreate(ref, build);
+  }
+}

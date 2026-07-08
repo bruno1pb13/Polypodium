@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/enums.dart';
+import '../../../../core/widgets/fullscreen_image_viewer.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/entry_model.dart';
 
@@ -118,13 +119,24 @@ class EntryTimelineItem extends ConsumerWidget {
                             const SizedBox(height: 10),
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.file(
-                                File(entry.photoPath!),
-                                height: 150,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
-                                    const SizedBox.shrink(),
+                              child: GestureDetector(
+                                onTap: () => showFullscreenImageViewer(
+                                    context, entry.photoPath!),
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 320,
+                                    maxHeight: 220,
+                                  ),
+                                  child: AspectRatio(
+                                    aspectRatio: 4 / 3,
+                                    child: Image.file(
+                                      File(entry.photoPath!),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          const SizedBox.shrink(),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ],

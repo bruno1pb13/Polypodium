@@ -5,7 +5,7 @@ import '../../features/species/presentation/screens/species_list_screen.dart';
 import '../../features/locations/presentation/screens/locations_list_screen.dart';
 import '../../features/soils/presentation/screens/soils_list_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
-import '../../features/workspaces/presentation/screens/workspaces_screen.dart';
+import '../../features/workspaces/presentation/widgets/workspace_selector.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -74,7 +74,10 @@ class AppDrawer extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  child: WorkspaceSelector(dark: true),
+                ),
                 _DrawerItem(
                   icon: Icons.home_outlined,
                   label: 'Minhas Plantas',
@@ -119,17 +122,6 @@ class AppDrawer extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (_) => const SoilsListScreen()),
-                    );
-                  },
-                ),
-                _DrawerItem(
-                  icon: Icons.workspaces_outline,
-                  label: 'Workspaces',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const WorkspacesScreen()),
                     );
                   },
                 ),
