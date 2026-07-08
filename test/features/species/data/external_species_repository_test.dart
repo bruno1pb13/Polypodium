@@ -23,7 +23,7 @@ void main() {
       db.execute('CREATE TABLE external_species (popular_name TEXT, scientific_name TEXT)');
       db.execute("INSERT INTO external_species VALUES ('Rosa', 'Rosa gallica')");
       db.execute("INSERT INTO external_species VALUES ('Samambaia', 'Pteridium aquilinum')");
-      db.dispose();
+      db.close();
       
       // Make it > 1MB to skip asset copying in build()
       final sink = dbFile.openSync(mode: FileMode.append);
@@ -45,8 +45,21 @@ void main() {
     });
 
     tearDown(() async {
-      if (await tempDir.exists()) {
-        await tempDir.delete(recursive: true);
+      // The OS may hold the sqlite3 file handle (or its -wal/-shm sidecar
+      // files) open briefly after the connection closes. Retry a few times,
+      // but don't fail the test over best-effort cleanup — a leftover temp
+      // dir is recoverable manually (same tradeoff as
+      // WorkspacesNotifier._deleteWorkspaceStorage).
+      for (var attempt = 0; attempt < 6; attempt++) {
+        try {
+          if (await tempDir.exists()) {
+            await tempDir.delete(recursive: true);
+          }
+          break;
+        } catch (_) {
+          if (attempt == 5) break;
+          await Future.delayed(Duration(milliseconds: 300 * (attempt + 1)));
+        }
       }
     });
 

@@ -17,6 +17,7 @@ void main() {
         appDatabaseProvider.overrideWithValue(db),
       ],
     );
+    container.listen(speciesNotifierProvider, (_, __) {});
   });
 
   tearDown(() {

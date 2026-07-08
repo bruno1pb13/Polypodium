@@ -124,6 +124,10 @@ void main() {
               .overrideWith(() => MockEntriesNotifier()),
         ],
       );
+      container.listen(plantsNotifierProvider, (_, __) {});
+      container.listen(speciesNotifierProvider, (_, __) {});
+      container.listen(locationsNotifierProvider, (_, __) {});
+      container.listen(soilsNotifierProvider, (_, __) {});
 
       final notifier = container.read(plantsNotifierProvider.notifier);
       await notifier.save(plant);
@@ -167,6 +171,10 @@ void main() {
               .overrideWith(() => MockEntriesNotifier()),
         ],
       );
+      container.listen(plantsNotifierProvider, (_, __) {});
+      container.listen(speciesNotifierProvider, (_, __) {});
+      container.listen(locationsNotifierProvider, (_, __) {});
+      container.listen(soilsNotifierProvider, (_, __) {});
 
       final notifier = container.read(plantsNotifierProvider.notifier);
       // Wait for initial build to populate the "oldPlants" state
