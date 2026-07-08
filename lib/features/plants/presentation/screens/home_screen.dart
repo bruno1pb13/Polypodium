@@ -7,6 +7,7 @@ import '../../../species/presentation/screens/species_list_screen.dart';
 import '../../../locations/presentation/screens/locations_list_screen.dart';
 import '../../../../core/widgets/app_search_bar.dart';
 import '../providers/plant_search_providers.dart';
+import '../providers/plant_selection_provider.dart';
 import '../providers/plants_providers.dart';
 import '../../../../core/enums.dart';
 import '../../../../core/widgets/app_drawer.dart';
@@ -38,38 +39,94 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
+  Future<void> _confirmBulkDelete(
+    BuildContext context,
+    WidgetRef ref,
+    Set<String> plantIds,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+            'Deletar ${plantIds.length} planta(s)?'),
+        content: const Text('Todos os registros dessas plantas serão removidos.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Deletar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      for (final id in plantIds) {
+        await ref.read(plantsNotifierProvider.notifier).delete(id);
+      }
+      ref.read(plantSelectionProvider.notifier).state = {};
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final plantsAsync = ref.watch(filteredSortedPlantsProvider);
+    final selectedIds = ref.watch(plantSelectionProvider);
+    final isSelectionMode = selectedIds.isNotEmpty;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: MediaQuery.sizeOf(context).width >= kWideBreakpoint
-            ? null
-            : const Text(
-                'Polypodium',
-                style: TextStyle(
-                  fontFamily: 'CormorantGaramond',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 28,
-                  letterSpacing: 0.5,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black45,
-                      offset: Offset(0, 2),
-                      blurRadius: 4,
-                    ),
-                  ],
-                ),
+      appBar: isSelectionMode
+          ? AppBar(
+              backgroundColor: Colors.black87,
+              elevation: 0,
+              iconTheme: const IconThemeData(color: Colors.white),
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: 'Cancelar seleção',
+                onPressed: () =>
+                    ref.read(plantSelectionProvider.notifier).state = {},
               ),
-      ),
+              title: Text(
+                '${selectedIds.length} selecionada(s)',
+                style: const TextStyle(color: Colors.white),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: 'Excluir selecionadas',
+                  onPressed: () => _confirmBulkDelete(context, ref, selectedIds),
+                ),
+              ],
+            )
+          : AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              centerTitle: true,
+              iconTheme: const IconThemeData(color: Colors.white),
+              title: MediaQuery.sizeOf(context).width >= kWideBreakpoint
+                  ? null
+                  : const Text(
+                      'Polypodium',
+                      style: TextStyle(
+                        fontFamily: 'CormorantGaramond',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 28,
+                        letterSpacing: 0.5,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black45,
+                            offset: Offset(0, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                    ),
+            ),
       drawer: MediaQuery.sizeOf(context).width >= kWideBreakpoint
           ? null
           : const AppDrawer(),
@@ -166,16 +223,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.only(bottom: 80),
                           itemCount: plants.length,
-                          itemBuilder: (ctx, i) => PlantListItem(
-                            plantWithSpecies: plants[i],
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PlantDetailScreen(
-                                    plantId: plants[i].plant.id),
+                          itemBuilder: (ctx, i) {
+                            final plantId = plants[i].plant.id;
+                            return PlantListItem(
+                              plantWithSpecies: plants[i],
+                              isSelectionMode: isSelectionMode,
+                              isSelected: selectedIds.contains(plantId),
+                              onStartSelection: () => ref
+                                  .read(plantSelectionProvider.notifier)
+                                  .state = {plantId},
+                              onToggleSelect: () {
+                                final current = Set<String>.from(selectedIds);
+                                if (!current.remove(plantId)) {
+                                  current.add(plantId);
+                                }
+                                ref.read(plantSelectionProvider.notifier).state =
+                                    current;
+                              },
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      PlantDetailScreen(plantId: plantId),
+                                ),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         );
                       },
                     ),
@@ -186,13 +259,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const AddEditPlantScreen()),
-        ),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: isSelectionMode
+          ? null
+          : FloatingActionButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AddEditPlantScreen()),
+              ),
+              child: const Icon(Icons.add),
+            ),
     );
   }
 }

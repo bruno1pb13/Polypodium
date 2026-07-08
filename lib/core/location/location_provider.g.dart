@@ -6,22 +6,47 @@ part of 'location_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$locationServiceHash() => r'03cab3b59d0251c541343e81797ad443c87f5888';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [locationService].
 @ProviderFor(locationService)
-final locationServiceProvider = Provider<ILocationService>.internal(
-  locationService,
-  name: r'locationServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$locationServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final locationServiceProvider = LocationServiceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef LocationServiceRef = ProviderRef<ILocationService>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class LocationServiceProvider extends $FunctionalProvider<
+    ILocationService,
+    ILocationService,
+    ILocationService> with $Provider<ILocationService> {
+  LocationServiceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'locationServiceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$locationServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<ILocationService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ILocationService create(Ref ref) {
+    return locationService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ILocationService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ILocationService>(value),
+    );
+  }
+}
+
+String _$locationServiceHash() => r'03cab3b59d0251c541343e81797ad443c87f5888';

@@ -55,7 +55,7 @@ class EntryFiltersNotifier extends _$EntryFiltersNotifier {
 }
 
 @riverpod
-List<EntryType> availableEntryTypes(AvailableEntryTypesRef ref) {
+List<EntryType> availableEntryTypes(Ref ref) {
   return EntryType.values;
 }
 

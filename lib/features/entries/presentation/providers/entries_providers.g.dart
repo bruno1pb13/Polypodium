@@ -6,189 +6,138 @@ part of 'entries_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$entriesRepositoryHash() => r'5cfd89564a430f86edc242884039887e067525d3';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [entriesRepository].
 @ProviderFor(entriesRepository)
-final entriesRepositoryProvider = Provider<EntriesRepository>.internal(
-  entriesRepository,
-  name: r'entriesRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$entriesRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final entriesRepositoryProvider = EntriesRepositoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef EntriesRepositoryRef = ProviderRef<EntriesRepository>;
-String _$entriesNotifierHash() => r'21449b8df65eae3ea8f712975c7606233011cb6c';
-
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-abstract class _$EntriesNotifier
-    extends BuildlessAutoDisposeStreamNotifier<List<EntryModel>> {
-  late final String plantId;
-
-  Stream<List<EntryModel>> build(
-    String plantId,
-  );
-}
-
-/// See also [EntriesNotifier].
-@ProviderFor(EntriesNotifier)
-const entriesNotifierProvider = EntriesNotifierFamily();
-
-/// See also [EntriesNotifier].
-class EntriesNotifierFamily extends Family<AsyncValue<List<EntryModel>>> {
-  /// See also [EntriesNotifier].
-  const EntriesNotifierFamily();
-
-  /// See also [EntriesNotifier].
-  EntriesNotifierProvider call(
-    String plantId,
-  ) {
-    return EntriesNotifierProvider(
-      plantId,
-    );
-  }
-
-  @override
-  EntriesNotifierProvider getProviderOverride(
-    covariant EntriesNotifierProvider provider,
-  ) {
-    return call(
-      provider.plantId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'entriesNotifierProvider';
-}
-
-/// See also [EntriesNotifier].
-class EntriesNotifierProvider extends AutoDisposeStreamNotifierProviderImpl<
-    EntriesNotifier, List<EntryModel>> {
-  /// See also [EntriesNotifier].
-  EntriesNotifierProvider(
-    String plantId,
-  ) : this._internal(
-          () => EntriesNotifier()..plantId = plantId,
-          from: entriesNotifierProvider,
-          name: r'entriesNotifierProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$entriesNotifierHash,
-          dependencies: EntriesNotifierFamily._dependencies,
-          allTransitiveDependencies:
-              EntriesNotifierFamily._allTransitiveDependencies,
-          plantId: plantId,
+final class EntriesRepositoryProvider extends $FunctionalProvider<
+    EntriesRepository,
+    EntriesRepository,
+    EntriesRepository> with $Provider<EntriesRepository> {
+  EntriesRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'entriesRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
         );
 
-  EntriesNotifierProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.plantId,
-  }) : super.internal();
+  @override
+  String debugGetCreateSourceHash() => _$entriesRepositoryHash();
 
-  final String plantId;
+  @$internal
+  @override
+  $ProviderElement<EntriesRepository> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
 
   @override
-  Stream<List<EntryModel>> runNotifierBuild(
-    covariant EntriesNotifier notifier,
-  ) {
-    return notifier.build(
-      plantId,
-    );
+  EntriesRepository create(Ref ref) {
+    return entriesRepository(ref);
   }
 
-  @override
-  Override overrideWith(EntriesNotifier Function() create) {
-    return ProviderOverride(
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EntriesRepository value) {
+    return $ProviderOverride(
       origin: this,
-      override: EntriesNotifierProvider._internal(
-        () => create()..plantId = plantId,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        plantId: plantId,
-      ),
+      providerOverride: $SyncValueProvider<EntriesRepository>(value),
     );
   }
+}
+
+String _$entriesRepositoryHash() => r'5cfd89564a430f86edc242884039887e067525d3';
+
+@ProviderFor(EntriesNotifier)
+final entriesNotifierProvider = EntriesNotifierFamily._();
+
+final class EntriesNotifierProvider
+    extends $StreamNotifierProvider<EntriesNotifier, List<EntryModel>> {
+  EntriesNotifierProvider._(
+      {required EntriesNotifierFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'entriesNotifierProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
-  AutoDisposeStreamNotifierProviderElement<EntriesNotifier, List<EntryModel>>
-      createElement() {
-    return _EntriesNotifierProviderElement(this);
+  String debugGetCreateSourceHash() => _$entriesNotifierHash();
+
+  @override
+  String toString() {
+    return r'entriesNotifierProvider'
+        ''
+        '($argument)';
   }
+
+  @$internal
+  @override
+  EntriesNotifier create() => EntriesNotifier();
 
   @override
   bool operator ==(Object other) {
-    return other is EntriesNotifierProvider && other.plantId == plantId;
+    return other is EntriesNotifierProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, plantId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin EntriesNotifierRef
-    on AutoDisposeStreamNotifierProviderRef<List<EntryModel>> {
-  /// The parameter `plantId` of this provider.
-  String get plantId;
-}
+String _$entriesNotifierHash() => r'21449b8df65eae3ea8f712975c7606233011cb6c';
 
-class _EntriesNotifierProviderElement
-    extends AutoDisposeStreamNotifierProviderElement<EntriesNotifier,
-        List<EntryModel>> with EntriesNotifierRef {
-  _EntriesNotifierProviderElement(super.provider);
+final class EntriesNotifierFamily extends $Family
+    with
+        $ClassFamilyOverride<EntriesNotifier, AsyncValue<List<EntryModel>>,
+            List<EntryModel>, Stream<List<EntryModel>>, String> {
+  EntriesNotifierFamily._()
+      : super(
+          retry: null,
+          name: r'entriesNotifierProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  EntriesNotifierProvider call(
+    String plantId,
+  ) =>
+      EntriesNotifierProvider._(argument: plantId, from: this);
 
   @override
-  String get plantId => (origin as EntriesNotifierProvider).plantId;
+  String toString() => r'entriesNotifierProvider';
 }
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+
+abstract class _$EntriesNotifier extends $StreamNotifier<List<EntryModel>> {
+  late final _$args = ref.$arg as String;
+  String get plantId => _$args;
+
+  Stream<List<EntryModel>> build(
+    String plantId,
+  );
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<List<EntryModel>>, List<EntryModel>>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<EntryModel>>, List<EntryModel>>,
+        AsyncValue<List<EntryModel>>,
+        Object?,
+        Object?>;
+    return element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
+  }
+}

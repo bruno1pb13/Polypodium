@@ -6,38 +6,90 @@ part of 'species_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(speciesRepository)
+final speciesRepositoryProvider = SpeciesRepositoryProvider._();
+
+final class SpeciesRepositoryProvider extends $FunctionalProvider<
+    SpeciesRepository,
+    SpeciesRepository,
+    SpeciesRepository> with $Provider<SpeciesRepository> {
+  SpeciesRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'speciesRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$speciesRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<SpeciesRepository> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SpeciesRepository create(Ref ref) {
+    return speciesRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SpeciesRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SpeciesRepository>(value),
+    );
+  }
+}
+
 String _$speciesRepositoryHash() => r'60c995257591df82175f8a29f0a08cbceedbea0c';
 
-/// See also [speciesRepository].
-@ProviderFor(speciesRepository)
-final speciesRepositoryProvider = Provider<SpeciesRepository>.internal(
-  speciesRepository,
-  name: r'speciesRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$speciesRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+@ProviderFor(SpeciesNotifier)
+final speciesNotifierProvider = SpeciesNotifierProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SpeciesRepositoryRef = ProviderRef<SpeciesRepository>;
+final class SpeciesNotifierProvider
+    extends $StreamNotifierProvider<SpeciesNotifier, List<SpeciesModel>> {
+  SpeciesNotifierProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'speciesNotifierProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$speciesNotifierHash();
+
+  @$internal
+  @override
+  SpeciesNotifier create() => SpeciesNotifier();
+}
+
 String _$speciesNotifierHash() => r'9c16f8c6f4f92d14dda500f1e63be388814c98c5';
 
-/// See also [SpeciesNotifier].
-@ProviderFor(SpeciesNotifier)
-final speciesNotifierProvider = AutoDisposeStreamNotifierProvider<
-    SpeciesNotifier, List<SpeciesModel>>.internal(
-  SpeciesNotifier.new,
-  name: r'speciesNotifierProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$speciesNotifierHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$SpeciesNotifier = AutoDisposeStreamNotifier<List<SpeciesModel>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$SpeciesNotifier extends $StreamNotifier<List<SpeciesModel>> {
+  Stream<List<SpeciesModel>> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<List<SpeciesModel>>, List<SpeciesModel>>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<SpeciesModel>>, List<SpeciesModel>>,
+        AsyncValue<List<SpeciesModel>>,
+        Object?,
+        Object?>;
+    return element.handleCreate(ref, build);
+  }
+}

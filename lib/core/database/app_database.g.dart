@@ -2802,8 +2802,7 @@ final class $$SpeciesTableTableReferences extends BaseReferences<_$AppDatabase,
   static MultiTypedResultKey<$PlantsTableTable, List<PlantsTableData>>
       _plantsTableRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.plantsTable,
-              aliasName: $_aliasNameGenerator(
-                  db.speciesTable.id, db.plantsTable.speciesId));
+              aliasName: 'species__id__plants__species_id');
 
   $$PlantsTableTableProcessedTableManager get plantsTableRefs {
     final manager = $$PlantsTableTableTableManager($_db, $_db.plantsTable)
@@ -3095,10 +3094,9 @@ final class $$SoilsTableTableReferences
   $$SoilsTableTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static MultiTypedResultKey<$PlantsTableTable, List<PlantsTableData>>
-      _plantsTableRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-          db.plantsTable,
-          aliasName:
-              $_aliasNameGenerator(db.soilsTable.id, db.plantsTable.soilType));
+      _plantsTableRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.plantsTable,
+              aliasName: 'soils__id__plants__soil_type');
 
   $$PlantsTableTableProcessedTableManager get plantsTableRefs {
     final manager = $$PlantsTableTableTableManager($_db, $_db.plantsTable)
@@ -3386,8 +3384,7 @@ final class $$LocationsTableTableReferences extends BaseReferences<
   static MultiTypedResultKey<$PlantsTableTable, List<PlantsTableData>>
       _plantsTableRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.plantsTable,
-              aliasName: $_aliasNameGenerator(
-                  db.locationsTable.id, db.plantsTable.locationId));
+              aliasName: 'locations__id__plants__location_id');
 
   $$PlantsTableTableProcessedTableManager get plantsTableRefs {
     final manager = $$PlantsTableTableTableManager($_db, $_db.plantsTable)
@@ -3681,8 +3678,7 @@ final class $$PlantsTableTableReferences
   $$PlantsTableTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $SpeciesTableTable _speciesIdTable(_$AppDatabase db) =>
-      db.speciesTable.createAlias(
-          $_aliasNameGenerator(db.plantsTable.speciesId, db.speciesTable.id));
+      db.speciesTable.createAlias('plants__species_id__species__id');
 
   $$SpeciesTableTableProcessedTableManager get speciesId {
     final $_column = $_itemColumn<String>('species_id')!;
@@ -3696,8 +3692,7 @@ final class $$PlantsTableTableReferences
   }
 
   static $SoilsTableTable _soilTypeTable(_$AppDatabase db) =>
-      db.soilsTable.createAlias(
-          $_aliasNameGenerator(db.plantsTable.soilType, db.soilsTable.id));
+      db.soilsTable.createAlias('plants__soil_type__soils__id');
 
   $$SoilsTableTableProcessedTableManager get soilType {
     final $_column = $_itemColumn<String>('soil_type')!;
@@ -3711,8 +3706,7 @@ final class $$PlantsTableTableReferences
   }
 
   static $LocationsTableTable _locationIdTable(_$AppDatabase db) =>
-      db.locationsTable.createAlias($_aliasNameGenerator(
-          db.plantsTable.locationId, db.locationsTable.id));
+      db.locationsTable.createAlias('plants__location_id__locations__id');
 
   $$LocationsTableTableProcessedTableManager? get locationId {
     final $_column = $_itemColumn<String>('location_id');
@@ -3726,10 +3720,9 @@ final class $$PlantsTableTableReferences
   }
 
   static MultiTypedResultKey<$EntriesTableTable, List<EntriesTableData>>
-      _entriesTableRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-          db.entriesTable,
-          aliasName:
-              $_aliasNameGenerator(db.plantsTable.id, db.entriesTable.plantId));
+      _entriesTableRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.entriesTable,
+              aliasName: 'plants__id__entries__plant_id');
 
   $$EntriesTableTableProcessedTableManager get entriesTableRefs {
     final manager = $$EntriesTableTableTableManager($_db, $_db.entriesTable)
@@ -4288,8 +4281,7 @@ final class $$EntriesTableTableReferences extends BaseReferences<_$AppDatabase,
   $$EntriesTableTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $PlantsTableTable _plantIdTable(_$AppDatabase db) =>
-      db.plantsTable.createAlias(
-          $_aliasNameGenerator(db.entriesTable.plantId, db.plantsTable.id));
+      db.plantsTable.createAlias('entries__plant_id__plants__id');
 
   $$PlantsTableTableProcessedTableManager get plantId {
     final $_column = $_itemColumn<String>('plant_id')!;

@@ -28,7 +28,7 @@ class ExternalSpeciesRepository extends _$ExternalSpeciesRepository {
   @override
   Future<void> build() async {
     ref.onDispose(() {
-      _db?.dispose();
+      _db?.close();
       _db = null;
     });
 
@@ -51,7 +51,7 @@ class ExternalSpeciesRepository extends _$ExternalSpeciesRepository {
       final int count = countResult.first['cnt'] as int;
 
       if (count == 0) {
-        _db!.dispose();
+        _db!.close();
         await _copyFromAssets(dbFile);
         _db = sqlite3.open(dbFile.path);
       }
@@ -180,11 +180,11 @@ class ExternalSpeciesRepository extends _$ExternalSpeciesRepository {
         }
       }
     }
-    stmt.dispose();
-    tempDb.dispose();
+    stmt.close();
+    tempDb.close();
 
     // 4. Swap files
-    _db?.dispose();
+    _db?.close();
     final dbFile = await _getDatabaseFile();
     await tempDbFile.copy(dbFile.path);
     _db = sqlite3.open(dbFile.path);
