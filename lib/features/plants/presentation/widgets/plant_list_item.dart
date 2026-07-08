@@ -12,11 +12,19 @@ import '../../domain/plant_model.dart';
 class PlantListItem extends ConsumerWidget {
   final PlantWithSpecies plantWithSpecies;
   final VoidCallback onTap;
+  final bool isSelectionMode;
+  final bool isSelected;
+  final VoidCallback? onToggleSelect;
+  final VoidCallback? onStartSelection;
 
   const PlantListItem({
     super.key,
     required this.plantWithSpecies,
     required this.onTap,
+    this.isSelectionMode = false,
+    this.isSelected = false,
+    this.onToggleSelect,
+    this.onStartSelection,
   });
 
   @override
@@ -28,6 +36,15 @@ class PlantListItem extends ConsumerWidget {
     final alertStatus = ref.watch(plantAlertStatusProvider(pws.plant.id)).valueOrNull
         ?? (hasActiveChlorosis: false, chlorosisSeverity: null, hasActivePest: false, pestSeverity: null);
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    void handleThumbnailTap() {
+      if (isSelectionMode) {
+        onToggleSelect?.call();
+      } else {
+        onStartSelection?.call();
+      }
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -44,21 +61,53 @@ class PlantListItem extends ConsumerWidget {
                   : Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: transparencyEnabled
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.transparent,
+                color: isSelected
+                    ? colorScheme.primary
+                    : transparencyEnabled
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.transparent,
+                width: isSelected ? 2 : 1,
               ),
             ),
             child: InkWell(
-              onTap: onTap,
+              onTap: isSelectionMode ? onToggleSelect : onTap,
+              onLongPress: isSelectionMode ? null : onStartSelection,
               borderRadius: BorderRadius.circular(16),
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
-                    _PlantThumbnail(
-                      photoPath: photoAsync.valueOrNull,
-                      overdue: overdue,
+                    GestureDetector(
+                      onTap: handleThumbnailTap,
+                      child: Stack(
+                        children: [
+                          _PlantThumbnail(
+                            photoPath: photoAsync.valueOrNull,
+                            overdue: overdue,
+                          ),
+                          if (isSelectionMode)
+                            Positioned.fill(
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? Colors.black.withValues(alpha: 0.35)
+                                      : Colors.black.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    isSelected
+                                        ? Icons.check_circle
+                                        : Icons.circle_outlined,
+                                    color: Colors.white,
+                                    size: 26,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(

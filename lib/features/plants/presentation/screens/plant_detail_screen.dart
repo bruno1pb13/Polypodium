@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/enums.dart';
+import '../../../../core/widgets/fullscreen_image_viewer.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../entries/presentation/providers/entry_filters_provider.dart';
@@ -388,6 +389,7 @@ class _PlantPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final photoPath = this.photoPath;
     return Container(
       width: 120,
       height: 120,
@@ -404,10 +406,13 @@ class _PlantPhoto extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: photoPath != null
-            ? Image.file(
-                File(photoPath!),
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _PhotoPlaceholder(),
+            ? GestureDetector(
+                onTap: () => showFullscreenImageViewer(context, photoPath),
+                child: Image.file(
+                  File(photoPath),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _PhotoPlaceholder(),
+                ),
               )
             : _PhotoPlaceholder(),
       ),

@@ -4,7 +4,7 @@ import '../../features/species/presentation/screens/species_list_screen.dart';
 import '../../features/locations/presentation/screens/locations_list_screen.dart';
 import '../../features/soils/presentation/screens/soils_list_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
-import '../../features/workspaces/presentation/screens/workspaces_screen.dart';
+import '../../features/workspaces/presentation/widgets/workspace_selector.dart';
 
 const double kWideBreakpoint = 720.0;
 const double _kSidebarWidth = 240.0;
@@ -25,7 +25,6 @@ class _AppShellState extends State<AppShell> {
     'Espécies',
     'Localizações',
     'Solos',
-    'Workspaces',
     'Configurações',
   ];
   static const _icons = [
@@ -33,7 +32,6 @@ class _AppShellState extends State<AppShell> {
     Icons.eco_outlined,
     Icons.location_on_outlined,
     Icons.terrain_outlined,
-    Icons.workspaces_outline,
     Icons.settings_outlined,
   ];
   static const _selectedIcons = [
@@ -41,7 +39,6 @@ class _AppShellState extends State<AppShell> {
     Icons.eco,
     Icons.location_on,
     Icons.terrain,
-    Icons.workspaces,
     Icons.settings,
   ];
 
@@ -50,8 +47,7 @@ class _AppShellState extends State<AppShell> {
     1 => const SpeciesListScreen(),
     2 => const LocationsListScreen(),
     3 => const SoilsListScreen(),
-    4 => const WorkspacesScreen(),
-    5 => const SettingsScreen(),
+    4 => const SettingsScreen(),
     _ => const HomeScreen(),
   };
 
@@ -157,7 +153,10 @@ class _SideNav extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: WorkspaceSelector(),
+          ),
           for (int i = 0; i < labels.length; i++)
             _NavTile(
               icon: i == selectedIndex ? selectedIcons[i] : icons[i],
