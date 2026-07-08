@@ -33,7 +33,7 @@ class PlantListItem extends ConsumerWidget {
     final days = pws.daysRelativeToSchedule;
     final overdue = pws.needsWatering;
     final photoAsync = ref.watch(latestPlantPhotoProvider(pws.plant.id));
-    final alertStatus = ref.watch(plantAlertStatusProvider(pws.plant.id)).valueOrNull
+    final alertStatus = ref.watch(plantAlertStatusProvider(pws.plant.id)).value
         ?? (hasActiveChlorosis: false, chlorosisSeverity: null, hasActivePest: false, pestSeverity: null);
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
     final colorScheme = Theme.of(context).colorScheme;
@@ -82,7 +82,7 @@ class PlantListItem extends ConsumerWidget {
                       child: Stack(
                         children: [
                           _PlantThumbnail(
-                            photoPath: photoAsync.valueOrNull,
+                            photoPath: photoAsync.value,
                             overdue: overdue,
                           ),
                           if (isSelectionMode)

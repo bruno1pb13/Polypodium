@@ -49,17 +49,17 @@ class PlantDetailScreen extends ConsumerWidget {
             body: Center(child: Text('Planta não encontrada')),
           );
         }
-        final species = speciesAsync.valueOrNull
+        final species = speciesAsync.value
             ?.where((s) => s.id == plant.speciesId)
             .firstOrNull;
 
         final location = plant.locationId != null
-            ? locationsAsync.valueOrNull
+            ? locationsAsync.value
                 ?.where((l) => l.id == plant.locationId)
                 .firstOrNull
             : null;
 
-        final soil = soilsAsync.valueOrNull
+        final soil = soilsAsync.value
             ?.where((s) => s.id == plant.soilId)
             .firstOrNull;
 
@@ -341,7 +341,7 @@ class _HeaderSection extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _PlantPhoto(photoPath: photoAsync.valueOrNull),
+          _PlantPhoto(photoPath: photoAsync.value),
           const SizedBox(width: 20),
           Expanded(
             child: Column(
@@ -445,7 +445,7 @@ class _PlantInfoCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
-    final alertStatus = ref.watch(plantAlertStatusProvider(plant.id)).valueOrNull
+    final alertStatus = ref.watch(plantAlertStatusProvider(plant.id)).value
         ?? (hasActiveChlorosis: false, chlorosisSeverity: null, hasActivePest: false, pestSeverity: null);
 
     return Padding(

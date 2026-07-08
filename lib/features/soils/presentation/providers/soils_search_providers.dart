@@ -34,7 +34,7 @@ class SoilSortOptionNotifier extends _$SoilSortOptionNotifier {
 }
 
 @riverpod
-Future<List<SoilModel>> filteredSortedSoils(FilteredSortedSoilsRef ref) async {
+Future<List<SoilModel>> filteredSortedSoils(Ref ref) async {
   final query = ref.watch(soilSearchQueryProvider).normalize();
   final sortOption = ref.watch(soilSortOptionNotifierProvider);
 

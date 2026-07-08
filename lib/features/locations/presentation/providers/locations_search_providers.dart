@@ -34,7 +34,7 @@ class LocationSortOptionNotifier extends _$LocationSortOptionNotifier {
 }
 
 @riverpod
-Future<List<LocationModel>> filteredSortedLocations(FilteredSortedLocationsRef ref) async {
+Future<List<LocationModel>> filteredSortedLocations(Ref ref) async {
   final query = ref.watch(locationSearchQueryProvider).normalize();
   final sortOption = ref.watch(locationSortOptionNotifierProvider);
 

@@ -1,0 +1,9 @@
+targets:
+  $default:
+    builders:
+      riverpod_generator:
+        options:
+          # Keep the pre-4.0 naming convention (e.g. `speciesNotifierProvider`
+          # instead of `speciesProvider`) so existing call sites don't need to
+          # be renamed across the codebase.
+          provider_name_strip_pattern: ""

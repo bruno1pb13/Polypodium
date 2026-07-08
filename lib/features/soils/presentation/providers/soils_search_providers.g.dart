@@ -6,57 +6,136 @@ part of 'soils_search_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$filteredSortedSoilsHash() =>
-    r'db55dc539caeb5294e79b8ad193d04d2eae83d65';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [filteredSortedSoils].
-@ProviderFor(filteredSortedSoils)
-final filteredSortedSoilsProvider =
-    AutoDisposeFutureProvider<List<SoilModel>>.internal(
-  filteredSortedSoils,
-  name: r'filteredSortedSoilsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$filteredSortedSoilsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+@ProviderFor(SoilSearchQuery)
+final soilSearchQueryProvider = SoilSearchQueryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef FilteredSortedSoilsRef = AutoDisposeFutureProviderRef<List<SoilModel>>;
+final class SoilSearchQueryProvider
+    extends $NotifierProvider<SoilSearchQuery, String> {
+  SoilSearchQueryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'soilSearchQueryProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$soilSearchQueryHash();
+
+  @$internal
+  @override
+  SoilSearchQuery create() => SoilSearchQuery();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String>(value),
+    );
+  }
+}
+
 String _$soilSearchQueryHash() => r'133aa3046b45f7b0b3543600ef989213bb3a926b';
 
-/// See also [SoilSearchQuery].
-@ProviderFor(SoilSearchQuery)
-final soilSearchQueryProvider =
-    AutoDisposeNotifierProvider<SoilSearchQuery, String>.internal(
-  SoilSearchQuery.new,
-  name: r'soilSearchQueryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$soilSearchQueryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+abstract class _$SoilSearchQuery extends $Notifier<String> {
+  String build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<String, String>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<String, String>, String, Object?, Object?>;
+    return element.handleCreate(ref, build);
+  }
+}
 
-typedef _$SoilSearchQuery = AutoDisposeNotifier<String>;
+@ProviderFor(SoilSortOptionNotifier)
+final soilSortOptionNotifierProvider = SoilSortOptionNotifierProvider._();
+
+final class SoilSortOptionNotifierProvider
+    extends $NotifierProvider<SoilSortOptionNotifier, SoilSortOption> {
+  SoilSortOptionNotifierProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'soilSortOptionNotifierProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$soilSortOptionNotifierHash();
+
+  @$internal
+  @override
+  SoilSortOptionNotifier create() => SoilSortOptionNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SoilSortOption value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SoilSortOption>(value),
+    );
+  }
+}
+
 String _$soilSortOptionNotifierHash() =>
     r'7bba56a23141084cc9d214c94320e896264788da';
 
-/// See also [SoilSortOptionNotifier].
-@ProviderFor(SoilSortOptionNotifier)
-final soilSortOptionNotifierProvider = AutoDisposeNotifierProvider<
-    SoilSortOptionNotifier, SoilSortOption>.internal(
-  SoilSortOptionNotifier.new,
-  name: r'soilSortOptionNotifierProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$soilSortOptionNotifierHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+abstract class _$SoilSortOptionNotifier extends $Notifier<SoilSortOption> {
+  SoilSortOption build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<SoilSortOption, SoilSortOption>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<SoilSortOption, SoilSortOption>,
+        SoilSortOption,
+        Object?,
+        Object?>;
+    return element.handleCreate(ref, build);
+  }
+}
 
-typedef _$SoilSortOptionNotifier = AutoDisposeNotifier<SoilSortOption>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(filteredSortedSoils)
+final filteredSortedSoilsProvider = FilteredSortedSoilsProvider._();
+
+final class FilteredSortedSoilsProvider extends $FunctionalProvider<
+        AsyncValue<List<SoilModel>>, List<SoilModel>, FutureOr<List<SoilModel>>>
+    with $FutureModifier<List<SoilModel>>, $FutureProvider<List<SoilModel>> {
+  FilteredSortedSoilsProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'filteredSortedSoilsProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$filteredSortedSoilsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<SoilModel>> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<SoilModel>> create(Ref ref) {
+    return filteredSortedSoils(ref);
+  }
+}
+
+String _$filteredSortedSoilsHash() =>
+    r'd9c7c7c86603a0c94b5a9fe9b68c0b0f76ca5f24';
