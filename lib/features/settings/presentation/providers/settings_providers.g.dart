@@ -232,3 +232,50 @@ abstract class _$ThemeModeNotifier extends $Notifier<String> {
     return element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(AutoSyncEnabledNotifier)
+final autoSyncEnabledNotifierProvider = AutoSyncEnabledNotifierProvider._();
+
+final class AutoSyncEnabledNotifierProvider
+    extends $NotifierProvider<AutoSyncEnabledNotifier, bool> {
+  AutoSyncEnabledNotifierProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'autoSyncEnabledNotifierProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$autoSyncEnabledNotifierHash();
+
+  @$internal
+  @override
+  AutoSyncEnabledNotifier create() => AutoSyncEnabledNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$autoSyncEnabledNotifierHash() =>
+    r'cf551a6bb7d6c5cf3a7dd3552871bc66736da581';
+
+abstract class _$AutoSyncEnabledNotifier extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<bool, bool>, bool, Object?, Object?>;
+    return element.handleCreate(ref, build);
+  }
+}

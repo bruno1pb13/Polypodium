@@ -104,6 +104,7 @@ class _SyncSection extends ConsumerWidget {
     final syncState = ref.watch(syncNotifierProvider);
     final pendingAsync = ref.watch(pendingSyncCountProvider);
     final isLoading = syncState.isLoading;
+    final autoSyncEnabled = ref.watch(autoSyncEnabledNotifierProvider);
 
     final pendingText = pendingAsync.when(
       data: (n) => n == 0 ? 'Tudo sincronizado' : '$n evento(s) pendente(s)',
@@ -153,6 +154,18 @@ class _SyncSection extends ConsumerWidget {
                 label: Text(isLoading ? 'Sincronizando...' : 'Sincronizar Agora'),
               ),
             ),
+          ),
+        if (workspace.isLoggedIn)
+          SwitchListTile(
+            title: const Text('Sincronização automática'),
+            subtitle: Text(autoSyncEnabled
+                ? 'A cada 5 minutos (30 em economia de bateria no Android)'
+                : 'Desativada — sincronize manualmente'),
+            secondary: const Icon(Icons.autorenew),
+            value: autoSyncEnabled,
+            onChanged: (value) => ref
+                .read(autoSyncEnabledNotifierProvider.notifier)
+                .setEnabled(value),
           ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
