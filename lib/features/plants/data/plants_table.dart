@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 
-import '../../../core/database/converters.dart';
 import '../../locations/data/locations_table.dart';
 import '../../soils/data/soils_table.dart';
 import '../../species/data/species_table.dart';
@@ -25,11 +24,9 @@ class PlantsTable extends Table {
       .references(LocationsTable, #id, onDelete: KeyAction.setNull)();
   DateTimeColumn get lastIrrigatedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime()();
-
-  // TODO(sync): Pending/synced/conflict status for future server sync
-  TextColumn get syncStatus => text()
-      .map(const SyncStatusConverter())
-      .withDefault(const Constant('pending'))();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+  IntColumn get localRev => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

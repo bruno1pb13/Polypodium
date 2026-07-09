@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/workspaces/domain/workspace_model.dart';
 import '../../features/workspaces/presentation/providers/workspace_providers.dart';
 import '../database/database_provider.dart';
+import '../database/sync_cursors_dao.dart';
 import '../storage/photo_storage_provider.dart';
 import 'sync_service.dart';
 import 'workspace_config_store.dart';
@@ -36,11 +37,33 @@ SyncService syncService(Ref ref) {
   );
 }
 
+/// The push cursor for the 'server' peer, or null when there's no server
+/// to compare against (local-only workspace, or never logged in). Entities
+/// with `localRev` greater than this haven't been delivered to the server
+/// yet -- the basis for every "pending sync" badge in the UI.
+@riverpod
+Future<int?> pushCursorToServer(Ref ref) async {
+  final syncService = ref.watch(syncServiceProvider);
+  if (!syncService.isLoggedIn) return null;
+  final db = ref.watch(appDatabaseProvider);
+  return db.syncCursorsDao.getCursor(syncServerPeerId, syncDirectionPush);
+}
+
 @riverpod
 Future<int> pendingSyncCount(Ref ref) async {
+  final cursor = await ref.watch(pushCursorToServerProvider.future);
+  if (cursor == null) return 0;
+
   final db = ref.watch(appDatabaseProvider);
-  final pending = await db.syncQueueDao.getPending();
-  return pending.length;
+  const noLimit = 0x7fffffff;
+  final counts = await Future.wait([
+    db.speciesDao.changesSince(cursor, limit: noLimit),
+    db.plantsDao.changesSince(cursor, limit: noLimit),
+    db.entriesDao.changesSince(cursor, limit: noLimit),
+    db.locationsDao.changesSince(cursor, limit: noLimit),
+    db.soilsDao.changesSince(cursor, limit: noLimit),
+  ]);
+  return counts.fold<int>(0, (sum, list) => sum + list.length);
 }
 
 @riverpod

@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
-import '../../../core/database/sync_queue_dao.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../species/data/species_repository.dart';
 import '../domain/plant_model.dart';
@@ -14,13 +13,11 @@ class PlantsRepository {
     SpeciesRepository? speciesRepo,
   })  : _db = db,
         _dao = db.plantsDao,
-        _syncQueueDao = db.syncQueueDao,
         _speciesRepo = speciesRepo ?? SpeciesRepository(db),
         _notifications = notifications;
 
   final AppDatabase _db;
   final PlantsDao _dao;
-  final SyncQueueDao _syncQueueDao;
   final SpeciesRepository _speciesRepo;
   final INotificationService _notifications;
 
@@ -38,28 +35,23 @@ class PlantsRepository {
   }
 
   Future<void> save(PlantModel plant) async {
-    await _dao.upsert(_toCompanion(plant));
-    await _syncQueueDao.enqueue(
-      entityType: 'plant',
-      entityId: plant.id,
-      operation: 'create',
-      payload: plant.toJsonString(),
-    );
+    await _db.transaction(() async {
+      final rev = await _db.syncMetaDao.nextRev();
+      await _dao
+          .upsert(_toCompanion(plant, updatedAt: DateTime.now(), rev: rev));
+    });
     await _rescheduleNotification(plant);
   }
 
   /// Records an irrigation event and updates lastIrrigatedAt.
   Future<PlantModel?> irrigate(String plantId) async {
     final now = DateTime.now();
-    await _dao.updateLastIrrigated(plantId, now);
+    await _db.transaction(() async {
+      final rev = await _db.syncMetaDao.nextRev();
+      await _dao.updateLastIrrigated(plantId, now, updatedAt: now, rev: rev);
+    });
     final updated = await getById(plantId);
     if (updated != null) {
-      await _syncQueueDao.enqueue(
-        entityType: 'plant',
-        entityId: plantId,
-        operation: 'update',
-        payload: updated.toJsonString(),
-      );
       await _rescheduleNotification(updated);
     }
     return updated;
@@ -68,7 +60,11 @@ class PlantsRepository {
   /// Recalculates lastIrrigatedAt based on the most recent irrigation entry.
   Future<void> refreshPlantStatus(String plantId) async {
     final lastDate = await _db.entriesDao.getLastIrrigationDate(plantId);
-    await _dao.updateLastIrrigated(plantId, lastDate);
+    await _db.transaction(() async {
+      final rev = await _db.syncMetaDao.nextRev();
+      await _dao.updateLastIrrigated(plantId, lastDate,
+          updatedAt: DateTime.now(), rev: rev);
+    });
     final plant = await getById(plantId);
     if (plant != null) {
       await _rescheduleNotification(plant);
@@ -77,13 +73,16 @@ class PlantsRepository {
 
   Future<void> delete(String id) async {
     await _notifications.cancel(id);
-    await _dao.deleteById(id);
-    await _syncQueueDao.enqueue(
-      entityType: 'plant',
-      entityId: id,
-      operation: 'delete',
-      payload: '{"id":"$id"}',
-    );
+    final now = DateTime.now();
+    await _db.transaction(() async {
+      // Replicates the `KeyAction.cascade` FK behavior that only fires on a
+      // real SQLite DELETE, which a soft-delete never triggers.
+      final entryRev = await _db.syncMetaDao.nextRev();
+      await _db.entriesDao
+          .softDeleteByPlant(id, deletedAt: now, rev: entryRev);
+      final plantRev = await _db.syncMetaDao.nextRev();
+      await _dao.softDelete(id, deletedAt: now, rev: plantRev);
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -111,10 +110,13 @@ class PlantsRepository {
         locationId: row.locationId,
         lastIrrigatedAt: row.lastIrrigatedAt,
         createdAt: row.createdAt,
-        syncStatus: row.syncStatus,
+        updatedAt: row.updatedAt,
+        deletedAt: row.deletedAt,
+        localRev: row.localRev,
       );
 
-  static PlantsTableCompanion _toCompanion(PlantModel m) =>
+  static PlantsTableCompanion _toCompanion(PlantModel m,
+          {required DateTime updatedAt, required int rev}) =>
       PlantsTableCompanion.insert(
         id: m.id,
         speciesId: m.speciesId,
@@ -126,6 +128,7 @@ class PlantsRepository {
         locationId: Value(m.locationId),
         lastIrrigatedAt: Value(m.lastIrrigatedAt),
         createdAt: m.createdAt,
-        syncStatus: Value(m.syncStatus),
+        updatedAt: updatedAt,
+        localRev: Value(rev),
       );
 }

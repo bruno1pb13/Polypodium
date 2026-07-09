@@ -81,7 +81,6 @@ class WorkspaceRepository {
         userEmail: _prefs.getString(_legacyUserEmailKey),
         token: legacyToken,
         deviceId: _prefs.getString(_legacyDeviceIdKey),
-        cursor: _prefs.getInt(_legacyCursorKey) ?? 0,
         lastSyncAt:
             DateTime.tryParse(_prefs.getString(_legacyLastSyncAtKey) ?? ''),
         createdAt: now,

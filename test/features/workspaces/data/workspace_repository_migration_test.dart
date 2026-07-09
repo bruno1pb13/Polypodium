@@ -59,7 +59,6 @@ void main() {
       expect(remote.serverUrl, 'https://example.com');
       expect(remote.token, 'tok123');
       expect(remote.deviceId, 'device-1');
-      expect(remote.cursor, 42);
       expect(remote.userEmail, 'user@example.com');
       expect(remote.lastSyncAt, DateTime(2026, 1, 1));
       expect(repo.loadActiveId(), remote.id);

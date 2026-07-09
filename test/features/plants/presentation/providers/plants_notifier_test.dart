@@ -33,11 +33,7 @@ class MockLocationsNotifier extends LocationsNotifier with Mock {
 class MockSoilsNotifier extends SoilsNotifier with Mock {
   @override
   Stream<List<SoilModel>> build() => Stream.value([
-        SoilModel(
-            id: 'loamy',
-            name: 'Franco',
-            createdAt: DateTime.now(),
-            syncStatus: SyncStatus.synced),
+        SoilModel(id: 'loamy', name: 'Franco', createdAt: DateTime.now()),
       ]);
 }
 
