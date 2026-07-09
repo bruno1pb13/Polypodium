@@ -24,6 +24,7 @@ void main() {
             defaultIrrigationFrequencyDays: const Value(null),
             recommendedSoilTypes: [],
             createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
           ),
         );
 

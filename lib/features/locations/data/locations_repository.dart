@@ -1,17 +1,16 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
-import '../../../core/database/sync_queue_dao.dart';
 import '../domain/location_model.dart';
 import 'locations_dao.dart';
 
 class LocationsRepository {
   LocationsRepository(AppDatabase db)
-      : _dao = db.locationsDao,
-        _syncQueueDao = db.syncQueueDao;
+      : _db = db,
+        _dao = db.locationsDao;
 
+  final AppDatabase _db;
   final LocationsDao _dao;
-  final SyncQueueDao _syncQueueDao;
 
   Future<List<LocationModel>> getAll() async {
     final rows = await _dao.getAll();
@@ -27,23 +26,24 @@ class LocationsRepository {
   }
 
   Future<void> save(LocationModel location) async {
-    await _dao.upsert(_toCompanion(location));
-    await _syncQueueDao.enqueue(
-      entityType: 'location',
-      entityId: location.id,
-      operation: 'create',
-      payload: location.toJsonString(),
-    );
+    await _db.transaction(() async {
+      final rev = await _db.syncMetaDao.nextRev();
+      await _dao.upsert(
+          _toCompanion(location, updatedAt: DateTime.now(), rev: rev));
+    });
   }
 
   Future<void> delete(String id) async {
-    await _dao.deleteById(id);
-    await _syncQueueDao.enqueue(
-      entityType: 'location',
-      entityId: id,
-      operation: 'delete',
-      payload: '{"id":"$id"}',
-    );
+    final now = DateTime.now();
+    await _db.transaction(() async {
+      // Replicates the `KeyAction.setNull` FK behavior that only fires on a
+      // real SQLite DELETE, which a soft-delete never triggers.
+      final clearRev = await _db.syncMetaDao.nextRev();
+      await _db.plantsDao
+          .clearLocationForPlants(id, updatedAt: now, rev: clearRev);
+      final rev = await _db.syncMetaDao.nextRev();
+      await _dao.softDelete(id, deletedAt: now, rev: rev);
+    });
   }
 
   static LocationModel _fromRow(LocationsTableData row) => LocationModel(
@@ -53,10 +53,13 @@ class LocationsRepository {
         latitude: row.latitude,
         longitude: row.longitude,
         createdAt: row.createdAt,
-        syncStatus: row.syncStatus,
+        updatedAt: row.updatedAt,
+        deletedAt: row.deletedAt,
+        localRev: row.localRev,
       );
 
-  static LocationsTableCompanion _toCompanion(LocationModel m) =>
+  static LocationsTableCompanion _toCompanion(LocationModel m,
+          {required DateTime updatedAt, required int rev}) =>
       LocationsTableCompanion.insert(
         id: m.id,
         name: m.name,
@@ -64,6 +67,7 @@ class LocationsRepository {
         latitude: Value(m.latitude),
         longitude: Value(m.longitude),
         createdAt: m.createdAt,
-        syncStatus: Value(m.syncStatus),
+        updatedAt: updatedAt,
+        localRev: Value(rev),
       );
 }

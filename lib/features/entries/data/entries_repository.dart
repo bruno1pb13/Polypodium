@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
-import '../../../core/database/sync_queue_dao.dart';
 import '../../../core/enums.dart';
 import '../../../core/storage/photo_storage.dart';
 import '../domain/entry_model.dart';
@@ -9,11 +8,11 @@ import 'entries_dao.dart';
 
 class EntriesRepository {
   EntriesRepository(AppDatabase db, this._photoStorage)
-      : _dao = db.entriesDao,
-        _syncQueueDao = db.syncQueueDao;
+      : _db = db,
+        _dao = db.entriesDao;
 
+  final AppDatabase _db;
   final EntriesDao _dao;
-  final SyncQueueDao _syncQueueDao;
   final PhotoStorage _photoStorage;
 
   static const _retentionLimit = 30;
@@ -32,14 +31,11 @@ class EntriesRepository {
       _dao.watchByPlant(plantId).map((rows) => rows.map(_fromRow).toList());
 
   Future<void> create(EntryModel entry) async {
-    await _dao.insert(_toCompanion(entry));
-    // TODO(sync): Enqueue for server sync
-    await _syncQueueDao.enqueue(
-      entityType: 'entry',
-      entityId: entry.id,
-      operation: 'create',
-      payload: entry.toJsonString(),
-    );
+    await _db.transaction(() async {
+      final rev = await _db.syncMetaDao.nextRev();
+      await _dao
+          .insert(_toCompanion(entry, updatedAt: DateTime.now(), rev: rev));
+    });
     await _enforceRetentionPolicy(entry.plantId);
   }
 
@@ -48,13 +44,10 @@ class EntriesRepository {
     if (entry?.type == EntryType.history) {
       throw Exception('Registros de histórico não podem ser removidos.');
     }
-    await _dao.deleteById(id);
-    await _syncQueueDao.enqueue(
-      entityType: 'entry',
-      entityId: id,
-      operation: 'delete',
-      payload: '{"id":"$id"}',
-    );
+    await _db.transaction(() async {
+      final rev = await _db.syncMetaDao.nextRev();
+      await _dao.softDelete(id, deletedAt: DateTime.now(), rev: rev);
+    });
     if (entry?.photoPath != null) {
       await _photoStorage.deletePhoto(entry!.photoPath!);
     }
@@ -62,7 +55,7 @@ class EntriesRepository {
 
   // ---------------------------------------------------------------------------
 
-  /// Deletes entries beyond [_retentionLimit] (oldest first) and cleans
+  /// Soft-deletes entries beyond [_retentionLimit] (oldest first) and cleans
   /// orphaned photo files from disk.
   Future<void> _enforceRetentionPolicy(String plantId) async {
     final overflow =
@@ -71,14 +64,14 @@ class EntriesRepository {
       return;
     }
 
+    final now = DateTime.now();
+    await _db.transaction(() async {
+      for (final row in overflow) {
+        final rev = await _db.syncMetaDao.nextRev();
+        await _dao.softDelete(row.id, deletedAt: now, rev: rev);
+      }
+    });
     for (final row in overflow) {
-      await _dao.deleteById(row.id);
-      await _syncQueueDao.enqueue(
-        entityType: 'entry',
-        entityId: row.id,
-        operation: 'delete',
-        payload: '{"id":"${row.id}"}',
-      );
       if (row.photoPath != null) {
         await _photoStorage.deletePhoto(row.photoPath!);
       }
@@ -99,10 +92,13 @@ class EntriesRepository {
         numericValue: row.numericValue,
         extraData: row.extraData,
         createdAt: row.createdAt,
-        syncStatus: row.syncStatus,
+        updatedAt: row.updatedAt,
+        deletedAt: row.deletedAt,
+        localRev: row.localRev,
       );
 
-  static EntriesTableCompanion _toCompanion(EntryModel m) =>
+  static EntriesTableCompanion _toCompanion(EntryModel m,
+          {required DateTime updatedAt, required int rev}) =>
       EntriesTableCompanion.insert(
         id: m.id,
         plantId: m.plantId,
@@ -113,6 +109,7 @@ class EntriesRepository {
         numericValue: Value(m.numericValue),
         extraData: Value(m.extraData),
         createdAt: m.createdAt,
-        syncStatus: Value(m.syncStatus),
+        updatedAt: updatedAt,
+        localRev: Value(rev),
       );
 }

@@ -50,12 +50,12 @@ void main() {
     await target.close();
   });
 
-  Future<void> addPendingLocation(AppDatabase db, String id) =>
+  Future<void> addLocation(AppDatabase db, String id) =>
       db.locationsDao.upsert(LocationsTableCompanion.insert(
         id: id,
         name: 'Location $id',
         createdAt: DateTime(2026, 1, 1),
-        syncStatus: const Value(SyncStatus.pending),
+        updatedAt: DateTime(2026, 1, 1),
       ));
 
   group('hasPendingData', () {
@@ -64,16 +64,27 @@ void main() {
       expect(await service.hasPendingData(source), isFalse);
     });
 
-    test('true once any entity has syncStatus pending', () async {
-      await addPendingLocation(source, 'loc1');
+    test('true once any entity exists', () async {
+      await addLocation(source, 'loc1');
+      expect(await service.hasPendingData(source), isTrue);
+    });
+
+    test('true once a non-seeded (user-created) soil exists', () async {
+      await source.soilsDao.insertSoil(SoilsTableCompanion.insert(
+        id: 'custom-soil',
+        name: 'Minha mistura',
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+        isSeeded: const Value(false),
+      ));
       expect(await service.hasPendingData(source), isTrue);
     });
   });
 
   group('migrateData', () {
-    test('copies pending locations but skips already-seeded default soils',
+    test('copies locations but skips already-seeded default soils',
         () async {
-      await addPendingLocation(source, 'loc1');
+      await addLocation(source, 'loc1');
 
       await service.migrateData(
         sourceDb: source,
@@ -84,11 +95,10 @@ void main() {
       final locations = await target.locationsDao.getAll();
       expect(locations.map((l) => l.id), contains('loc1'));
 
-      // Default soils are seeded with syncStatus=synced in both databases,
-      // so they must not be duplicated/overwritten by the migration.
+      // Default soils are seeded (isSeeded=true) in both databases, so they
+      // must not be duplicated/overwritten by the migration.
       final soils = await target.soilsDao.getAllSoils();
-      final seededCount =
-          soils.where((s) => s.syncStatus == SyncStatus.synced).length;
+      final seededCount = soils.where((s) => s.isSeeded).length;
       expect(seededCount, soils.length);
     });
 
@@ -97,7 +107,8 @@ void main() {
         id: 'custom-soil',
         name: 'Minha mistura',
         createdAt: DateTime(2026, 1, 1),
-        syncStatus: const Value(SyncStatus.pending),
+        updatedAt: DateTime(2026, 1, 1),
+        isSeeded: const Value(false),
       ));
 
       await service.migrateData(
@@ -109,18 +120,18 @@ void main() {
       final soil = await target.soilsDao.getSoilById('custom-soil');
       expect(soil, isNotNull);
       expect(soil!.name, 'Minha mistura');
-      expect(soil.syncStatus, SyncStatus.pending);
+      expect(soil.isSeeded, isFalse);
     });
 
-    test('migrates species, plants and entries in dependency order and '
-        'marks them pending for the next sync', () async {
+    test('migrates species, plants and entries in dependency order',
+        () async {
       await source.speciesDao.upsert(SpeciesTableCompanion.insert(
         id: 'species1',
         scientificName: 'Sci',
         popularName: 'Pop',
         recommendedSoilTypes: const [],
         createdAt: DateTime(2026, 1, 1),
-        syncStatus: const Value(SyncStatus.pending),
+        updatedAt: DateTime(2026, 1, 1),
       ));
       await source.plantsDao.upsert(PlantsTableCompanion.insert(
         id: 'plant1',
@@ -129,7 +140,7 @@ void main() {
         soilType: 'sandy',
         acquisitionDate: DateTime(2026, 1, 1),
         createdAt: DateTime(2026, 1, 1),
-        syncStatus: const Value(SyncStatus.pending),
+        updatedAt: DateTime(2026, 1, 1),
       ));
       await source.entriesDao.insert(EntriesTableCompanion.insert(
         id: 'entry1',
@@ -137,7 +148,7 @@ void main() {
         date: DateTime(2026, 1, 2),
         type: EntryType.observation,
         createdAt: DateTime(2026, 1, 2),
-        syncStatus: const Value(SyncStatus.pending),
+        updatedAt: DateTime(2026, 1, 2),
       ));
 
       await service.migrateData(
@@ -153,9 +164,6 @@ void main() {
       expect(species, isNotNull);
       expect(plant, isNotNull);
       expect(entry, isNotNull);
-      expect(species!.syncStatus, SyncStatus.pending);
-      expect(plant!.syncStatus, SyncStatus.pending);
-      expect(entry!.syncStatus, SyncStatus.pending);
     });
 
     test('copies an entry photo file and rewrites photoPath to the new '
@@ -171,7 +179,7 @@ void main() {
         popularName: 'Pop',
         recommendedSoilTypes: const [],
         createdAt: DateTime(2026, 1, 1),
-        syncStatus: const Value(SyncStatus.pending),
+        updatedAt: DateTime(2026, 1, 1),
       ));
       await source.plantsDao.upsert(PlantsTableCompanion.insert(
         id: 'plant1',
@@ -180,7 +188,7 @@ void main() {
         soilType: 'sandy',
         acquisitionDate: DateTime(2026, 1, 1),
         createdAt: DateTime(2026, 1, 1),
-        syncStatus: const Value(SyncStatus.pending),
+        updatedAt: DateTime(2026, 1, 1),
       ));
       await source.entriesDao.insert(EntriesTableCompanion.insert(
         id: 'entry1',
@@ -189,7 +197,7 @@ void main() {
         photoPath: Value(sourcePhoto.path),
         type: EntryType.observation,
         createdAt: DateTime(2026, 1, 2),
-        syncStatus: const Value(SyncStatus.pending),
+        updatedAt: DateTime(2026, 1, 2),
       ));
 
       await service.migrateData(

@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-import '../../../core/enums.dart';
 import '../../locations/domain/location_model.dart';
 import '../../species/domain/species_model.dart';
 
@@ -17,8 +14,9 @@ class PlantModel {
   final String? locationId;
   final DateTime? lastIrrigatedAt;
   final DateTime createdAt;
-  // TODO(sync): Used by the sync layer to determine pending changes
-  final SyncStatus syncStatus;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int localRev;
 
   const PlantModel({
     required this.id,
@@ -31,8 +29,10 @@ class PlantModel {
     this.locationId,
     this.lastIrrigatedAt,
     required this.createdAt,
-    this.syncStatus = SyncStatus.pending,
-  });
+    DateTime? updatedAt,
+    this.deletedAt,
+    this.localRev = 0,
+  }) : updatedAt = updatedAt ?? createdAt;
 
   PlantModel copyWith({
     String? id,
@@ -45,7 +45,9 @@ class PlantModel {
     Object? locationId = _sentinel,
     Object? lastIrrigatedAt = _sentinel,
     DateTime? createdAt,
-    SyncStatus? syncStatus,
+    DateTime? updatedAt,
+    Object? deletedAt = _sentinel,
+    int? localRev,
   }) =>
       PlantModel(
         id: id ?? this.id,
@@ -63,25 +65,10 @@ class PlantModel {
             ? this.lastIrrigatedAt
             : lastIrrigatedAt as DateTime?,
         createdAt: createdAt ?? this.createdAt,
-        syncStatus: syncStatus ?? this.syncStatus,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt == _sentinel ? this.deletedAt : deletedAt as DateTime?,
+        localRev: localRev ?? this.localRev,
       );
-
-  // TODO(sync): Serialization used when enqueuing in sync_queue
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'speciesId': speciesId,
-        'nickname': nickname,
-        'soilId': soilId,
-        'irrigationFrequencyDays': irrigationFrequencyDays,
-        'acquisitionDate': acquisitionDate.toIso8601String(),
-        'location': location,
-        'locationId': locationId,
-        'lastIrrigatedAt': lastIrrigatedAt?.toIso8601String(),
-        'createdAt': createdAt.toIso8601String(),
-        'syncStatus': syncStatus.name,
-      };
-
-  String toJsonString() => jsonEncode(toJson());
 }
 
 // Sentinel for nullable copyWith overrides
@@ -92,11 +79,13 @@ class PlantWithSpecies {
   final PlantModel plant;
   final SpeciesModel species;
   final LocationModel? location;
+  final bool isPendingSync;
 
   const PlantWithSpecies({
     required this.plant,
     required this.species,
     this.location,
+    this.isPendingSync = false,
   });
 
   int? get effectiveFrequencyDays =>

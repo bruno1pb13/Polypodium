@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import '../../../core/enums.dart';
 
 class EntryModel {
@@ -14,8 +12,9 @@ class EntryModel {
   // JSON string for extra structured fields (e.g. pest type)
   final String? extraData;
   final DateTime createdAt;
-  // TODO(sync): Used by the sync layer to determine pending changes
-  final SyncStatus syncStatus;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int localRev;
 
   const EntryModel({
     required this.id,
@@ -27,8 +26,10 @@ class EntryModel {
     this.numericValue,
     this.extraData,
     required this.createdAt,
-    this.syncStatus = SyncStatus.pending,
-  });
+    DateTime? updatedAt,
+    this.deletedAt,
+    this.localRev = 0,
+  }) : updatedAt = updatedAt ?? createdAt;
 
   EntryModel copyWith({
     String? id,
@@ -40,7 +41,9 @@ class EntryModel {
     Object? numericValue = _sentinel,
     Object? extraData = _sentinel,
     DateTime? createdAt,
-    SyncStatus? syncStatus,
+    DateTime? updatedAt,
+    Object? deletedAt = _sentinel,
+    int? localRev,
   }) =>
       EntryModel(
         id: id ?? this.id,
@@ -56,24 +59,10 @@ class EntryModel {
         extraData:
             extraData == _sentinel ? this.extraData : extraData as String?,
         createdAt: createdAt ?? this.createdAt,
-        syncStatus: syncStatus ?? this.syncStatus,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt == _sentinel ? this.deletedAt : deletedAt as DateTime?,
+        localRev: localRev ?? this.localRev,
       );
-
-  // TODO(sync): Serialization used when enqueuing in sync_queue
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'plantId': plantId,
-        'date': date.toIso8601String(),
-        'photoPath': photoPath,
-        'note': note,
-        'type': type.name,
-        'numericValue': numericValue,
-        'extraData': extraData,
-        'createdAt': createdAt.toIso8601String(),
-        'syncStatus': syncStatus.name,
-      };
-
-  String toJsonString() => jsonEncode(toJson());
 }
 
 const Object _sentinel = Object();

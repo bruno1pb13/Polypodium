@@ -1,6 +1,3 @@
-import 'dart:convert';
-import '../../../../core/enums.dart';
-
 class SoilModel {
   final String id;
   final String name;
@@ -8,7 +5,10 @@ class SoilModel {
   final String? imagePath;
   final String? imageSource;
   final DateTime createdAt;
-  final SyncStatus syncStatus;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int localRev;
+  final bool isSeeded;
 
   const SoilModel({
     required this.id,
@@ -17,8 +17,11 @@ class SoilModel {
     this.imagePath,
     this.imageSource,
     required this.createdAt,
-    this.syncStatus = SyncStatus.pending,
-  });
+    DateTime? updatedAt,
+    this.deletedAt,
+    this.localRev = 0,
+    this.isSeeded = false,
+  }) : updatedAt = updatedAt ?? createdAt;
 
   SoilModel copyWith({
     String? id,
@@ -27,7 +30,10 @@ class SoilModel {
     Object? imagePath = _sentinel,
     Object? imageSource = _sentinel,
     DateTime? createdAt,
-    SyncStatus? syncStatus,
+    DateTime? updatedAt,
+    Object? deletedAt = _sentinel,
+    int? localRev,
+    bool? isSeeded,
   }) =>
       SoilModel(
         id: id ?? this.id,
@@ -36,30 +42,11 @@ class SoilModel {
         imagePath: imagePath == _sentinel ? this.imagePath : imagePath as String?,
         imageSource: imageSource == _sentinel ? this.imageSource : imageSource as String?,
         createdAt: createdAt ?? this.createdAt,
-        syncStatus: syncStatus ?? this.syncStatus,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt == _sentinel ? this.deletedAt : deletedAt as DateTime?,
+        localRev: localRev ?? this.localRev,
+        isSeeded: isSeeded ?? this.isSeeded,
       );
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'composition': composition,
-        'imagePath': imagePath,
-        'imageSource': imageSource,
-        'createdAt': createdAt.toIso8601String(),
-        'syncStatus': syncStatus.name,
-      };
-
-  factory SoilModel.fromJson(Map<String, dynamic> json) => SoilModel(
-        id: json['id'],
-        name: json['name'],
-        composition: json['composition'],
-        imagePath: json['imagePath'],
-        imageSource: json['imageSource'],
-        createdAt: DateTime.parse(json['createdAt']),
-        syncStatus: SyncStatus.values.byName(json['syncStatus'] ?? 'pending'),
-      );
-
-  String toJsonString() => jsonEncode(toJson());
 }
 
 const Object _sentinel = Object();

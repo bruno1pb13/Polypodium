@@ -40,19 +40,32 @@ class $SpeciesTableTable extends SpeciesTable
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>(
               $SpeciesTableTable.$converterrecommendedSoilTypes);
-  @override
-  late final GeneratedColumnWithTypeConverter<SyncStatus, String> syncStatus =
-      GeneratedColumn<String>('sync_status', aliasedName, false,
-              type: DriftSqlType.string,
-              requiredDuringInsert: false,
-              defaultValue: const Constant('pending'))
-          .withConverter<SyncStatus>($SpeciesTableTable.$convertersyncStatus);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _localRevMeta =
+      const VerificationMeta('localRev');
+  @override
+  late final GeneratedColumn<int> localRev = GeneratedColumn<int>(
+      'local_rev', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -60,8 +73,10 @@ class $SpeciesTableTable extends SpeciesTable
         popularName,
         defaultIrrigationFrequencyDays,
         recommendedSoilTypes,
-        syncStatus,
-        createdAt
+        createdAt,
+        updatedAt,
+        deletedAt,
+        localRev
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -107,6 +122,20 @@ class $SpeciesTableTable extends SpeciesTable
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    if (data.containsKey('local_rev')) {
+      context.handle(_localRevMeta,
+          localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
+    }
     return context;
   }
 
@@ -128,11 +157,14 @@ class $SpeciesTableTable extends SpeciesTable
       recommendedSoilTypes: $SpeciesTableTable.$converterrecommendedSoilTypes
           .fromSql(attachedDatabase.typeMapping.read(DriftSqlType.string,
               data['${effectivePrefix}recommended_soil_types'])!),
-      syncStatus: $SpeciesTableTable.$convertersyncStatus.fromSql(
-          attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}sync_status'])!),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      localRev: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
     );
   }
 
@@ -143,8 +175,6 @@ class $SpeciesTableTable extends SpeciesTable
 
   static TypeConverter<List<String>, String> $converterrecommendedSoilTypes =
       const StringListConverter();
-  static TypeConverter<SyncStatus, String> $convertersyncStatus =
-      const SyncStatusConverter();
 }
 
 class SpeciesTableData extends DataClass
@@ -156,16 +186,20 @@ class SpeciesTableData extends DataClass
 
   /// JSON-encoded list of soil IDs
   final List<String> recommendedSoilTypes;
-  final SyncStatus syncStatus;
   final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int localRev;
   const SpeciesTableData(
       {required this.id,
       required this.scientificName,
       required this.popularName,
       this.defaultIrrigationFrequencyDays,
       required this.recommendedSoilTypes,
-      required this.syncStatus,
-      required this.createdAt});
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt,
+      required this.localRev});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -181,11 +215,12 @@ class SpeciesTableData extends DataClass
           .$converterrecommendedSoilTypes
           .toSql(recommendedSoilTypes));
     }
-    {
-      map['sync_status'] = Variable<String>(
-          $SpeciesTableTable.$convertersyncStatus.toSql(syncStatus));
-    }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['local_rev'] = Variable<int>(localRev);
     return map;
   }
 
@@ -199,8 +234,12 @@ class SpeciesTableData extends DataClass
               ? const Value.absent()
               : Value(defaultIrrigationFrequencyDays),
       recommendedSoilTypes: Value(recommendedSoilTypes),
-      syncStatus: Value(syncStatus),
       createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      localRev: Value(localRev),
     );
   }
 
@@ -215,8 +254,10 @@ class SpeciesTableData extends DataClass
           serializer.fromJson<int?>(json['defaultIrrigationFrequencyDays']),
       recommendedSoilTypes:
           serializer.fromJson<List<String>>(json['recommendedSoilTypes']),
-      syncStatus: serializer.fromJson<SyncStatus>(json['syncStatus']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      localRev: serializer.fromJson<int>(json['localRev']),
     );
   }
   @override
@@ -230,8 +271,10 @@ class SpeciesTableData extends DataClass
           serializer.toJson<int?>(defaultIrrigationFrequencyDays),
       'recommendedSoilTypes':
           serializer.toJson<List<String>>(recommendedSoilTypes),
-      'syncStatus': serializer.toJson<SyncStatus>(syncStatus),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'localRev': serializer.toJson<int>(localRev),
     };
   }
 
@@ -241,8 +284,10 @@ class SpeciesTableData extends DataClass
           String? popularName,
           Value<int?> defaultIrrigationFrequencyDays = const Value.absent(),
           List<String>? recommendedSoilTypes,
-          SyncStatus? syncStatus,
-          DateTime? createdAt}) =>
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent(),
+          int? localRev}) =>
       SpeciesTableData(
         id: id ?? this.id,
         scientificName: scientificName ?? this.scientificName,
@@ -251,8 +296,10 @@ class SpeciesTableData extends DataClass
             ? defaultIrrigationFrequencyDays.value
             : this.defaultIrrigationFrequencyDays,
         recommendedSoilTypes: recommendedSoilTypes ?? this.recommendedSoilTypes,
-        syncStatus: syncStatus ?? this.syncStatus,
         createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        localRev: localRev ?? this.localRev,
       );
   SpeciesTableData copyWithCompanion(SpeciesTableCompanion data) {
     return SpeciesTableData(
@@ -269,9 +316,10 @@ class SpeciesTableData extends DataClass
       recommendedSoilTypes: data.recommendedSoilTypes.present
           ? data.recommendedSoilTypes.value
           : this.recommendedSoilTypes,
-      syncStatus:
-          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      localRev: data.localRev.present ? data.localRev.value : this.localRev,
     );
   }
 
@@ -284,8 +332,10 @@ class SpeciesTableData extends DataClass
           ..write(
               'defaultIrrigationFrequencyDays: $defaultIrrigationFrequencyDays, ')
           ..write('recommendedSoilTypes: $recommendedSoilTypes, ')
-          ..write('syncStatus: $syncStatus, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev')
           ..write(')'))
         .toString();
   }
@@ -297,8 +347,10 @@ class SpeciesTableData extends DataClass
       popularName,
       defaultIrrigationFrequencyDays,
       recommendedSoilTypes,
-      syncStatus,
-      createdAt);
+      createdAt,
+      updatedAt,
+      deletedAt,
+      localRev);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -309,8 +361,10 @@ class SpeciesTableData extends DataClass
           other.defaultIrrigationFrequencyDays ==
               this.defaultIrrigationFrequencyDays &&
           other.recommendedSoilTypes == this.recommendedSoilTypes &&
-          other.syncStatus == this.syncStatus &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.localRev == this.localRev);
 }
 
 class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
@@ -319,8 +373,10 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
   final Value<String> popularName;
   final Value<int?> defaultIrrigationFrequencyDays;
   final Value<List<String>> recommendedSoilTypes;
-  final Value<SyncStatus> syncStatus;
   final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> localRev;
   final Value<int> rowid;
   const SpeciesTableCompanion({
     this.id = const Value.absent(),
@@ -328,8 +384,10 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
     this.popularName = const Value.absent(),
     this.defaultIrrigationFrequencyDays = const Value.absent(),
     this.recommendedSoilTypes = const Value.absent(),
-    this.syncStatus = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SpeciesTableCompanion.insert({
@@ -338,22 +396,27 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
     required String popularName,
     this.defaultIrrigationFrequencyDays = const Value.absent(),
     required List<String> recommendedSoilTypes,
-    this.syncStatus = const Value.absent(),
     required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         scientificName = Value(scientificName),
         popularName = Value(popularName),
         recommendedSoilTypes = Value(recommendedSoilTypes),
-        createdAt = Value(createdAt);
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
   static Insertable<SpeciesTableData> custom({
     Expression<String>? id,
     Expression<String>? scientificName,
     Expression<String>? popularName,
     Expression<int>? defaultIrrigationFrequencyDays,
     Expression<String>? recommendedSoilTypes,
-    Expression<String>? syncStatus,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? localRev,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -364,8 +427,10 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
         'default_irrigation_frequency_days': defaultIrrigationFrequencyDays,
       if (recommendedSoilTypes != null)
         'recommended_soil_types': recommendedSoilTypes,
-      if (syncStatus != null) 'sync_status': syncStatus,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (localRev != null) 'local_rev': localRev,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -376,8 +441,10 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
       Value<String>? popularName,
       Value<int?>? defaultIrrigationFrequencyDays,
       Value<List<String>>? recommendedSoilTypes,
-      Value<SyncStatus>? syncStatus,
       Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? localRev,
       Value<int>? rowid}) {
     return SpeciesTableCompanion(
       id: id ?? this.id,
@@ -386,8 +453,10 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
       defaultIrrigationFrequencyDays:
           defaultIrrigationFrequencyDays ?? this.defaultIrrigationFrequencyDays,
       recommendedSoilTypes: recommendedSoilTypes ?? this.recommendedSoilTypes,
-      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      localRev: localRev ?? this.localRev,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -413,12 +482,17 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
           .$converterrecommendedSoilTypes
           .toSql(recommendedSoilTypes.value));
     }
-    if (syncStatus.present) {
-      map['sync_status'] = Variable<String>(
-          $SpeciesTableTable.$convertersyncStatus.toSql(syncStatus.value));
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (localRev.present) {
+      map['local_rev'] = Variable<int>(localRev.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -435,8 +509,10 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
           ..write(
               'defaultIrrigationFrequencyDays: $defaultIrrigationFrequencyDays, ')
           ..write('recommendedSoilTypes: $recommendedSoilTypes, ')
-          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -483,16 +559,49 @@ class $SoilsTableTable extends SoilsTable
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumnWithTypeConverter<SyncStatus, String> syncStatus =
-      GeneratedColumn<String>('sync_status', aliasedName, false,
-              type: DriftSqlType.string,
-              requiredDuringInsert: false,
-              defaultValue: const Constant('pending'))
-          .withConverter<SyncStatus>($SoilsTableTable.$convertersyncStatus);
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, composition, imagePath, imageSource, createdAt, syncStatus];
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _localRevMeta =
+      const VerificationMeta('localRev');
+  @override
+  late final GeneratedColumn<int> localRev = GeneratedColumn<int>(
+      'local_rev', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _isSeededMeta =
+      const VerificationMeta('isSeeded');
+  @override
+  late final GeneratedColumn<bool> isSeeded = GeneratedColumn<bool>(
+      'is_seeded', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_seeded" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        composition,
+        imagePath,
+        imageSource,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        localRev,
+        isSeeded
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -536,6 +645,24 @@ class $SoilsTableTable extends SoilsTable
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    if (data.containsKey('local_rev')) {
+      context.handle(_localRevMeta,
+          localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
+    }
+    if (data.containsKey('is_seeded')) {
+      context.handle(_isSeededMeta,
+          isSeeded.isAcceptableOrUnknown(data['is_seeded']!, _isSeededMeta));
+    }
     return context;
   }
 
@@ -557,9 +684,14 @@ class $SoilsTableTable extends SoilsTable
           .read(DriftSqlType.string, data['${effectivePrefix}image_source']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
-      syncStatus: $SoilsTableTable.$convertersyncStatus.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sync_status'])!),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      localRev: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
+      isSeeded: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_seeded'])!,
     );
   }
 
@@ -567,9 +699,6 @@ class $SoilsTableTable extends SoilsTable
   $SoilsTableTable createAlias(String alias) {
     return $SoilsTableTable(attachedDatabase, alias);
   }
-
-  static TypeConverter<SyncStatus, String> $convertersyncStatus =
-      const SyncStatusConverter();
 }
 
 class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
@@ -579,7 +708,16 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
   final String? imagePath;
   final String? imageSource;
   final DateTime createdAt;
-  final SyncStatus syncStatus;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int localRev;
+
+  /// True for the default soils seeded on database creation/upgrade (see
+  /// app_database.dart), false for soils the user created. Distinguishes
+  /// "never touched by the user" from "genuinely local-only data worth
+  /// migrating" in WorkspaceMigrationService, now that there's no
+  /// syncStatus column to repurpose for that check.
+  final bool isSeeded;
   const SoilsTableData(
       {required this.id,
       required this.name,
@@ -587,7 +725,10 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       this.imagePath,
       this.imageSource,
       required this.createdAt,
-      required this.syncStatus});
+      required this.updatedAt,
+      this.deletedAt,
+      required this.localRev,
+      required this.isSeeded});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -603,10 +744,12 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       map['image_source'] = Variable<String>(imageSource);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
-    {
-      map['sync_status'] = Variable<String>(
-          $SoilsTableTable.$convertersyncStatus.toSql(syncStatus));
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
+    map['local_rev'] = Variable<int>(localRev);
+    map['is_seeded'] = Variable<bool>(isSeeded);
     return map;
   }
 
@@ -624,7 +767,12 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
           ? const Value.absent()
           : Value(imageSource),
       createdAt: Value(createdAt),
-      syncStatus: Value(syncStatus),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      localRev: Value(localRev),
+      isSeeded: Value(isSeeded),
     );
   }
 
@@ -638,7 +786,10 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       imagePath: serializer.fromJson<String?>(json['imagePath']),
       imageSource: serializer.fromJson<String?>(json['imageSource']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      syncStatus: serializer.fromJson<SyncStatus>(json['syncStatus']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      localRev: serializer.fromJson<int>(json['localRev']),
+      isSeeded: serializer.fromJson<bool>(json['isSeeded']),
     );
   }
   @override
@@ -651,7 +802,10 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       'imagePath': serializer.toJson<String?>(imagePath),
       'imageSource': serializer.toJson<String?>(imageSource),
       'createdAt': serializer.toJson<DateTime>(createdAt),
-      'syncStatus': serializer.toJson<SyncStatus>(syncStatus),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'localRev': serializer.toJson<int>(localRev),
+      'isSeeded': serializer.toJson<bool>(isSeeded),
     };
   }
 
@@ -662,7 +816,10 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
           Value<String?> imagePath = const Value.absent(),
           Value<String?> imageSource = const Value.absent(),
           DateTime? createdAt,
-          SyncStatus? syncStatus}) =>
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent(),
+          int? localRev,
+          bool? isSeeded}) =>
       SoilsTableData(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -670,7 +827,10 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
         imagePath: imagePath.present ? imagePath.value : this.imagePath,
         imageSource: imageSource.present ? imageSource.value : this.imageSource,
         createdAt: createdAt ?? this.createdAt,
-        syncStatus: syncStatus ?? this.syncStatus,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        localRev: localRev ?? this.localRev,
+        isSeeded: isSeeded ?? this.isSeeded,
       );
   SoilsTableData copyWithCompanion(SoilsTableCompanion data) {
     return SoilsTableData(
@@ -682,8 +842,10 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       imageSource:
           data.imageSource.present ? data.imageSource.value : this.imageSource,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      syncStatus:
-          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      localRev: data.localRev.present ? data.localRev.value : this.localRev,
+      isSeeded: data.isSeeded.present ? data.isSeeded.value : this.isSeeded,
     );
   }
 
@@ -696,14 +858,17 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
           ..write('imagePath: $imagePath, ')
           ..write('imageSource: $imageSource, ')
           ..write('createdAt: $createdAt, ')
-          ..write('syncStatus: $syncStatus')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev, ')
+          ..write('isSeeded: $isSeeded')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, name, composition, imagePath, imageSource, createdAt, syncStatus);
+  int get hashCode => Object.hash(id, name, composition, imagePath, imageSource,
+      createdAt, updatedAt, deletedAt, localRev, isSeeded);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -714,7 +879,10 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
           other.imagePath == this.imagePath &&
           other.imageSource == this.imageSource &&
           other.createdAt == this.createdAt &&
-          other.syncStatus == this.syncStatus);
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.localRev == this.localRev &&
+          other.isSeeded == this.isSeeded);
 }
 
 class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
@@ -724,7 +892,10 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
   final Value<String?> imagePath;
   final Value<String?> imageSource;
   final Value<DateTime> createdAt;
-  final Value<SyncStatus> syncStatus;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> localRev;
+  final Value<bool> isSeeded;
   final Value<int> rowid;
   const SoilsTableCompanion({
     this.id = const Value.absent(),
@@ -733,7 +904,10 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
     this.imagePath = const Value.absent(),
     this.imageSource = const Value.absent(),
     this.createdAt = const Value.absent(),
-    this.syncStatus = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
+    this.isSeeded = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SoilsTableCompanion.insert({
@@ -743,11 +917,15 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
     this.imagePath = const Value.absent(),
     this.imageSource = const Value.absent(),
     required DateTime createdAt,
-    this.syncStatus = const Value.absent(),
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
+    this.isSeeded = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
-        createdAt = Value(createdAt);
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
   static Insertable<SoilsTableData> custom({
     Expression<String>? id,
     Expression<String>? name,
@@ -755,7 +933,10 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
     Expression<String>? imagePath,
     Expression<String>? imageSource,
     Expression<DateTime>? createdAt,
-    Expression<String>? syncStatus,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? localRev,
+    Expression<bool>? isSeeded,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -765,7 +946,10 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
       if (imagePath != null) 'image_path': imagePath,
       if (imageSource != null) 'image_source': imageSource,
       if (createdAt != null) 'created_at': createdAt,
-      if (syncStatus != null) 'sync_status': syncStatus,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (localRev != null) 'local_rev': localRev,
+      if (isSeeded != null) 'is_seeded': isSeeded,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -777,7 +961,10 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
       Value<String?>? imagePath,
       Value<String?>? imageSource,
       Value<DateTime>? createdAt,
-      Value<SyncStatus>? syncStatus,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? localRev,
+      Value<bool>? isSeeded,
       Value<int>? rowid}) {
     return SoilsTableCompanion(
       id: id ?? this.id,
@@ -786,7 +973,10 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
       imagePath: imagePath ?? this.imagePath,
       imageSource: imageSource ?? this.imageSource,
       createdAt: createdAt ?? this.createdAt,
-      syncStatus: syncStatus ?? this.syncStatus,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      localRev: localRev ?? this.localRev,
+      isSeeded: isSeeded ?? this.isSeeded,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -812,9 +1002,17 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
-    if (syncStatus.present) {
-      map['sync_status'] = Variable<String>(
-          $SoilsTableTable.$convertersyncStatus.toSql(syncStatus.value));
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (localRev.present) {
+      map['local_rev'] = Variable<int>(localRev.value);
+    }
+    if (isSeeded.present) {
+      map['is_seeded'] = Variable<bool>(isSeeded.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -831,7 +1029,10 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
           ..write('imagePath: $imagePath, ')
           ..write('imageSource: $imageSource, ')
           ..write('createdAt: $createdAt, ')
-          ..write('syncStatus: $syncStatus, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev, ')
+          ..write('isSeeded: $isSeeded, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -878,16 +1079,38 @@ class $LocationsTableTable extends LocationsTable
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumnWithTypeConverter<SyncStatus, String> syncStatus =
-      GeneratedColumn<String>('sync_status', aliasedName, false,
-              type: DriftSqlType.string,
-              requiredDuringInsert: false,
-              defaultValue: const Constant('pending'))
-          .withConverter<SyncStatus>($LocationsTableTable.$convertersyncStatus);
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, description, latitude, longitude, createdAt, syncStatus];
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _localRevMeta =
+      const VerificationMeta('localRev');
+  @override
+  late final GeneratedColumn<int> localRev = GeneratedColumn<int>(
+      'local_rev', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        description,
+        latitude,
+        longitude,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        localRev
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -929,6 +1152,20 @@ class $LocationsTableTable extends LocationsTable
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    if (data.containsKey('local_rev')) {
+      context.handle(_localRevMeta,
+          localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
+    }
     return context;
   }
 
@@ -950,9 +1187,12 @@ class $LocationsTableTable extends LocationsTable
           .read(DriftSqlType.double, data['${effectivePrefix}longitude']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
-      syncStatus: $LocationsTableTable.$convertersyncStatus.fromSql(
-          attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}sync_status'])!),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      localRev: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
     );
   }
 
@@ -960,9 +1200,6 @@ class $LocationsTableTable extends LocationsTable
   $LocationsTableTable createAlias(String alias) {
     return $LocationsTableTable(attachedDatabase, alias);
   }
-
-  static TypeConverter<SyncStatus, String> $convertersyncStatus =
-      const SyncStatusConverter();
 }
 
 class LocationsTableData extends DataClass
@@ -973,7 +1210,9 @@ class LocationsTableData extends DataClass
   final double? latitude;
   final double? longitude;
   final DateTime createdAt;
-  final SyncStatus syncStatus;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int localRev;
   const LocationsTableData(
       {required this.id,
       required this.name,
@@ -981,7 +1220,9 @@ class LocationsTableData extends DataClass
       this.latitude,
       this.longitude,
       required this.createdAt,
-      required this.syncStatus});
+      required this.updatedAt,
+      this.deletedAt,
+      required this.localRev});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -997,10 +1238,11 @@ class LocationsTableData extends DataClass
       map['longitude'] = Variable<double>(longitude);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
-    {
-      map['sync_status'] = Variable<String>(
-          $LocationsTableTable.$convertersyncStatus.toSql(syncStatus));
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
+    map['local_rev'] = Variable<int>(localRev);
     return map;
   }
 
@@ -1018,7 +1260,11 @@ class LocationsTableData extends DataClass
           ? const Value.absent()
           : Value(longitude),
       createdAt: Value(createdAt),
-      syncStatus: Value(syncStatus),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      localRev: Value(localRev),
     );
   }
 
@@ -1032,7 +1278,9 @@ class LocationsTableData extends DataClass
       latitude: serializer.fromJson<double?>(json['latitude']),
       longitude: serializer.fromJson<double?>(json['longitude']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      syncStatus: serializer.fromJson<SyncStatus>(json['syncStatus']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      localRev: serializer.fromJson<int>(json['localRev']),
     );
   }
   @override
@@ -1045,7 +1293,9 @@ class LocationsTableData extends DataClass
       'latitude': serializer.toJson<double?>(latitude),
       'longitude': serializer.toJson<double?>(longitude),
       'createdAt': serializer.toJson<DateTime>(createdAt),
-      'syncStatus': serializer.toJson<SyncStatus>(syncStatus),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'localRev': serializer.toJson<int>(localRev),
     };
   }
 
@@ -1056,7 +1306,9 @@ class LocationsTableData extends DataClass
           Value<double?> latitude = const Value.absent(),
           Value<double?> longitude = const Value.absent(),
           DateTime? createdAt,
-          SyncStatus? syncStatus}) =>
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent(),
+          int? localRev}) =>
       LocationsTableData(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -1064,7 +1316,9 @@ class LocationsTableData extends DataClass
         latitude: latitude.present ? latitude.value : this.latitude,
         longitude: longitude.present ? longitude.value : this.longitude,
         createdAt: createdAt ?? this.createdAt,
-        syncStatus: syncStatus ?? this.syncStatus,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        localRev: localRev ?? this.localRev,
       );
   LocationsTableData copyWithCompanion(LocationsTableCompanion data) {
     return LocationsTableData(
@@ -1075,8 +1329,9 @@ class LocationsTableData extends DataClass
       latitude: data.latitude.present ? data.latitude.value : this.latitude,
       longitude: data.longitude.present ? data.longitude.value : this.longitude,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      syncStatus:
-          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      localRev: data.localRev.present ? data.localRev.value : this.localRev,
     );
   }
 
@@ -1089,14 +1344,16 @@ class LocationsTableData extends DataClass
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
           ..write('createdAt: $createdAt, ')
-          ..write('syncStatus: $syncStatus')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, name, description, latitude, longitude, createdAt, syncStatus);
+  int get hashCode => Object.hash(id, name, description, latitude, longitude,
+      createdAt, updatedAt, deletedAt, localRev);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1107,7 +1364,9 @@ class LocationsTableData extends DataClass
           other.latitude == this.latitude &&
           other.longitude == this.longitude &&
           other.createdAt == this.createdAt &&
-          other.syncStatus == this.syncStatus);
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.localRev == this.localRev);
 }
 
 class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
@@ -1117,7 +1376,9 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
   final Value<double?> latitude;
   final Value<double?> longitude;
   final Value<DateTime> createdAt;
-  final Value<SyncStatus> syncStatus;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> localRev;
   final Value<int> rowid;
   const LocationsTableCompanion({
     this.id = const Value.absent(),
@@ -1126,7 +1387,9 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
     this.createdAt = const Value.absent(),
-    this.syncStatus = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LocationsTableCompanion.insert({
@@ -1136,11 +1399,14 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
     required DateTime createdAt,
-    this.syncStatus = const Value.absent(),
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
-        createdAt = Value(createdAt);
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
   static Insertable<LocationsTableData> custom({
     Expression<String>? id,
     Expression<String>? name,
@@ -1148,7 +1414,9 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     Expression<double>? latitude,
     Expression<double>? longitude,
     Expression<DateTime>? createdAt,
-    Expression<String>? syncStatus,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? localRev,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1158,7 +1426,9 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
       if (createdAt != null) 'created_at': createdAt,
-      if (syncStatus != null) 'sync_status': syncStatus,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (localRev != null) 'local_rev': localRev,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1170,7 +1440,9 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
       Value<double?>? latitude,
       Value<double?>? longitude,
       Value<DateTime>? createdAt,
-      Value<SyncStatus>? syncStatus,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? localRev,
       Value<int>? rowid}) {
     return LocationsTableCompanion(
       id: id ?? this.id,
@@ -1179,7 +1451,9 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       createdAt: createdAt ?? this.createdAt,
-      syncStatus: syncStatus ?? this.syncStatus,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      localRev: localRev ?? this.localRev,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1205,9 +1479,14 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
-    if (syncStatus.present) {
-      map['sync_status'] = Variable<String>(
-          $LocationsTableTable.$convertersyncStatus.toSql(syncStatus.value));
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (localRev.present) {
+      map['local_rev'] = Variable<int>(localRev.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1224,7 +1503,9 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
           ..write('createdAt: $createdAt, ')
-          ..write('syncStatus: $syncStatus, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1305,13 +1586,26 @@ class $PlantsTableTable extends PlantsTable
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumnWithTypeConverter<SyncStatus, String> syncStatus =
-      GeneratedColumn<String>('sync_status', aliasedName, false,
-              type: DriftSqlType.string,
-              requiredDuringInsert: false,
-              defaultValue: const Constant('pending'))
-          .withConverter<SyncStatus>($PlantsTableTable.$convertersyncStatus);
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _localRevMeta =
+      const VerificationMeta('localRev');
+  @override
+  late final GeneratedColumn<int> localRev = GeneratedColumn<int>(
+      'local_rev', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1324,7 +1618,9 @@ class $PlantsTableTable extends PlantsTable
         locationId,
         lastIrrigatedAt,
         createdAt,
-        syncStatus
+        updatedAt,
+        deletedAt,
+        localRev
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1396,6 +1692,20 @@ class $PlantsTableTable extends PlantsTable
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    if (data.containsKey('local_rev')) {
+      context.handle(_localRevMeta,
+          localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
+    }
     return context;
   }
 
@@ -1426,9 +1736,12 @@ class $PlantsTableTable extends PlantsTable
           DriftSqlType.dateTime, data['${effectivePrefix}last_irrigated_at']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
-      syncStatus: $PlantsTableTable.$convertersyncStatus.fromSql(
-          attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}sync_status'])!),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      localRev: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
     );
   }
 
@@ -1436,9 +1749,6 @@ class $PlantsTableTable extends PlantsTable
   $PlantsTableTable createAlias(String alias) {
     return $PlantsTableTable(attachedDatabase, alias);
   }
-
-  static TypeConverter<SyncStatus, String> $convertersyncStatus =
-      const SyncStatusConverter();
 }
 
 class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
@@ -1454,7 +1764,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
   final String? locationId;
   final DateTime? lastIrrigatedAt;
   final DateTime createdAt;
-  final SyncStatus syncStatus;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int localRev;
   const PlantsTableData(
       {required this.id,
       required this.speciesId,
@@ -1466,7 +1778,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       this.locationId,
       this.lastIrrigatedAt,
       required this.createdAt,
-      required this.syncStatus});
+      required this.updatedAt,
+      this.deletedAt,
+      required this.localRev});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1488,10 +1802,11 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       map['last_irrigated_at'] = Variable<DateTime>(lastIrrigatedAt);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
-    {
-      map['sync_status'] = Variable<String>(
-          $PlantsTableTable.$convertersyncStatus.toSql(syncStatus));
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
+    map['local_rev'] = Variable<int>(localRev);
     return map;
   }
 
@@ -1515,7 +1830,11 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ? const Value.absent()
           : Value(lastIrrigatedAt),
       createdAt: Value(createdAt),
-      syncStatus: Value(syncStatus),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      localRev: Value(localRev),
     );
   }
 
@@ -1534,7 +1853,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       locationId: serializer.fromJson<String?>(json['locationId']),
       lastIrrigatedAt: serializer.fromJson<DateTime?>(json['lastIrrigatedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      syncStatus: serializer.fromJson<SyncStatus>(json['syncStatus']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      localRev: serializer.fromJson<int>(json['localRev']),
     );
   }
   @override
@@ -1552,7 +1873,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       'locationId': serializer.toJson<String?>(locationId),
       'lastIrrigatedAt': serializer.toJson<DateTime?>(lastIrrigatedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
-      'syncStatus': serializer.toJson<SyncStatus>(syncStatus),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'localRev': serializer.toJson<int>(localRev),
     };
   }
 
@@ -1567,7 +1890,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           Value<String?> locationId = const Value.absent(),
           Value<DateTime?> lastIrrigatedAt = const Value.absent(),
           DateTime? createdAt,
-          SyncStatus? syncStatus}) =>
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent(),
+          int? localRev}) =>
       PlantsTableData(
         id: id ?? this.id,
         speciesId: speciesId ?? this.speciesId,
@@ -1583,7 +1908,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
             ? lastIrrigatedAt.value
             : this.lastIrrigatedAt,
         createdAt: createdAt ?? this.createdAt,
-        syncStatus: syncStatus ?? this.syncStatus,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        localRev: localRev ?? this.localRev,
       );
   PlantsTableData copyWithCompanion(PlantsTableCompanion data) {
     return PlantsTableData(
@@ -1604,8 +1931,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ? data.lastIrrigatedAt.value
           : this.lastIrrigatedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      syncStatus:
-          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      localRev: data.localRev.present ? data.localRev.value : this.localRev,
     );
   }
 
@@ -1622,7 +1950,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ..write('locationId: $locationId, ')
           ..write('lastIrrigatedAt: $lastIrrigatedAt, ')
           ..write('createdAt: $createdAt, ')
-          ..write('syncStatus: $syncStatus')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev')
           ..write(')'))
         .toString();
   }
@@ -1639,7 +1969,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       locationId,
       lastIrrigatedAt,
       createdAt,
-      syncStatus);
+      updatedAt,
+      deletedAt,
+      localRev);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1654,7 +1986,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           other.locationId == this.locationId &&
           other.lastIrrigatedAt == this.lastIrrigatedAt &&
           other.createdAt == this.createdAt &&
-          other.syncStatus == this.syncStatus);
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.localRev == this.localRev);
 }
 
 class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
@@ -1668,7 +2002,9 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
   final Value<String?> locationId;
   final Value<DateTime?> lastIrrigatedAt;
   final Value<DateTime> createdAt;
-  final Value<SyncStatus> syncStatus;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> localRev;
   final Value<int> rowid;
   const PlantsTableCompanion({
     this.id = const Value.absent(),
@@ -1681,7 +2017,9 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.locationId = const Value.absent(),
     this.lastIrrigatedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
-    this.syncStatus = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PlantsTableCompanion.insert({
@@ -1695,14 +2033,17 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.locationId = const Value.absent(),
     this.lastIrrigatedAt = const Value.absent(),
     required DateTime createdAt,
-    this.syncStatus = const Value.absent(),
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         speciesId = Value(speciesId),
         nickname = Value(nickname),
         soilType = Value(soilType),
         acquisitionDate = Value(acquisitionDate),
-        createdAt = Value(createdAt);
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
   static Insertable<PlantsTableData> custom({
     Expression<String>? id,
     Expression<String>? speciesId,
@@ -1714,7 +2055,9 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     Expression<String>? locationId,
     Expression<DateTime>? lastIrrigatedAt,
     Expression<DateTime>? createdAt,
-    Expression<String>? syncStatus,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? localRev,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1729,7 +2072,9 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       if (locationId != null) 'location_id': locationId,
       if (lastIrrigatedAt != null) 'last_irrigated_at': lastIrrigatedAt,
       if (createdAt != null) 'created_at': createdAt,
-      if (syncStatus != null) 'sync_status': syncStatus,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (localRev != null) 'local_rev': localRev,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1745,7 +2090,9 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       Value<String?>? locationId,
       Value<DateTime?>? lastIrrigatedAt,
       Value<DateTime>? createdAt,
-      Value<SyncStatus>? syncStatus,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? localRev,
       Value<int>? rowid}) {
     return PlantsTableCompanion(
       id: id ?? this.id,
@@ -1759,7 +2106,9 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       locationId: locationId ?? this.locationId,
       lastIrrigatedAt: lastIrrigatedAt ?? this.lastIrrigatedAt,
       createdAt: createdAt ?? this.createdAt,
-      syncStatus: syncStatus ?? this.syncStatus,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      localRev: localRev ?? this.localRev,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1798,9 +2147,14 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
-    if (syncStatus.present) {
-      map['sync_status'] = Variable<String>(
-          $PlantsTableTable.$convertersyncStatus.toSql(syncStatus.value));
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (localRev.present) {
+      map['local_rev'] = Variable<int>(localRev.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1821,7 +2175,9 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
           ..write('locationId: $locationId, ')
           ..write('lastIrrigatedAt: $lastIrrigatedAt, ')
           ..write('createdAt: $createdAt, ')
-          ..write('syncStatus: $syncStatus, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1887,13 +2243,26 @@ class $EntriesTableTable extends EntriesTable
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumnWithTypeConverter<SyncStatus, String> syncStatus =
-      GeneratedColumn<String>('sync_status', aliasedName, false,
-              type: DriftSqlType.string,
-              requiredDuringInsert: false,
-              defaultValue: const Constant('pending'))
-          .withConverter<SyncStatus>($EntriesTableTable.$convertersyncStatus);
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _localRevMeta =
+      const VerificationMeta('localRev');
+  @override
+  late final GeneratedColumn<int> localRev = GeneratedColumn<int>(
+      'local_rev', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1905,7 +2274,9 @@ class $EntriesTableTable extends EntriesTable
         numericValue,
         extraData,
         createdAt,
-        syncStatus
+        updatedAt,
+        deletedAt,
+        localRev
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1958,6 +2329,20 @@ class $EntriesTableTable extends EntriesTable
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    if (data.containsKey('local_rev')) {
+      context.handle(_localRevMeta,
+          localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
+    }
     return context;
   }
 
@@ -1986,9 +2371,12 @@ class $EntriesTableTable extends EntriesTable
           .read(DriftSqlType.string, data['${effectivePrefix}extra_data']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
-      syncStatus: $EntriesTableTable.$convertersyncStatus.fromSql(
-          attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}sync_status'])!),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      localRev: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
     );
   }
 
@@ -1999,8 +2387,6 @@ class $EntriesTableTable extends EntriesTable
 
   static TypeConverter<EntryType, String> $convertertype =
       const EntryTypeConverter();
-  static TypeConverter<SyncStatus, String> $convertersyncStatus =
-      const SyncStatusConverter();
 }
 
 class EntriesTableData extends DataClass
@@ -2014,7 +2400,9 @@ class EntriesTableData extends DataClass
   final double? numericValue;
   final String? extraData;
   final DateTime createdAt;
-  final SyncStatus syncStatus;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int localRev;
   const EntriesTableData(
       {required this.id,
       required this.plantId,
@@ -2025,7 +2413,9 @@ class EntriesTableData extends DataClass
       this.numericValue,
       this.extraData,
       required this.createdAt,
-      required this.syncStatus});
+      required this.updatedAt,
+      this.deletedAt,
+      required this.localRev});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2049,10 +2439,11 @@ class EntriesTableData extends DataClass
       map['extra_data'] = Variable<String>(extraData);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
-    {
-      map['sync_status'] = Variable<String>(
-          $EntriesTableTable.$convertersyncStatus.toSql(syncStatus));
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
+    map['local_rev'] = Variable<int>(localRev);
     return map;
   }
 
@@ -2073,7 +2464,11 @@ class EntriesTableData extends DataClass
           ? const Value.absent()
           : Value(extraData),
       createdAt: Value(createdAt),
-      syncStatus: Value(syncStatus),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      localRev: Value(localRev),
     );
   }
 
@@ -2090,7 +2485,9 @@ class EntriesTableData extends DataClass
       numericValue: serializer.fromJson<double?>(json['numericValue']),
       extraData: serializer.fromJson<String?>(json['extraData']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      syncStatus: serializer.fromJson<SyncStatus>(json['syncStatus']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      localRev: serializer.fromJson<int>(json['localRev']),
     );
   }
   @override
@@ -2106,7 +2503,9 @@ class EntriesTableData extends DataClass
       'numericValue': serializer.toJson<double?>(numericValue),
       'extraData': serializer.toJson<String?>(extraData),
       'createdAt': serializer.toJson<DateTime>(createdAt),
-      'syncStatus': serializer.toJson<SyncStatus>(syncStatus),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'localRev': serializer.toJson<int>(localRev),
     };
   }
 
@@ -2120,7 +2519,9 @@ class EntriesTableData extends DataClass
           Value<double?> numericValue = const Value.absent(),
           Value<String?> extraData = const Value.absent(),
           DateTime? createdAt,
-          SyncStatus? syncStatus}) =>
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent(),
+          int? localRev}) =>
       EntriesTableData(
         id: id ?? this.id,
         plantId: plantId ?? this.plantId,
@@ -2132,7 +2533,9 @@ class EntriesTableData extends DataClass
             numericValue.present ? numericValue.value : this.numericValue,
         extraData: extraData.present ? extraData.value : this.extraData,
         createdAt: createdAt ?? this.createdAt,
-        syncStatus: syncStatus ?? this.syncStatus,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        localRev: localRev ?? this.localRev,
       );
   EntriesTableData copyWithCompanion(EntriesTableCompanion data) {
     return EntriesTableData(
@@ -2147,8 +2550,9 @@ class EntriesTableData extends DataClass
           : this.numericValue,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      syncStatus:
-          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      localRev: data.localRev.present ? data.localRev.value : this.localRev,
     );
   }
 
@@ -2164,14 +2568,16 @@ class EntriesTableData extends DataClass
           ..write('numericValue: $numericValue, ')
           ..write('extraData: $extraData, ')
           ..write('createdAt: $createdAt, ')
-          ..write('syncStatus: $syncStatus')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, plantId, date, photoPath, note, type,
-      numericValue, extraData, createdAt, syncStatus);
+      numericValue, extraData, createdAt, updatedAt, deletedAt, localRev);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2185,7 +2591,9 @@ class EntriesTableData extends DataClass
           other.numericValue == this.numericValue &&
           other.extraData == this.extraData &&
           other.createdAt == this.createdAt &&
-          other.syncStatus == this.syncStatus);
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.localRev == this.localRev);
 }
 
 class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
@@ -2198,7 +2606,9 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
   final Value<double?> numericValue;
   final Value<String?> extraData;
   final Value<DateTime> createdAt;
-  final Value<SyncStatus> syncStatus;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> localRev;
   final Value<int> rowid;
   const EntriesTableCompanion({
     this.id = const Value.absent(),
@@ -2210,7 +2620,9 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
     this.numericValue = const Value.absent(),
     this.extraData = const Value.absent(),
     this.createdAt = const Value.absent(),
-    this.syncStatus = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   EntriesTableCompanion.insert({
@@ -2223,13 +2635,16 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
     this.numericValue = const Value.absent(),
     this.extraData = const Value.absent(),
     required DateTime createdAt,
-    this.syncStatus = const Value.absent(),
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         plantId = Value(plantId),
         date = Value(date),
         type = Value(type),
-        createdAt = Value(createdAt);
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
   static Insertable<EntriesTableData> custom({
     Expression<String>? id,
     Expression<String>? plantId,
@@ -2240,7 +2655,9 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
     Expression<double>? numericValue,
     Expression<String>? extraData,
     Expression<DateTime>? createdAt,
-    Expression<String>? syncStatus,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? localRev,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2253,7 +2670,9 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
       if (numericValue != null) 'numeric_value': numericValue,
       if (extraData != null) 'extra_data': extraData,
       if (createdAt != null) 'created_at': createdAt,
-      if (syncStatus != null) 'sync_status': syncStatus,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (localRev != null) 'local_rev': localRev,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2268,7 +2687,9 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
       Value<double?>? numericValue,
       Value<String?>? extraData,
       Value<DateTime>? createdAt,
-      Value<SyncStatus>? syncStatus,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? localRev,
       Value<int>? rowid}) {
     return EntriesTableCompanion(
       id: id ?? this.id,
@@ -2280,7 +2701,9 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
       numericValue: numericValue ?? this.numericValue,
       extraData: extraData ?? this.extraData,
       createdAt: createdAt ?? this.createdAt,
-      syncStatus: syncStatus ?? this.syncStatus,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      localRev: localRev ?? this.localRev,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2316,9 +2739,14 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
-    if (syncStatus.present) {
-      map['sync_status'] = Variable<String>(
-          $EntriesTableTable.$convertersyncStatus.toSql(syncStatus.value));
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (localRev.present) {
+      map['local_rev'] = Variable<int>(localRev.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -2338,119 +2766,54 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
           ..write('numericValue: $numericValue, ')
           ..write('extraData: $extraData, ')
           ..write('createdAt: $createdAt, ')
-          ..write('syncStatus: $syncStatus, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
 }
 
-class $SyncQueueTableTable extends SyncQueueTable
-    with TableInfo<$SyncQueueTableTable, SyncQueueTableData> {
+class $SyncMetaTableTable extends SyncMetaTable
+    with TableInfo<$SyncMetaTableTable, SyncMetaTableData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $SyncQueueTableTable(this.attachedDatabase, [this._alias]);
+  $SyncMetaTableTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
       'id', aliasedName, false,
-      hasAutoIncrement: true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _nextLocalRevMeta =
+      const VerificationMeta('nextLocalRev');
+  @override
+  late final GeneratedColumn<int> nextLocalRev = GeneratedColumn<int>(
+      'next_local_rev', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _entityTypeMeta =
-      const VerificationMeta('entityType');
+      defaultValue: const Constant(1));
   @override
-  late final GeneratedColumn<String> entityType = GeneratedColumn<String>(
-      'entity_type', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _entityIdMeta =
-      const VerificationMeta('entityId');
-  @override
-  late final GeneratedColumn<String> entityId = GeneratedColumn<String>(
-      'entity_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _operationMeta =
-      const VerificationMeta('operation');
-  @override
-  late final GeneratedColumn<String> operation = GeneratedColumn<String>(
-      'operation', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _payloadMeta =
-      const VerificationMeta('payload');
-  @override
-  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
-      'payload', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _processedMeta =
-      const VerificationMeta('processed');
-  @override
-  late final GeneratedColumn<bool> processed = GeneratedColumn<bool>(
-      'processed', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("processed" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  @override
-  List<GeneratedColumn> get $columns =>
-      [id, entityType, entityId, operation, payload, processed, createdAt];
+  List<GeneratedColumn> get $columns => [id, nextLocalRev];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'sync_queue';
+  static const String $name = 'sync_meta';
   @override
-  VerificationContext validateIntegrity(Insertable<SyncQueueTableData> instance,
+  VerificationContext validateIntegrity(Insertable<SyncMetaTableData> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('entity_type')) {
+    if (data.containsKey('next_local_rev')) {
       context.handle(
-          _entityTypeMeta,
-          entityType.isAcceptableOrUnknown(
-              data['entity_type']!, _entityTypeMeta));
-    } else if (isInserting) {
-      context.missing(_entityTypeMeta);
-    }
-    if (data.containsKey('entity_id')) {
-      context.handle(_entityIdMeta,
-          entityId.isAcceptableOrUnknown(data['entity_id']!, _entityIdMeta));
-    } else if (isInserting) {
-      context.missing(_entityIdMeta);
-    }
-    if (data.containsKey('operation')) {
-      context.handle(_operationMeta,
-          operation.isAcceptableOrUnknown(data['operation']!, _operationMeta));
-    } else if (isInserting) {
-      context.missing(_operationMeta);
-    }
-    if (data.containsKey('payload')) {
-      context.handle(_payloadMeta,
-          payload.isAcceptableOrUnknown(data['payload']!, _payloadMeta));
-    } else if (isInserting) {
-      context.missing(_payloadMeta);
-    }
-    if (data.containsKey('processed')) {
-      context.handle(_processedMeta,
-          processed.isAcceptableOrUnknown(data['processed']!, _processedMeta));
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
+          _nextLocalRevMeta,
+          nextLocalRev.isAcceptableOrUnknown(
+              data['next_local_rev']!, _nextLocalRevMeta));
     }
     return context;
   }
@@ -2458,91 +2821,48 @@ class $SyncQueueTableTable extends SyncQueueTable
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  SyncQueueTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  SyncMetaTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return SyncQueueTableData(
+    return SyncMetaTableData(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      entityType: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}entity_type'])!,
-      entityId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}entity_id'])!,
-      operation: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}operation'])!,
-      payload: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}payload'])!,
-      processed: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}processed'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      nextLocalRev: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}next_local_rev'])!,
     );
   }
 
   @override
-  $SyncQueueTableTable createAlias(String alias) {
-    return $SyncQueueTableTable(attachedDatabase, alias);
+  $SyncMetaTableTable createAlias(String alias) {
+    return $SyncMetaTableTable(attachedDatabase, alias);
   }
 }
 
-class SyncQueueTableData extends DataClass
-    implements Insertable<SyncQueueTableData> {
+class SyncMetaTableData extends DataClass
+    implements Insertable<SyncMetaTableData> {
   final int id;
-
-  /// 'species' | 'plant' | 'entry'
-  final String entityType;
-  final String entityId;
-
-  /// 'create' | 'update' | 'delete'
-  final String operation;
-
-  /// JSON-encoded snapshot of the entity at the time of the write
-  final String payload;
-  final bool processed;
-  final DateTime createdAt;
-  const SyncQueueTableData(
-      {required this.id,
-      required this.entityType,
-      required this.entityId,
-      required this.operation,
-      required this.payload,
-      required this.processed,
-      required this.createdAt});
+  final int nextLocalRev;
+  const SyncMetaTableData({required this.id, required this.nextLocalRev});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['entity_type'] = Variable<String>(entityType);
-    map['entity_id'] = Variable<String>(entityId);
-    map['operation'] = Variable<String>(operation);
-    map['payload'] = Variable<String>(payload);
-    map['processed'] = Variable<bool>(processed);
-    map['created_at'] = Variable<DateTime>(createdAt);
+    map['next_local_rev'] = Variable<int>(nextLocalRev);
     return map;
   }
 
-  SyncQueueTableCompanion toCompanion(bool nullToAbsent) {
-    return SyncQueueTableCompanion(
+  SyncMetaTableCompanion toCompanion(bool nullToAbsent) {
+    return SyncMetaTableCompanion(
       id: Value(id),
-      entityType: Value(entityType),
-      entityId: Value(entityId),
-      operation: Value(operation),
-      payload: Value(payload),
-      processed: Value(processed),
-      createdAt: Value(createdAt),
+      nextLocalRev: Value(nextLocalRev),
     );
   }
 
-  factory SyncQueueTableData.fromJson(Map<String, dynamic> json,
+  factory SyncMetaTableData.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return SyncQueueTableData(
+    return SyncMetaTableData(
       id: serializer.fromJson<int>(json['id']),
-      entityType: serializer.fromJson<String>(json['entityType']),
-      entityId: serializer.fromJson<String>(json['entityId']),
-      operation: serializer.fromJson<String>(json['operation']),
-      payload: serializer.fromJson<String>(json['payload']),
-      processed: serializer.fromJson<bool>(json['processed']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      nextLocalRev: serializer.fromJson<int>(json['nextLocalRev']),
     );
   }
   @override
@@ -2550,141 +2870,67 @@ class SyncQueueTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'entityType': serializer.toJson<String>(entityType),
-      'entityId': serializer.toJson<String>(entityId),
-      'operation': serializer.toJson<String>(operation),
-      'payload': serializer.toJson<String>(payload),
-      'processed': serializer.toJson<bool>(processed),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'nextLocalRev': serializer.toJson<int>(nextLocalRev),
     };
   }
 
-  SyncQueueTableData copyWith(
-          {int? id,
-          String? entityType,
-          String? entityId,
-          String? operation,
-          String? payload,
-          bool? processed,
-          DateTime? createdAt}) =>
-      SyncQueueTableData(
+  SyncMetaTableData copyWith({int? id, int? nextLocalRev}) => SyncMetaTableData(
         id: id ?? this.id,
-        entityType: entityType ?? this.entityType,
-        entityId: entityId ?? this.entityId,
-        operation: operation ?? this.operation,
-        payload: payload ?? this.payload,
-        processed: processed ?? this.processed,
-        createdAt: createdAt ?? this.createdAt,
+        nextLocalRev: nextLocalRev ?? this.nextLocalRev,
       );
-  SyncQueueTableData copyWithCompanion(SyncQueueTableCompanion data) {
-    return SyncQueueTableData(
+  SyncMetaTableData copyWithCompanion(SyncMetaTableCompanion data) {
+    return SyncMetaTableData(
       id: data.id.present ? data.id.value : this.id,
-      entityType:
-          data.entityType.present ? data.entityType.value : this.entityType,
-      entityId: data.entityId.present ? data.entityId.value : this.entityId,
-      operation: data.operation.present ? data.operation.value : this.operation,
-      payload: data.payload.present ? data.payload.value : this.payload,
-      processed: data.processed.present ? data.processed.value : this.processed,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      nextLocalRev: data.nextLocalRev.present
+          ? data.nextLocalRev.value
+          : this.nextLocalRev,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('SyncQueueTableData(')
+    return (StringBuffer('SyncMetaTableData(')
           ..write('id: $id, ')
-          ..write('entityType: $entityType, ')
-          ..write('entityId: $entityId, ')
-          ..write('operation: $operation, ')
-          ..write('payload: $payload, ')
-          ..write('processed: $processed, ')
-          ..write('createdAt: $createdAt')
+          ..write('nextLocalRev: $nextLocalRev')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, entityType, entityId, operation, payload, processed, createdAt);
+  int get hashCode => Object.hash(id, nextLocalRev);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is SyncQueueTableData &&
+      (other is SyncMetaTableData &&
           other.id == this.id &&
-          other.entityType == this.entityType &&
-          other.entityId == this.entityId &&
-          other.operation == this.operation &&
-          other.payload == this.payload &&
-          other.processed == this.processed &&
-          other.createdAt == this.createdAt);
+          other.nextLocalRev == this.nextLocalRev);
 }
 
-class SyncQueueTableCompanion extends UpdateCompanion<SyncQueueTableData> {
+class SyncMetaTableCompanion extends UpdateCompanion<SyncMetaTableData> {
   final Value<int> id;
-  final Value<String> entityType;
-  final Value<String> entityId;
-  final Value<String> operation;
-  final Value<String> payload;
-  final Value<bool> processed;
-  final Value<DateTime> createdAt;
-  const SyncQueueTableCompanion({
+  final Value<int> nextLocalRev;
+  const SyncMetaTableCompanion({
     this.id = const Value.absent(),
-    this.entityType = const Value.absent(),
-    this.entityId = const Value.absent(),
-    this.operation = const Value.absent(),
-    this.payload = const Value.absent(),
-    this.processed = const Value.absent(),
-    this.createdAt = const Value.absent(),
+    this.nextLocalRev = const Value.absent(),
   });
-  SyncQueueTableCompanion.insert({
+  SyncMetaTableCompanion.insert({
     this.id = const Value.absent(),
-    required String entityType,
-    required String entityId,
-    required String operation,
-    required String payload,
-    this.processed = const Value.absent(),
-    required DateTime createdAt,
-  })  : entityType = Value(entityType),
-        entityId = Value(entityId),
-        operation = Value(operation),
-        payload = Value(payload),
-        createdAt = Value(createdAt);
-  static Insertable<SyncQueueTableData> custom({
+    this.nextLocalRev = const Value.absent(),
+  });
+  static Insertable<SyncMetaTableData> custom({
     Expression<int>? id,
-    Expression<String>? entityType,
-    Expression<String>? entityId,
-    Expression<String>? operation,
-    Expression<String>? payload,
-    Expression<bool>? processed,
-    Expression<DateTime>? createdAt,
+    Expression<int>? nextLocalRev,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (entityType != null) 'entity_type': entityType,
-      if (entityId != null) 'entity_id': entityId,
-      if (operation != null) 'operation': operation,
-      if (payload != null) 'payload': payload,
-      if (processed != null) 'processed': processed,
-      if (createdAt != null) 'created_at': createdAt,
+      if (nextLocalRev != null) 'next_local_rev': nextLocalRev,
     });
   }
 
-  SyncQueueTableCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? entityType,
-      Value<String>? entityId,
-      Value<String>? operation,
-      Value<String>? payload,
-      Value<bool>? processed,
-      Value<DateTime>? createdAt}) {
-    return SyncQueueTableCompanion(
+  SyncMetaTableCompanion copyWith({Value<int>? id, Value<int>? nextLocalRev}) {
+    return SyncMetaTableCompanion(
       id: id ?? this.id,
-      entityType: entityType ?? this.entityType,
-      entityId: entityId ?? this.entityId,
-      operation: operation ?? this.operation,
-      payload: payload ?? this.payload,
-      processed: processed ?? this.processed,
-      createdAt: createdAt ?? this.createdAt,
+      nextLocalRev: nextLocalRev ?? this.nextLocalRev,
     );
   }
 
@@ -2694,37 +2940,250 @@ class SyncQueueTableCompanion extends UpdateCompanion<SyncQueueTableData> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (entityType.present) {
-      map['entity_type'] = Variable<String>(entityType.value);
-    }
-    if (entityId.present) {
-      map['entity_id'] = Variable<String>(entityId.value);
-    }
-    if (operation.present) {
-      map['operation'] = Variable<String>(operation.value);
-    }
-    if (payload.present) {
-      map['payload'] = Variable<String>(payload.value);
-    }
-    if (processed.present) {
-      map['processed'] = Variable<bool>(processed.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+    if (nextLocalRev.present) {
+      map['next_local_rev'] = Variable<int>(nextLocalRev.value);
     }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('SyncQueueTableCompanion(')
+    return (StringBuffer('SyncMetaTableCompanion(')
           ..write('id: $id, ')
-          ..write('entityType: $entityType, ')
-          ..write('entityId: $entityId, ')
-          ..write('operation: $operation, ')
-          ..write('payload: $payload, ')
-          ..write('processed: $processed, ')
-          ..write('createdAt: $createdAt')
+          ..write('nextLocalRev: $nextLocalRev')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SyncCursorsTableTable extends SyncCursorsTable
+    with TableInfo<$SyncCursorsTableTable, SyncCursorsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncCursorsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _peerIdMeta = const VerificationMeta('peerId');
+  @override
+  late final GeneratedColumn<String> peerId = GeneratedColumn<String>(
+      'peer_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _directionMeta =
+      const VerificationMeta('direction');
+  @override
+  late final GeneratedColumn<String> direction = GeneratedColumn<String>(
+      'direction', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _cursorMeta = const VerificationMeta('cursor');
+  @override
+  late final GeneratedColumn<int> cursor = GeneratedColumn<int>(
+      'cursor', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  @override
+  List<GeneratedColumn> get $columns => [peerId, direction, cursor];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_cursors';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<SyncCursorsTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('peer_id')) {
+      context.handle(_peerIdMeta,
+          peerId.isAcceptableOrUnknown(data['peer_id']!, _peerIdMeta));
+    } else if (isInserting) {
+      context.missing(_peerIdMeta);
+    }
+    if (data.containsKey('direction')) {
+      context.handle(_directionMeta,
+          direction.isAcceptableOrUnknown(data['direction']!, _directionMeta));
+    } else if (isInserting) {
+      context.missing(_directionMeta);
+    }
+    if (data.containsKey('cursor')) {
+      context.handle(_cursorMeta,
+          cursor.isAcceptableOrUnknown(data['cursor']!, _cursorMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {peerId, direction};
+  @override
+  SyncCursorsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncCursorsTableData(
+      peerId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}peer_id'])!,
+      direction: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}direction'])!,
+      cursor: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}cursor'])!,
+    );
+  }
+
+  @override
+  $SyncCursorsTableTable createAlias(String alias) {
+    return $SyncCursorsTableTable(attachedDatabase, alias);
+  }
+}
+
+class SyncCursorsTableData extends DataClass
+    implements Insertable<SyncCursorsTableData> {
+  final String peerId;
+
+  /// 'pull' | 'push'
+  final String direction;
+  final int cursor;
+  const SyncCursorsTableData(
+      {required this.peerId, required this.direction, required this.cursor});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['peer_id'] = Variable<String>(peerId);
+    map['direction'] = Variable<String>(direction);
+    map['cursor'] = Variable<int>(cursor);
+    return map;
+  }
+
+  SyncCursorsTableCompanion toCompanion(bool nullToAbsent) {
+    return SyncCursorsTableCompanion(
+      peerId: Value(peerId),
+      direction: Value(direction),
+      cursor: Value(cursor),
+    );
+  }
+
+  factory SyncCursorsTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncCursorsTableData(
+      peerId: serializer.fromJson<String>(json['peerId']),
+      direction: serializer.fromJson<String>(json['direction']),
+      cursor: serializer.fromJson<int>(json['cursor']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'peerId': serializer.toJson<String>(peerId),
+      'direction': serializer.toJson<String>(direction),
+      'cursor': serializer.toJson<int>(cursor),
+    };
+  }
+
+  SyncCursorsTableData copyWith(
+          {String? peerId, String? direction, int? cursor}) =>
+      SyncCursorsTableData(
+        peerId: peerId ?? this.peerId,
+        direction: direction ?? this.direction,
+        cursor: cursor ?? this.cursor,
+      );
+  SyncCursorsTableData copyWithCompanion(SyncCursorsTableCompanion data) {
+    return SyncCursorsTableData(
+      peerId: data.peerId.present ? data.peerId.value : this.peerId,
+      direction: data.direction.present ? data.direction.value : this.direction,
+      cursor: data.cursor.present ? data.cursor.value : this.cursor,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncCursorsTableData(')
+          ..write('peerId: $peerId, ')
+          ..write('direction: $direction, ')
+          ..write('cursor: $cursor')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(peerId, direction, cursor);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncCursorsTableData &&
+          other.peerId == this.peerId &&
+          other.direction == this.direction &&
+          other.cursor == this.cursor);
+}
+
+class SyncCursorsTableCompanion extends UpdateCompanion<SyncCursorsTableData> {
+  final Value<String> peerId;
+  final Value<String> direction;
+  final Value<int> cursor;
+  final Value<int> rowid;
+  const SyncCursorsTableCompanion({
+    this.peerId = const Value.absent(),
+    this.direction = const Value.absent(),
+    this.cursor = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncCursorsTableCompanion.insert({
+    required String peerId,
+    required String direction,
+    this.cursor = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : peerId = Value(peerId),
+        direction = Value(direction);
+  static Insertable<SyncCursorsTableData> custom({
+    Expression<String>? peerId,
+    Expression<String>? direction,
+    Expression<int>? cursor,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (peerId != null) 'peer_id': peerId,
+      if (direction != null) 'direction': direction,
+      if (cursor != null) 'cursor': cursor,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncCursorsTableCompanion copyWith(
+      {Value<String>? peerId,
+      Value<String>? direction,
+      Value<int>? cursor,
+      Value<int>? rowid}) {
+    return SyncCursorsTableCompanion(
+      peerId: peerId ?? this.peerId,
+      direction: direction ?? this.direction,
+      cursor: cursor ?? this.cursor,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (peerId.present) {
+      map['peer_id'] = Variable<String>(peerId.value);
+    }
+    if (direction.present) {
+      map['direction'] = Variable<String>(direction.value);
+    }
+    if (cursor.present) {
+      map['cursor'] = Variable<int>(cursor.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncCursorsTableCompanion(')
+          ..write('peerId: $peerId, ')
+          ..write('direction: $direction, ')
+          ..write('cursor: $cursor, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -2738,7 +3197,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocationsTableTable locationsTable = $LocationsTableTable(this);
   late final $PlantsTableTable plantsTable = $PlantsTableTable(this);
   late final $EntriesTableTable entriesTable = $EntriesTableTable(this);
-  late final $SyncQueueTableTable syncQueueTable = $SyncQueueTableTable(this);
+  late final $SyncMetaTableTable syncMetaTable = $SyncMetaTableTable(this);
+  late final $SyncCursorsTableTable syncCursorsTable =
+      $SyncCursorsTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2749,7 +3210,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         locationsTable,
         plantsTable,
         entriesTable,
-        syncQueueTable
+        syncMetaTable,
+        syncCursorsTable
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -2779,8 +3241,10 @@ typedef $$SpeciesTableTableCreateCompanionBuilder = SpeciesTableCompanion
   required String popularName,
   Value<int?> defaultIrrigationFrequencyDays,
   required List<String> recommendedSoilTypes,
-  Value<SyncStatus> syncStatus,
   required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
   Value<int> rowid,
 });
 typedef $$SpeciesTableTableUpdateCompanionBuilder = SpeciesTableCompanion
@@ -2790,8 +3254,10 @@ typedef $$SpeciesTableTableUpdateCompanionBuilder = SpeciesTableCompanion
   Value<String> popularName,
   Value<int?> defaultIrrigationFrequencyDays,
   Value<List<String>> recommendedSoilTypes,
-  Value<SyncStatus> syncStatus,
   Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
   Value<int> rowid,
 });
 
@@ -2842,13 +3308,17 @@ class $$SpeciesTableTableFilterComposer
           column: $table.recommendedSoilTypes,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, String>
-      get syncStatus => $composableBuilder(
-          column: $table.syncStatus,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
-
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnFilters(column));
 
   Expression<bool> plantsTableRefs(
       Expression<bool> Function($$PlantsTableTableFilterComposer f) f) {
@@ -2899,11 +3369,17 @@ class $$SpeciesTableTableOrderingComposer
       column: $table.recommendedSoilTypes,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get syncStatus => $composableBuilder(
-      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnOrderings(column));
 }
 
 class $$SpeciesTableTableAnnotationComposer
@@ -2932,12 +3408,17 @@ class $$SpeciesTableTableAnnotationComposer
       get recommendedSoilTypes => $composableBuilder(
           column: $table.recommendedSoilTypes, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<SyncStatus, String> get syncStatus =>
-      $composableBuilder(
-          column: $table.syncStatus, builder: (column) => column);
-
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get localRev =>
+      $composableBuilder(column: $table.localRev, builder: (column) => column);
 
   Expression<T> plantsTableRefs<T extends Object>(
       Expression<T> Function($$PlantsTableTableAnnotationComposer a) f) {
@@ -2989,8 +3470,10 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             Value<String> popularName = const Value.absent(),
             Value<int?> defaultIrrigationFrequencyDays = const Value.absent(),
             Value<List<String>> recommendedSoilTypes = const Value.absent(),
-            Value<SyncStatus> syncStatus = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               SpeciesTableCompanion(
@@ -2999,8 +3482,10 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             popularName: popularName,
             defaultIrrigationFrequencyDays: defaultIrrigationFrequencyDays,
             recommendedSoilTypes: recommendedSoilTypes,
-            syncStatus: syncStatus,
             createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -3009,8 +3494,10 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             required String popularName,
             Value<int?> defaultIrrigationFrequencyDays = const Value.absent(),
             required List<String> recommendedSoilTypes,
-            Value<SyncStatus> syncStatus = const Value.absent(),
             required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               SpeciesTableCompanion.insert(
@@ -3019,8 +3506,10 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             popularName: popularName,
             defaultIrrigationFrequencyDays: defaultIrrigationFrequencyDays,
             recommendedSoilTypes: recommendedSoilTypes,
-            syncStatus: syncStatus,
             createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -3075,7 +3564,10 @@ typedef $$SoilsTableTableCreateCompanionBuilder = SoilsTableCompanion Function({
   Value<String?> imagePath,
   Value<String?> imageSource,
   required DateTime createdAt,
-  Value<SyncStatus> syncStatus,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
+  Value<bool> isSeeded,
   Value<int> rowid,
 });
 typedef $$SoilsTableTableUpdateCompanionBuilder = SoilsTableCompanion Function({
@@ -3085,7 +3577,10 @@ typedef $$SoilsTableTableUpdateCompanionBuilder = SoilsTableCompanion Function({
   Value<String?> imagePath,
   Value<String?> imageSource,
   Value<DateTime> createdAt,
-  Value<SyncStatus> syncStatus,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
+  Value<bool> isSeeded,
   Value<int> rowid,
 });
 
@@ -3135,10 +3630,17 @@ class $$SoilsTableTableFilterComposer
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
-  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, String>
-      get syncStatus => $composableBuilder(
-          column: $table.syncStatus,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isSeeded => $composableBuilder(
+      column: $table.isSeeded, builder: (column) => ColumnFilters(column));
 
   Expression<bool> plantsTableRefs(
       Expression<bool> Function($$PlantsTableTableFilterComposer f) f) {
@@ -3189,8 +3691,17 @@ class $$SoilsTableTableOrderingComposer
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get syncStatus => $composableBuilder(
-      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isSeeded => $composableBuilder(
+      column: $table.isSeeded, builder: (column) => ColumnOrderings(column));
 }
 
 class $$SoilsTableTableAnnotationComposer
@@ -3220,9 +3731,17 @@ class $$SoilsTableTableAnnotationComposer
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<SyncStatus, String> get syncStatus =>
-      $composableBuilder(
-          column: $table.syncStatus, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get localRev =>
+      $composableBuilder(column: $table.localRev, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSeeded =>
+      $composableBuilder(column: $table.isSeeded, builder: (column) => column);
 
   Expression<T> plantsTableRefs<T extends Object>(
       Expression<T> Function($$PlantsTableTableAnnotationComposer a) f) {
@@ -3275,7 +3794,10 @@ class $$SoilsTableTableTableManager extends RootTableManager<
             Value<String?> imagePath = const Value.absent(),
             Value<String?> imageSource = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
-            Value<SyncStatus> syncStatus = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
+            Value<bool> isSeeded = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               SoilsTableCompanion(
@@ -3285,7 +3807,10 @@ class $$SoilsTableTableTableManager extends RootTableManager<
             imagePath: imagePath,
             imageSource: imageSource,
             createdAt: createdAt,
-            syncStatus: syncStatus,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
+            isSeeded: isSeeded,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -3295,7 +3820,10 @@ class $$SoilsTableTableTableManager extends RootTableManager<
             Value<String?> imagePath = const Value.absent(),
             Value<String?> imageSource = const Value.absent(),
             required DateTime createdAt,
-            Value<SyncStatus> syncStatus = const Value.absent(),
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
+            Value<bool> isSeeded = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               SoilsTableCompanion.insert(
@@ -3305,7 +3833,10 @@ class $$SoilsTableTableTableManager extends RootTableManager<
             imagePath: imagePath,
             imageSource: imageSource,
             createdAt: createdAt,
-            syncStatus: syncStatus,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
+            isSeeded: isSeeded,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -3361,7 +3892,9 @@ typedef $$LocationsTableTableCreateCompanionBuilder = LocationsTableCompanion
   Value<double?> latitude,
   Value<double?> longitude,
   required DateTime createdAt,
-  Value<SyncStatus> syncStatus,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
   Value<int> rowid,
 });
 typedef $$LocationsTableTableUpdateCompanionBuilder = LocationsTableCompanion
@@ -3372,7 +3905,9 @@ typedef $$LocationsTableTableUpdateCompanionBuilder = LocationsTableCompanion
   Value<double?> latitude,
   Value<double?> longitude,
   Value<DateTime> createdAt,
-  Value<SyncStatus> syncStatus,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
   Value<int> rowid,
 });
 
@@ -3423,10 +3958,14 @@ class $$LocationsTableTableFilterComposer
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
-  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, String>
-      get syncStatus => $composableBuilder(
-          column: $table.syncStatus,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnFilters(column));
 
   Expression<bool> plantsTableRefs(
       Expression<bool> Function($$PlantsTableTableFilterComposer f) f) {
@@ -3477,8 +4016,14 @@ class $$LocationsTableTableOrderingComposer
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get syncStatus => $composableBuilder(
-      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnOrderings(column));
 }
 
 class $$LocationsTableTableAnnotationComposer
@@ -3508,9 +4053,14 @@ class $$LocationsTableTableAnnotationComposer
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<SyncStatus, String> get syncStatus =>
-      $composableBuilder(
-          column: $table.syncStatus, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get localRev =>
+      $composableBuilder(column: $table.localRev, builder: (column) => column);
 
   Expression<T> plantsTableRefs<T extends Object>(
       Expression<T> Function($$PlantsTableTableAnnotationComposer a) f) {
@@ -3564,7 +4114,9 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             Value<double?> latitude = const Value.absent(),
             Value<double?> longitude = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
-            Value<SyncStatus> syncStatus = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               LocationsTableCompanion(
@@ -3574,7 +4126,9 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             latitude: latitude,
             longitude: longitude,
             createdAt: createdAt,
-            syncStatus: syncStatus,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -3584,7 +4138,9 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             Value<double?> latitude = const Value.absent(),
             Value<double?> longitude = const Value.absent(),
             required DateTime createdAt,
-            Value<SyncStatus> syncStatus = const Value.absent(),
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               LocationsTableCompanion.insert(
@@ -3594,7 +4150,9 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             latitude: latitude,
             longitude: longitude,
             createdAt: createdAt,
-            syncStatus: syncStatus,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -3654,7 +4212,9 @@ typedef $$PlantsTableTableCreateCompanionBuilder = PlantsTableCompanion
   Value<String?> locationId,
   Value<DateTime?> lastIrrigatedAt,
   required DateTime createdAt,
-  Value<SyncStatus> syncStatus,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
   Value<int> rowid,
 });
 typedef $$PlantsTableTableUpdateCompanionBuilder = PlantsTableCompanion
@@ -3669,7 +4229,9 @@ typedef $$PlantsTableTableUpdateCompanionBuilder = PlantsTableCompanion
   Value<String?> locationId,
   Value<DateTime?> lastIrrigatedAt,
   Value<DateTime> createdAt,
-  Value<SyncStatus> syncStatus,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
   Value<int> rowid,
 });
 
@@ -3767,10 +4329,14 @@ class $$PlantsTableTableFilterComposer
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
-  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, String>
-      get syncStatus => $composableBuilder(
-          column: $table.syncStatus,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnFilters(column));
 
   $$SpeciesTableTableFilterComposer get speciesId {
     final $$SpeciesTableTableFilterComposer composer = $composerBuilder(
@@ -3887,8 +4453,14 @@ class $$PlantsTableTableOrderingComposer
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get syncStatus => $composableBuilder(
-      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnOrderings(column));
 
   $$SpeciesTableTableOrderingComposer get speciesId {
     final $$SpeciesTableTableOrderingComposer composer = $composerBuilder(
@@ -3981,9 +4553,14 @@ class $$PlantsTableTableAnnotationComposer
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<SyncStatus, String> get syncStatus =>
-      $composableBuilder(
-          column: $table.syncStatus, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get localRev =>
+      $composableBuilder(column: $table.localRev, builder: (column) => column);
 
   $$SpeciesTableTableAnnotationComposer get speciesId {
     final $$SpeciesTableTableAnnotationComposer composer = $composerBuilder(
@@ -4104,7 +4681,9 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<String?> locationId = const Value.absent(),
             Value<DateTime?> lastIrrigatedAt = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
-            Value<SyncStatus> syncStatus = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               PlantsTableCompanion(
@@ -4118,7 +4697,9 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             locationId: locationId,
             lastIrrigatedAt: lastIrrigatedAt,
             createdAt: createdAt,
-            syncStatus: syncStatus,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -4132,7 +4713,9 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<String?> locationId = const Value.absent(),
             Value<DateTime?> lastIrrigatedAt = const Value.absent(),
             required DateTime createdAt,
-            Value<SyncStatus> syncStatus = const Value.absent(),
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               PlantsTableCompanion.insert(
@@ -4146,7 +4729,9 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             locationId: locationId,
             lastIrrigatedAt: lastIrrigatedAt,
             createdAt: createdAt,
-            syncStatus: syncStatus,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -4258,7 +4843,9 @@ typedef $$EntriesTableTableCreateCompanionBuilder = EntriesTableCompanion
   Value<double?> numericValue,
   Value<String?> extraData,
   required DateTime createdAt,
-  Value<SyncStatus> syncStatus,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
   Value<int> rowid,
 });
 typedef $$EntriesTableTableUpdateCompanionBuilder = EntriesTableCompanion
@@ -4272,7 +4859,9 @@ typedef $$EntriesTableTableUpdateCompanionBuilder = EntriesTableCompanion
   Value<double?> numericValue,
   Value<String?> extraData,
   Value<DateTime> createdAt,
-  Value<SyncStatus> syncStatus,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
   Value<int> rowid,
 });
 
@@ -4330,10 +4919,14 @@ class $$EntriesTableTableFilterComposer
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
-  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, String>
-      get syncStatus => $composableBuilder(
-          column: $table.syncStatus,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnFilters(column));
 
   $$PlantsTableTableFilterComposer get plantId {
     final $$PlantsTableTableFilterComposer composer = $composerBuilder(
@@ -4390,8 +4983,14 @@ class $$EntriesTableTableOrderingComposer
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get syncStatus => $composableBuilder(
-      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnOrderings(column));
 
   $$PlantsTableTableOrderingComposer get plantId {
     final $$PlantsTableTableOrderingComposer composer = $composerBuilder(
@@ -4447,9 +5046,14 @@ class $$EntriesTableTableAnnotationComposer
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<SyncStatus, String> get syncStatus =>
-      $composableBuilder(
-          column: $table.syncStatus, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get localRev =>
+      $composableBuilder(column: $table.localRev, builder: (column) => column);
 
   $$PlantsTableTableAnnotationComposer get plantId {
     final $$PlantsTableTableAnnotationComposer composer = $composerBuilder(
@@ -4504,7 +5108,9 @@ class $$EntriesTableTableTableManager extends RootTableManager<
             Value<double?> numericValue = const Value.absent(),
             Value<String?> extraData = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
-            Value<SyncStatus> syncStatus = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               EntriesTableCompanion(
@@ -4517,7 +5123,9 @@ class $$EntriesTableTableTableManager extends RootTableManager<
             numericValue: numericValue,
             extraData: extraData,
             createdAt: createdAt,
-            syncStatus: syncStatus,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -4530,7 +5138,9 @@ class $$EntriesTableTableTableManager extends RootTableManager<
             Value<double?> numericValue = const Value.absent(),
             Value<String?> extraData = const Value.absent(),
             required DateTime createdAt,
-            Value<SyncStatus> syncStatus = const Value.absent(),
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               EntriesTableCompanion.insert(
@@ -4543,7 +5153,9 @@ class $$EntriesTableTableTableManager extends RootTableManager<
             numericValue: numericValue,
             extraData: extraData,
             createdAt: createdAt,
-            syncStatus: syncStatus,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -4602,30 +5214,20 @@ typedef $$EntriesTableTableProcessedTableManager = ProcessedTableManager<
     (EntriesTableData, $$EntriesTableTableReferences),
     EntriesTableData,
     PrefetchHooks Function({bool plantId})>;
-typedef $$SyncQueueTableTableCreateCompanionBuilder = SyncQueueTableCompanion
+typedef $$SyncMetaTableTableCreateCompanionBuilder = SyncMetaTableCompanion
     Function({
   Value<int> id,
-  required String entityType,
-  required String entityId,
-  required String operation,
-  required String payload,
-  Value<bool> processed,
-  required DateTime createdAt,
+  Value<int> nextLocalRev,
 });
-typedef $$SyncQueueTableTableUpdateCompanionBuilder = SyncQueueTableCompanion
+typedef $$SyncMetaTableTableUpdateCompanionBuilder = SyncMetaTableCompanion
     Function({
   Value<int> id,
-  Value<String> entityType,
-  Value<String> entityId,
-  Value<String> operation,
-  Value<String> payload,
-  Value<bool> processed,
-  Value<DateTime> createdAt,
+  Value<int> nextLocalRev,
 });
 
-class $$SyncQueueTableTableFilterComposer
-    extends Composer<_$AppDatabase, $SyncQueueTableTable> {
-  $$SyncQueueTableTableFilterComposer({
+class $$SyncMetaTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncMetaTableTable> {
+  $$SyncMetaTableTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -4635,28 +5237,13 @@ class $$SyncQueueTableTableFilterComposer
   ColumnFilters<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get entityType => $composableBuilder(
-      column: $table.entityType, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get entityId => $composableBuilder(
-      column: $table.entityId, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get operation => $composableBuilder(
-      column: $table.operation, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get payload => $composableBuilder(
-      column: $table.payload, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<bool> get processed => $composableBuilder(
-      column: $table.processed, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get nextLocalRev => $composableBuilder(
+      column: $table.nextLocalRev, builder: (column) => ColumnFilters(column));
 }
 
-class $$SyncQueueTableTableOrderingComposer
-    extends Composer<_$AppDatabase, $SyncQueueTableTable> {
-  $$SyncQueueTableTableOrderingComposer({
+class $$SyncMetaTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncMetaTableTable> {
+  $$SyncMetaTableTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -4666,28 +5253,14 @@ class $$SyncQueueTableTableOrderingComposer
   ColumnOrderings<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get entityType => $composableBuilder(
-      column: $table.entityType, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get entityId => $composableBuilder(
-      column: $table.entityId, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get operation => $composableBuilder(
-      column: $table.operation, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get payload => $composableBuilder(
-      column: $table.payload, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<bool> get processed => $composableBuilder(
-      column: $table.processed, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get nextLocalRev => $composableBuilder(
+      column: $table.nextLocalRev,
+      builder: (column) => ColumnOrderings(column));
 }
 
-class $$SyncQueueTableTableAnnotationComposer
-    extends Composer<_$AppDatabase, $SyncQueueTableTable> {
-  $$SyncQueueTableTableAnnotationComposer({
+class $$SyncMetaTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncMetaTableTable> {
+  $$SyncMetaTableTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -4697,86 +5270,50 @@ class $$SyncQueueTableTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get entityType => $composableBuilder(
-      column: $table.entityType, builder: (column) => column);
-
-  GeneratedColumn<String> get entityId =>
-      $composableBuilder(column: $table.entityId, builder: (column) => column);
-
-  GeneratedColumn<String> get operation =>
-      $composableBuilder(column: $table.operation, builder: (column) => column);
-
-  GeneratedColumn<String> get payload =>
-      $composableBuilder(column: $table.payload, builder: (column) => column);
-
-  GeneratedColumn<bool> get processed =>
-      $composableBuilder(column: $table.processed, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<int> get nextLocalRev => $composableBuilder(
+      column: $table.nextLocalRev, builder: (column) => column);
 }
 
-class $$SyncQueueTableTableTableManager extends RootTableManager<
+class $$SyncMetaTableTableTableManager extends RootTableManager<
     _$AppDatabase,
-    $SyncQueueTableTable,
-    SyncQueueTableData,
-    $$SyncQueueTableTableFilterComposer,
-    $$SyncQueueTableTableOrderingComposer,
-    $$SyncQueueTableTableAnnotationComposer,
-    $$SyncQueueTableTableCreateCompanionBuilder,
-    $$SyncQueueTableTableUpdateCompanionBuilder,
+    $SyncMetaTableTable,
+    SyncMetaTableData,
+    $$SyncMetaTableTableFilterComposer,
+    $$SyncMetaTableTableOrderingComposer,
+    $$SyncMetaTableTableAnnotationComposer,
+    $$SyncMetaTableTableCreateCompanionBuilder,
+    $$SyncMetaTableTableUpdateCompanionBuilder,
     (
-      SyncQueueTableData,
-      BaseReferences<_$AppDatabase, $SyncQueueTableTable, SyncQueueTableData>
+      SyncMetaTableData,
+      BaseReferences<_$AppDatabase, $SyncMetaTableTable, SyncMetaTableData>
     ),
-    SyncQueueTableData,
+    SyncMetaTableData,
     PrefetchHooks Function()> {
-  $$SyncQueueTableTableTableManager(
-      _$AppDatabase db, $SyncQueueTableTable table)
+  $$SyncMetaTableTableTableManager(_$AppDatabase db, $SyncMetaTableTable table)
       : super(TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$SyncQueueTableTableFilterComposer($db: db, $table: table),
+              $$SyncMetaTableTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$SyncQueueTableTableOrderingComposer($db: db, $table: table),
+              $$SyncMetaTableTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$SyncQueueTableTableAnnotationComposer($db: db, $table: table),
+              $$SyncMetaTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            Value<String> entityType = const Value.absent(),
-            Value<String> entityId = const Value.absent(),
-            Value<String> operation = const Value.absent(),
-            Value<String> payload = const Value.absent(),
-            Value<bool> processed = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> nextLocalRev = const Value.absent(),
           }) =>
-              SyncQueueTableCompanion(
+              SyncMetaTableCompanion(
             id: id,
-            entityType: entityType,
-            entityId: entityId,
-            operation: operation,
-            payload: payload,
-            processed: processed,
-            createdAt: createdAt,
+            nextLocalRev: nextLocalRev,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            required String entityType,
-            required String entityId,
-            required String operation,
-            required String payload,
-            Value<bool> processed = const Value.absent(),
-            required DateTime createdAt,
+            Value<int> nextLocalRev = const Value.absent(),
           }) =>
-              SyncQueueTableCompanion.insert(
+              SyncMetaTableCompanion.insert(
             id: id,
-            entityType: entityType,
-            entityId: entityId,
-            operation: operation,
-            payload: payload,
-            processed: processed,
-            createdAt: createdAt,
+            nextLocalRev: nextLocalRev,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -4785,20 +5322,166 @@ class $$SyncQueueTableTableTableManager extends RootTableManager<
         ));
 }
 
-typedef $$SyncQueueTableTableProcessedTableManager = ProcessedTableManager<
+typedef $$SyncMetaTableTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
-    $SyncQueueTableTable,
-    SyncQueueTableData,
-    $$SyncQueueTableTableFilterComposer,
-    $$SyncQueueTableTableOrderingComposer,
-    $$SyncQueueTableTableAnnotationComposer,
-    $$SyncQueueTableTableCreateCompanionBuilder,
-    $$SyncQueueTableTableUpdateCompanionBuilder,
+    $SyncMetaTableTable,
+    SyncMetaTableData,
+    $$SyncMetaTableTableFilterComposer,
+    $$SyncMetaTableTableOrderingComposer,
+    $$SyncMetaTableTableAnnotationComposer,
+    $$SyncMetaTableTableCreateCompanionBuilder,
+    $$SyncMetaTableTableUpdateCompanionBuilder,
     (
-      SyncQueueTableData,
-      BaseReferences<_$AppDatabase, $SyncQueueTableTable, SyncQueueTableData>
+      SyncMetaTableData,
+      BaseReferences<_$AppDatabase, $SyncMetaTableTable, SyncMetaTableData>
     ),
-    SyncQueueTableData,
+    SyncMetaTableData,
+    PrefetchHooks Function()>;
+typedef $$SyncCursorsTableTableCreateCompanionBuilder
+    = SyncCursorsTableCompanion Function({
+  required String peerId,
+  required String direction,
+  Value<int> cursor,
+  Value<int> rowid,
+});
+typedef $$SyncCursorsTableTableUpdateCompanionBuilder
+    = SyncCursorsTableCompanion Function({
+  Value<String> peerId,
+  Value<String> direction,
+  Value<int> cursor,
+  Value<int> rowid,
+});
+
+class $$SyncCursorsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncCursorsTableTable> {
+  $$SyncCursorsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get peerId => $composableBuilder(
+      column: $table.peerId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get direction => $composableBuilder(
+      column: $table.direction, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get cursor => $composableBuilder(
+      column: $table.cursor, builder: (column) => ColumnFilters(column));
+}
+
+class $$SyncCursorsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncCursorsTableTable> {
+  $$SyncCursorsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get peerId => $composableBuilder(
+      column: $table.peerId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get direction => $composableBuilder(
+      column: $table.direction, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get cursor => $composableBuilder(
+      column: $table.cursor, builder: (column) => ColumnOrderings(column));
+}
+
+class $$SyncCursorsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncCursorsTableTable> {
+  $$SyncCursorsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get peerId =>
+      $composableBuilder(column: $table.peerId, builder: (column) => column);
+
+  GeneratedColumn<String> get direction =>
+      $composableBuilder(column: $table.direction, builder: (column) => column);
+
+  GeneratedColumn<int> get cursor =>
+      $composableBuilder(column: $table.cursor, builder: (column) => column);
+}
+
+class $$SyncCursorsTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $SyncCursorsTableTable,
+    SyncCursorsTableData,
+    $$SyncCursorsTableTableFilterComposer,
+    $$SyncCursorsTableTableOrderingComposer,
+    $$SyncCursorsTableTableAnnotationComposer,
+    $$SyncCursorsTableTableCreateCompanionBuilder,
+    $$SyncCursorsTableTableUpdateCompanionBuilder,
+    (
+      SyncCursorsTableData,
+      BaseReferences<_$AppDatabase, $SyncCursorsTableTable,
+          SyncCursorsTableData>
+    ),
+    SyncCursorsTableData,
+    PrefetchHooks Function()> {
+  $$SyncCursorsTableTableTableManager(
+      _$AppDatabase db, $SyncCursorsTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncCursorsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncCursorsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncCursorsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> peerId = const Value.absent(),
+            Value<String> direction = const Value.absent(),
+            Value<int> cursor = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SyncCursorsTableCompanion(
+            peerId: peerId,
+            direction: direction,
+            cursor: cursor,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String peerId,
+            required String direction,
+            Value<int> cursor = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SyncCursorsTableCompanion.insert(
+            peerId: peerId,
+            direction: direction,
+            cursor: cursor,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$SyncCursorsTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $SyncCursorsTableTable,
+    SyncCursorsTableData,
+    $$SyncCursorsTableTableFilterComposer,
+    $$SyncCursorsTableTableOrderingComposer,
+    $$SyncCursorsTableTableAnnotationComposer,
+    $$SyncCursorsTableTableCreateCompanionBuilder,
+    $$SyncCursorsTableTableUpdateCompanionBuilder,
+    (
+      SyncCursorsTableData,
+      BaseReferences<_$AppDatabase, $SyncCursorsTableTable,
+          SyncCursorsTableData>
+    ),
+    SyncCursorsTableData,
     PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
@@ -4814,6 +5497,8 @@ class $AppDatabaseManager {
       $$PlantsTableTableTableManager(_db, _db.plantsTable);
   $$EntriesTableTableTableManager get entriesTable =>
       $$EntriesTableTableTableManager(_db, _db.entriesTable);
-  $$SyncQueueTableTableTableManager get syncQueueTable =>
-      $$SyncQueueTableTableTableManager(_db, _db.syncQueueTable);
+  $$SyncMetaTableTableTableManager get syncMetaTable =>
+      $$SyncMetaTableTableTableManager(_db, _db.syncMetaTable);
+  $$SyncCursorsTableTableTableManager get syncCursorsTable =>
+      $$SyncCursorsTableTableTableManager(_db, _db.syncCursorsTable);
 }

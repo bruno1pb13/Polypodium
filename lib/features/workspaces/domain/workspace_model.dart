@@ -11,7 +11,6 @@ class Workspace {
   final String? userEmail;
   final String? token;
   final String? deviceId;
-  final int cursor;
   final DateTime? lastSyncAt;
   final DateTime createdAt;
 
@@ -29,7 +28,6 @@ class Workspace {
     this.userEmail,
     this.token,
     this.deviceId,
-    this.cursor = 0,
     this.lastSyncAt,
     required this.createdAt,
     this.dbFileNameOverride,
@@ -51,7 +49,6 @@ class Workspace {
         token: const _Sentinel(),
         userEmail: const _Sentinel(),
         lastSyncAt: const _Sentinel(),
-        cursor: 0,
       );
 
   Workspace copyWith({
@@ -62,7 +59,6 @@ class Workspace {
     Object? userEmail = const _Sentinel(),
     Object? token = const _Sentinel(),
     Object? deviceId = const _Sentinel(),
-    int? cursor,
     Object? lastSyncAt = const _Sentinel(),
     DateTime? createdAt,
     Object? dbFileNameOverride = const _Sentinel(),
@@ -77,7 +73,6 @@ class Workspace {
           userEmail is _Sentinel ? this.userEmail : userEmail as String?,
       token: token is _Sentinel ? this.token : token as String?,
       deviceId: deviceId is _Sentinel ? this.deviceId : deviceId as String?,
-      cursor: cursor ?? this.cursor,
       lastSyncAt:
           lastSyncAt is _Sentinel ? this.lastSyncAt : lastSyncAt as DateTime?,
       createdAt: createdAt ?? this.createdAt,
@@ -95,7 +90,6 @@ class Workspace {
         'userEmail': userEmail,
         'token': token,
         'deviceId': deviceId,
-        'cursor': cursor,
         'lastSyncAt': lastSyncAt?.toIso8601String(),
         'createdAt': createdAt.toIso8601String(),
         'dbFileNameOverride': dbFileNameOverride,
@@ -109,7 +103,6 @@ class Workspace {
         userEmail: json['userEmail'] as String?,
         token: json['token'] as String?,
         deviceId: json['deviceId'] as String?,
-        cursor: json['cursor'] as int? ?? 0,
         lastSyncAt: json['lastSyncAt'] != null
             ? DateTime.tryParse(json['lastSyncAt'] as String)
             : null,

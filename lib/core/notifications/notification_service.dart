@@ -179,7 +179,6 @@ class NotificationService implements INotificationService {
           locationId: row.locationId,
           lastIrrigatedAt: row.lastIrrigatedAt,
           createdAt: row.createdAt,
-          syncStatus: row.syncStatus,
         );
         final species = SpeciesModel(
           id: speciesRow.id,
@@ -188,7 +187,6 @@ class NotificationService implements INotificationService {
           defaultIrrigationFrequencyDays:
               speciesRow.defaultIrrigationFrequencyDays,
           recommendedSoilIds: speciesRow.recommendedSoilTypes,
-          syncStatus: speciesRow.syncStatus,
           createdAt: speciesRow.createdAt,
         );
 

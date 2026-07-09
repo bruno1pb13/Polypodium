@@ -1,7 +1,5 @@
 import 'package:drift/drift.dart';
 
-import '../../../core/database/converters.dart';
-
 class LocationsTable extends Table {
   @override
   String get tableName => 'locations';
@@ -12,10 +10,9 @@ class LocationsTable extends Table {
   RealColumn get latitude => real().nullable()();
   RealColumn get longitude => real().nullable()();
   DateTimeColumn get createdAt => dateTime()();
-
-  TextColumn get syncStatus => text()
-      .map(const SyncStatusConverter())
-      .withDefault(const Constant('pending'))();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+  IntColumn get localRev => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -182,8 +182,8 @@ Future<List<PlantWithSpecies>> plantsWithSpecies(Ref ref) async {
   final speciesById = {for (final s in species) s.id: s};
   final locationsById = {for (final l in locations) l.id: l};
 
-  // Pre-fetch entries sync status for all plants to avoid N+1 queries if possible,
-  // but for simplicity we'll fetch per plant for now as it's a small list.
+  // null when there's no server to compare against (local-only workspace).
+  final cursor = await ref.watch(pushCursorToServerProvider.future);
   final db = ref.watch(appDatabaseProvider);
 
   final results = <PlantWithSpecies>[];
@@ -191,26 +191,22 @@ Future<List<PlantWithSpecies>> plantsWithSpecies(Ref ref) async {
     if (!speciesById.containsKey(p.speciesId)) continue;
 
     final species = speciesById[p.speciesId]!;
-    
-    // Check if any entry for this plant is pending sync
-    final hasPendingEntries = await db.entriesDao.hasPendingSync(p.id);
-    
-    // Check if the location is pending sync
     final location = p.locationId != null ? locationsById[p.locationId] : null;
-    final locationPending = location?.syncStatus == SyncStatus.pending;
-    
-    // Determine overall sync status: if plant, species, location, or any entry is pending, overall is pending
-    final overallSyncStatus = (p.syncStatus == SyncStatus.pending || 
-                               species.syncStatus == SyncStatus.pending || 
-                               locationPending ||
-                               hasPendingEntries) 
-                               ? SyncStatus.pending 
-                               : SyncStatus.synced;
+
+    var isPendingSync = false;
+    if (cursor != null) {
+      final hasPendingEntries = await db.entriesDao.hasChangesSince(p.id, cursor);
+      isPendingSync = p.localRev > cursor ||
+          species.localRev > cursor ||
+          (location != null && location.localRev > cursor) ||
+          hasPendingEntries;
+    }
 
     results.add(PlantWithSpecies(
-      plant: p.copyWith(syncStatus: overallSyncStatus),
+      plant: p,
       species: species,
       location: location,
+      isPendingSync: isPendingSync,
     ));
   }
 
