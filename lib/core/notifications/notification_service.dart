@@ -105,9 +105,10 @@ class NotificationService implements INotificationService {
       return;
     }
 
-    // Linux does not support background daemons, so scheduled notifications
-    // are unavailable — they would be lost when the app closes anyway.
-    if (Platform.isLinux) return;
+    // flutter_local_notifications only implements scheduling on
+    // Android, iOS and macOS; calling zonedSchedule() elsewhere throws
+    // UnimplementedError.
+    if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) return;
 
     final scheduledDate =
         _nextIrrigationTime(plant.lastIrrigatedAt, frequencyDays);
