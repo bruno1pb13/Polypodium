@@ -8,6 +8,7 @@ class SettingsRepository {
   static const _transparencyEnabledKey = 'transparency_enabled';
   static const _themeModeKey = 'theme_mode';
   static const _syncServerUrlKey = 'sync_server_url';
+  static const _autoSyncEnabledKey = 'auto_sync_enabled';
 
   final SharedPreferences _prefs;
 
@@ -45,6 +46,12 @@ class SettingsRepository {
     } else {
       await _prefs.setString(_syncServerUrlKey, url);
     }
+  }
+
+  bool isAutoSyncEnabled() => _prefs.getBool(_autoSyncEnabledKey) ?? true;
+
+  Future<void> setAutoSyncEnabled(bool enabled) async {
+    await _prefs.setBool(_autoSyncEnabledKey, enabled);
   }
 
   Future<void> rescheduleAllNotifications(Ref ref) async {
