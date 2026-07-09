@@ -49,13 +49,3 @@ class EntryTypeConverter extends TypeConverter<EntryType, String> {
   @override
   String toSql(EntryType value) => value.name;
 }
-
-class SyncStatusConverter extends TypeConverter<SyncStatus, String> {
-  const SyncStatusConverter();
-
-  @override
-  SyncStatus fromSql(String fromDb) => SyncStatus.values.byName(fromDb);
-
-  @override
-  String toSql(SyncStatus value) => value.name;
-}

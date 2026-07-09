@@ -1,7 +1,3 @@
-import 'dart:convert';
-
-import '../../../core/enums.dart';
-
 class LocationModel {
   final String id;
   final String name;
@@ -9,7 +5,9 @@ class LocationModel {
   final double? latitude;
   final double? longitude;
   final DateTime createdAt;
-  final SyncStatus syncStatus;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int localRev;
 
   const LocationModel({
     required this.id,
@@ -18,8 +16,10 @@ class LocationModel {
     this.latitude,
     this.longitude,
     required this.createdAt,
-    this.syncStatus = SyncStatus.pending,
-  });
+    DateTime? updatedAt,
+    this.deletedAt,
+    this.localRev = 0,
+  }) : updatedAt = updatedAt ?? createdAt;
 
   LocationModel copyWith({
     String? id,
@@ -28,7 +28,9 @@ class LocationModel {
     Object? latitude = _sentinel,
     Object? longitude = _sentinel,
     DateTime? createdAt,
-    SyncStatus? syncStatus,
+    DateTime? updatedAt,
+    Object? deletedAt = _sentinel,
+    int? localRev,
   }) =>
       LocationModel(
         id: id ?? this.id,
@@ -41,20 +43,10 @@ class LocationModel {
         longitude:
             longitude == _sentinel ? this.longitude : longitude as double?,
         createdAt: createdAt ?? this.createdAt,
-        syncStatus: syncStatus ?? this.syncStatus,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt == _sentinel ? this.deletedAt : deletedAt as DateTime?,
+        localRev: localRev ?? this.localRev,
       );
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'description': description,
-        'latitude': latitude,
-        'longitude': longitude,
-        'createdAt': createdAt.toIso8601String(),
-        'syncStatus': syncStatus.name,
-      };
-
-  String toJsonString() => jsonEncode(toJson());
 }
 
 const Object _sentinel = Object();

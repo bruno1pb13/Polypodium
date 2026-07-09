@@ -1,16 +1,13 @@
-import 'dart:convert';
-
-import '../../../core/enums.dart';
-
 class SpeciesModel {
   final String id;
   final String scientificName;
   final String popularName;
   final int? defaultIrrigationFrequencyDays;
   final List<String> recommendedSoilIds;
-  // TODO(sync): Used by the sync layer to determine pending changes
-  final SyncStatus syncStatus;
   final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int localRev;
 
   const SpeciesModel({
     required this.id,
@@ -18,9 +15,11 @@ class SpeciesModel {
     required this.popularName,
     required this.defaultIrrigationFrequencyDays,
     required this.recommendedSoilIds,
-    this.syncStatus = SyncStatus.pending,
     required this.createdAt,
-  });
+    DateTime? updatedAt,
+    this.deletedAt,
+    this.localRev = 0,
+  }) : updatedAt = updatedAt ?? createdAt;
 
   SpeciesModel copyWith({
     String? id,
@@ -28,8 +27,10 @@ class SpeciesModel {
     String? popularName,
     Object? defaultIrrigationFrequencyDays = _sentinel,
     List<String>? recommendedSoilIds,
-    SyncStatus? syncStatus,
     DateTime? createdAt,
+    DateTime? updatedAt,
+    Object? deletedAt = _sentinel,
+    int? localRev,
   }) =>
       SpeciesModel(
         id: id ?? this.id,
@@ -39,22 +40,11 @@ class SpeciesModel {
             ? this.defaultIrrigationFrequencyDays
             : defaultIrrigationFrequencyDays as int?,
         recommendedSoilIds: recommendedSoilIds ?? this.recommendedSoilIds,
-        syncStatus: syncStatus ?? this.syncStatus,
         createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt == _sentinel ? this.deletedAt : deletedAt as DateTime?,
+        localRev: localRev ?? this.localRev,
       );
-
-  // TODO(sync): Serialization used when enqueuing in sync_queue
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'scientificName': scientificName,
-        'popularName': popularName,
-        'defaultIrrigationFrequencyDays': defaultIrrigationFrequencyDays,
-        'recommendedSoilIds': recommendedSoilIds,
-        'syncStatus': syncStatus.name,
-        'createdAt': createdAt.toIso8601String(),
-      };
-
-  String toJsonString() => jsonEncode(toJson());
 }
 
 // Sentinel for nullable copyWith overrides

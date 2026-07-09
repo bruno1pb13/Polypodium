@@ -17,15 +17,18 @@ import '../../features/species/data/species_table.dart';
 import '../../features/soils/data/soils_dao.dart';
 import '../../features/soils/data/soils_table.dart';
 import 'converters.dart';
-import 'sync_queue_dao.dart';
-import 'sync_queue_table.dart';
+import 'sync_cursors_dao.dart';
+import 'sync_cursors_table.dart';
+import 'sync_meta_dao.dart';
+import 'sync_meta_table.dart';
 
 export '../../features/entries/data/entries_table.dart';
 export '../../features/locations/data/locations_table.dart';
 export '../../features/plants/data/plants_table.dart';
 export '../../features/soils/data/soils_table.dart';
 export '../../features/species/data/species_table.dart';
-export 'sync_queue_table.dart';
+export 'sync_cursors_table.dart';
+export 'sync_meta_table.dart';
 
 part 'app_database.g.dart';
 
@@ -34,9 +37,10 @@ part 'app_database.g.dart';
     SpeciesTable,
     PlantsTable,
     EntriesTable,
-    SyncQueueTable,
     LocationsTable,
-    SoilsTable
+    SoilsTable,
+    SyncMetaTable,
+    SyncCursorsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -45,117 +49,71 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
   late final EntriesDao entriesDao = EntriesDao(this);
-  late final SyncQueueDao syncQueueDao = SyncQueueDao(this);
   late final LocationsDao locationsDao = LocationsDao(this);
   late final SoilsDao soilsDao = SoilsDao(this);
+  late final SyncMetaDao syncMetaDao = SyncMetaDao(this);
+  late final SyncCursorsDao syncCursorsDao = SyncCursorsDao(this);
+
+  Future<void> _seedFresh() async {
+    await into(syncMetaTable).insertOnConflictUpdate(
+      SyncMetaTableCompanion.insert(
+          id: const Value(0), nextLocalRev: const Value(1)),
+    );
+    final now = DateTime.now();
+    for (final type in SoilType.values) {
+      await into(soilsTable).insertOnConflictUpdate(
+        SoilsTableCompanion.insert(
+          id: type.name,
+          name: type.label,
+          composition: Value(type.description),
+          imagePath: Value(type.imagePath),
+          imageSource: Value(type.imageSource),
+          createdAt: now,
+          updatedAt: now,
+          isSeeded: const Value(true),
+        ),
+      );
+    }
+  }
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async {
           await m.createAll();
-          // Seed all soils on creation
-          for (final type in SoilType.values) {
-            await into(soilsTable).insert(
-              SoilsTableCompanion.insert(
-                id: type.name,
-                name: type.label,
-                composition: Value(type.description),
-                imagePath: Value(type.imagePath),
-                imageSource: Value(type.imageSource),
-                createdAt: DateTime.now(),
-                syncStatus: const Value(SyncStatus.synced),
-              ),
-            );
-          }
+          await _seedFresh();
         },
         onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            // ... (existing code for v1 to v2)
-          }
-          if (from < 3) {
-            // Migration for version 3: making defaultIrrigationFrequencyDays nullable
-            // ignore: experimental_member_use
-            await m.alterTable(TableMigration(
-              speciesTable,
-            ));
-          }
-          if (from < 4) {
-            // 1. Create soils table
+          if (from < 10) {
+            // Pull/ack + row-versioning rewrite of sync (event-log ->
+            // per-row rev/updatedAt/deletedAt). No production data exists
+            // yet to preserve across this shape change, so upgrading from
+            // any prior schema just resets to a fresh, empty database
+            // rather than carrying forward a chain of dead syncStatus-era
+            // migration steps. Drop children before parents, recreate
+            // parents before children, to respect FK constraints.
+            await m.deleteTable('entries');
+            await m.deleteTable('plants');
+            await m.deleteTable('species');
+            await m.deleteTable('soils');
+            await m.deleteTable('locations');
+            await m.deleteTable('sync_queue');
+            await m.deleteTable('sync_meta');
+            await m.deleteTable('sync_cursors');
+
+            await m.createTable(speciesTable);
             await m.createTable(soilsTable);
+            await m.createTable(locationsTable);
+            await m.createTable(plantsTable);
+            await m.createTable(entriesTable);
+            await m.createTable(syncMetaTable);
+            await m.createTable(syncCursorsTable);
 
-            // 2. Seed soils with defaults from SoilType enum
-            for (final type in SoilType.values) {
-              await into(soilsTable).insert(
-                SoilsTableCompanion.insert(
-                  id: type.name, // Use name as ID for migration
-                  name: type.label,
-                  createdAt: DateTime.now(),
-                  syncStatus: const Value(SyncStatus.synced),
-                ),
-              );
-            }
-
-            // 3. Update plants table to use text ID instead of enum-mapped string
-            // Actually, plantsTable.soilType is already TextColumn, but mapped with SoilTypeConverter.
-            // We need to change the mapping or just store the ID.
-            // Since we're changing the model too, we'll keep the column name but change what it stores.
-            // Drift handles table updates via alterTable but for column type/converter changes it's trickier.
-            // For now, we'll just migrate the values.
-            
-            // 4. Species recommended soils: currently JSON list of enum names.
-            // Since we used enum names as IDs for the seed, the content is already compatible!
-          }
-          if (from < 5) {
-            await m.addColumn(locationsTable, locationsTable.latitude);
-            await m.addColumn(locationsTable, locationsTable.longitude);
-          }
-          if (from < 6) {
-            // Seed new soils introduced in SoilType enum
-            // We use insertOrReplace to update existing ones with descriptions too
-            for (final type in SoilType.values) {
-              await into(soilsTable).insert(
-                SoilsTableCompanion.insert(
-                  id: type.name,
-                  name: type.label,
-                  composition: Value(type.description),
-                  createdAt: DateTime.now(),
-                  syncStatus: const Value(SyncStatus.synced),
-                ),
-                mode: InsertMode.insertOrReplace,
-              );
-            }
-          }
-          if (from < 7) {
-            await m.addColumn(soilsTable, soilsTable.imagePath);
-            await m.addColumn(soilsTable, soilsTable.imageSource);
-          }
-          if (from < 8) {
-            // Re-seed soils with image paths and sources populated from
-            // the current SoilType enum. Only touches seeded rows (whose
-            // id matches an enum name); user-created soils are untouched.
-            for (final type in SoilType.values) {
-              await into(soilsTable).insert(
-                SoilsTableCompanion.insert(
-                  id: type.name,
-                  name: type.label,
-                  composition: Value(type.description),
-                  imagePath: Value(type.imagePath),
-                  imageSource: Value(type.imageSource),
-                  createdAt: DateTime.now(),
-                  syncStatus: const Value(SyncStatus.synced),
-                ),
-                mode: InsertMode.insertOrReplace,
-              );
-            }
-          }
-          if (from < 9) {
-            await m.addColumn(entriesTable, entriesTable.numericValue);
-            await m.addColumn(entriesTable, entriesTable.extraData);
+            await _seedFresh();
           }
         },
       );

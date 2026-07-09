@@ -3,22 +3,22 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
-import '../../../core/enums.dart';
 import '../../../core/storage/photo_storage.dart';
 import '../domain/workspace_model.dart';
 import '../domain/workspace_paths.dart';
 
 /// Copies data created in the local (device-only) workspace into a
 /// newly-created remote workspace, so it can be pushed to a server the user
-/// just registered on. Only rows with `syncStatus == pending` are copied —
-/// the same filter [SyncService] itself uses — which naturally skips the
-/// soil types every workspace already seeds on creation.
+/// just registered on. A local workspace can never call sync() (isLoggedIn
+/// requires `type == remote`), so every *active* row in it is fair game to
+/// migrate; only default-seeded soils (never touched by the user) are
+/// skipped, via [SoilsTable.isSeeded].
 class WorkspaceMigrationService {
   const WorkspaceMigrationService();
 
-  /// Whether the local workspace has any never-synced data worth offering to
-  /// migrate. [local] must be the actual persisted local workspace (see note
-  /// on [migrateLocalInto]).
+  /// Whether the local workspace has any data worth offering to migrate.
+  /// [local] must be the actual persisted local workspace (see note on
+  /// [migrateLocalInto]).
   Future<bool> hasPendingLocalData(Workspace local) async {
     final db = AppDatabase(fileName: dbFileNameFor(local));
     try {
@@ -31,24 +31,11 @@ class WorkspaceMigrationService {
   /// Core of [hasPendingLocalData], split out so it can be exercised in
   /// tests against an in-memory database instead of a real file.
   Future<bool> hasPendingData(AppDatabase db) async {
-    bool anyPending<T>(List<T> rows, SyncStatus Function(T) statusOf) =>
-        rows.any((r) => statusOf(r) == SyncStatus.pending);
-
-    if (anyPending(await db.speciesDao.getAll(), (r) => r.syncStatus)) {
-      return true;
-    }
-    if (anyPending(await db.soilsDao.getAllSoils(), (r) => r.syncStatus)) {
-      return true;
-    }
-    if (anyPending(await db.locationsDao.getAll(), (r) => r.syncStatus)) {
-      return true;
-    }
-    if (anyPending(await db.plantsDao.getAll(), (r) => r.syncStatus)) {
-      return true;
-    }
-    if (anyPending(await db.entriesDao.getAll(), (r) => r.syncStatus)) {
-      return true;
-    }
+    if ((await db.speciesDao.getAll()).isNotEmpty) return true;
+    if ((await db.soilsDao.getAllSoils()).any((s) => !s.isSeeded)) return true;
+    if ((await db.locationsDao.getAll()).isNotEmpty) return true;
+    if ((await db.plantsDao.getAll()).isNotEmpty) return true;
+    if ((await db.entriesDao.getAll()).isNotEmpty) return true;
     return false;
   }
 
@@ -88,67 +75,81 @@ class WorkspaceMigrationService {
 
   Future<void> _migrateSpecies(AppDatabase source, AppDatabase target) async {
     for (final row in await source.speciesDao.getAll()) {
-      if (row.syncStatus != SyncStatus.pending) continue;
-      await target.speciesDao.upsert(SpeciesTableCompanion.insert(
-        id: row.id,
-        scientificName: row.scientificName,
-        popularName: row.popularName,
-        defaultIrrigationFrequencyDays:
-            Value(row.defaultIrrigationFrequencyDays),
-        recommendedSoilTypes: row.recommendedSoilTypes,
-        syncStatus: const Value(SyncStatus.pending),
-        createdAt: row.createdAt,
-      ));
+      await target.transaction(() async {
+        final rev = await target.syncMetaDao.nextRev();
+        await target.speciesDao.upsert(SpeciesTableCompanion.insert(
+          id: row.id,
+          scientificName: row.scientificName,
+          popularName: row.popularName,
+          defaultIrrigationFrequencyDays:
+              Value(row.defaultIrrigationFrequencyDays),
+          recommendedSoilTypes: row.recommendedSoilTypes,
+          createdAt: row.createdAt,
+          updatedAt: DateTime.now(),
+          localRev: Value(rev),
+        ));
+      });
     }
   }
 
   Future<void> _migrateSoils(AppDatabase source, AppDatabase target) async {
     for (final row in await source.soilsDao.getAllSoils()) {
-      if (row.syncStatus != SyncStatus.pending) continue;
-      await target.soilsDao.insertSoil(SoilsTableCompanion.insert(
-        id: row.id,
-        name: row.name,
-        composition: Value(row.composition),
-        imagePath: Value(row.imagePath),
-        imageSource: Value(row.imageSource),
-        createdAt: row.createdAt,
-        syncStatus: const Value(SyncStatus.pending),
-      ));
+      if (row.isSeeded) continue;
+      await target.transaction(() async {
+        final rev = await target.syncMetaDao.nextRev();
+        await target.soilsDao.insertSoil(SoilsTableCompanion.insert(
+          id: row.id,
+          name: row.name,
+          composition: Value(row.composition),
+          imagePath: Value(row.imagePath),
+          imageSource: Value(row.imageSource),
+          createdAt: row.createdAt,
+          updatedAt: DateTime.now(),
+          localRev: Value(rev),
+          isSeeded: const Value(false),
+        ));
+      });
     }
   }
 
   Future<void> _migrateLocations(
       AppDatabase source, AppDatabase target) async {
     for (final row in await source.locationsDao.getAll()) {
-      if (row.syncStatus != SyncStatus.pending) continue;
-      await target.locationsDao.upsert(LocationsTableCompanion.insert(
-        id: row.id,
-        name: row.name,
-        description: Value(row.description),
-        latitude: Value(row.latitude),
-        longitude: Value(row.longitude),
-        createdAt: row.createdAt,
-        syncStatus: const Value(SyncStatus.pending),
-      ));
+      await target.transaction(() async {
+        final rev = await target.syncMetaDao.nextRev();
+        await target.locationsDao.upsert(LocationsTableCompanion.insert(
+          id: row.id,
+          name: row.name,
+          description: Value(row.description),
+          latitude: Value(row.latitude),
+          longitude: Value(row.longitude),
+          createdAt: row.createdAt,
+          updatedAt: DateTime.now(),
+          localRev: Value(rev),
+        ));
+      });
     }
   }
 
   Future<void> _migratePlants(AppDatabase source, AppDatabase target) async {
     for (final row in await source.plantsDao.getAll()) {
-      if (row.syncStatus != SyncStatus.pending) continue;
-      await target.plantsDao.upsert(PlantsTableCompanion.insert(
-        id: row.id,
-        speciesId: row.speciesId,
-        nickname: row.nickname,
-        soilType: row.soilType,
-        irrigationFrequencyDays: Value(row.irrigationFrequencyDays),
-        acquisitionDate: row.acquisitionDate,
-        location: Value(row.location),
-        locationId: Value(row.locationId),
-        lastIrrigatedAt: Value(row.lastIrrigatedAt),
-        createdAt: row.createdAt,
-        syncStatus: const Value(SyncStatus.pending),
-      ));
+      await target.transaction(() async {
+        final rev = await target.syncMetaDao.nextRev();
+        await target.plantsDao.upsert(PlantsTableCompanion.insert(
+          id: row.id,
+          speciesId: row.speciesId,
+          nickname: row.nickname,
+          soilType: row.soilType,
+          irrigationFrequencyDays: Value(row.irrigationFrequencyDays),
+          acquisitionDate: row.acquisitionDate,
+          location: Value(row.location),
+          locationId: Value(row.locationId),
+          lastIrrigatedAt: Value(row.lastIrrigatedAt),
+          createdAt: row.createdAt,
+          updatedAt: DateTime.now(),
+          localRev: Value(rev),
+        ));
+      });
     }
   }
 
@@ -161,8 +162,6 @@ class WorkspaceMigrationService {
     PhotoStorage targetPhotos,
   ) async {
     for (final row in await source.entriesDao.getAll()) {
-      if (row.syncStatus != SyncStatus.pending) continue;
-
       String? photoPath;
       if (row.photoPath != null) {
         final file = File(row.photoPath!);
@@ -171,18 +170,22 @@ class WorkspaceMigrationService {
         }
       }
 
-      await target.entriesDao.upsert(EntriesTableCompanion.insert(
-        id: row.id,
-        plantId: row.plantId,
-        date: row.date,
-        photoPath: Value(photoPath),
-        note: Value(row.note),
-        type: row.type,
-        numericValue: Value(row.numericValue),
-        extraData: Value(row.extraData),
-        createdAt: row.createdAt,
-        syncStatus: const Value(SyncStatus.pending),
-      ));
+      await target.transaction(() async {
+        final rev = await target.syncMetaDao.nextRev();
+        await target.entriesDao.insert(EntriesTableCompanion.insert(
+          id: row.id,
+          plantId: row.plantId,
+          date: row.date,
+          photoPath: Value(photoPath),
+          note: Value(row.note),
+          type: row.type,
+          numericValue: Value(row.numericValue),
+          extraData: Value(row.extraData),
+          createdAt: row.createdAt,
+          updatedAt: DateTime.now(),
+          localRev: Value(rev),
+        ));
+      });
     }
   }
 }

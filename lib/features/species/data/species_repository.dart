@@ -1,17 +1,16 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
-import '../../../core/database/sync_queue_dao.dart';
 import '../domain/species_model.dart';
 import 'species_dao.dart';
 
 class SpeciesRepository {
   SpeciesRepository(AppDatabase db)
-      : _dao = db.speciesDao,
-        _syncQueueDao = db.syncQueueDao;
+      : _db = db,
+        _dao = db.speciesDao;
 
+  final AppDatabase _db;
   final SpeciesDao _dao;
-  final SyncQueueDao _syncQueueDao;
 
   Future<List<SpeciesModel>> getAll() async {
     final rows = await _dao.getAll();
@@ -27,24 +26,24 @@ class SpeciesRepository {
   }
 
   Future<void> save(SpeciesModel species) async {
-    await _dao.upsert(_toCompanion(species));
-    // TODO(sync): Enqueue for server sync when connectivity layer is added
-    await _syncQueueDao.enqueue(
-      entityType: 'species',
-      entityId: species.id,
-      operation: 'create',
-      payload: species.toJsonString(),
-    );
+    await _db.transaction(() async {
+      final rev = await _db.syncMetaDao.nextRev();
+      await _dao
+          .upsert(_toCompanion(species, updatedAt: DateTime.now(), rev: rev));
+    });
   }
 
   Future<void> delete(String id) async {
-    await _dao.deleteById(id);
-    await _syncQueueDao.enqueue(
-      entityType: 'species',
-      entityId: id,
-      operation: 'delete',
-      payload: '{"id":"$id"}',
-    );
+    final hasActivePlants =
+        await _db.plantsDao.hasActiveReferencingSpecies(id);
+    if (hasActivePlants) {
+      throw Exception(
+          'Não é possível excluir uma espécie com plantas vinculadas.');
+    }
+    await _db.transaction(() async {
+      final rev = await _db.syncMetaDao.nextRev();
+      await _dao.softDelete(id, deletedAt: DateTime.now(), rev: rev);
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -55,18 +54,23 @@ class SpeciesRepository {
         popularName: row.popularName,
         defaultIrrigationFrequencyDays: row.defaultIrrigationFrequencyDays,
         recommendedSoilIds: row.recommendedSoilTypes,
-        syncStatus: row.syncStatus,
         createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        deletedAt: row.deletedAt,
+        localRev: row.localRev,
       );
 
-  static SpeciesTableCompanion _toCompanion(SpeciesModel m) =>
+  static SpeciesTableCompanion _toCompanion(SpeciesModel m,
+          {required DateTime updatedAt, required int rev}) =>
       SpeciesTableCompanion.insert(
         id: m.id,
         scientificName: m.scientificName,
         popularName: m.popularName,
-        defaultIrrigationFrequencyDays: Value(m.defaultIrrigationFrequencyDays),
+        defaultIrrigationFrequencyDays:
+            Value(m.defaultIrrigationFrequencyDays),
         recommendedSoilTypes: m.recommendedSoilIds,
-        syncStatus: Value(m.syncStatus),
         createdAt: m.createdAt,
+        updatedAt: updatedAt,
+        localRev: Value(rev),
       );
 }

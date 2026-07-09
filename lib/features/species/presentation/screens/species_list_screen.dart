@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/enums.dart';
+import '../../../../core/sync/sync_providers.dart';
 import '../../../../core/widgets/app_search_bar.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../data/external_species_repository.dart';
@@ -370,6 +371,8 @@ class _SpeciesListItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    final pushCursor = ref.watch(pushCursorToServerProvider).value;
+    final isPendingSync = pushCursor != null && species.localRev > pushCursor;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -453,7 +456,7 @@ class _SpeciesListItem extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    if (species.syncStatus == SyncStatus.pending)
+                    if (isPendingSync)
                       Tooltip(
                         message: 'Pendente de sincronização',
                         child: Icon(

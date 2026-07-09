@@ -15,12 +15,10 @@ class SpeciesTable extends Table {
   TextColumn get recommendedSoilTypes =>
       text().map(const StringListConverter())();
 
-  // TODO(sync): Pending/synced/conflict status for future server sync
-  TextColumn get syncStatus => text()
-      .map(const SyncStatusConverter())
-      .withDefault(const Constant('pending'))();
-
   DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+  IntColumn get localRev => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

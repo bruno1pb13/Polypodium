@@ -50,6 +50,54 @@ final class SyncServiceProvider
 
 String _$syncServiceHash() => r'791c01c68a6b89a1c88dfd019d65010eab2abceb';
 
+/// The push cursor for the 'server' peer, or null when there's no server
+/// to compare against (local-only workspace, or never logged in). Entities
+/// with `localRev` greater than this haven't been delivered to the server
+/// yet -- the basis for every "pending sync" badge in the UI.
+
+@ProviderFor(pushCursorToServer)
+final pushCursorToServerProvider = PushCursorToServerProvider._();
+
+/// The push cursor for the 'server' peer, or null when there's no server
+/// to compare against (local-only workspace, or never logged in). Entities
+/// with `localRev` greater than this haven't been delivered to the server
+/// yet -- the basis for every "pending sync" badge in the UI.
+
+final class PushCursorToServerProvider
+    extends $FunctionalProvider<AsyncValue<int?>, int?, FutureOr<int?>>
+    with $FutureModifier<int?>, $FutureProvider<int?> {
+  /// The push cursor for the 'server' peer, or null when there's no server
+  /// to compare against (local-only workspace, or never logged in). Entities
+  /// with `localRev` greater than this haven't been delivered to the server
+  /// yet -- the basis for every "pending sync" badge in the UI.
+  PushCursorToServerProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'pushCursorToServerProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$pushCursorToServerHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<int?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<int?> create(Ref ref) {
+    return pushCursorToServer(ref);
+  }
+}
+
+String _$pushCursorToServerHash() =>
+    r'91514ec6534bb0e5117d2b2bc4062ed03d9e81ef';
+
 @ProviderFor(pendingSyncCount)
 final pendingSyncCountProvider = PendingSyncCountProvider._();
 
@@ -81,7 +129,7 @@ final class PendingSyncCountProvider
   }
 }
 
-String _$pendingSyncCountHash() => r'b6144ec8c6bb629afb7be76d1a8d9b34b0855313';
+String _$pendingSyncCountHash() => r'd1bfe432b7927c0cdcd8f35a029c6581ad581dfd';
 
 @ProviderFor(SyncNotifier)
 final syncNotifierProvider = SyncNotifierProvider._();

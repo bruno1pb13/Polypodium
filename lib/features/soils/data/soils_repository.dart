@@ -1,15 +1,11 @@
 import 'package:drift/drift.dart';
 import '../../../core/database/app_database.dart';
-import '../../../core/database/sync_queue_dao.dart';
 import '../domain/soil_model.dart';
 
 class SoilsRepository {
-  SoilsRepository(AppDatabase db)
-      : _db = db,
-        _syncQueueDao = db.syncQueueDao;
+  SoilsRepository(AppDatabase db) : _db = db;
 
   final AppDatabase _db;
-  final SyncQueueDao _syncQueueDao;
 
   Future<List<SoilModel>> getAll() async {
     final rows = await _db.soilsDao.getAllSoils();
@@ -22,33 +18,37 @@ class SoilsRepository {
         );
   }
 
+  /// Creating/editing a soil through this repository always counts as user
+  /// data from that point on -- even if it started out as a seeded default
+  /// -- so it gets picked up by WorkspaceMigrationService on first login.
   Future<void> save(SoilModel model) async {
-    final companion = SoilsTableCompanion(
-      id: Value(model.id),
-      name: Value(model.name),
-      composition: Value(model.composition),
-      imagePath: Value(model.imagePath),
-      imageSource: Value(model.imageSource),
-      createdAt: Value(model.createdAt),
-      syncStatus: Value(model.syncStatus),
-    );
-    await _db.soilsDao.insertSoil(companion);
-    await _syncQueueDao.enqueue(
-      entityType: 'soil',
-      entityId: model.id,
-      operation: 'create',
-      payload: model.toJsonString(),
-    );
+    await _db.transaction(() async {
+      final rev = await _db.syncMetaDao.nextRev();
+      final companion = SoilsTableCompanion.insert(
+        id: model.id,
+        name: model.name,
+        composition: Value(model.composition),
+        imagePath: Value(model.imagePath),
+        imageSource: Value(model.imageSource),
+        createdAt: model.createdAt,
+        updatedAt: DateTime.now(),
+        localRev: Value(rev),
+        isSeeded: const Value(false),
+      );
+      await _db.soilsDao.insertSoil(companion);
+    });
   }
 
   Future<void> delete(String id) async {
-    await _db.soilsDao.deleteSoil(id);
-    await _syncQueueDao.enqueue(
-      entityType: 'soil',
-      entityId: id,
-      operation: 'delete',
-      payload: '{"id":"$id"}',
-    );
+    final hasActivePlants = await _db.plantsDao.hasActiveReferencingSoil(id);
+    if (hasActivePlants) {
+      throw Exception(
+          'Não é possível excluir um solo com plantas vinculadas.');
+    }
+    await _db.transaction(() async {
+      final rev = await _db.syncMetaDao.nextRev();
+      await _db.soilsDao.softDelete(id, deletedAt: DateTime.now(), rev: rev);
+    });
   }
 
   SoilModel _toModel(SoilsTableData row) {
@@ -59,7 +59,10 @@ class SoilsRepository {
       imagePath: row.imagePath,
       imageSource: row.imageSource,
       createdAt: row.createdAt,
-      syncStatus: row.syncStatus,
+      updatedAt: row.updatedAt,
+      deletedAt: row.deletedAt,
+      localRev: row.localRev,
+      isSeeded: row.isSeeded,
     );
   }
 }

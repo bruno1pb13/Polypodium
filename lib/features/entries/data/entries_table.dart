@@ -19,11 +19,9 @@ class EntriesTable extends Table {
   // JSON blob for extra structured data (e.g. {"pestType":"Cochonilha"})
   TextColumn get extraData => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
-
-  // TODO(sync): Pending/synced/conflict status for future server sync
-  TextColumn get syncStatus => text()
-      .map(const SyncStatusConverter())
-      .withDefault(const Constant('pending'))();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+  IntColumn get localRev => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

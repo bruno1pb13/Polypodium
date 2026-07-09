@@ -30,9 +30,6 @@ enum EntryType {
   history,
 }
 
-// TODO(sync): Tracks local changes pending server synchronization
-enum SyncStatus { synced, pending, conflict }
-
 enum PlantSortOption {
   wateringNeeds,
   nameAZ,
