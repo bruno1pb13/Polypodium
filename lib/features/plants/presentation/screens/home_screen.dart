@@ -5,7 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../species/presentation/screens/species_list_screen.dart';
 // ignore: unused_import
 import '../../../locations/presentation/screens/locations_list_screen.dart';
+import '../../../../core/sync/auto_sync_controller.dart';
+import '../../../../core/sync/sync_providers.dart';
 import '../../../../core/widgets/app_search_bar.dart';
+import '../../../workspaces/presentation/providers/workspace_providers.dart';
 import '../providers/plant_search_providers.dart';
 import '../providers/plant_selection_provider.dart';
 import '../providers/plants_providers.dart';
@@ -27,6 +30,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _searchController = TextEditingController();
 
   Future<void> _refresh() async {
+    if (ref.read(activeWorkspaceProvider).isLoggedIn) {
+      await ref.read(autoSyncControllerProvider.notifier).syncNow();
+    }
     ref.invalidate(plantsNotifierProvider);
     try {
       await ref.read(filteredSortedPlantsProvider.future);
@@ -70,11 +76,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  Future<void> _manualSync() async {
+    await ref.read(syncNotifierProvider.notifier).sync();
+    if (!mounted) return;
+    final state = ref.read(syncNotifierProvider);
+    if (state.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.error.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final plantsAsync = ref.watch(filteredSortedPlantsProvider);
     final selectedIds = ref.watch(plantSelectionProvider);
     final isSelectionMode = selectedIds.isNotEmpty;
+    final workspace = ref.watch(activeWorkspaceProvider);
+    final syncState = ref.watch(syncNotifierProvider);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -126,6 +148,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ],
                       ),
                     ),
+              actions: [
+                if (workspace.isLoggedIn)
+                  IconButton(
+                    icon: syncState.isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.sync),
+                    tooltip: 'Sincronizar agora',
+                    onPressed: syncState.isLoading ? null : _manualSync,
+                  ),
+              ],
             ),
       drawer: MediaQuery.sizeOf(context).width >= kWideBreakpoint
           ? null

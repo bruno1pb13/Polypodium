@@ -59,3 +59,18 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
     state = themeMode;
   }
 }
+
+@riverpod
+class AutoSyncEnabledNotifier extends _$AutoSyncEnabledNotifier {
+  @override
+  bool build() {
+    final repository = ref.watch(settingsRepositoryProvider);
+    return repository.isAutoSyncEnabled();
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    await ref.read(settingsRepositoryProvider).setAutoSyncEnabled(enabled);
+    state = enabled;
+  }
+}
+
