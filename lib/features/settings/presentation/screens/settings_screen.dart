@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/settings_providers.dart';
 import '../../../../core/sync/sync_providers.dart';
+import '../../../data_transfer/presentation/widgets/data_transfer_section.dart';
 import '../../../workspaces/domain/workspace_model.dart';
 import '../../../workspaces/presentation/providers/workspace_providers.dart';
 import '../../../workspaces/presentation/screens/workspaces_screen.dart';
@@ -79,6 +80,9 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
           _SectionHeader(title: 'Sincronização'),
           const _SyncSection(),
+          const Divider(),
+          _SectionHeader(title: 'Dados'),
+          const DataTransferSection(),
           const Divider(),
           const AboutListTile(
             icon: Icon(Icons.info_outline),
