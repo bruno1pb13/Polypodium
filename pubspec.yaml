@@ -62,7 +62,7 @@ flutter_launcher_icons:
 
 msix_config:
   display_name: Polypodium
-  publisher_display_name: Polypodium
+  publisher_display_name: zapperbrz
   publisher: CN=Polypodium
   identity_name: com.polypodium.polypodium
   msix_version: 1.1.0.0
