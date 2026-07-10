@@ -105,3 +105,7 @@ Os artefatos de saída serão:
 Em **Configurações → Servidor** informe a URL e faça login. A partir daí o botão de sync aparece na mesma tela.
 
 O sync é manual — não há sincronização automática em segundo plano. O WorkManager só executa a verificação de notificações de irrigação.
+
+## Licença
+
+Este projeto é distribuído sob a [licença MIT](LICENSE).
