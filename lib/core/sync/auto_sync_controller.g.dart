@@ -66,7 +66,7 @@ final class AutoSyncControllerProvider
 }
 
 String _$autoSyncControllerHash() =>
-    r'f31671104d8eae3746f1c9d5c5b34e8804d390f7';
+    r'1ed49c580c97deec6bb46ea31822ded31c1dcdff';
 
 /// Drives periodic background sync while the app is open. Ticks every
 /// minute and syncs once the elapsed time reaches the current interval --

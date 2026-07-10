@@ -30,6 +30,7 @@ dependencies:
   geolocator: ^13.0.2
   gal: ^2.3.2
   share_plus: ^13.2.0
+  file_selector: ^1.0.3
   battery_plus: ^6.2.1
 
 dev_dependencies:

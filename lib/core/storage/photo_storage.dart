@@ -42,6 +42,16 @@ class PhotoStorage {
     return dest.path;
   }
 
+  /// Writes [bytes] under [fileName] (basename only) in this workspace's
+  /// photo dir, reusing an existing file of the same name so repeated
+  /// imports of the same backup stay idempotent. Returns the absolute path.
+  Future<String> restorePhoto(List<int> bytes, String fileName) async {
+    final dir = await _photosDir();
+    final dest = File(p.join(dir.path, p.basename(fileName)));
+    if (!dest.existsSync()) await dest.writeAsBytes(bytes);
+    return dest.path;
+  }
+
   /// Removes photo files whose paths are not in [referencedPaths].
   Future<void> cleanOrphanPhotos(List<String> referencedPaths) async {
     final dir = await _photosDir();

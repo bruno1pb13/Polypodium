@@ -218,10 +218,11 @@ class WorkspacesScreen extends ConsumerWidget {
       BuildContext context, WidgetRef ref, Workspace ws) async {
     String role;
     try {
-      role = await const AdminClient().me(
+      final info = await const AdminClient().me(
         serverUrl: ws.serverUrl!,
         token: ws.token!,
       );
+      role = info.role;
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)

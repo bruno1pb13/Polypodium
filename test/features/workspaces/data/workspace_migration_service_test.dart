@@ -33,6 +33,9 @@ class FakePhotoStorage implements PhotoStorage {
 
   @override
   Future<String> savePhotoBytes(List<int> bytes, String fileName) async => '';
+
+  @override
+  Future<String> restorePhoto(List<int> bytes, String fileName) async => '';
 }
 
 void main() {
