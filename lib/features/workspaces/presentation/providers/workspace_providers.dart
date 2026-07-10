@@ -72,6 +72,7 @@ class WorkspacesNotifier extends _$WorkspacesNotifier {
       token: result.token,
       deviceId: result.deviceId,
       createdAt: DateTime.now(),
+      role: result.role,
     );
     await upsert(workspace);
     return workspace;
@@ -101,6 +102,7 @@ class WorkspacesNotifier extends _$WorkspacesNotifier {
       token: result.token,
       deviceId: result.deviceId,
       createdAt: DateTime.now(),
+      role: result.role,
     );
     await upsert(workspace);
     return workspace;
@@ -120,7 +122,11 @@ class WorkspacesNotifier extends _$WorkspacesNotifier {
       password: password,
       deviceId: ws.deviceId ?? const Uuid().v4(),
     );
-    await upsert(ws.copyWith(token: result.token, deviceId: result.deviceId));
+    await upsert(ws.copyWith(
+      token: result.token,
+      deviceId: result.deviceId,
+      role: result.role,
+    ));
   }
 
   /// Clears session credentials but keeps the workspace (and its data) —

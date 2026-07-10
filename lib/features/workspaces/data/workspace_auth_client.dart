@@ -5,7 +5,12 @@ import 'package:http/http.dart' as http;
 class WorkspaceLoginResult {
   final String token;
   final String deviceId;
-  const WorkspaceLoginResult({required this.token, required this.deviceId});
+  final String? role;
+  const WorkspaceLoginResult({
+    required this.token,
+    required this.deviceId,
+    this.role,
+  });
 }
 
 /// Talks to a Polypodium server's auth endpoints. Extracted out of
@@ -39,9 +44,10 @@ class WorkspaceAuthClient {
     return data['hasUsers'] as bool? ?? true;
   }
 
-  /// Creates a new account on [serverUrl]. Only meant to be used when
-  /// [hasUsers] returned false — the server treats every account the same,
-  /// but the app only offers this as the very first-run onboarding step.
+  /// Creates the very first account on [serverUrl], which becomes the
+  /// server's admin. Only works when [hasUsers] returned false — the server
+  /// rejects this once any account exists; after that, only an existing
+  /// admin can create new accounts (see AdminClient.createUser).
   Future<WorkspaceLoginResult> register({
     required String serverUrl,
     required String email,
@@ -64,6 +70,7 @@ class WorkspaceAuthClient {
     return WorkspaceLoginResult(
       token: data['token'] as String,
       deviceId: data['deviceId'] as String,
+      role: data['role'] as String?,
     );
   }
 
@@ -95,6 +102,7 @@ class WorkspaceAuthClient {
     return WorkspaceLoginResult(
       token: data['token'] as String,
       deviceId: data['deviceId'] as String,
+      role: data['role'] as String?,
     );
   }
 }
