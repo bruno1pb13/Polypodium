@@ -34,10 +34,12 @@ flutter @BuildArgs
 Write-Host "==> Generating MSIX Installer..." -ForegroundColor Cyan
 $MsixArgs = @("pub", "run", "msix:create", "--store")
 if ($env:BUILD_NAME) {
-    # MSIX version must be in format x.x.x.x
-    $MsixVer = $env:BUILD_NAME
-    if ($env:BUILD_NUMBER) { $MsixVer = "$env:BUILD_NAME.$env:BUILD_NUMBER" }
-    else { $MsixVer = "$env:BUILD_NAME.0" }
+    # Microsoft Store requires the fourth (revision) component to be zero.
+    # Keep the semantic app version and do not append the CI build number.
+    if ($env:BUILD_NAME -notmatch '^\d+\.\d+\.\d+$') {
+        throw "BUILD_NAME must use semantic version format x.y.z for MSIX packaging (received: $env:BUILD_NAME)."
+    }
+    $MsixVer = "$env:BUILD_NAME.0"
     $MsixArgs += "--version=$MsixVer"
 }
 flutter @MsixArgs
