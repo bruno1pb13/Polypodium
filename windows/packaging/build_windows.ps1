@@ -8,6 +8,21 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $ProjectRoot = Resolve-Path "$ScriptDir\..\.."
 Set-Location $ProjectRoot
 
+if (-not $env:MSIX_IDENTITY_NAME) {
+    throw "Repository variable MSIX_IDENTITY_NAME is not configured. Copy the Package/Identity Name value from Partner Center."
+}
+if (-not $env:MSIX_PUBLISHER) {
+    throw "Repository variable MSIX_PUBLISHER is not configured. Copy the Package/Identity Publisher value from Partner Center."
+}
+
+# The Store identity is public metadata, supplied by GitHub Actions repository
+# variables so the repository can keep harmless local placeholders.
+$PubspecPath = Join-Path $ProjectRoot "pubspec.yaml"
+$Pubspec = [System.IO.File]::ReadAllText($PubspecPath, [System.Text.Encoding]::UTF8)
+$Pubspec = $Pubspec -replace '(?m)^(\s*publisher:)\s*.*$', "`$1 $env:MSIX_PUBLISHER"
+$Pubspec = $Pubspec -replace '(?m)^(\s*identity_name:)\s*.*$', "`$1 $env:MSIX_IDENTITY_NAME"
+[System.IO.File]::WriteAllText($PubspecPath, $Pubspec, (New-Object System.Text.UTF8Encoding($false)))
+
 Write-Host "==> Building Flutter Windows (release)..." -ForegroundColor Cyan
 $BuildArgs = @("build", "windows", "--release")
 if ($env:BUILD_NAME) { $BuildArgs += "--build-name=$env:BUILD_NAME" }
@@ -17,7 +32,7 @@ flutter @BuildArgs
 
 # Ensure msix is available
 Write-Host "==> Generating MSIX Installer..." -ForegroundColor Cyan
-$MsixArgs = @("pub", "run", "msix:create", "--install-certificate=false")
+$MsixArgs = @("pub", "run", "msix:create", "--store")
 if ($env:BUILD_NAME) {
     # MSIX version must be in format x.x.x.x
     $MsixVer = $env:BUILD_NAME
