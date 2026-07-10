@@ -139,6 +139,8 @@ jobs:
         env:
           BUILD_NAME: ${{ needs.version.outputs.build_name }}
           BUILD_NUMBER: ${{ needs.version.outputs.build_number }}
+          MSIX_IDENTITY_NAME: ${{ vars.MSIX_IDENTITY_NAME }}
+          MSIX_PUBLISHER: ${{ vars.MSIX_PUBLISHER }}
         run: .\windows\packaging\build_windows.ps1
 
       - uses: actions/upload-artifact@v4

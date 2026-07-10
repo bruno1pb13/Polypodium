@@ -67,7 +67,7 @@ msix_config:
   identity_name: com.polypodium.polypodium
   msix_version: 1.1.0.0
   logo_path: assets/images/logo.png
-  capabilities: internetClient
+  capabilities: internetClient, location
 
 flutter:
   uses-material-design: true
