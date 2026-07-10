@@ -19,12 +19,14 @@ jobs:
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
           VERSION=${TAG_NAME#v}
-          if [[ $VERSION == *"+"* ]]; then
-            BUILD_NAME=$(echo $VERSION | cut -d'+' -f1)
-            BUILD_NUMBER=$(echo $VERSION | cut -d'+' -f2)
+          # Accept both v2.3.2 (preferred) and the legacy spelling v.2.3.2.
+          VERSION=${VERSION#.}
+          if [[ $VERSION =~ ^([0-9]+\.[0-9]+\.[0-9]+)(\+([0-9]+))?$ ]]; then
+            BUILD_NAME=${BASH_REMATCH[1]}
+            BUILD_NUMBER=${BASH_REMATCH[3]:-$GITHUB_RUN_NUMBER}
           else
-            BUILD_NAME=$VERSION
-            BUILD_NUMBER=$GITHUB_RUN_NUMBER
+            echo "Invalid release tag '$TAG_NAME'. Use vX.Y.Z or vX.Y.Z+BUILD (for example, v2.3.2)." >&2
+            exit 1
           fi
           echo "BUILD_NAME=$BUILD_NAME" >> $GITHUB_OUTPUT
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
