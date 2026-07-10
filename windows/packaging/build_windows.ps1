@@ -23,6 +23,16 @@ $Pubspec = $Pubspec -replace '(?m)^(\s*publisher:)\s*.*$', "`$1 $env:MSIX_PUBLIS
 $Pubspec = $Pubspec -replace '(?m)^(\s*identity_name:)\s*.*$', "`$1 $env:MSIX_IDENTITY_NAME"
 [System.IO.File]::WriteAllText($PubspecPath, $Pubspec, (New-Object System.Text.UTF8Encoding($false)))
 
+$MsixVer = $null
+if ($env:BUILD_NAME) {
+    # Microsoft Store requires the fourth (revision) component to be zero.
+    # Validate before the comparatively slow Flutter build.
+    if ($env:BUILD_NAME -notmatch '^\d+\.\d+\.\d+$') {
+        throw "BUILD_NAME must use semantic version format x.y.z for MSIX packaging (received: $env:BUILD_NAME)."
+    }
+    $MsixVer = "$env:BUILD_NAME.0"
+}
+
 Write-Host "==> Building Flutter Windows (release)..." -ForegroundColor Cyan
 $BuildArgs = @("build", "windows", "--release")
 if ($env:BUILD_NAME) { $BuildArgs += "--build-name=$env:BUILD_NAME" }
@@ -33,13 +43,7 @@ flutter @BuildArgs
 # Ensure msix is available
 Write-Host "==> Generating MSIX Installer..." -ForegroundColor Cyan
 $MsixArgs = @("pub", "run", "msix:create", "--store")
-if ($env:BUILD_NAME) {
-    # Microsoft Store requires the fourth (revision) component to be zero.
-    # Keep the semantic app version and do not append the CI build number.
-    if ($env:BUILD_NAME -notmatch '^\d+\.\d+\.\d+$') {
-        throw "BUILD_NAME must use semantic version format x.y.z for MSIX packaging (received: $env:BUILD_NAME)."
-    }
-    $MsixVer = "$env:BUILD_NAME.0"
+if ($MsixVer) {
     $MsixArgs += "--version=$MsixVer"
 }
 flutter @MsixArgs
