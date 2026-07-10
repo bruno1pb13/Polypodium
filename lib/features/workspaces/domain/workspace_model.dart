@@ -14,6 +14,12 @@ class Workspace {
   final DateTime? lastSyncAt;
   final DateTime createdAt;
 
+  /// Server-wide role of the logged-in account ('admin' | 'member'), cached
+  /// from the last login/register/me response. Null for the local workspace
+  /// or a remote workspace that hasn't authenticated since this field was
+  /// introduced.
+  final String? role;
+
   /// Set only for a workspace that inherited pre-existing on-disk storage
   /// from before workspaces existed (see WorkspaceRepository.ensureBootstrapped).
   final String? dbFileNameOverride;
@@ -31,6 +37,7 @@ class Workspace {
     this.lastSyncAt,
     required this.createdAt,
     this.dbFileNameOverride,
+    this.role,
   });
 
   factory Workspace.newLocal() => Workspace(
@@ -43,12 +50,15 @@ class Workspace {
   bool get isLoggedIn =>
       type == WorkspaceType.remote && token != null && serverUrl != null;
 
+  bool get isServerAdmin => isLoggedIn && role == 'admin';
+
   /// Clears session credentials while keeping the server connection details,
   /// mirroring the previous global SyncService.logout() behavior.
   Workspace disconnected() => copyWith(
         token: const _Sentinel(),
         userEmail: const _Sentinel(),
         lastSyncAt: const _Sentinel(),
+        role: const _Sentinel(),
       );
 
   Workspace copyWith({
@@ -62,6 +72,7 @@ class Workspace {
     Object? lastSyncAt = const _Sentinel(),
     DateTime? createdAt,
     Object? dbFileNameOverride = const _Sentinel(),
+    Object? role = const _Sentinel(),
   }) {
     return Workspace(
       id: id ?? this.id,
@@ -79,6 +90,7 @@ class Workspace {
       dbFileNameOverride: dbFileNameOverride is _Sentinel
           ? this.dbFileNameOverride
           : dbFileNameOverride as String?,
+      role: role is _Sentinel ? this.role : role as String?,
     );
   }
 
@@ -93,6 +105,7 @@ class Workspace {
         'lastSyncAt': lastSyncAt?.toIso8601String(),
         'createdAt': createdAt.toIso8601String(),
         'dbFileNameOverride': dbFileNameOverride,
+        'role': role,
       };
 
   factory Workspace.fromJson(Map<String, dynamic> json) => Workspace(
@@ -108,6 +121,7 @@ class Workspace {
             : null,
         createdAt: DateTime.parse(json['createdAt'] as String),
         dbFileNameOverride: json['dbFileNameOverride'] as String?,
+        role: json['role'] as String?,
       );
 }
 

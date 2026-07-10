@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../../core/sync/sync_providers.dart';
+import '../../../admin/data/admin_client.dart';
+import '../../../admin/presentation/screens/server_admin_screen.dart';
 import '../../../plants/presentation/screens/home_screen.dart';
 import '../../data/workspace_auth_client.dart';
 import '../../data/workspace_migration_service.dart';
@@ -45,6 +47,8 @@ class WorkspacesScreen extends ConsumerWidget {
               onDisconnect:
                   ws.isLoggedIn ? () => _disconnect(context, ref, ws) : null,
               onDelete: () => _delete(context, ref, ws),
+              onAdminPanel:
+                  ws.isServerAdmin ? () => _openAdmin(context, ref, ws) : null,
             ),
           if (remotes.isEmpty)
             const Padding(
@@ -207,6 +211,44 @@ class WorkspacesScreen extends ConsumerWidget {
     }
   }
 
+  /// Re-checks the account's role against the server before opening the
+  /// admin panel -- the cached [Workspace.role] may be stale if another
+  /// admin demoted this account since the last login.
+  Future<void> _openAdmin(
+      BuildContext context, WidgetRef ref, Workspace ws) async {
+    String role;
+    try {
+      role = await const AdminClient().me(
+        serverUrl: ws.serverUrl!,
+        token: ws.token!,
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$e')));
+      }
+      return;
+    }
+
+    final updated = ws.copyWith(role: role);
+    await ref.read(workspacesNotifierProvider.notifier).upsert(updated);
+
+    if (role != 'admin') {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Você não tem mais permissão de administrador.'),
+        ));
+      }
+      return;
+    }
+
+    if (context.mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => ServerAdminScreen(workspace: updated)),
+      );
+    }
+  }
+
   Future<void> _rename(
       BuildContext context, WidgetRef ref, Workspace ws) async {
     final controller = TextEditingController(text: ws.name);
@@ -243,6 +285,7 @@ class _WorkspaceTile extends StatelessWidget {
     this.onReconnect,
     this.onDisconnect,
     this.onDelete,
+    this.onAdminPanel,
   });
 
   final Workspace workspace;
@@ -252,6 +295,7 @@ class _WorkspaceTile extends StatelessWidget {
   final VoidCallback? onReconnect;
   final VoidCallback? onDisconnect;
   final VoidCallback? onDelete;
+  final VoidCallback? onAdminPanel;
 
   bool get _isLocal => workspace.type == WorkspaceType.local;
 
@@ -301,6 +345,8 @@ class _WorkspaceTile extends StatelessWidget {
                     onDisconnect?.call();
                   case 'delete':
                     onDelete?.call();
+                  case 'admin':
+                    onAdminPanel?.call();
                 }
               },
               itemBuilder: (context) => [
@@ -311,6 +357,12 @@ class _WorkspaceTile extends StatelessWidget {
                 if (onDisconnect != null)
                   const PopupMenuItem(
                       value: 'disconnect', child: Text('Desconectar')),
+                if (onAdminPanel != null) ...[
+                  const PopupMenuDivider(),
+                  const PopupMenuItem(
+                      value: 'admin',
+                      child: Text('Administração do servidor')),
+                ],
                 const PopupMenuDivider(),
                 const PopupMenuItem(value: 'delete', child: Text('Excluir')),
               ],
