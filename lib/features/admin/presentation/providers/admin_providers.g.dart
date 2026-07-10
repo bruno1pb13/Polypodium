@@ -125,6 +125,103 @@ final class ServerStatusFamily extends $Family
   String toString() => r'serverStatusProvider';
 }
 
+@ProviderFor(ServerDataSettingsNotifier)
+final serverDataSettingsNotifierProvider = ServerDataSettingsNotifierFamily._();
+
+final class ServerDataSettingsNotifierProvider extends $AsyncNotifierProvider<
+    ServerDataSettingsNotifier, ServerDataSettings> {
+  ServerDataSettingsNotifierProvider._(
+      {required ServerDataSettingsNotifierFamily super.from,
+      required Workspace super.argument})
+      : super(
+          retry: null,
+          name: r'serverDataSettingsNotifierProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$serverDataSettingsNotifierHash();
+
+  @override
+  String toString() {
+    return r'serverDataSettingsNotifierProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  ServerDataSettingsNotifier create() => ServerDataSettingsNotifier();
+
+  @override
+  bool operator ==(Object other) {
+    return other is ServerDataSettingsNotifierProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$serverDataSettingsNotifierHash() =>
+    r'737a02b0ca9449a89b661a66288b4d9b18fa1a6e';
+
+final class ServerDataSettingsNotifierFamily extends $Family
+    with
+        $ClassFamilyOverride<
+            ServerDataSettingsNotifier,
+            AsyncValue<ServerDataSettings>,
+            ServerDataSettings,
+            FutureOr<ServerDataSettings>,
+            Workspace> {
+  ServerDataSettingsNotifierFamily._()
+      : super(
+          retry: null,
+          name: r'serverDataSettingsNotifierProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  ServerDataSettingsNotifierProvider call(
+    Workspace workspace,
+  ) =>
+      ServerDataSettingsNotifierProvider._(argument: workspace, from: this);
+
+  @override
+  String toString() => r'serverDataSettingsNotifierProvider';
+}
+
+abstract class _$ServerDataSettingsNotifier
+    extends $AsyncNotifier<ServerDataSettings> {
+  late final _$args = ref.$arg as Workspace;
+  Workspace get workspace => _$args;
+
+  FutureOr<ServerDataSettings> build(
+    Workspace workspace,
+  );
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<ServerDataSettings>, ServerDataSettings>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<ServerDataSettings>, ServerDataSettings>,
+        AsyncValue<ServerDataSettings>,
+        Object?,
+        Object?>;
+    return element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
+  }
+}
+
 @ProviderFor(ServerUsersNotifier)
 final serverUsersNotifierProvider = ServerUsersNotifierFamily._();
 

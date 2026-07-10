@@ -21,11 +21,13 @@ class ServerAdminScreen extends ConsumerWidget {
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(serverStatusProvider(workspace));
+          ref.invalidate(serverDataSettingsNotifierProvider(workspace));
           ref.invalidate(serverUsersNotifierProvider(workspace));
         },
         child: ListView(
           children: [
             _StatusCard(statusAsync: statusAsync),
+            _DataSettingsCard(workspace: workspace),
             const Divider(height: 1),
             usersAsync.when(
               data: (users) => Column(
@@ -214,6 +216,80 @@ class _StatusCard extends StatelessWidget {
     if (days > 0) return '${days}d ${hours}h ${minutes}m';
     if (hours > 0) return '${hours}h ${minutes}m';
     return '${minutes}m';
+  }
+}
+
+class _DataSettingsCard extends ConsumerWidget {
+  const _DataSettingsCard({required this.workspace});
+
+  final Workspace workspace;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settingsAsync =
+        ref.watch(serverDataSettingsNotifierProvider(workspace));
+
+    return Card(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: settingsAsync.when(
+          data: (settings) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Text('Permissões de membros',
+                    style: Theme.of(context).textTheme.titleMedium),
+              ),
+              SwitchListTile(
+                title: const Text('Exportar dados'),
+                subtitle:
+                    const Text('Membros podem exportar os próprios dados'),
+                value: settings.allowMemberExport,
+                onChanged: (value) => _update(
+                    context,
+                    ref
+                        .read(serverDataSettingsNotifierProvider(workspace)
+                            .notifier)
+                        .setAllowMemberExport(value)),
+              ),
+              SwitchListTile(
+                title: const Text('Importar dados'),
+                subtitle:
+                    const Text('Membros podem importar dados de um backup'),
+                value: settings.allowMemberImport,
+                onChanged: (value) => _update(
+                    context,
+                    ref
+                        .read(serverDataSettingsNotifierProvider(workspace)
+                            .notifier)
+                        .setAllowMemberImport(value)),
+              ),
+            ],
+          ),
+          loading: () => const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (e, _) => Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('Erro ao carregar permissões: $e'),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _update(BuildContext context, Future<void> action) async {
+    try {
+      await action;
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$e')));
+      }
+    }
   }
 }
 

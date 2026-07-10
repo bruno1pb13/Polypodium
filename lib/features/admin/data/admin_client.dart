@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../domain/account_info.dart';
+import '../domain/server_data_settings.dart';
 import '../domain/server_status.dart';
 import '../domain/server_user.dart';
 
@@ -12,9 +14,10 @@ import '../domain/server_user.dart';
 class AdminClient {
   const AdminClient();
 
-  /// The role of the account behind [token]. Any authenticated account can
-  /// call this (not just admins) -- used to decide whether to show admin UI.
-  Future<String> me({
+  /// The role and effective permissions of the account behind [token]. Any
+  /// authenticated account can call this (not just admins) -- used to decide
+  /// whether to show admin UI and whether export/import is allowed.
+  Future<AccountInfo> me({
     required String serverUrl,
     required String token,
   }) async {
@@ -23,8 +26,44 @@ class AdminClient {
             headers: _authHeaders(token))
         .timeout(const Duration(seconds: 10));
     _checkStatus(response, 200);
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    return data['role'] as String;
+    return AccountInfo.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  Future<ServerDataSettings> getDataSettings({
+    required String serverUrl,
+    required String token,
+  }) async {
+    final response = await http
+        .get(Uri.parse('$serverUrl/api/v1/admin/settings'),
+            headers: _authHeaders(token))
+        .timeout(const Duration(seconds: 10));
+    _checkStatus(response, 200);
+    return ServerDataSettings.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  Future<ServerDataSettings> updateDataSettings({
+    required String serverUrl,
+    required String token,
+    bool? allowMemberExport,
+    bool? allowMemberImport,
+  }) async {
+    final response = await http
+        .patch(
+          Uri.parse('$serverUrl/api/v1/admin/settings'),
+          headers: _authHeaders(token),
+          body: jsonEncode({
+            if (allowMemberExport != null)
+              'allowMemberExport': allowMemberExport,
+            if (allowMemberImport != null)
+              'allowMemberImport': allowMemberImport,
+          }),
+        )
+        .timeout(const Duration(seconds: 15));
+    _checkStatus(response, 200);
+    return ServerDataSettings.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   Future<ServerStatus> status({
