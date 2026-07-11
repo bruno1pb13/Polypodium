@@ -145,7 +145,7 @@ class WorkspacesNotifier extends _$WorkspacesNotifier {
   Future<void> removeRemote(String id) async {
     final workspace = state.firstWhere((w) => w.id == id);
     if (workspace.type != WorkspaceType.remote) {
-      throw StateError('O workspace local não pode ser excluído');
+      throw StateError('The local workspace cannot be deleted');
     }
 
     if (ref.read(activeWorkspaceIdNotifierProvider) == id) {

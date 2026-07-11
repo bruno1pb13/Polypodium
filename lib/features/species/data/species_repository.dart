@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/domain_exceptions.dart';
 import '../domain/species_model.dart';
 import 'species_dao.dart';
 
@@ -37,8 +38,7 @@ class SpeciesRepository {
     final hasActivePlants =
         await _db.plantsDao.hasActiveReferencingSpecies(id);
     if (hasActivePlants) {
-      throw Exception(
-          'Não é possível excluir uma espécie com plantas vinculadas.');
+      throw const SpeciesInUseException();
     }
     await _db.transaction(() async {
       final rev = await _db.syncMetaDao.nextRev();

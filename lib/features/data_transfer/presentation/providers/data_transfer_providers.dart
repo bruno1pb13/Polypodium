@@ -32,7 +32,7 @@ Future<DataTransferPermission> dataTransferPermission(Ref ref) async {
     return const DataTransferPermission(
       canExport: false,
       canImport: false,
-      deniedReason: 'Conecte-se ao servidor para exportar ou importar.',
+      deniedReason: DataTransferDeniedReason.notConnected,
     );
   }
   try {
@@ -43,7 +43,7 @@ Future<DataTransferPermission> dataTransferPermission(Ref ref) async {
     return DataTransferPermission(
       canExport: info.canExportData,
       canImport: info.canImportData,
-      deniedReason: 'Desativado pelo administrador do servidor.',
+      deniedReason: DataTransferDeniedReason.disabledByAdmin,
     );
   } catch (_) {
     // Offline or unreachable server: fall back to the cached role — admins
@@ -52,8 +52,7 @@ Future<DataTransferPermission> dataTransferPermission(Ref ref) async {
     return const DataTransferPermission(
       canExport: false,
       canImport: false,
-      deniedReason:
-          'Não foi possível verificar a permissão com o servidor.',
+      deniedReason: DataTransferDeniedReason.permissionUnverified,
     );
   }
 }

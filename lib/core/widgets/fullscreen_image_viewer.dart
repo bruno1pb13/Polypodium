@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../l10n/l10n.dart';
+
 /// Opens [imagePath] in a fullscreen viewer with zoom, save-to-gallery and
 /// share actions.
 Future<void> showFullscreenImageViewer(
@@ -37,27 +39,27 @@ class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
     if (_saving) return;
     setState(() => _saving = true);
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
     try {
       final hasAccess = await Gal.hasAccess(toAlbum: true) ||
           await Gal.requestAccess(toAlbum: true);
       if (!hasAccess) {
         messenger.showSnackBar(
-          const SnackBar(
-              content: Text('Permissão negada para acessar a galeria')),
+          SnackBar(content: Text(l10n.galleryPermissionDenied)),
         );
         return;
       }
       await Gal.putImage(widget.imagePath, album: 'Polypodium');
       messenger.showSnackBar(
-        const SnackBar(content: Text('Imagem salva na galeria')),
+        SnackBar(content: Text(l10n.imageSavedToGallery)),
       );
     } on GalException catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Erro ao salvar imagem: ${e.type.message}')),
+        SnackBar(content: Text(l10n.imageSaveError(e.type.message))),
       );
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Erro ao salvar imagem: $e')),
+        SnackBar(content: Text(l10n.imageSaveError('$e'))),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -77,7 +79,7 @@ class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao compartilhar: $e')),
+          SnackBar(content: Text(context.l10n.shareError('$e'))),
         );
       }
     }
@@ -105,12 +107,12 @@ class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
                         strokeWidth: 2, color: Colors.white),
                   )
                 : const Icon(Icons.download_outlined),
-            tooltip: 'Salvar na galeria',
+            tooltip: context.l10n.saveToGallery,
             onPressed: _saving ? null : _save,
           ),
           IconButton(
             icon: const Icon(Icons.share_outlined),
-            tooltip: 'Compartilhar',
+            tooltip: context.l10n.share,
             onPressed: _share,
           ),
         ],

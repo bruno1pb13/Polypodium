@@ -8,8 +8,12 @@ enum SyncBannerKind { success, offline }
 
 class SyncBannerState {
   final SyncBannerKind kind;
-  final String message;
-  const SyncBannerState({required this.kind, required this.message});
+
+  /// Number of synced items when [kind] is [SyncBannerKind.success].
+  /// The user-facing message is built (localized) by the banner widget.
+  final int downloadedCount;
+
+  const SyncBannerState({required this.kind, this.downloadedCount = 0});
 }
 
 /// Transient top-of-screen banner shown for background sync activity: a
@@ -29,17 +33,12 @@ class SyncBannerController extends _$SyncBannerController {
   void showDownloaded(int count) {
     _show(SyncBannerState(
       kind: SyncBannerKind.success,
-      message: count == 1
-          ? '1 novidade sincronizada'
-          : '$count novidades sincronizadas',
+      downloadedCount: count,
     ));
   }
 
   void showOffline() {
-    _show(const SyncBannerState(
-      kind: SyncBannerKind.offline,
-      message: 'Sem conexão com o servidor — usando dados locais',
-    ));
+    _show(const SyncBannerState(kind: SyncBannerKind.offline));
   }
 
   void _show(SyncBannerState next) {

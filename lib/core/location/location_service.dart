@@ -9,12 +9,21 @@ class DeviceCoordinates {
   const DeviceCoordinates({required this.latitude, required this.longitude});
 }
 
+/// Why obtaining the device position failed. The UI maps each code to a
+/// localized message.
+enum LocationError {
+  unsupportedPlatform,
+  serviceDisabled,
+  permissionDenied,
+  permissionDeniedForever,
+}
+
 class LocationServiceException implements Exception {
-  final String message;
-  const LocationServiceException(this.message);
+  final LocationError error;
+  const LocationServiceException(this.error);
 
   @override
-  String toString() => message;
+  String toString() => 'LocationServiceException($error)';
 }
 
 abstract interface class ILocationService {
@@ -27,28 +36,25 @@ class GeolocatorLocationService implements ILocationService {
   @override
   Future<DeviceCoordinates> getCurrentPosition() async {
     if (Platform.isLinux) {
-      throw const LocationServiceException(
-          'Geolocalização não é suportada no desktop Linux.');
+      throw const LocationServiceException(LocationError.unsupportedPlatform);
     }
 
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      throw const LocationServiceException(
-          'O GPS está desativado. Ative-o e tente novamente.');
+      throw const LocationServiceException(LocationError.serviceDisabled);
     }
 
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        throw const LocationServiceException(
-            'Permissão de localização negada.');
+        throw const LocationServiceException(LocationError.permissionDenied);
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
       throw const LocationServiceException(
-          'Permissão de localização negada permanentemente. Habilite nas configurações do dispositivo.');
+          LocationError.permissionDeniedForever);
     }
 
     final position = await Geolocator.getCurrentPosition(

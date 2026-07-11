@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../soils/presentation/providers/soils_providers.dart';
 import '../../domain/species_model.dart';
 import '../providers/species_providers.dart';
@@ -53,20 +54,23 @@ class _AddSpeciesScreenState extends ConsumerState<AddSpeciesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Editar espécie' : 'Nova espécie'),
+        title: Text(
+            _isEditing ? context.l10n.editSpecies : context.l10n.newSpecies),
       ),
       body: soilsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e')),
+        error: (e, _) => Center(child: Text(context.l10n.errorGeneric('$e'))),
         data: (soils) => Form(
           key: _formKey,
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
               SpeciesAutocomplete(
-                localSpecies: const [], // Na tela de espécie só queremos buscar na base externa
+                // On the species screen we only want to search the external
+                // dataset, not local species.
+                localSpecies: const [],
                 controller: _popularCtrl,
-                label: 'Nome popular *',
+                label: '${context.l10n.popularNameLabel} *',
                 onSelected: (_, popular, scientific) {
                   setState(() {
                     _popularCtrl.text = popular!;
@@ -74,36 +78,39 @@ class _AddSpeciesScreenState extends ConsumerState<AddSpeciesScreen> {
                   });
                 },
                 validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Campo obrigatório'
+                    ? context.l10n.requiredField
                     : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _scientificCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Nome científico *',
-                  hintText: 'Ex: Nephrolepis exaltata',
+                decoration: InputDecoration(
+                  labelText: '${context.l10n.scientificNameLabel} *',
+                  hintText: context.l10n.scientificNameHint,
                 ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Campo obrigatório' : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? context.l10n.requiredField
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _frequencyCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Frequência de irrigação padrão (dias)',
+                decoration: InputDecoration(
+                  labelText: context.l10n.defaultIrrigationFrequencyLabel,
                 ),
                 keyboardType: TextInputType.number,
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return null;
                   final n = int.tryParse(v);
-                  if (n == null || n <= 0) return 'Informe um número positivo';
+                  if (n == null || n <= 0) {
+                    return context.l10n.positiveNumberRequired;
+                  }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               Text(
-                'Solos recomendados',
+                context.l10n.recommendedSoils,
                 style: Theme.of(context).textTheme.labelLarge,
               ),
               const SizedBox(height: 8),
@@ -129,8 +136,9 @@ class _AddSpeciesScreenState extends ConsumerState<AddSpeciesScreen> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Text(
-                        _isEditing ? 'Salvar alterações' : 'Adicionar espécie'),
+                    : Text(_isEditing
+                        ? context.l10n.saveChanges
+                        : context.l10n.addSpecies),
               ),
             ],
           ),

@@ -10,6 +10,8 @@ import 'package:http/http.dart' as http;
 import 'package:archive/archive.dart';
 import 'package:csv/csv.dart';
 
+import '../../../core/sync/sync_exceptions.dart';
+
 part 'external_species_repository.g.dart';
 
 class ExternalSpecies {
@@ -139,7 +141,7 @@ class ExternalSpeciesRepository extends _$ExternalSpeciesRepository {
     }
 
     if (taxonContent == null || vernacularContent == null) {
-      throw Exception('Arquivos não encontrados no ZIP');
+      throw const ServerErrorException('Dataset files not found in ZIP');
     }
 
     // 3. Rebuild SQLite locally

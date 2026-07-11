@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../../core/sync/sync_exceptions.dart';
 import '../domain/account_info.dart';
 import '../domain/server_data_settings.dart';
 import '../domain/server_status.dart';
@@ -144,14 +145,14 @@ class AdminClient {
 
   void _checkStatus(http.Response response, int expected) {
     if (response.statusCode == 401) {
-      throw Exception('Sessão expirada. Faça login novamente.');
+      throw const SessionExpiredException();
     }
     if (response.statusCode == 403) {
-      throw Exception('Você não tem permissão de administrador.');
+      throw const AdminForbiddenException();
     }
     if (response.statusCode != expected) {
       final body = jsonDecode(response.body) as Map<String, dynamic>;
-      throw Exception(body['error'] ?? 'Erro ao comunicar com o servidor');
+      throw ServerErrorException(body['error'] as String?);
     }
   }
 

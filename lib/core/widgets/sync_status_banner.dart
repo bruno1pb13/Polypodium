@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../l10n/l10n.dart';
 import '../sync/sync_banner_controller.dart';
 
 /// Top-of-screen strip reporting background sync activity: green when new
@@ -23,7 +24,10 @@ class SyncStatusBanner extends ConsumerWidget {
       ),
       child: banner == null
           ? const SizedBox(width: double.infinity, key: ValueKey('empty'))
-          : _Banner(key: ValueKey(banner.message), state: banner),
+          : _Banner(
+              key: ValueKey('${banner.kind}-${banner.downloadedCount}'),
+              state: banner,
+            ),
     );
   }
 }
@@ -39,6 +43,9 @@ class _Banner extends StatelessWidget {
     final color = isSuccess ? Colors.green.shade600 : Colors.red.shade600;
     final icon =
         isSuccess ? Icons.cloud_done_outlined : Icons.cloud_off_outlined;
+    final message = isSuccess
+        ? context.l10n.syncDownloaded(state.downloadedCount)
+        : context.l10n.syncOffline;
 
     return SafeArea(
       bottom: false,
@@ -52,7 +59,7 @@ class _Banner extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  state.message,
+                  message,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,

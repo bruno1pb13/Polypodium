@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../domain/species_model.dart';
 import '../../data/external_species_repository.dart';
 
@@ -9,8 +10,12 @@ class SpeciesAutocomplete extends ConsumerStatefulWidget {
   final List<SpeciesModel> localSpecies;
   final TextEditingController controller;
   final void Function(String? id, String? popular, String? scientific) onSelected;
-  final String label;
-  final String hint;
+
+  /// Defaults to the localized "Species *" label when null.
+  final String? label;
+
+  /// Defaults to the localized search hint when null.
+  final String? hint;
   final String? Function(String?)? validator;
 
   const SpeciesAutocomplete({
@@ -18,8 +23,8 @@ class SpeciesAutocomplete extends ConsumerStatefulWidget {
     required this.localSpecies,
     required this.controller,
     required this.onSelected,
-    this.label = 'Espécie *',
-    this.hint = 'Busque na base oficial ou local...',
+    this.label,
+    this.hint,
     this.validator,
   });
 
@@ -231,9 +236,11 @@ class _SpeciesAutocompleteState extends ConsumerState<SpeciesAutocomplete> {
                           ),
                         ),
                       if (!_isLoading && _options.isEmpty && widget.controller.text.isNotEmpty)
-                        const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text('Nenhuma espécie encontrada', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(context.l10n.noSpeciesFound,
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.grey)),
                         ),
                     ],
                   );
@@ -263,8 +270,8 @@ class _SpeciesAutocompleteState extends ConsumerState<SpeciesAutocomplete> {
         controller: widget.controller,
         focusNode: _focusNode,
         decoration: InputDecoration(
-          labelText: widget.label,
-          hintText: widget.hint,
+          labelText: widget.label ?? '${context.l10n.speciesFieldLabel} *',
+          hintText: widget.hint ?? context.l10n.speciesSearchFieldHint,
           suffixIcon: _isLoading 
             ? const SizedBox(width: 20, height: 20, child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator(strokeWidth: 2)))
             : const Icon(Icons.search, size: 20),

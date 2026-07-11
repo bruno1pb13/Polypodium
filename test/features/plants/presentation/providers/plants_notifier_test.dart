@@ -135,7 +135,9 @@ void main() {
           .single as EntryModel;
       expect(capturedEntry.type, EntryType.history);
       expect(capturedEntry.plantId, plant.id);
-      expect(capturedEntry.note, contains('Planta adicionada'));
+      // History notes are written via systemL10n(); in the test environment
+      // the device locale resolves to the English fallback.
+      expect(capturedEntry.note, contains('Plant added'));
       expect(capturedEntry.note, contains('Ferny'));
     });
 
@@ -184,7 +186,7 @@ void main() {
           .captured
           .single as EntryModel;
       expect(capturedEntry.type, EntryType.history);
-      expect(capturedEntry.note, contains('Apelido: Ferny → Ferny Updated'));
+      expect(capturedEntry.note, contains('Nickname: Ferny → Ferny Updated'));
     });
 
     test('irrigate calls repository', () async {

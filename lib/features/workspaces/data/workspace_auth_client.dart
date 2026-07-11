@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../../core/sync/sync_exceptions.dart';
+
 class WorkspaceLoginResult {
   final String token;
   final String deviceId;
@@ -25,7 +27,7 @@ class WorkspaceAuthClient {
         .timeout(const Duration(seconds: 10));
 
     if (response.statusCode != 200) {
-      throw Exception('Servidor não disponível ou URL inválida');
+      throw const ServerUnavailableException();
     }
   }
 
@@ -37,7 +39,7 @@ class WorkspaceAuthClient {
         .timeout(const Duration(seconds: 10));
 
     if (response.statusCode != 200) {
-      throw Exception('Servidor não disponível ou URL inválida');
+      throw const ServerUnavailableException();
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -63,7 +65,10 @@ class WorkspaceAuthClient {
 
     if (response.statusCode != 201) {
       final body = jsonDecode(response.body) as Map<String, dynamic>;
-      throw Exception(body['error'] ?? 'Falha ao criar conta');
+      throw AuthFailedException(
+        serverMessage: body['error'] as String?,
+        isRegistration: true,
+      );
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -95,7 +100,7 @@ class WorkspaceAuthClient {
 
     if (response.statusCode != 200) {
       final body = jsonDecode(response.body) as Map<String, dynamic>;
-      throw Exception(body['error'] ?? 'Falha ao autenticar');
+      throw AuthFailedException(serverMessage: body['error'] as String?);
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;

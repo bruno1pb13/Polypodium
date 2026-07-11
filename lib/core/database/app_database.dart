@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../enums.dart';
+import '../l10n/l10n.dart';
 import '../../features/entries/data/entries_dao.dart';
 import '../../features/entries/data/entries_table.dart';
 import '../../features/locations/data/locations_dao.dart';
@@ -65,12 +66,15 @@ class AppDatabase extends _$AppDatabase {
           id: const Value(0), nextLocalRev: const Value(1)),
     );
     final now = DateTime.now();
+    // Seeded soils are persisted (and synced) as regular data, so they are
+    // created once in the device language at database-creation time.
+    final l10n = systemL10n();
     for (final type in SoilType.values) {
       await into(soilsTable).insertOnConflictUpdate(
         SoilsTableCompanion.insert(
           id: type.name,
-          name: type.label,
-          composition: Value(type.description),
+          name: type.label(l10n),
+          composition: Value(type.description(l10n)),
           imagePath: Value(type.imagePath),
           imageSource: Value(type.imageSource),
           createdAt: now,

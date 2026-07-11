@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/widgets/app_shell.dart';
 import '../../domain/workspace_model.dart';
 import '../providers/workspace_providers.dart';
@@ -44,11 +45,11 @@ class WorkspaceSelector extends ConsumerWidget {
             child: _WorkspaceRow(workspace: ws, isActive: ws.id == active.id),
           ),
         const PopupMenuDivider(),
-        const PopupMenuItem<String>(
+        PopupMenuItem<String>(
           value: _manageAction,
           child: _ActionRow(
             icon: Icons.settings_outlined,
-            label: 'Gerenciar workspaces',
+            label: context.l10n.manageWorkspaces,
           ),
         ),
       ],
@@ -156,10 +157,10 @@ class _WorkspaceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLocal = workspace.type == WorkspaceType.local;
     final subtitle = isLocal
-        ? 'Local — não sincroniza'
+        ? context.l10n.localNoSync
         : (workspace.isLoggedIn
-            ? (workspace.userEmail ?? 'Conectado')
-            : 'Desconectado');
+            ? (workspace.userEmail ?? context.l10n.connected)
+            : context.l10n.disconnected);
     final cs = Theme.of(context).colorScheme;
 
     return Row(

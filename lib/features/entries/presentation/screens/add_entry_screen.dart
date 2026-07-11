@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/enums.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/storage/photo_storage.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../entries/domain/entry_model.dart';
@@ -65,12 +66,12 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   bool _showFieldErrors = false;
   late final PhotoStorage _photoStorage;
 
-  static const _pruningReasons = [
-    (key: 'formacao', label: 'Formação'),
-    (key: 'limpeza', label: 'Limpeza'),
-    (key: 'rejuvenescimento', label: 'Rejuvenescimento'),
-    (key: 'colheita', label: 'Colheita'),
-  ];
+  List<({String key, String label})> _pruningReasons(AppLocalizations l10n) => [
+        (key: 'formacao', label: l10n.pruningFormation),
+        (key: 'limpeza', label: l10n.pruningCleaning),
+        (key: 'rejuvenescimento', label: l10n.pruningRejuvenation),
+        (key: 'colheita', label: l10n.pruningHarvest),
+      ];
 
   @override
   void initState() {
@@ -159,9 +160,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'Novo Registro',
-          style: TextStyle(
+        title: Text(
+          context.l10n.newEntryTitle,
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
             shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
@@ -199,9 +200,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Tipo de registro',
-                        style: TextStyle(
+                      Text(
+                        context.l10n.entryTypeCardTitle,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -217,7 +218,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                             .map((t) {
                           final selected = t == _type;
                           return ChoiceChip(
-                            label: Text('${t.emoji} ${t.label}'),
+                            label: Text('${t.emoji} ${t.label(context.l10n)}'),
                             selected: selected,
                             onSelected: (_) => setState(() {
                               _type = t;
@@ -258,9 +259,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Notas',
-                        style: TextStyle(
+                      Text(
+                        context.l10n.notesTitle,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -274,19 +275,17 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                         decoration: InputDecoration(
                           hintText: switch (_type) {
                             EntryType.irrigation =>
-                              'Tinha algo na água? Alguma observação?',
+                              context.l10n.noteHintIrrigation,
                             EntryType.fertilizer =>
-                              'Frequência, método de aplicação...',
-                            EntryType.pruning =>
-                              'Como a planta estava antes da poda?',
-                            EntryType.observation => 'Como a planta está hoje?',
-                            EntryType.height =>
-                              'Alguma observação sobre o crescimento?',
+                              context.l10n.noteHintFertilizer,
+                            EntryType.pruning => context.l10n.noteHintPruning,
+                            EntryType.observation =>
+                              context.l10n.noteHintObservation,
+                            EntryType.height => context.l10n.noteHintHeight,
                             EntryType.chlorosis =>
-                              'Quais folhas estão afetadas?',
-                            EntryType.pest =>
-                              'Onde foi identificado? Algum tratamento?',
-                            _ => 'Notas opcionais...',
+                              context.l10n.noteHintChlorosis,
+                            EntryType.pest => context.l10n.noteHintPest,
+                            _ => context.l10n.noteHintDefault,
                           },
                           hintStyle: TextStyle(
                             color: Colors.white.withValues(alpha: 0.4),
@@ -316,9 +315,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Foto',
-                        style: TextStyle(
+                      Text(
+                        context.l10n.photoTitle,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -362,7 +361,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                             Expanded(
                               child: _PhotoButton(
                                 icon: Icons.photo_camera_outlined,
-                                label: 'Câmera',
+                                label: context.l10n.camera,
                                 onTap: () => _pickPhoto(ImageSource.camera),
                               ),
                             ),
@@ -370,7 +369,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                             Expanded(
                               child: _PhotoButton(
                                 icon: Icons.photo_library_outlined,
-                                label: 'Galeria',
+                                label: context.l10n.gallery,
                                 onTap: () => _pickPhoto(ImageSource.gallery),
                               ),
                             ),
@@ -398,9 +397,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text(
-                            'Salvar registro',
-                            style: TextStyle(
+                        : Text(
+                            context.l10n.saveEntry,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
@@ -432,21 +431,35 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   // Irrigation — 3 quick presets + custom input
   // ---------------------------------------------------------------------------
 
-  static const _irrigationOptions = [
-    (value: 1, label: 'Escassa', description: 'Solo levemente úmido'),
-    (value: 2, label: 'Moderada', description: 'Rega normal, solo bem úmido'),
-    (value: 3, label: 'Intensa', description: 'Solo encharcado / longa duração'),
-  ];
+  List<({int value, String label, String description})> _irrigationOptions(
+          AppLocalizations l10n) =>
+      [
+        (
+          value: 1,
+          label: l10n.irrigationScarce,
+          description: l10n.irrigationScarceDesc
+        ),
+        (
+          value: 2,
+          label: l10n.irrigationModerate,
+          description: l10n.irrigationModerateDesc
+        ),
+        (
+          value: 3,
+          label: l10n.irrigationIntense,
+          description: l10n.irrigationIntenseDesc
+        ),
+      ];
 
   Widget _buildIrrigationFields(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle(emoji: '💧', label: 'Irrigação'),
+        _SectionTitle(emoji: '💧', label: context.l10n.entryTypeIrrigation),
         const SizedBox(height: 4),
-        _HintText('Intensidade da rega (opcional)'),
+        _HintText(context.l10n.irrigationIntensityHint),
         const SizedBox(height: 12),
-        ..._irrigationOptions.map((o) => Padding(
+        ..._irrigationOptions(context.l10n).map((o) => Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: _SelectionRow(
                 selected: _irrigationIntensity == o.value,
@@ -469,9 +482,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle(emoji: '🌱', label: 'Fertilização'),
+        _SectionTitle(emoji: '🌱', label: context.l10n.entryTypeFertilizer),
         const SizedBox(height: 4),
-        _HintText('Produto(s) utilizado(s) — opcional'),
+        _HintText(context.l10n.fertilizerProductsHint),
         const SizedBox(height: 12),
         ...List.generate(_fertilizerProducts.length, (i) {
           final p = _fertilizerProducts[i];
@@ -487,8 +500,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                       flex: 3,
                       child: _TextField(
                         controller: p.nameCtrl,
-                        label: 'Produto ${_fertilizerProducts.length > 1 ? "${i + 1}" : ""}',
-                        hint: 'Ex: Forth Crescimento',
+                        label:
+                            '${context.l10n.productLabel} ${_fertilizerProducts.length > 1 ? "${i + 1}" : ""}',
+                        hint: context.l10n.productHint,
                         context: context,
                       ),
                     ),
@@ -497,7 +511,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                       flex: 2,
                       child: _NumericField(
                         controller: p.doseCtrl,
-                        label: 'Dose',
+                        label: context.l10n.doseLabel,
                         suffix: 'ml',
                         hint: '5',
                         onChanged: (_) => setState(() {}),
@@ -534,9 +548,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           onPressed: () =>
               setState(() => _fertilizerProducts.add(_ProductEntry())),
           icon: const Icon(Icons.add, size: 18, color: Colors.white70),
-          label: const Text(
-            'Adicionar produto',
-            style: TextStyle(color: Colors.white70, fontSize: 13),
+          label: Text(
+            context.l10n.addProduct,
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
           ),
           style: TextButton.styleFrom(
             padding:
@@ -559,14 +573,14 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle(emoji: '✂️', label: 'Poda'),
+        _SectionTitle(emoji: '✂️', label: context.l10n.entryTypePruning),
         const SizedBox(height: 4),
-        _HintText('Motivo (opcional)'),
+        _HintText(context.l10n.pruningReasonHint),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: _pruningReasons.map((r) {
+          children: _pruningReasons(context.l10n).map((r) {
             final selected = _pruningReason == r.key;
             return ChoiceChip(
               label: Text(r.label),
@@ -601,7 +615,14 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   // ---------------------------------------------------------------------------
 
   Widget _buildObservationFields(BuildContext context) {
-    const scoreLabels = ['', 'Crítica', 'Ruim', 'Regular', 'Boa', 'Ótima'];
+    final scoreLabels = [
+      '',
+      context.l10n.healthCritical,
+      context.l10n.healthBad,
+      context.l10n.healthRegular,
+      context.l10n.healthGood,
+      context.l10n.healthExcellent,
+    ];
     final scoreColors = [
       Colors.transparent,
       Colors.red.shade400,
@@ -614,9 +635,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle(emoji: '👁', label: 'Observação'),
+        _SectionTitle(emoji: '👁', label: context.l10n.entryTypeObservation),
         const SizedBox(height: 4),
-        _HintText('Nota de saúde da planta (opcional)'),
+        _HintText(context.l10n.healthScoreHint),
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -680,22 +701,22 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle(emoji: '📏', label: 'Altura da planta'),
+        _SectionTitle(emoji: '📏', label: context.l10n.heightSectionTitle),
         const SizedBox(height: 12),
         _NumericField(
           controller: _heightCtrl,
-          label: 'Altura em cm *',
+          label: '${context.l10n.heightCmLabel} *',
           suffix: 'cm',
-          hint: 'Ex: 32,5',
+          hint: context.l10n.heightHint,
           hasError: hasError,
-          errorText: hasError ? 'Informe uma altura em cm válida' : null,
+          errorText: hasError ? context.l10n.heightInvalid : null,
           onChanged: (_) {
             if (_showFieldErrors) setState(() {});
           },
           context: context,
         ),
         const SizedBox(height: 8),
-        _HintText('Meça do nível do solo até a folha mais alta.'),
+        _HintText(context.l10n.heightMeasureHint),
       ],
     );
   }
@@ -708,11 +729,11 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle(emoji: '🟡', label: 'Clorose'),
+        _SectionTitle(emoji: '🟡', label: context.l10n.entryTypeChlorosis),
         const SizedBox(height: 4),
-        _HintText('Selecione a gravidade *'),
+        _HintText(context.l10n.severitySelectHint),
         const SizedBox(height: 12),
-        ..._chlorosisSeverityOptions.map((s) => Padding(
+        ..._chlorosisSeverityOptions(context.l10n).map((s) => Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: _SelectionRow(
                 selected: _chlorosisSeverity == s.value,
@@ -735,23 +756,23 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle(emoji: '🐛', label: 'Parasitas'),
+        _SectionTitle(emoji: '🐛', label: context.l10n.entryTypePest),
         const SizedBox(height: 12),
         _TextField(
           controller: _pestTypeCtrl,
-          label: 'Tipo de parasita *',
-          hint: 'Ex: Cochonilha, Pulgão, Ácaro...',
+          label: '${context.l10n.pestTypeLabel} *',
+          hint: context.l10n.pestTypeHint,
           hasError: hasError,
-          errorText: hasError ? 'Informe o tipo de parasita' : null,
+          errorText: hasError ? context.l10n.pestTypeRequired : null,
           onChanged: (_) {
             if (_showFieldErrors) setState(() {});
           },
           context: context,
         ),
         const SizedBox(height: 16),
-        _HintText('Gravidade da infestação *'),
+        _HintText(context.l10n.pestSeverityHint),
         const SizedBox(height: 8),
-        ..._pestSeverityOptions.map((s) => Padding(
+        ..._pestSeverityOptions(context.l10n).map((s) => Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: _SelectionRow(
                 selected: _pestSeverity == s.value,
@@ -767,19 +788,50 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
 
   // ---------------------------------------------------------------------------
 
-  static const _chlorosisSeverityOptions = [
-    (value: 0, label: 'Curada', description: 'Planta sem clorose ativa'),
-    (value: 1, label: 'Leve', description: 'Poucas folhas amareladas'),
-    (value: 2, label: 'Moderada', description: 'Várias folhas afetadas'),
-    (value: 3, label: 'Severa', description: 'Maioria das folhas afetadas'),
-  ];
+  List<({int value, String label, String description})>
+      _chlorosisSeverityOptions(AppLocalizations l10n) => [
+            (
+              value: 0,
+              label: l10n.chlorosisCured,
+              description: l10n.chlorosisCuredDesc
+            ),
+            (
+              value: 1,
+              label: l10n.severityMild,
+              description: l10n.chlorosisMildDesc
+            ),
+            (
+              value: 2,
+              label: l10n.severityModerate,
+              description: l10n.chlorosisModerateDesc
+            ),
+            (
+              value: 3,
+              label: l10n.severitySevere,
+              description: l10n.chlorosisSevereDesc
+            ),
+          ];
 
-  static const _pestSeverityOptions = [
-    (value: 0, label: 'Erradicada', description: 'Planta livre de parasitas'),
-    (value: 1, label: 'Leve', description: 'Poucos indivíduos / área pequena'),
-    (value: 2, label: 'Moderada', description: 'Várias áreas afetadas'),
-    (value: 3, label: 'Severa', description: 'Infestação generalizada'),
-  ];
+  List<({int value, String label, String description})> _pestSeverityOptions(
+          AppLocalizations l10n) =>
+      [
+        (
+          value: 0,
+          label: l10n.pestEradicated,
+          description: l10n.pestEradicatedDesc
+        ),
+        (value: 1, label: l10n.severityMild, description: l10n.pestMildDesc),
+        (
+          value: 2,
+          label: l10n.severityModerate,
+          description: l10n.pestModerateDesc
+        ),
+        (
+          value: 3,
+          label: l10n.severitySevere,
+          description: l10n.pestSevereDesc
+        ),
+      ];
 
   Future<void> _pickPhoto(ImageSource source) async {
     final picker = ImagePicker();
