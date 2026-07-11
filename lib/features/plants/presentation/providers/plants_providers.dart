@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/enums.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/notifications/notification_provider.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
@@ -65,6 +66,13 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   Future<String?> _generateHistoryNote(PlantModel? old, PlantModel next) async {
+    // History notes are persisted (and synced) as entry text, so they are
+    // written once in the device language at the time of the change. The
+    // explicit pattern (instead of DateFormat.yMd) avoids requiring intl's
+    // per-locale date symbols, which aren't loaded outside the widget tree.
+    final l10n = systemL10n();
+    final dateFmt = DateFormat(l10n.dateFormatPattern);
+
     if (old == null) {
       // Creation
       final species = await ref.read(speciesNotifierProvider.future).then(
@@ -75,23 +83,23 @@ class PlantsNotifier extends _$PlantsNotifier {
               (list) => list.where((l) => l.id == next.locationId).firstOrNull);
 
       final sb = StringBuffer();
-      sb.writeln('Planta adicionada ao sistema:');
-      sb.writeln('• Apelido: ${next.nickname}');
+      sb.writeln(l10n.historyPlantAdded);
+      sb.writeln('• ${l10n.historyFieldNickname}: ${next.nickname}');
       if (species != null) {
         sb.writeln(
-            '• Espécie: ${species.popularName} (${species.scientificName})');
+            '• ${l10n.historyFieldSpecies}: ${species.popularName} (${species.scientificName})');
       }
       final soil = await ref.read(soilsNotifierProvider.future).then(
           (list) => list.where((s) => s.id == next.soilId).firstOrNull);
-      sb.writeln('• Solo: ${soil?.name ?? 'Desconhecido'}');
+      sb.writeln('• ${l10n.historyFieldSoil}: ${soil?.name ?? l10n.unknown}');
       if (location != null) {
-        sb.writeln('• Localização: ${location.name}');
+        sb.writeln('• ${l10n.historyFieldLocation}: ${location.name}');
       }
       sb.writeln(
-          '• Adquirida em: ${DateFormat('dd/MM/yyyy').format(next.acquisitionDate)}');
+          '• ${l10n.historyAcquiredOn}: ${dateFmt.format(next.acquisitionDate)}');
       if (next.irrigationFrequencyDays != null) {
         sb.writeln(
-            '• Rega personalizada: ${next.irrigationFrequencyDays} dias');
+            '• ${l10n.historyCustomWatering(l10n.daysCount(next.irrigationFrequencyDays!))}');
       }
       return sb.toString().trim();
     }
@@ -99,7 +107,8 @@ class PlantsNotifier extends _$PlantsNotifier {
     // Update
     final changes = <String>[];
     if (old.nickname != next.nickname) {
-      changes.add('Apelido: ${old.nickname} → ${next.nickname}');
+      changes
+          .add('${l10n.historyFieldNickname}: ${old.nickname} → ${next.nickname}');
     }
     if (old.speciesId != next.speciesId) {
       final speciesList = await ref.read(speciesNotifierProvider.future);
@@ -107,35 +116,40 @@ class PlantsNotifier extends _$PlantsNotifier {
       final nextS =
           speciesList.where((s) => s.id == next.speciesId).firstOrNull;
       changes.add(
-          'Espécie: ${oldS?.popularName ?? 'Desconhecida'} → ${nextS?.popularName ?? 'Desconhecida'}');
+          '${l10n.historyFieldSpecies}: ${oldS?.popularName ?? l10n.unknown} → ${nextS?.popularName ?? l10n.unknown}');
     }
     if (old.soilId != next.soilId) {
       final soilList = await ref.read(soilsNotifierProvider.future);
       final oldSoil = soilList.where((s) => s.id == old.soilId).firstOrNull;
       final nextSoil = soilList.where((s) => s.id == next.soilId).firstOrNull;
       changes.add(
-          'Solo: ${oldSoil?.name ?? 'Desconhecido'} → ${nextSoil?.name ?? 'Desconhecido'}');
+          '${l10n.historyFieldSoil}: ${oldSoil?.name ?? l10n.unknown} → ${nextSoil?.name ?? l10n.unknown}');
     }
     if (old.locationId != next.locationId) {
       final locList = await ref.read(locationsNotifierProvider.future);
       final oldL = locList.where((l) => l.id == old.locationId).firstOrNull;
       final nextL = locList.where((l) => l.id == next.locationId).firstOrNull;
       changes.add(
-          'Localização: ${oldL?.name ?? 'Nenhuma'} → ${nextL?.name ?? 'Nenhuma'}');
+          '${l10n.historyFieldLocation}: ${oldL?.name ?? l10n.none} → ${nextL?.name ?? l10n.none}');
     }
     if (old.irrigationFrequencyDays != next.irrigationFrequencyDays) {
-      changes.add(
-          'Frequência de rega: ${old.irrigationFrequencyDays ?? 'Padrão'} → ${next.irrigationFrequencyDays ?? 'Padrão'} dias');
+      final oldFreq = old.irrigationFrequencyDays == null
+          ? l10n.defaultValue
+          : l10n.daysCount(old.irrigationFrequencyDays!);
+      final nextFreq = next.irrigationFrequencyDays == null
+          ? l10n.defaultValue
+          : l10n.daysCount(next.irrigationFrequencyDays!);
+      changes.add('${l10n.historyFieldWateringFrequency}: $oldFreq → $nextFreq');
     }
     if (old.acquisitionDate.day != next.acquisitionDate.day ||
         old.acquisitionDate.month != next.acquisitionDate.month ||
         old.acquisitionDate.year != next.acquisitionDate.year) {
       changes.add(
-          'Data de aquisição: ${DateFormat('dd/MM/yyyy').format(old.acquisitionDate)} → ${DateFormat('dd/MM/yyyy').format(next.acquisitionDate)}');
+          '${l10n.historyFieldAcquisitionDate}: ${dateFmt.format(old.acquisitionDate)} → ${dateFmt.format(next.acquisitionDate)}');
     }
 
     if (changes.isEmpty) return null;
-    return 'Informações atualizadas:\n${changes.map((c) => '• $c').join('\n')}';
+    return '${l10n.historyUpdatedHeader}\n${changes.map((c) => '• $c').join('\n')}';
   }
 
   Future<void> irrigate(String plantId) async {

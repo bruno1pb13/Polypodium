@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../domain/soil_model.dart';
 import 'soil_picker_sheet.dart';
 
@@ -77,7 +78,7 @@ class SoilSelectionField extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Tipo de solo *${isRecommended ? ' (recomendado)' : ''}',
+                        '${context.l10n.soilTypeLabel} *${isRecommended ? ' ${context.l10n.recommendedSuffix}' : ''}',
                         style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 12,
@@ -85,7 +86,7 @@ class SoilSelectionField extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        selectedSoil?.name ?? 'Selecionar solo',
+                        selectedSoil?.name ?? context.l10n.selectSoilTitle,
                         style: TextStyle(
                           color: selectedSoil != null
                               ? Colors.white

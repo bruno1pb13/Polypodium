@@ -7,8 +7,11 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/l10n/error_messages.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../data/data_export_service.dart';
 import '../../data/data_import_service.dart';
+import '../../domain/data_transfer_permission.dart';
 import '../providers/data_transfer_providers.dart';
 
 /// The "Dados" block of the settings screen: export the active workspace to
@@ -34,11 +37,21 @@ class _DataTransferSectionState extends ConsumerState<DataTransferSection> {
     final deniedReason = permission?.deniedReason;
 
     String subtitleFor(bool allowed, String normal) {
-      if (permissionAsync.isLoading) return 'Verificando permissão...';
+      if (permissionAsync.isLoading) return context.l10n.checkingPermission;
       if (permissionAsync.hasError) {
-        return 'Não foi possível verificar a permissão com o servidor.';
+        return context.l10n.permissionCheckFailed;
       }
-      if (!allowed) return deniedReason ?? 'Não permitido.';
+      if (!allowed) {
+        return switch (deniedReason) {
+          DataTransferDeniedReason.notConnected =>
+            context.l10n.connectToTransfer,
+          DataTransferDeniedReason.disabledByAdmin =>
+            context.l10n.disabledByAdmin,
+          DataTransferDeniedReason.permissionUnverified =>
+            context.l10n.permissionCheckFailed,
+          null => context.l10n.notAllowed,
+        };
+      }
       return normal;
     }
 
@@ -47,17 +60,17 @@ class _DataTransferSectionState extends ConsumerState<DataTransferSection> {
       children: [
         ListTile(
           leading: const Icon(Icons.upload_file_outlined),
-          title: const Text('Exportar dados'),
-          subtitle: Text(subtitleFor(
-              canExport, 'Gera um arquivo .zip com os dados e fotos')),
+          title: Text(context.l10n.exportData),
+          subtitle:
+              Text(subtitleFor(canExport, context.l10n.exportDataSubtitle)),
           enabled: canExport && !_busy,
           onTap: () => _run(_export),
         ),
         ListTile(
           leading: const Icon(Icons.file_download_outlined),
-          title: const Text('Importar dados'),
-          subtitle: Text(subtitleFor(
-              canImport, 'Mescla um backup exportado com os dados atuais')),
+          title: Text(context.l10n.importData),
+          subtitle:
+              Text(subtitleFor(canImport, context.l10n.importDataSubtitle)),
           enabled: canImport && !_busy,
           onTap: () => _run(_import),
         ),
@@ -76,6 +89,7 @@ class _DataTransferSectionState extends ConsumerState<DataTransferSection> {
 
   Future<void> _export() async {
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
     final box = context.findRenderObject() as RenderBox?;
     try {
       final bytes =
@@ -104,18 +118,19 @@ class _DataTransferSectionState extends ConsumerState<DataTransferSection> {
         if (location == null) return;
         await File(location.path).writeAsBytes(bytes);
         messenger.showSnackBar(
-          SnackBar(content: Text('Dados exportados para ${location.path}')),
+          SnackBar(content: Text(l10n.dataExportedTo(location.path))),
         );
       }
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Erro ao exportar: $e')),
+        SnackBar(content: Text(l10n.exportError('$e'))),
       );
     }
   }
 
   Future<void> _import() async {
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
     try {
       final file = await openFile(
         acceptedTypeGroups: const [
@@ -132,20 +147,16 @@ class _DataTransferSectionState extends ConsumerState<DataTransferSection> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Importar dados?'),
-          content: Text(
-            'Os dados de "${p.basename(file.path)}" serão mesclados aos '
-            'dados deste workspace. Itens editados mais recentemente no '
-            'aplicativo são mantidos.',
-          ),
+          title: Text(ctx.l10n.importDataTitle),
+          content: Text(ctx.l10n.importDataBody(p.basename(file.path))),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancelar'),
+              child: Text(ctx.l10n.cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Importar'),
+              child: Text(ctx.l10n.importAction),
             ),
           ],
         ),
@@ -158,16 +169,23 @@ class _DataTransferSectionState extends ConsumerState<DataTransferSection> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            'Importação concluída: ${summary.applied} item(ns) aplicados'
-            '${summary.skipped > 0 ? ', ${summary.skipped} ignorados por serem mais antigos' : ''}.',
+            summary.skipped > 0
+                ? l10n.importDoneWithSkipped(summary.applied, summary.skipped)
+                : l10n.importDone(summary.applied),
           ),
         ),
       );
     } on InvalidBackupException catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+      final message = switch (e.kind) {
+        InvalidBackupKind.corrupt => l10n.backupCorrupt,
+        InvalidBackupKind.unrecognized => l10n.backupUnrecognized,
+        InvalidBackupKind.notPolypodiumBackup => l10n.backupNotPolypodium,
+        InvalidBackupKind.newerVersion => l10n.backupNewerVersion,
+      };
+      messenger.showSnackBar(SnackBar(content: Text(message)));
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Erro ao importar: $e')),
+        SnackBar(content: Text(localizedErrorMessage(e, l10n))),
       );
     }
   }

@@ -41,8 +41,10 @@ class EntriesRepository {
 
   Future<void> delete(String id) async {
     final entry = await getById(id);
+    // Guard against programming errors -- the UI never offers deletion for
+    // history entries, so this is not a user-facing message.
     if (entry?.type == EntryType.history) {
-      throw Exception('Registros de histórico não podem ser removidos.');
+      throw StateError('History entries cannot be deleted.');
     }
     await _db.transaction(() async {
       final rev = await _db.syncMetaDao.nextRev();

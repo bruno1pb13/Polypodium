@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/l10n.dart';
 import '../../features/plants/presentation/screens/home_screen.dart';
 import '../../features/species/presentation/screens/species_list_screen.dart';
 import '../../features/locations/presentation/screens/locations_list_screen.dart';
@@ -20,12 +21,12 @@ class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
   final _contentKey = GlobalKey<NavigatorState>();
 
-  static const _labels = [
-    'Minhas Plantas',
-    'Espécies',
-    'Localizações',
-    'Solos',
-    'Configurações',
+  List<String> _labels(BuildContext context) => [
+    context.l10n.navMyPlants,
+    context.l10n.navSpecies,
+    context.l10n.navLocations,
+    context.l10n.navSoils,
+    context.l10n.navSettings,
   ];
   static const _icons = [
     Icons.home_outlined,
@@ -76,7 +77,7 @@ class _AppShellState extends State<AppShell> {
             children: [
               _SideNav(
                 selectedIndex: _selectedIndex,
-                labels: _labels,
+                labels: _labels(context),
                 icons: _icons,
                 selectedIcons: _selectedIcons,
                 onSelected: _onSelected,

@@ -1,3 +1,5 @@
+import '../l10n/app_localizations.dart';
+
 enum SoilType {
   sandy,
   clay,
@@ -65,52 +67,52 @@ enum EntrySortOption {
 }
 
 extension EntrySortOptionX on EntrySortOption {
-  String get label => switch (this) {
-        EntrySortOption.dateDesc => 'Mais recentes primeiro',
-        EntrySortOption.dateAsc => 'Mais antigos primeiro',
-        EntrySortOption.typeAZ => 'Por tipo',
+  String label(AppLocalizations l10n) => switch (this) {
+        EntrySortOption.dateDesc => l10n.sortNewestFirst,
+        EntrySortOption.dateAsc => l10n.sortOldestFirst,
+        EntrySortOption.typeAZ => l10n.sortByType,
       };
 }
 
 extension SoilTypeX on SoilType {
-  String get label => switch (this) {
-        SoilType.sandy => 'Arenoso',
-        SoilType.clay => 'Argiloso',
-        SoilType.loamy => 'Franco',
-        SoilType.peaty => 'Turfoso',
-        SoilType.chalky => 'Calcário',
-        SoilType.silty => 'Siltoso',
-        SoilType.latosol => 'Latossolo',
-        SoilType.argisol => 'Argissolo',
-        SoilType.terraRoxa => 'Terra Roxa',
-        SoilType.massape => 'Massapê',
-        SoilType.alluvial => 'Aluvial/Várzea',
-        SoilType.terraVegetal => 'Terra Vegetal',
-        SoilType.pottingMix => 'Substrato Pronto',
-        SoilType.wormCastings => 'Húmus de Minhoca',
-        SoilType.succulentMix => 'Substrato p/ Suculentas',
-        SoilType.coconutFiber => 'Fibra de Coco',
-        SoilType.manure => 'Esterco Curtido',
+  String label(AppLocalizations l10n) => switch (this) {
+        SoilType.sandy => l10n.soilSandy,
+        SoilType.clay => l10n.soilClay,
+        SoilType.loamy => l10n.soilLoamy,
+        SoilType.peaty => l10n.soilPeaty,
+        SoilType.chalky => l10n.soilChalky,
+        SoilType.silty => l10n.soilSilty,
+        SoilType.latosol => l10n.soilLatosol,
+        SoilType.argisol => l10n.soilArgisol,
+        SoilType.terraRoxa => l10n.soilTerraRoxa,
+        SoilType.massape => l10n.soilMassape,
+        SoilType.alluvial => l10n.soilAlluvial,
+        SoilType.terraVegetal => l10n.soilTerraVegetal,
+        SoilType.pottingMix => l10n.soilPottingMix,
+        SoilType.wormCastings => l10n.soilWormCastings,
+        SoilType.succulentMix => l10n.soilSucculentMix,
+        SoilType.coconutFiber => l10n.soilCoconutFiber,
+        SoilType.manure => l10n.soilManure,
       };
 
-  String get description => switch (this) {
-        SoilType.sandy => 'Alta drenagem, baixa retenção de nutrientes.',
-        SoilType.clay => 'Alta retenção de água, tende a compactar.',
-        SoilType.loamy => 'Equilibrado entre areia, silte e argila.',
-        SoilType.peaty => 'Rico em matéria orgânica, retém muita umidade.',
-        SoilType.chalky => 'Pedregoso e alcalino, boa drenagem.',
-        SoilType.silty => 'Retém bem a umidade, fértil e macio.',
-        SoilType.latosol => 'Rico em ferro e alumínio. Muito poroso e bem drenado.',
-        SoilType.argisol => 'Acúmulo de argila em profundidade. Risco de erosão.',
-        SoilType.terraRoxa => 'Origem vulcânica. Extrema fertilidade e cor avermelhada.',
-        SoilType.massape => 'Escuro, muito argiloso e fértil. Típico do NE.',
-        SoilType.alluvial => 'Sedimentos de rios. Naturalmente fértil e jovem.',
-        SoilType.terraVegetal => 'Terra mineral misturada com restos vegetais decompostos.',
-        SoilType.pottingMix => 'Mix balanceado de turfa, casca de pinus e perlita.',
-        SoilType.wormCastings => 'Rico em NPK e microrganismos. Ótimo fertilizante.',
-        SoilType.succulentMix => 'Alta drenagem. 50% orgânico e 50% areia ou perlita.',
-        SoilType.coconutFiber => 'Melhora a aeração e mantém umidade controlada.',
-        SoilType.manure => 'Adubo orgânico rico. Deve ser usado sempre decomposto.',
+  String description(AppLocalizations l10n) => switch (this) {
+        SoilType.sandy => l10n.soilSandyDesc,
+        SoilType.clay => l10n.soilClayDesc,
+        SoilType.loamy => l10n.soilLoamyDesc,
+        SoilType.peaty => l10n.soilPeatyDesc,
+        SoilType.chalky => l10n.soilChalkyDesc,
+        SoilType.silty => l10n.soilSiltyDesc,
+        SoilType.latosol => l10n.soilLatosolDesc,
+        SoilType.argisol => l10n.soilArgisolDesc,
+        SoilType.terraRoxa => l10n.soilTerraRoxaDesc,
+        SoilType.massape => l10n.soilMassapeDesc,
+        SoilType.alluvial => l10n.soilAlluvialDesc,
+        SoilType.terraVegetal => l10n.soilTerraVegetalDesc,
+        SoilType.pottingMix => l10n.soilPottingMixDesc,
+        SoilType.wormCastings => l10n.soilWormCastingsDesc,
+        SoilType.succulentMix => l10n.soilSucculentMixDesc,
+        SoilType.coconutFiber => l10n.soilCoconutFiberDesc,
+        SoilType.manure => l10n.soilManureDesc,
       };
 
   String? get imagePath => switch (this) {
@@ -168,16 +170,16 @@ extension SoilTypeX on SoilType {
 }
 
 extension EntryTypeX on EntryType {
-  String get label => switch (this) {
-        EntryType.irrigation => 'Irrigação',
-        EntryType.fertilizer => 'Fertilização',
-        EntryType.pruning => 'Poda',
-        EntryType.observation => 'Observação',
-        EntryType.height => 'Altura',
-        EntryType.chlorosis => 'Clorose',
-        EntryType.pest => 'Parasitas',
-        EntryType.other => 'Outro',
-        EntryType.history => 'Histórico',
+  String label(AppLocalizations l10n) => switch (this) {
+        EntryType.irrigation => l10n.entryTypeIrrigation,
+        EntryType.fertilizer => l10n.entryTypeFertilizer,
+        EntryType.pruning => l10n.entryTypePruning,
+        EntryType.observation => l10n.entryTypeObservation,
+        EntryType.height => l10n.entryTypeHeight,
+        EntryType.chlorosis => l10n.entryTypeChlorosis,
+        EntryType.pest => l10n.entryTypePest,
+        EntryType.other => l10n.entryTypeOther,
+        EntryType.history => l10n.entryTypeHistory,
       };
 
   String get emoji => switch (this) {

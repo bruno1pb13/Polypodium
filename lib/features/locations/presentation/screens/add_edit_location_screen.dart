@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/l10n/error_messages.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/location/location_provider.dart';
 import '../../../../core/location/location_service.dart';
 import '../../domain/location_model.dart';
@@ -64,7 +66,7 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
-          _isEditing ? 'Editar localização' : 'Nova localização',
+          _isEditing ? context.l10n.editLocation : context.l10n.newLocation,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -107,30 +109,30 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const _SectionTitle('Identificação'),
+                          _SectionTitle(context.l10n.sectionIdentification),
                           const SizedBox(height: 12),
                           TextFormField(
                             controller: _nameCtrl,
                             style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
-                              labelText: 'Nome *',
-                              hintText: 'Ex: Sala de estar, Varanda, Quarto',
-                              prefixIcon: Icon(Icons.location_on_outlined),
+                            decoration: InputDecoration(
+                              labelText: '${context.l10n.nameLabel} *',
+                              hintText: context.l10n.locationNameHint,
+                              prefixIcon:
+                                  const Icon(Icons.location_on_outlined),
                             ),
                             textCapitalization: TextCapitalization.sentences,
-                            validator: (v) =>
-                                (v == null || v.trim().isEmpty)
-                                    ? 'Campo obrigatório'
-                                    : null,
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? context.l10n.requiredField
+                                : null,
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _descriptionCtrl,
                             style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
-                              labelText: 'Descrição',
-                              hintText: 'Opcional',
-                              prefixIcon: Icon(Icons.notes_outlined),
+                            decoration: InputDecoration(
+                              labelText: context.l10n.descriptionLabel,
+                              hintText: context.l10n.optional,
+                              prefixIcon: const Icon(Icons.notes_outlined),
                             ),
                             maxLines: 3,
                           ),
@@ -142,7 +144,7 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const _SectionTitle('Coordenadas'),
+                          _SectionTitle(context.l10n.sectionCoordinates),
                           const SizedBox(height: 12),
                           Row(
                             children: [
@@ -150,10 +152,11 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
                                 child: TextFormField(
                                   controller: _latitudeCtrl,
                                   style: const TextStyle(color: Colors.white),
-                                  decoration: const InputDecoration(
-                                    labelText: 'Latitude',
-                                    hintText: 'Opcional',
-                                    prefixIcon: Icon(Icons.explore_outlined),
+                                  decoration: InputDecoration(
+                                    labelText: context.l10n.latitudeLabel,
+                                    hintText: context.l10n.optional,
+                                    prefixIcon:
+                                        const Icon(Icons.explore_outlined),
                                   ),
                                   keyboardType:
                                       const TextInputType.numberWithOptions(
@@ -171,10 +174,11 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
                                 child: TextFormField(
                                   controller: _longitudeCtrl,
                                   style: const TextStyle(color: Colors.white),
-                                  decoration: const InputDecoration(
-                                    labelText: 'Longitude',
-                                    hintText: 'Opcional',
-                                    prefixIcon: Icon(Icons.explore_outlined),
+                                  decoration: InputDecoration(
+                                    labelText: context.l10n.longitudeLabel,
+                                    hintText: context.l10n.optional,
+                                    prefixIcon:
+                                        const Icon(Icons.explore_outlined),
                                   ),
                                   keyboardType:
                                       const TextInputType.numberWithOptions(
@@ -217,8 +221,8 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
                                   : const Icon(Icons.my_location),
                               label: Text(
                                 _fetchingLocation
-                                    ? 'Obtendo localização...'
-                                    : 'Usar localização atual',
+                                    ? context.l10n.gettingLocation
+                                    : context.l10n.useCurrentLocation,
                               ),
                             ),
                           ),
@@ -246,8 +250,8 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
                               )
                             : Text(
                                 _isEditing
-                                    ? 'Salvar alterações'
-                                    : 'Adicionar localização',
+                                    ? context.l10n.saveChanges
+                                    : context.l10n.addLocation,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -268,8 +272,10 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
   String? _validateCoordinate(String? v, double min, double max) {
     if (v == null || v.trim().isEmpty) return null;
     final parsed = double.tryParse(v.trim());
-    if (parsed == null) return 'Número inválido';
-    if (parsed < min || parsed > max) return 'Fora do intervalo [$min, $max]';
+    if (parsed == null) return context.l10n.invalidNumber;
+    if (parsed < min || parsed > max) {
+      return context.l10n.outOfRange('$min', '$max');
+    }
     return null;
   }
 
@@ -291,12 +297,12 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
     } on LocationServiceException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
+        SnackBar(content: Text(localizedErrorMessage(e, context.l10n))),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Não foi possível obter a localização: $e')),
+        SnackBar(content: Text(context.l10n.locationFetchError('$e'))),
       );
     } finally {
       if (mounted) setState(() => _fetchingLocation = false);

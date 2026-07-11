@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/error_messages.dart';
+import '../../../../core/l10n/l10n.dart';
+
 /// "Server URL, then credentials" dialog shared by the flows that need to
 /// talk to a Polypodium server: adding a new remote workspace, reconnecting
 /// an existing one, and (when [checkHasUsers] reports an empty server) the
@@ -108,14 +111,14 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
     } on Exception catch (e) {
       if (mounted) {
         setState(() {
-          _error = e.toString().replaceFirst('Exception: ', '');
+          _error = localizedErrorMessage(e, context.l10n);
           _loading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Erro inesperado ao conectar.';
+          _error = context.l10n.unexpectedConnectError;
           _loading = false;
         });
       }
@@ -159,7 +162,7 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
     } on Exception catch (e) {
       if (mounted) {
         setState(() {
-          _error = e.toString().replaceFirst('Exception: ', '');
+          _error = localizedErrorMessage(e, context.l10n);
           _loading = false;
         });
       }
@@ -167,8 +170,8 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
       if (mounted) {
         setState(() {
           _error = _isRegisterMode
-              ? 'Erro inesperado ao criar conta.'
-              : 'Erro inesperado ao entrar.';
+              ? context.l10n.unexpectedRegisterError
+              : context.l10n.unexpectedLoginError;
           _loading = false;
         });
       }
@@ -186,14 +189,14 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
     } on Exception catch (e) {
       if (mounted) {
         setState(() {
-          _error = e.toString().replaceFirst('Exception: ', '');
+          _error = localizedErrorMessage(e, context.l10n);
           _loading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Erro inesperado ao migrar os dados.';
+          _error = context.l10n.unexpectedMigrateError;
           _loading = false;
         });
       }
@@ -203,9 +206,11 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
   @override
   Widget build(BuildContext context) {
     final title = switch (_step) {
-      0 => 'Endereço do servidor',
-      1 => _isRegisterMode ? 'Criar primeira conta do servidor' : widget.title,
-      _ => 'Migrar dados locais?',
+      0 => context.l10n.serverAddressTitle,
+      1 => _isRegisterMode
+          ? context.l10n.createFirstAccountTitle
+          : widget.title,
+      _ => context.l10n.migrateLocalDataTitle,
     };
     final content = switch (_step) {
       0 => _buildServerStep(),
@@ -228,10 +233,10 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
         children: [
           TextFormField(
             controller: _urlController,
-            decoration: const InputDecoration(
-              labelText: 'URL do servidor',
-              hintText: 'https://meu-servidor.com',
-              prefixIcon: Icon(Icons.dns_outlined),
+            decoration: InputDecoration(
+              labelText: context.l10n.serverUrlLabel,
+              hintText: 'https://my-server.com',
+              prefixIcon: const Icon(Icons.dns_outlined),
             ),
             keyboardType: TextInputType.url,
             autocorrect: false,
@@ -239,10 +244,10 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
             onFieldSubmitted: (_) => _checkServer(),
             validator: (v) {
               if (v == null || v.trim().isEmpty) {
-                return 'Obrigatório';
+                return context.l10n.requiredShort;
               }
               if (!v.trim().startsWith('http')) {
-                return 'Deve começar com http:// ou https://';
+                return context.l10n.mustStartWithHttp;
               }
               return null;
             },
@@ -300,8 +305,7 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Este servidor ainda não tem nenhuma conta. Crie a conta '
-                'principal abaixo — ela será usada para acessá-lo daqui em diante.',
+                context.l10n.firstAccountInfo,
                 style: TextStyle(
                   fontSize: 13,
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -314,32 +318,34 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
       const SizedBox(height: 16),
       TextFormField(
         controller: _workspaceNameController,
-        decoration: const InputDecoration(
-          labelText: 'Nome deste workspace',
-          hintText: 'Ex: Estufa de casa',
-          prefixIcon: Icon(Icons.label_outline),
+        decoration: InputDecoration(
+          labelText: context.l10n.workspaceNameLabel,
+          hintText: context.l10n.workspaceNameHint,
+          prefixIcon: const Icon(Icons.label_outline),
         ),
         autofocus: true,
-        validator: (v) =>
-            (v == null || v.trim().isEmpty) ? 'Obrigatório' : null,
+        validator: (v) => (v == null || v.trim().isEmpty)
+            ? context.l10n.requiredShort
+            : null,
       ),
       const SizedBox(height: 16),
       TextFormField(
         controller: _emailController,
-        decoration: const InputDecoration(
-          labelText: 'Email',
-          prefixIcon: Icon(Icons.email_outlined),
+        decoration: InputDecoration(
+          labelText: context.l10n.emailLabel,
+          prefixIcon: const Icon(Icons.email_outlined),
         ),
         keyboardType: TextInputType.emailAddress,
         autocorrect: false,
-        validator: (v) =>
-            (v == null || v.trim().isEmpty) ? 'Obrigatório' : null,
+        validator: (v) => (v == null || v.trim().isEmpty)
+            ? context.l10n.requiredShort
+            : null,
       ),
       const SizedBox(height: 16),
       TextFormField(
         controller: _passwordController,
         decoration: InputDecoration(
-          labelText: 'Senha',
+          labelText: context.l10n.passwordLabel,
           prefixIcon: const Icon(Icons.lock_outlined),
           suffixIcon: IconButton(
             icon: Icon(_obscurePassword
@@ -351,22 +357,22 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
         ),
         obscureText: _obscurePassword,
         validator: (v) {
-          if (v == null || v.isEmpty) return 'Obrigatório';
-          if (v.length < 6) return 'Mínimo de 6 caracteres';
+          if (v == null || v.isEmpty) return context.l10n.requiredShort;
+          if (v.length < 6) return context.l10n.passwordMinChars;
           return null;
         },
       ),
       const SizedBox(height: 16),
       TextFormField(
         controller: _confirmPasswordController,
-        decoration: const InputDecoration(
-          labelText: 'Confirmar senha',
-          prefixIcon: Icon(Icons.lock_outlined),
+        decoration: InputDecoration(
+          labelText: context.l10n.confirmPasswordLabel,
+          prefixIcon: const Icon(Icons.lock_outlined),
         ),
         obscureText: _obscurePassword,
         onFieldSubmitted: (_) => _submit(),
         validator: (v) => v != _passwordController.text
-            ? 'As senhas não coincidem'
+            ? context.l10n.passwordsDontMatch
             : null,
       ),
     ];
@@ -376,21 +382,22 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
     return [
       TextFormField(
         controller: _emailController,
-        decoration: const InputDecoration(
-          labelText: 'Email',
-          prefixIcon: Icon(Icons.email_outlined),
+        decoration: InputDecoration(
+          labelText: context.l10n.emailLabel,
+          prefixIcon: const Icon(Icons.email_outlined),
         ),
         keyboardType: TextInputType.emailAddress,
         autocorrect: false,
         autofocus: true,
-        validator: (v) =>
-            (v == null || v.trim().isEmpty) ? 'Obrigatório' : null,
+        validator: (v) => (v == null || v.trim().isEmpty)
+            ? context.l10n.requiredShort
+            : null,
       ),
       const SizedBox(height: 16),
       TextFormField(
         controller: _passwordController,
         decoration: InputDecoration(
-          labelText: 'Senha',
+          labelText: context.l10n.passwordLabel,
           prefixIcon: const Icon(Icons.lock_outlined),
           suffixIcon: IconButton(
             icon: Icon(_obscurePassword
@@ -402,7 +409,8 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
         ),
         obscureText: _obscurePassword,
         onFieldSubmitted: (_) => _submit(),
-        validator: (v) => (v == null || v.isEmpty) ? 'Obrigatório' : null,
+        validator: (v) =>
+            (v == null || v.isEmpty) ? context.l10n.requiredShort : null,
       ),
     ];
   }
@@ -412,10 +420,7 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Encontramos dados salvos apenas neste dispositivo (workspace '
-          'local). Deseja enviá-los agora para este servidor?',
-        ),
+        Text(context.l10n.migrateLocalDataBody),
         if (_error != null) _buildErrorRow(),
       ],
     );
@@ -445,7 +450,7 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
   List<Widget> _serverActions() => [
         TextButton(
           onPressed: _loading ? null : () => Navigator.pop(context),
-          child: const Text('Cancelar'),
+          child: Text(context.l10n.cancel),
         ),
         FilledButton(
           onPressed: _loading ? null : _checkServer,
@@ -454,7 +459,7 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('Próximo'),
+              : Text(context.l10n.next),
         ),
       ];
 
@@ -468,7 +473,9 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
                       _error = null;
                     })
                   : Navigator.pop(context),
-          child: Text(widget.serverUrlEditable ? 'Voltar' : 'Cancelar'),
+          child: Text(widget.serverUrlEditable
+              ? context.l10n.back
+              : context.l10n.cancel),
         ),
         FilledButton(
           onPressed: _loading ? null : _submit,
@@ -477,7 +484,9 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2))
-              : Text(_isRegisterMode ? 'Criar conta' : 'Entrar'),
+              : Text(_isRegisterMode
+                  ? context.l10n.createAccount
+                  : context.l10n.signIn),
         ),
       ];
 
@@ -485,7 +494,7 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
         TextButton(
           onPressed:
               _loading ? null : () => Navigator.pop(context, true),
-          child: const Text('Agora não'),
+          child: Text(context.l10n.notNow),
         ),
         FilledButton(
           onPressed: _loading ? null : _migrate,
@@ -494,7 +503,7 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('Migrar'),
+              : Text(context.l10n.migrate),
         ),
       ];
 }

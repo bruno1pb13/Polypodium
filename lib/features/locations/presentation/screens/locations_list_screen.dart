@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/enums.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/sync/sync_providers.dart';
 import '../../../../core/widgets/app_search_bar.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
@@ -46,9 +47,9 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'Localizações',
-          style: TextStyle(
+        title: Text(
+          context.l10n.navLocations,
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
             shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
@@ -83,7 +84,7 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
               children: [
                 AppSearchBar<LocationSortOption>(
                   controller: _searchController,
-                  hintText: 'Buscar localizações...',
+                  hintText: context.l10n.searchLocationsHint,
                   onChanged: (value) {
                     ref.read(locationSearchQueryProvider.notifier).setQuery(value);
                   },
@@ -92,18 +93,18 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
                         .read(locationSortOptionNotifierProvider.notifier)
                         .setSortOption(option);
                   },
-                  sortOptions: const [
+                  sortOptions: [
                     PopupMenuItem(
                       value: LocationSortOption.nameAZ,
-                      child: Text('Nome (A-Z)'),
+                      child: Text(context.l10n.sortNameAZ),
                     ),
                     PopupMenuItem(
                       value: LocationSortOption.nameZA,
-                      child: Text('Nome (Z-A)'),
+                      child: Text(context.l10n.sortNameZA),
                     ),
                     PopupMenuItem(
                       value: LocationSortOption.dateAdded,
-                      child: Text('Data de Adição'),
+                      child: Text(context.l10n.sortDateAdded),
                     ),
                   ],
                 ),
@@ -118,7 +119,7 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
                       ),
                       error: (e, _) => Center(
                         child: Text(
-                          'Erro: $e',
+                          context.l10n.errorGeneric('$e'),
                           style: const TextStyle(color: Colors.white),
                         ),
                       ),
@@ -130,9 +131,11 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
                               child: SizedBox(
                                 height: constraints.maxHeight,
                                 child: _searchController.text.isNotEmpty
-                                    ? const Center(
-                                        child: Text('Nenhuma localização encontrada',
-                                            style: TextStyle(color: Colors.white)))
+                                    ? Center(
+                                        child: Text(
+                                            context.l10n.noLocationsFound,
+                                            style: const TextStyle(
+                                                color: Colors.white)))
                                     : const _EmptyState(),
                               ),
                             ),
@@ -182,17 +185,16 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Deletar localização?'),
-        content: const Text(
-            'Plantas vinculadas a esta localização não serão deletadas, mas ficarão sem localização.'),
+        title: Text(ctx.l10n.deleteLocationTitle),
+        content: Text(ctx.l10n.deleteLocationBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ctx.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Deletar'),
+            child: Text(ctx.l10n.delete),
           ),
         ],
       ),
@@ -307,7 +309,7 @@ class _LocationListItem extends ConsumerWidget {
                     ),
                     if (isPendingSync)
                       Tooltip(
-                        message: 'Pendente de sincronização',
+                        message: context.l10n.pendingSync,
                         child: Icon(
                           Icons.cloud_upload_outlined,
                           size: 16,
@@ -356,14 +358,14 @@ class _EmptyState extends StatelessWidget {
             color: Colors.white.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Nenhuma localização cadastrada',
-            style: TextStyle(color: Colors.white, fontSize: 16),
+          Text(
+            context.l10n.noLocationsRegistered,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Toque em + para adicionar uma localização.',
-            style: TextStyle(fontSize: 13, color: Colors.white70),
+          Text(
+            context.l10n.tapToAddLocation,
+            style: const TextStyle(fontSize: 13, color: Colors.white70),
           ),
         ],
       ),

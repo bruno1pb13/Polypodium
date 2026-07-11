@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/settings_providers.dart';
+import '../../../../core/l10n/error_messages.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/sync/sync_providers.dart';
 import '../../../data_transfer/presentation/widgets/data_transfer_section.dart';
 import '../../../workspaces/domain/workspace_model.dart';
@@ -18,14 +20,14 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Configurações'),
+        title: Text(context.l10n.navSettings),
       ),
       body: ListView(
         children: [
-          _SectionHeader(title: 'Geral'),
+          _SectionHeader(title: context.l10n.settingsGeneral),
           SwitchListTile(
-            title: const Text('Notificações de Rega'),
-            subtitle: const Text('Habilitar ou desabilitar lembretes'),
+            title: Text(context.l10n.wateringNotifications),
+            subtitle: Text(context.l10n.wateringNotificationsSubtitle),
             secondary: const Icon(Icons.notifications_outlined),
             value: notificationsEnabled,
             onChanged: (value) {
@@ -35,10 +37,10 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           const Divider(),
-          _SectionHeader(title: 'Aparência'),
+          _SectionHeader(title: context.l10n.settingsAppearance),
           SwitchListTile(
-            title: const Text('Transparência e Blur'),
-            subtitle: const Text('Efeitos visuais em cartões e menus'),
+            title: Text(context.l10n.transparencyAndBlur),
+            subtitle: Text(context.l10n.transparencyAndBlurSubtitle),
             secondary: const Icon(Icons.blur_on),
             value: transparencyEnabled,
             onChanged: (value) {
@@ -49,23 +51,23 @@ class SettingsScreen extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.dark_mode_outlined),
-            title: const Text('Modo Noturno'),
+            title: Text(context.l10n.darkMode),
             trailing: SegmentedButton<String>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: 'system',
-                  icon: Icon(Icons.brightness_auto),
-                  label: Text('Auto'),
+                  icon: const Icon(Icons.brightness_auto),
+                  label: Text(context.l10n.themeAuto),
                 ),
                 ButtonSegment(
                   value: 'light',
-                  icon: Icon(Icons.light_mode),
-                  label: Text('Claro'),
+                  icon: const Icon(Icons.light_mode),
+                  label: Text(context.l10n.themeLight),
                 ),
                 ButtonSegment(
                   value: 'dark',
-                  icon: Icon(Icons.dark_mode),
-                  label: Text('Escuro'),
+                  icon: const Icon(Icons.dark_mode),
+                  label: Text(context.l10n.themeDark),
                 ),
               ],
               selected: {themeModeStr},
@@ -78,18 +80,18 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const Divider(),
-          _SectionHeader(title: 'Sincronização'),
+          _SectionHeader(title: context.l10n.settingsSync),
           const _SyncSection(),
           const Divider(),
-          _SectionHeader(title: 'Dados'),
+          _SectionHeader(title: context.l10n.settingsData),
           const DataTransferSection(),
           const Divider(),
-          const AboutListTile(
-            icon: Icon(Icons.info_outline),
+          AboutListTile(
+            icon: const Icon(Icons.info_outline),
             applicationName: 'Polypodium',
             applicationVersion: '1.0.0',
             applicationLegalese: '© 2024 Polypodium Team',
-            child: Text('Sobre o Aplicativo'),
+            child: Text(context.l10n.aboutApp),
           ),
         ],
       ),
@@ -111,7 +113,9 @@ class _SyncSection extends ConsumerWidget {
     final autoSyncEnabled = ref.watch(autoSyncEnabledNotifierProvider);
 
     final pendingText = pendingAsync.when(
-      data: (n) => n == 0 ? 'Tudo sincronizado' : '$n evento(s) pendente(s)',
+      data: (n) => n == 0
+          ? context.l10n.allSynced
+          : context.l10n.pendingEventsCount(n),
       loading: () => '...',
       error: (_, __) => '',
     );
@@ -128,15 +132,18 @@ class _SyncSection extends ConsumerWidget {
           title: Text(workspace.name),
           subtitle: Text(
             workspace.type == WorkspaceType.local
-                ? 'Workspace local — não sincroniza'
-                : (workspace.isLoggedIn ? pendingText : 'Desconectado'),
+                ? context.l10n.localWorkspaceNoSync
+                : (workspace.isLoggedIn
+                    ? pendingText
+                    : context.l10n.disconnected),
           ),
           trailing: syncState.hasError
               ? IconButton(
                   icon: const Icon(Icons.error_outline, color: Colors.red),
-                  tooltip: syncState.error.toString(),
-                  onPressed: () =>
-                      _showError(context, syncState.error.toString()),
+                  tooltip:
+                      localizedErrorMessage(syncState.error!, context.l10n),
+                  onPressed: () => _showError(context,
+                      localizedErrorMessage(syncState.error!, context.l10n)),
                 )
               : null,
         ),
@@ -155,16 +162,17 @@ class _SyncSection extends ConsumerWidget {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.sync),
-                label: Text(isLoading ? 'Sincronizando...' : 'Sincronizar Agora'),
+                label:
+                    Text(isLoading ? context.l10n.syncing : context.l10n.syncNow),
               ),
             ),
           ),
         if (workspace.isLoggedIn)
           SwitchListTile(
-            title: const Text('Sincronização automática'),
+            title: Text(context.l10n.autoSync),
             subtitle: Text(autoSyncEnabled
-                ? 'A cada 5 minutos (30 em economia de bateria no Android)'
-                : 'Desativada — sincronize manualmente'),
+                ? context.l10n.autoSyncOnSubtitle
+                : context.l10n.autoSyncOffSubtitle),
             secondary: const Icon(Icons.autorenew),
             value: autoSyncEnabled,
             onChanged: (value) => ref
@@ -181,7 +189,7 @@ class _SyncSection extends ConsumerWidget {
                 MaterialPageRoute(builder: (_) => const WorkspacesScreen()),
               ),
               icon: const Icon(Icons.workspaces_outline),
-              label: const Text('Gerenciar workspaces'),
+              label: Text(context.l10n.manageWorkspaces),
             ),
           ),
         ),
