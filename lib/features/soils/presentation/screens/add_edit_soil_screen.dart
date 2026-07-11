@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../domain/soil_model.dart';
 import '../providers/soils_providers.dart';
 
@@ -108,7 +109,7 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
-          _isEditing ? 'Editar solo' : 'Novo solo',
+          _isEditing ? context.l10n.editSoil : context.l10n.newSoil,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -179,14 +180,15 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          const Text(
-                            'Toque para alterar a imagem',
-                            style: TextStyle(fontSize: 12, color: Colors.white60),
+                          Text(
+                            context.l10n.tapToChangeImage,
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.white60),
                           ),
                           if (_isAssetImage && _sourceCtrl.text.isNotEmpty) ...[
                             const SizedBox(height: 8),
                             Text(
-                              'Fonte: ${_sourceCtrl.text}',
+                              context.l10n.imageSource(_sourceCtrl.text),
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                   fontSize: 11,
@@ -202,30 +204,29 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const _SectionTitle('Informações'),
+                          _SectionTitle(context.l10n.sectionInformation),
                           const SizedBox(height: 12),
                           TextFormField(
                             controller: _nameCtrl,
                             style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
-                              labelText: 'Nome do Solo *',
-                              hintText: 'Ex: Solo Orgânico Premium',
-                              prefixIcon: Icon(Icons.terrain_outlined),
+                            decoration: InputDecoration(
+                              labelText: '${context.l10n.soilNameLabel} *',
+                              hintText: context.l10n.soilNameHint,
+                              prefixIcon: const Icon(Icons.terrain_outlined),
                             ),
                             validator: (v) => (v == null || v.trim().isEmpty)
-                                ? 'Informe um nome'
+                                ? context.l10n.nameRequired
                                 : null,
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _compositionCtrl,
                             style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
-                              labelText: 'Composição (opcional)',
-                              hintText:
-                                  'Ex: 40% húmus, 30% perlita, 30% fibra de coco',
-                              helperText: 'Uma linha descrevendo a mistura.',
-                              prefixIcon: Icon(Icons.layers_outlined),
+                            decoration: InputDecoration(
+                              labelText: context.l10n.compositionLabel,
+                              hintText: context.l10n.compositionHint,
+                              helperText: context.l10n.compositionHelper,
+                              prefixIcon: const Icon(Icons.layers_outlined),
                             ),
                             maxLines: 2,
                           ),
@@ -234,10 +235,10 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
                             TextFormField(
                               controller: _sourceCtrl,
                               style: const TextStyle(color: Colors.white),
-                              decoration: const InputDecoration(
-                                labelText: 'Fonte da Imagem (opcional)',
-                                hintText: 'Ex: https://exemplo.com/foto',
-                                prefixIcon: Icon(Icons.link_outlined),
+                              decoration: InputDecoration(
+                                labelText: context.l10n.imageSourceLabel,
+                                hintText: context.l10n.imageSourceHint,
+                                prefixIcon: const Icon(Icons.link_outlined),
                               ),
                             ),
                           ],
@@ -264,7 +265,9 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
                                 ),
                               )
                             : Text(
-                                _isEditing ? 'Salvar alterações' : 'Criar solo',
+                                _isEditing
+                                    ? context.l10n.saveChanges
+                                    : context.l10n.createSoil,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,

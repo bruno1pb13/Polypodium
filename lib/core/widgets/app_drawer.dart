@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../l10n/l10n.dart';
 import '../../features/plants/presentation/screens/home_screen.dart';
 import '../../features/species/presentation/screens/species_list_screen.dart';
 import '../../features/locations/presentation/screens/locations_list_screen.dart';
@@ -80,7 +81,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.home_outlined,
-                  label: 'Minhas Plantas',
+                  label: context.l10n.navMyPlants,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.of(context).pushAndRemoveUntil(
@@ -91,7 +92,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.eco_outlined,
-                  label: 'Espécies',
+                  label: context.l10n.navSpecies,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -103,7 +104,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.location_on_outlined,
-                  label: 'Localizações',
+                  label: context.l10n.navLocations,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -115,7 +116,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.terrain_outlined,
-                  label: 'Solos',
+                  label: context.l10n.navSoils,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -127,7 +128,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.settings_outlined,
-                  label: 'Configurações',
+                  label: context.l10n.navSettings,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(

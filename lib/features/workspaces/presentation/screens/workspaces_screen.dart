@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/database/database_provider.dart';
+import '../../../../core/l10n/error_messages.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../../core/sync/sync_providers.dart';
 import '../../../admin/data/admin_client.dart';
@@ -51,11 +53,10 @@ class WorkspacesScreen extends ConsumerWidget {
                   ws.isServerAdmin ? () => _openAdmin(context, ref, ws) : null,
             ),
           if (remotes.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(24),
+            Padding(
+              padding: const EdgeInsets.all(24),
               child: Text(
-                'Nenhum workspace remoto ainda. Adicione um para sincronizar '
-                'estes dados com um servidor.',
+                context.l10n.noRemoteWorkspaces,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -64,7 +65,7 @@ class WorkspacesScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _addRemote(context, ref),
         icon: const Icon(Icons.add),
-        label: const Text('Adicionar workspace remoto'),
+        label: Text(context.l10n.addRemoteWorkspace),
       ),
     );
   }
@@ -90,7 +91,7 @@ class WorkspacesScreen extends ConsumerWidget {
     final created = await showDialog<bool>(
       context: context,
       builder: (_) => WorkspaceLoginDialog(
-        title: 'Adicionar workspace remoto',
+        title: context.l10n.addRemoteWorkspace,
         checkServer: authClient.checkServer,
         checkHasUsers: authClient.hasUsers,
         onSubmit: (serverUrl, email, password) async {
@@ -144,7 +145,7 @@ class WorkspacesScreen extends ConsumerWidget {
     await showDialog<bool>(
       context: context,
       builder: (_) => WorkspaceLoginDialog(
-        title: 'Reconectar "${ws.name}"',
+        title: context.l10n.reconnectWorkspace(ws.name),
         serverUrlEditable: false,
         initialServerUrl: ws.serverUrl,
         initialEmail: ws.userEmail,
@@ -161,19 +162,16 @@ class WorkspacesScreen extends ConsumerWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Desconectar'),
-        content: const Text(
-          'Os dados deste workspace continuam neste dispositivo. '
-          'Para sincronizar novamente, entre com sua conta.',
-        ),
+        title: Text(ctx.l10n.disconnect),
+        content: Text(ctx.l10n.disconnectBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ctx.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Desconectar'),
+            child: Text(ctx.l10n.disconnect),
           ),
         ],
       ),
@@ -188,19 +186,16 @@ class WorkspacesScreen extends ConsumerWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Excluir "${ws.name}"?'),
-        content: const Text(
-          'Os dados deste workspace serão apagados deste dispositivo. '
-          'Isso não afeta a conta nem os dados no servidor.',
-        ),
+        title: Text(ctx.l10n.deleteWorkspaceTitle(ws.name)),
+        content: Text(ctx.l10n.deleteWorkspaceBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ctx.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Excluir',
+            child: Text(ctx.l10n.deleteAction,
                 style: TextStyle(color: Theme.of(ctx).colorScheme.error)),
           ),
         ],
@@ -225,8 +220,8 @@ class WorkspacesScreen extends ConsumerWidget {
       role = info.role;
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(localizedErrorMessage(e, context.l10n))));
       }
       return;
     }
@@ -236,8 +231,8 @@ class WorkspacesScreen extends ConsumerWidget {
 
     if (role != 'admin') {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Você não tem mais permissão de administrador.'),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(context.l10n.adminPermissionLost),
         ));
       }
       return;
@@ -256,16 +251,16 @@ class WorkspacesScreen extends ConsumerWidget {
     final newName = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Renomear workspace'),
+        title: Text(ctx.l10n.renameWorkspace),
         content: TextField(controller: controller, autofocus: true),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
+            child: Text(ctx.l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('Salvar'),
+            child: Text(ctx.l10n.save),
           ),
         ],
       ),
@@ -314,8 +309,8 @@ class _WorkspaceTile extends StatelessWidget {
               child: Text(workspace.name, overflow: TextOverflow.ellipsis)),
           if (_isLocal) ...[
             const SizedBox(width: 8),
-            const Chip(
-              label: Text('Local'),
+            Chip(
+              label: Text(context.l10n.localChip),
               visualDensity: VisualDensity.compact,
             ),
           ],
@@ -327,10 +322,10 @@ class _WorkspaceTile extends StatelessWidget {
         ],
       ),
       subtitle: Text(_isLocal
-          ? 'Dados só neste dispositivo'
+          ? context.l10n.dataOnlyOnDevice
           : (workspace.isLoggedIn
-              ? (workspace.userEmail ?? 'Conectado')
-              : 'Desconectado')),
+              ? (workspace.userEmail ?? context.l10n.connected)
+              : context.l10n.disconnected)),
       selected: isActive,
       onTap: onTap,
       trailing: _isLocal
@@ -351,21 +346,25 @@ class _WorkspaceTile extends StatelessWidget {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(value: 'rename', child: Text('Renomear')),
+                PopupMenuItem(
+                    value: 'rename', child: Text(context.l10n.rename)),
                 if (onReconnect != null)
-                  const PopupMenuItem(
-                      value: 'reconnect', child: Text('Reconectar')),
+                  PopupMenuItem(
+                      value: 'reconnect',
+                      child: Text(context.l10n.reconnect)),
                 if (onDisconnect != null)
-                  const PopupMenuItem(
-                      value: 'disconnect', child: Text('Desconectar')),
+                  PopupMenuItem(
+                      value: 'disconnect',
+                      child: Text(context.l10n.disconnect)),
                 if (onAdminPanel != null) ...[
                   const PopupMenuDivider(),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                       value: 'admin',
-                      child: Text('Administração do servidor')),
+                      child: Text(context.l10n.serverAdministration)),
                 ],
                 const PopupMenuDivider(),
-                const PopupMenuItem(value: 'delete', child: Text('Excluir')),
+                PopupMenuItem(
+                    value: 'delete', child: Text(context.l10n.deleteAction)),
               ],
             ),
     );

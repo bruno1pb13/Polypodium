@@ -19,13 +19,32 @@ class ImportSummary {
   final int skipped;
 }
 
+/// Why the selected file could not be imported. The UI maps each kind to a
+/// localized message.
+enum InvalidBackupKind {
+  /// Structurally broken data (missing sections, bad rows, decode failures).
+  corrupt,
+
+  /// Not a .zip/.json backup file, or a zip without data.json.
+  unrecognized,
+
+  /// A readable file that is not a Polypodium backup.
+  notPolypodiumBackup,
+
+  /// Produced by a newer app version than this one understands.
+  newerVersion,
+}
+
 /// Thrown when the selected file is not a readable Polypodium backup.
+/// [detail] is diagnostic only, never shown to the user.
 class InvalidBackupException implements Exception {
-  const InvalidBackupException(this.message);
-  final String message;
+  const InvalidBackupException(this.kind, [this.detail]);
+  final InvalidBackupKind kind;
+  final String? detail;
 
   @override
-  String toString() => message;
+  String toString() =>
+      'InvalidBackupException($kind${detail == null ? '' : ': $detail'})';
 }
 
 /// Merges a backup produced by DataExportService into the active workspace.
@@ -44,7 +63,8 @@ class DataImportService {
     final parsed = _parseArchive(bytes);
     final entities = parsed.data['entities'];
     if (entities is! Map<String, dynamic>) {
-      throw const InvalidBackupException('Backup sem a seção de dados.');
+      throw const InvalidBackupException(
+          InvalidBackupKind.corrupt, 'missing entities section');
     }
 
     List<Map<String, dynamic>> rowsOf(String key) {
@@ -127,7 +147,7 @@ class DataImportService {
     } on InvalidBackupException {
       rethrow;
     } catch (e) {
-      throw InvalidBackupException('Arquivo de backup inválido: $e');
+      throw InvalidBackupException(InvalidBackupKind.corrupt, '$e');
     }
 
     return ImportSummary(applied: applied, skipped: skipped);
@@ -159,15 +179,14 @@ class DataImportService {
       }
       if (jsonText == null) {
         throw const InvalidBackupException(
-            'O arquivo zip não contém um backup do Polypodium (data.json).');
+            InvalidBackupKind.unrecognized, 'zip without data.json');
       }
     } else {
       // Also accept the bare data.json for hand-carried/edited backups.
       try {
         jsonText = utf8.decode(bytes);
       } catch (_) {
-        throw const InvalidBackupException(
-            'Arquivo não reconhecido: esperado um .zip ou .json de backup.');
+        throw const InvalidBackupException(InvalidBackupKind.unrecognized);
       }
     }
 
@@ -175,19 +194,16 @@ class DataImportService {
     try {
       decoded = jsonDecode(jsonText);
     } on FormatException {
-      throw const InvalidBackupException(
-          'Arquivo não reconhecido: esperado um .zip ou .json de backup.');
+      throw const InvalidBackupException(InvalidBackupKind.unrecognized);
     }
     if (decoded is! Map<String, dynamic> ||
         decoded['format'] != DataExportService.formatName) {
       throw const InvalidBackupException(
-          'Este arquivo não é um backup do Polypodium.');
+          InvalidBackupKind.notPolypodiumBackup);
     }
     final version = decoded['version'];
     if (version is! int || version > DataExportService.formatVersion) {
-      throw const InvalidBackupException(
-          'Backup gerado por uma versão mais nova do aplicativo. '
-          'Atualize o Polypodium para importá-lo.');
+      throw const InvalidBackupException(InvalidBackupKind.newerVersion);
     }
     return (data: decoded, photos: photos);
   }

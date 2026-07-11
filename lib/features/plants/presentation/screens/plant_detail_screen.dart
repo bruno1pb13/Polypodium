@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/enums.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/widgets/fullscreen_image_viewer.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
@@ -41,12 +42,13 @@ class PlantDetailScreen extends ConsumerWidget {
     return plantsAsync.when(
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (e, _) => Scaffold(body: Center(child: Text('Erro: $e'))),
+      error: (e, _) =>
+          Scaffold(body: Center(child: Text(context.l10n.errorGeneric('$e')))),
       data: (plants) {
         final plant = plants.where((p) => p.id == plantId).firstOrNull;
         if (plant == null) {
-          return const Scaffold(
-            body: Center(child: Text('Planta não encontrada')),
+          return Scaffold(
+            body: Center(child: Text(context.l10n.plantNotFound)),
           );
         }
         final species = speciesAsync.value
@@ -162,7 +164,8 @@ class PlantDetailScreen extends ConsumerWidget {
                         child: Center(child: CircularProgressIndicator()),
                       ),
                       error: (e, _) => SliverToBoxAdapter(
-                        child: Center(child: Text('Erro: $e')),
+                        child:
+                            Center(child: Text(context.l10n.errorGeneric('$e'))),
                       ),
                       data: (entries) {
                         final filteredEntries = entries
@@ -174,20 +177,22 @@ class PlantDetailScreen extends ConsumerWidget {
                             filteredEntries.sort(
                                 (a, b) => a.date.compareTo(b.date));
                           case EntrySortOption.typeAZ:
-                            filteredEntries.sort(
-                                (a, b) => a.type.label.compareTo(b.type.label));
+                            filteredEntries.sort((a, b) => a.type
+                                .label(context.l10n)
+                                .compareTo(b.type.label(context.l10n)));
                           case EntrySortOption.dateDesc:
                             break;
                         }
 
                         if (filteredEntries.isEmpty) {
-                          return const SliverToBoxAdapter(
+                          return SliverToBoxAdapter(
                             child: Padding(
-                              padding: EdgeInsets.all(48),
+                              padding: const EdgeInsets.all(48),
                               child: Center(
                                 child: Text(
-                                  'Nenhum registro encontrado',
-                                  style: TextStyle(color: Colors.white70),
+                                  context.l10n.noEntriesFound,
+                                  style:
+                                      const TextStyle(color: Colors.white70),
                                 ),
                               ),
                             ),
@@ -233,7 +238,7 @@ class PlantDetailScreen extends ConsumerWidget {
                 heroTag: 'irrigate',
                 onPressed: () => _irrigate(context, ref),
                 icon: const Icon(Icons.water_drop),
-                label: const Text('Reguei agora'),
+                label: Text(context.l10n.wateredNow),
               ),
             ],
           ),
@@ -256,9 +261,9 @@ class PlantDetailScreen extends ConsumerWidget {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Irrigação registrada!'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(context.l10n.irrigationRecorded),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -266,7 +271,7 @@ class PlantDetailScreen extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao registrar irrigação: $e'),
+            content: Text(context.l10n.irrigationRecordError('$e')),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -282,15 +287,15 @@ class PlantDetailScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Deletar registro?'),
+        title: Text(ctx.l10n.deleteEntryTitle),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ctx.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Deletar'),
+            child: Text(ctx.l10n.delete),
           ),
         ],
       ),
@@ -304,16 +309,16 @@ class PlantDetailScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Deletar planta?'),
-        content: const Text('Todos os registros desta planta serão removidos.'),
+        title: Text(ctx.l10n.deletePlantTitle),
+        content: Text(ctx.l10n.deletePlantBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ctx.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Deletar'),
+            child: Text(ctx.l10n.delete),
           ),
         ],
       ),
@@ -474,8 +479,8 @@ class _PlantInfoCard extends ConsumerWidget {
                 _row(
                   context,
                   Icons.terrain_outlined,
-                  'Solo',
-                  soilName ?? 'Não informado',
+                  context.l10n.soilLabel,
+                  soilName ?? context.l10n.notInformed,
                   transparencyEnabled,
                 ),
                 if (soilComposition != null) ...[
@@ -501,16 +506,19 @@ class _PlantInfoCard extends ConsumerWidget {
                 _row(
                   context,
                   Icons.location_on_outlined,
-                  'Localização',
-                  pws?.location?.name ?? plant.location ?? 'Não informada',
+                  context.l10n.locationLabel,
+                  pws?.location?.name ??
+                      plant.location ??
+                      context.l10n.notInformed,
                   transparencyEnabled,
                 ),
                 const Divider(color: Colors.white10, height: 16),
                 _row(
                   context,
                   Icons.calendar_today_outlined,
-                  'Adquirida em',
-                  DateFormat('dd/MM/yyyy').format(plant.acquisitionDate),
+                  context.l10n.acquiredOnLabel,
+                  DateFormat.yMd(context.l10n.localeName)
+                      .format(plant.acquisitionDate),
                   transparencyEnabled,
                 ),
                 if (pws?.effectiveFrequencyDays != null) ...[
@@ -518,8 +526,8 @@ class _PlantInfoCard extends ConsumerWidget {
                   _row(
                     context,
                     Icons.opacity_outlined,
-                    'Frequência de irrigação',
-                    '${pws!.effectiveFrequencyDays} dias',
+                    context.l10n.irrigationFrequencyShort,
+                    context.l10n.daysCount(pws!.effectiveFrequencyDays!),
                     transparencyEnabled,
                   ),
                 ],
@@ -528,8 +536,8 @@ class _PlantInfoCard extends ConsumerWidget {
                   _alertRow(
                     context,
                     '🟡',
-                    'Clorose',
-                    _severityLabel(alertStatus.chlorosisSeverity),
+                    context.l10n.entryTypeChlorosis,
+                    _severityLabel(context, alertStatus.chlorosisSeverity),
                     const Color(0xFFEAB308),
                     transparencyEnabled,
                   ),
@@ -539,8 +547,8 @@ class _PlantInfoCard extends ConsumerWidget {
                   _alertRow(
                     context,
                     '🐛',
-                    'Praga',
-                    _severityLabel(alertStatus.pestSeverity),
+                    context.l10n.pestBadge,
+                    _severityLabel(context, alertStatus.pestSeverity),
                     const Color(0xFFF97316),
                     transparencyEnabled,
                   ),
@@ -575,11 +583,11 @@ class _PlantInfoCard extends ConsumerWidget {
         ],
       );
 
-  String _severityLabel(int? v) => switch (v) {
-        1 => 'Leve',
-        2 => 'Moderada',
-        3 => 'Severa',
-        _ => 'Ativa',
+  String _severityLabel(BuildContext context, int? v) => switch (v) {
+        1 => context.l10n.severityMild,
+        2 => context.l10n.severityModerate,
+        3 => context.l10n.severitySevere,
+        _ => context.l10n.severityActive,
       };
 
   Widget _alertRow(
@@ -667,7 +675,9 @@ class _IrrigationStatusCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        overdue ? 'Precisa de água!' : 'Irrigação em dia',
+                        overdue
+                            ? context.l10n.needsWater
+                            : context.l10n.wateringUpToDate,
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           color: overdue
@@ -677,10 +687,10 @@ class _IrrigationStatusCard extends ConsumerWidget {
                       ),
                       Text(
                         pws.plant.lastIrrigatedAt == null
-                            ? 'Última rega não registrada'
+                            ? context.l10n.lastWateringNotRecorded
                             : overdue
-                                ? '$days dia(s) em atraso'
-                                : 'Próxima irrigação em ${-days} dia(s)',
+                                ? context.l10n.daysOverdue(days)
+                                : context.l10n.nextWateringInDays(-days),
                         style: TextStyle(
                           fontSize: 13,
                           color: overdue
@@ -715,9 +725,9 @@ class _EntriesHeader extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 24, 4, 4),
       child: Row(
         children: [
-          const Text(
-            'Registros',
-            style: TextStyle(
+          Text(
+            context.l10n.entriesTitle,
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -729,7 +739,7 @@ class _EntriesHeader extends ConsumerWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.filter_list, color: Colors.white70),
-                tooltip: 'Filtrar tipos',
+                tooltip: context.l10n.filterTypes,
                 onPressed: () {
                   final isDesktop = switch (defaultTargetPlatform) {
                     TargetPlatform.linux ||
@@ -776,7 +786,7 @@ class _EntriesHeader extends ConsumerWidget {
                   ? colorScheme.primary
                   : Colors.white70,
             ),
-            tooltip: 'Ordenar',
+            tooltip: context.l10n.sortTooltip,
             onSelected: (sort) => ref
                 .read(entrySortNotifierProvider(plantId).notifier)
                 .setSort(sort),
@@ -793,7 +803,7 @@ class _EntriesHeader extends ConsumerWidget {
                                 : Colors.transparent,
                           ),
                           const SizedBox(width: 8),
-                          Text(s.label),
+                          Text(s.label(ctx.l10n)),
                         ],
                       ),
                     ))
@@ -844,9 +854,9 @@ class _FilterSheet extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(20, 16, 8, 4),
                   child: Row(
                     children: [
-                      const Text(
-                        'Tipos de registro',
-                        style: TextStyle(
+                      Text(
+                        context.l10n.entryTypesTitle,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 17,
                           fontWeight: FontWeight.w600,
@@ -860,7 +870,7 @@ class _FilterSheet extends ConsumerWidget {
                                   .notifier)
                               .selectAll(),
                           child: Text(
-                            'Todos',
+                            context.l10n.all,
                             style: TextStyle(color: colorScheme.primary),
                           ),
                         ),
@@ -876,7 +886,7 @@ class _FilterSheet extends ConsumerWidget {
                             entryFiltersNotifierProvider(plantId).notifier)
                         .toggleFilter(type),
                     title: Text(
-                      '${type.emoji}  ${type.label}',
+                      '${type.emoji}  ${type.label(context.l10n)}',
                       style: const TextStyle(color: Colors.white),
                     ),
                     checkColor: Colors.white,
@@ -926,9 +936,9 @@ class _FilterDialog extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(20, 16, 8, 4),
                   child: Row(
                     children: [
-                      const Text(
-                        'Tipos de registro',
-                        style: TextStyle(
+                      Text(
+                        context.l10n.entryTypesTitle,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 17,
                           fontWeight: FontWeight.w600,
@@ -942,7 +952,7 @@ class _FilterDialog extends ConsumerWidget {
                                   .notifier)
                               .selectAll(),
                           child: Text(
-                            'Todos',
+                            context.l10n.all,
                             style: TextStyle(color: colorScheme.primary),
                           ),
                         ),
@@ -963,7 +973,7 @@ class _FilterDialog extends ConsumerWidget {
                             entryFiltersNotifierProvider(plantId).notifier)
                         .toggleFilter(type),
                     title: Text(
-                      '${type.emoji}  ${type.label}',
+                      '${type.emoji}  ${type.label(context.l10n)}',
                       style: const TextStyle(color: Colors.white),
                     ),
                     checkColor: Colors.white,

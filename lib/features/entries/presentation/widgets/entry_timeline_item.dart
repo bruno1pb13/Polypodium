@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/enums.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/widgets/fullscreen_image_viewer.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/entry_model.dart';
@@ -70,7 +71,7 @@ class EntryTimelineItem extends ConsumerWidget {
                           Row(
                             children: [
                               Text(
-                                entry.type.label,
+                                entry.type.label(context.l10n),
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   color: transparencyEnabled
@@ -83,7 +84,9 @@ class EntryTimelineItem extends ConsumerWidget {
                               ),
                               const Spacer(),
                               Text(
-                                DateFormat('dd/MM/yy HH:mm').format(entry.date),
+                                DateFormat.yMd(context.l10n.localeName)
+                                    .add_Hm()
+                                    .format(entry.date),
                                 style: TextStyle(
                                   color: transparencyEnabled
                                       ? Colors.white60
@@ -183,7 +186,7 @@ class _EntryDataBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = _summaryText();
+    final text = _summaryText(context.l10n);
     if (text == null) return const SizedBox.shrink();
 
     return Padding(
@@ -213,7 +216,7 @@ class _EntryDataBadge extends StatelessWidget {
     );
   }
 
-  String? _summaryText() {
+  String? _summaryText(AppLocalizations l10n) {
     final nv = entry.numericValue;
     final extra = entry.extraData != null
         ? (jsonDecode(entry.extraData!) as Map<String, dynamic>)
@@ -222,31 +225,34 @@ class _EntryDataBadge extends StatelessWidget {
     return switch (entry.type) {
       EntryType.height when nv != null => '📏 ${_fmt(nv)} cm',
       EntryType.chlorosis when nv != null => nv.toInt() == 0
-          ? '💚 Curada'
-          : '🟡 ${_severityLabel(nv.toInt())}',
-      EntryType.pest => _pestSummary(extra, nv),
-      EntryType.irrigation when nv != null => '💧 ${_irrigationLabel(nv.toInt())}',
-      EntryType.fertilizer => _fertilizerSummary(extra),
+          ? '💚 ${l10n.chlorosisCured}'
+          : '🟡 ${_severityLabel(l10n, nv.toInt())}',
+      EntryType.pest => _pestSummary(l10n, extra, nv),
+      EntryType.irrigation when nv != null =>
+        '💧 ${_irrigationLabel(l10n, nv.toInt())}',
+      EntryType.fertilizer => _fertilizerSummary(l10n, extra),
       EntryType.pruning when extra != null =>
-        '✂️ ${_pruningLabel(extra['reason'] as String?)}',
+        '✂️ ${_pruningLabel(l10n, extra['reason'] as String?)}',
       EntryType.observation when nv != null =>
-        '${_healthEmoji(nv.toInt())} Saúde ${nv.toInt()}/5 — ${_healthLabel(nv.toInt())}',
+        '${_healthEmoji(nv.toInt())} ${l10n.healthSummary(nv.toInt())} — ${_healthLabel(l10n, nv.toInt())}',
       _ => null,
     };
   }
 
-  String? _pestSummary(Map<String, dynamic>? extra, double? nv) {
-    if (nv != null && nv.toInt() == 0) return '✅ Erradicada';
+  String? _pestSummary(
+      AppLocalizations l10n, Map<String, dynamic>? extra, double? nv) {
+    if (nv != null && nv.toInt() == 0) return '✅ ${l10n.pestEradicated}';
     final pestType = extra?['pestType'] as String?;
     final parts = [
       if (pestType != null && pestType.isNotEmpty) pestType,
-      if (nv != null) _severityLabel(nv.toInt()),
+      if (nv != null) _severityLabel(l10n, nv.toInt()),
     ];
     if (parts.isEmpty) return null;
     return '🐛 ${parts.join(' · ')}';
   }
 
-  String? _fertilizerSummary(Map<String, dynamic>? extra) {
+  String? _fertilizerSummary(
+      AppLocalizations l10n, Map<String, dynamic>? extra) {
     if (extra == null) return null;
     // New format: {"products": [{"name": "...", "dose": X}, ...]}
     final products = extra['products'] as List<dynamic>?;
@@ -259,7 +265,7 @@ class _EntryDataBadge extends StatelessWidget {
             dose != null ? ' · ${_fmt((dose as num).toDouble())} ml' : '';
         return '🌱 $name$dosePart';
       }
-      return '🌱 ${products.length} produtos';
+      return '🌱 ${l10n.productsCount(products.length)}';
     }
     return null;
   }
@@ -267,25 +273,25 @@ class _EntryDataBadge extends StatelessWidget {
   String _fmt(double v) =>
       v == v.truncateToDouble() ? v.toInt().toString() : v.toStringAsFixed(1);
 
-  String _irrigationLabel(int v) => switch (v) {
-        1 => 'Escassa',
-        2 => 'Moderada',
-        3 => 'Intensa',
+  String _irrigationLabel(AppLocalizations l10n, int v) => switch (v) {
+        1 => l10n.irrigationScarce,
+        2 => l10n.irrigationModerate,
+        3 => l10n.irrigationIntense,
         _ => '$v',
       };
 
-  String _severityLabel(int v) => switch (v) {
-        1 => 'Leve',
-        2 => 'Moderada',
-        3 => 'Severa',
+  String _severityLabel(AppLocalizations l10n, int v) => switch (v) {
+        1 => l10n.severityMild,
+        2 => l10n.severityModerate,
+        3 => l10n.severitySevere,
         _ => '$v',
       };
 
-  String _pruningLabel(String? key) => switch (key) {
-        'formacao' => 'Formação',
-        'limpeza' => 'Limpeza',
-        'rejuvenescimento' => 'Rejuvenescimento',
-        'colheita' => 'Colheita',
+  String _pruningLabel(AppLocalizations l10n, String? key) => switch (key) {
+        'formacao' => l10n.pruningFormation,
+        'limpeza' => l10n.pruningCleaning,
+        'rejuvenescimento' => l10n.pruningRejuvenation,
+        'colheita' => l10n.pruningHarvest,
         _ => key ?? '',
       };
 
@@ -298,12 +304,12 @@ class _EntryDataBadge extends StatelessWidget {
         _ => '',
       };
 
-  String _healthLabel(int score) => switch (score) {
-        1 => 'Crítica',
-        2 => 'Ruim',
-        3 => 'Regular',
-        4 => 'Boa',
-        5 => 'Ótima',
+  String _healthLabel(AppLocalizations l10n, int score) => switch (score) {
+        1 => l10n.healthCritical,
+        2 => l10n.healthBad,
+        3 => l10n.healthRegular,
+        4 => l10n.healthGood,
+        5 => l10n.healthExcellent,
         _ => '',
       };
 }

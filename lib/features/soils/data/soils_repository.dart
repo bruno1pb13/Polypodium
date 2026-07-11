@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/domain_exceptions.dart';
 import '../domain/soil_model.dart';
 
 class SoilsRepository {
@@ -42,8 +43,7 @@ class SoilsRepository {
   Future<void> delete(String id) async {
     final hasActivePlants = await _db.plantsDao.hasActiveReferencingSoil(id);
     if (hasActivePlants) {
-      throw Exception(
-          'Não é possível excluir um solo com plantas vinculadas.');
+      throw const SoilInUseException();
     }
     await _db.transaction(() async {
       final rev = await _db.syncMetaDao.nextRev();

@@ -13,6 +13,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../database/app_database.dart';
 import '../../features/plants/domain/plant_model.dart';
 import '../../features/species/domain/species_model.dart';
+import '../l10n/l10n.dart';
 
 abstract interface class INotificationService {
   Future<void> schedule({required PlantModel plant, required SpeciesModel species});
@@ -24,9 +25,12 @@ class NotificationService implements INotificationService {
 
   static const irrigationCheckTask = 'irrigation-check';
   static const _channelId = 'polypodium_irrigation';
-  static const _channelName = 'Irrigação';
 
   static final _plugin = FlutterLocalNotificationsPlugin();
+
+  /// Localizations resolved from the device locale — notifications are also
+  /// built from background isolates, where no [BuildContext] exists.
+  static AppLocalizations get _l10n => systemL10n();
 
   static Future<void> initialize() async {
     tz_data.initializeTimeZones();
@@ -60,9 +64,9 @@ class NotificationService implements INotificationService {
       await androidPlugin?.requestNotificationsPermission();
       await androidPlugin?.requestExactAlarmsPermission();
       await androidPlugin?.createNotificationChannel(
-        const AndroidNotificationChannel(
+        AndroidNotificationChannel(
           _channelId,
-          _channelName,
+          _l10n.irrigationChannelName,
           importance: Importance.defaultImportance,
         ),
       );
@@ -113,16 +117,17 @@ class NotificationService implements INotificationService {
     final scheduledDate =
         _nextIrrigationTime(plant.lastIrrigatedAt, frequencyDays);
 
+    final l10n = _l10n;
     await _plugin.zonedSchedule(
       _notificationId(plant.id),
-      'Hora de regar! 🌿',
-      '${plant.nickname} precisa ser regada hoje.',
+      l10n.irrigationNotificationTitle,
+      l10n.irrigationNotificationBody(plant.nickname),
       scheduledDate,
       NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
-          _channelName,
-          channelDescription: 'Lembretes de irrigação das suas plantas',
+          l10n.irrigationChannelName,
+          channelDescription: l10n.irrigationChannelDescription,
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
         ),

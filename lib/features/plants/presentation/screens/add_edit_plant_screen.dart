@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../species/domain/species_model.dart';
 import '../../../species/presentation/providers/species_providers.dart';
 import '../../../species/presentation/widgets/species_autocomplete.dart';
@@ -100,7 +101,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
-          _isEditing ? 'Editar planta' : 'Nova planta',
+          _isEditing ? context.l10n.editPlant : context.l10n.newPlant,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -138,7 +139,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
               ),
               error: (e, _) => Center(
                 child: Text(
-                  'Erro: $e',
+                  context.l10n.errorGeneric('$e'),
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
@@ -148,7 +149,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                 ),
                 error: (e, _) => Center(
                   child: Text(
-                    'Erro: $e',
+                    context.l10n.errorGeneric('$e'),
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),
@@ -158,7 +159,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                   ),
                   error: (e, _) => Center(
                     child: Text(
-                      'Erro: $e',
+                      context.l10n.errorGeneric('$e'),
                       style: const TextStyle(color: Colors.white),
                     ),
                   ),
@@ -173,18 +174,21 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const _SectionTitle('Identificação'),
+                                _SectionTitle(
+                                    context.l10n.sectionIdentification),
                                 const SizedBox(height: 12),
                                 TextFormField(
                                   controller: _nicknameCtrl,
                                   style: const TextStyle(color: Colors.white),
-                                  decoration: const InputDecoration(
-                                    labelText: 'Apelido *',
-                                    hintText: 'Ex: Samambaia da sala',
-                                    prefixIcon: Icon(Icons.local_florist_outlined),
+                                  decoration: InputDecoration(
+                                    labelText:
+                                        '${context.l10n.nicknameLabel} *',
+                                    hintText: context.l10n.nicknameHint,
+                                    prefixIcon: const Icon(
+                                        Icons.local_florist_outlined),
                                   ),
                                   validator: (v) => (v == null || v.trim().isEmpty)
-                                      ? 'Informe um apelido'
+                                      ? context.l10n.nicknameRequired
                                       : null,
                                 ),
                                 const SizedBox(height: 16),
@@ -194,7 +198,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                                   onSelected: _onSpeciesSelected(species),
                                   validator: (v) =>
                                       (v == null || v.trim().isEmpty)
-                                          ? 'Selecione uma espécie'
+                                          ? context.l10n.speciesRequired
                                           : null,
                                 ),
                               ],
@@ -205,7 +209,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const _SectionTitle('Cuidados'),
+                                _SectionTitle(context.l10n.sectionCare),
                                 const SizedBox(height: 12),
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,7 +235,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                                       padding: const EdgeInsets.only(top: 4),
                                       child: IconButton.filled(
                                         icon: const Icon(Icons.add_circle_outline),
-                                        tooltip: 'Novo tipo de solo',
+                                        tooltip: context.l10n.newSoilType,
                                         style: IconButton.styleFrom(
                                           backgroundColor:
                                               Colors.white.withValues(alpha: 0.1),
@@ -257,10 +261,10 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                                   style: const TextStyle(color: Colors.white),
                                   decoration: InputDecoration(
                                     labelText:
-                                        'Frequência de irrigação (dias)${_isFrequencyAutoFilled ? ' (recomendado)' : ''}',
-                                    hintText: 'Opcional',
+                                        '${context.l10n.irrigationFrequencyLabel}${_isFrequencyAutoFilled ? ' ${context.l10n.recommendedSuffix}' : ''}',
+                                    hintText: context.l10n.optional,
                                     helperText:
-                                        'Se preenchido, o app enviará lembretes de rega.',
+                                        context.l10n.irrigationFrequencyHelper,
                                     helperMaxLines: 2,
                                     prefixIcon:
                                         const Icon(Icons.opacity_outlined),
@@ -278,7 +282,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                                     }
                                     final n = int.tryParse(v);
                                     if (n == null || n <= 0) {
-                                      return 'Informe um número positivo';
+                                      return context.l10n.positiveNumberRequired;
                                     }
                                     return null;
                                   },
@@ -291,7 +295,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const _SectionTitle('Detalhes'),
+                                _SectionTitle(context.l10n.sectionDetails),
                                 const SizedBox(height: 12),
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -306,10 +310,11 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                                         iconEnabledColor: Colors.white70,
                                         style: const TextStyle(
                                             color: Colors.white),
-                                        decoration: const InputDecoration(
-                                          labelText: 'Localização',
-                                          prefixIcon:
-                                              Icon(Icons.location_on_outlined),
+                                        decoration: InputDecoration(
+                                          labelText:
+                                              context.l10n.locationLabel,
+                                          prefixIcon: const Icon(
+                                              Icons.location_on_outlined),
                                         ),
                                         items: locations
                                             .map((l) => DropdownMenuItem(
@@ -325,7 +330,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                                     IconButton.filled(
                                       icon: const Icon(
                                           Icons.add_location_alt_outlined),
-                                      tooltip: 'Nova localização',
+                                      tooltip: context.l10n.newLocation,
                                       style: IconButton.styleFrom(
                                         backgroundColor:
                                             Colors.white.withValues(alpha: 0.1),
@@ -370,8 +375,8 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                                     )
                                   : Text(
                                       _isEditing
-                                          ? 'Salvar alterações'
-                                          : 'Adicionar planta',
+                                          ? context.l10n.saveChanges
+                                          : context.l10n.addPlant,
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
@@ -441,14 +446,14 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
 
     if (_selectedSpeciesId == null && _tempExternalScientificName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione uma espécie da lista')),
+        SnackBar(content: Text(context.l10n.selectSpeciesFromList)),
       );
       return;
     }
 
     if (_selectedSoilId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione um tipo de solo')),
+        SnackBar(content: Text(context.l10n.selectSoilType)),
       );
       return;
     }
@@ -596,13 +601,14 @@ class _DatePickerTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Data de aquisição',
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                    Text(
+                      context.l10n.acquisitionDateLabel,
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      DateFormat('dd/MM/yyyy').format(date),
+                      DateFormat.yMd(context.l10n.localeName).format(date),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 15,

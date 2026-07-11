@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/plant_model.dart';
@@ -144,7 +145,7 @@ class PlantListItem extends ConsumerWidget {
                                 Padding(
                                   padding: const EdgeInsets.only(right: 4),
                                   child: Tooltip(
-                                    message: 'Pendente de sincronização',
+                                    message: context.l10n.pendingSync,
                                     child: Icon(
                                       Icons.cloud_upload_outlined,
                                       size: 16,
@@ -190,16 +191,16 @@ class PlantListItem extends ConsumerWidget {
                                   _IrrigationBadge(
                                       daysRelative: days, overdue: overdue),
                                 if (alertStatus.hasActiveChlorosis)
-                                  const _AlertBadge(
+                                  _AlertBadge(
                                     emoji: '🟡',
-                                    label: 'Clorose',
-                                    color: Color(0xFFEAB308),
+                                    label: context.l10n.entryTypeChlorosis,
+                                    color: const Color(0xFFEAB308),
                                   ),
                                 if (alertStatus.hasActivePest)
-                                  const _AlertBadge(
+                                  _AlertBadge(
                                     emoji: '🐛',
-                                    label: 'Praga',
-                                    color: Color(0xFFF97316),
+                                    label: context.l10n.pestBadge,
+                                    color: const Color(0xFFF97316),
                                   ),
                               ],
                             ),
@@ -335,7 +336,7 @@ class _IrrigationBadge extends StatelessWidget {
           Icon(Icons.water_drop, size: 13, color: color),
           const SizedBox(width: 6),
           Text(
-            'Irrigação',
+            context.l10n.entryTypeIrrigation,
             style: TextStyle(
               fontSize: 12,
               color: color,

@@ -1,0 +1,637 @@
+{
+  "@@locale": "en",
+
+  "navMyPlants": "My Plants",
+  "navSpecies": "Species",
+  "navLocations": "Locations",
+  "navSoils": "Soils",
+  "navSettings": "Settings",
+
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "deleteAction": "Delete",
+  "save": "Save",
+  "saveChanges": "Save changes",
+  "create": "Create",
+  "next": "Next",
+  "back": "Back",
+  "notNow": "Not now",
+  "all": "All",
+  "optional": "Optional",
+  "requiredField": "Required field",
+  "requiredShort": "Required",
+  "unknown": "Unknown",
+  "none": "None",
+  "defaultValue": "Default",
+  "notInformed": "Not set",
+  "notAllowed": "Not allowed.",
+  "connected": "Connected",
+  "disconnected": "Disconnected",
+  "share": "Share",
+  "camera": "Camera",
+  "gallery": "Gallery",
+  "rename": "Rename",
+  "reconnect": "Reconnect",
+  "disconnect": "Disconnect",
+  "migrate": "Migrate",
+  "signIn": "Sign in",
+  "createAccount": "Create account",
+  "positiveNumberRequired": "Enter a positive number",
+  "invalidNumber": "Invalid number",
+  "nameRequired": "Enter a name",
+  "nameLabel": "Name",
+  "descriptionLabel": "Description",
+
+  "dateFormatPattern": "M/d/yyyy",
+  "@dateFormatPattern": {
+    "description": "Date pattern used for dates embedded in persisted history notes"
+  },
+
+  "daysCount": "{days, plural, one{{days} day} other{{days} days}}",
+  "@daysCount": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+
+  "errorGeneric": "Error: {error}",
+  "@errorGeneric": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+
+  "syncDownloaded": "{count, plural, one{1 update synced} other{{count} updates synced}}",
+  "@syncDownloaded": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "syncOffline": "No connection to the server — using local data",
+  "pendingSync": "Pending sync",
+  "syncNow": "Sync now",
+  "syncing": "Syncing...",
+  "allSynced": "Everything synced",
+  "pendingEventsCount": "{count, plural, one{{count} pending event} other{{count} pending events}}",
+  "@pendingEventsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "autoSync": "Automatic sync",
+  "autoSyncOnSubtitle": "Every 5 minutes (30 in battery saver on Android)",
+  "autoSyncOffSubtitle": "Disabled — sync manually",
+  "localWorkspaceNoSync": "Local workspace — does not sync",
+  "manageWorkspaces": "Manage workspaces",
+
+  "errorSessionExpired": "Session expired. Please sign in again.",
+  "errorSyncReceive": "Error receiving data from the server",
+  "errorSyncSend": "Error sending data to the server",
+  "errorNotAuthenticated": "Not authenticated",
+  "errorServerUnavailable": "Server unavailable or invalid URL",
+  "errorAdminForbidden": "You do not have administrator permission.",
+  "errorLoginFailed": "Failed to sign in",
+  "errorRegisterFailed": "Failed to create account",
+  "errorServerCommunication": "Error communicating with the server",
+  "errorSpeciesInUse": "A species with linked plants cannot be deleted.",
+  "errorSoilInUse": "A soil with linked plants cannot be deleted.",
+
+  "locationUnsupportedPlatform": "Geolocation is not supported on Linux desktop.",
+  "locationServiceDisabled": "GPS is turned off. Enable it and try again.",
+  "locationPermissionDenied": "Location permission denied.",
+  "locationPermissionDeniedForever": "Location permission permanently denied. Enable it in the device settings.",
+  "locationFetchError": "Could not get the location: {error}",
+  "@locationFetchError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+
+  "galleryPermissionDenied": "Permission to access the gallery was denied",
+  "imageSavedToGallery": "Image saved to gallery",
+  "imageSaveError": "Error saving image: {error}",
+  "@imageSaveError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "shareError": "Error sharing: {error}",
+  "@shareError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "saveToGallery": "Save to gallery",
+
+  "irrigationChannelName": "Watering",
+  "irrigationChannelDescription": "Watering reminders for your plants",
+  "irrigationNotificationTitle": "Time to water! 🌿",
+  "irrigationNotificationBody": "{nickname} needs to be watered today.",
+  "@irrigationNotificationBody": {
+    "placeholders": {
+      "nickname": {"type": "String"}
+    }
+  },
+
+  "historyPlantAdded": "Plant added to the system:",
+  "historyFieldNickname": "Nickname",
+  "historyFieldSpecies": "Species",
+  "historyFieldSoil": "Soil",
+  "historyFieldLocation": "Location",
+  "historyFieldAcquisitionDate": "Acquisition date",
+  "historyFieldWateringFrequency": "Watering frequency",
+  "historyAcquiredOn": "Acquired on",
+  "historyCustomWatering": "Custom watering: {days}",
+  "@historyCustomWatering": {
+    "placeholders": {
+      "days": {"type": "String"}
+    }
+  },
+  "historyUpdatedHeader": "Updated information:",
+
+  "searchPlantsHint": "Search plants...",
+  "searchSpeciesHint": "Search species...",
+  "searchSoilsHint": "Search soils...",
+  "searchLocationsHint": "Search locations...",
+  "sortWateringNeeds": "Watering needs",
+  "sortNameAZ": "Name (A-Z)",
+  "sortNameZA": "Name (Z-A)",
+  "sortLastWatered": "Last watered",
+  "sortDateAdded": "Date added",
+  "sortPopularNameAZ": "Popular Name (A-Z)",
+  "sortPopularNameZA": "Popular Name (Z-A)",
+  "sortScientificNameAZ": "Scientific Name (A-Z)",
+  "sortScientificNameZA": "Scientific Name (Z-A)",
+  "sortNewestFirst": "Newest first",
+  "sortOldestFirst": "Oldest first",
+  "sortByType": "By type",
+  "sortTooltip": "Sort",
+
+  "errorLoadingPlants": "Error loading plants: {error}",
+  "@errorLoadingPlants": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "noPlantsFound": "No plants found",
+  "noPlantsRegistered": "No plants registered",
+  "tapToAddFirstPlant": "Tap + to add your first plant.",
+  "deletePlantsTitle": "{count, plural, one{Delete {count} plant?} other{Delete {count} plants?}}",
+  "@deletePlantsTitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "deletePlantsBody": "All records of these plants will be removed.",
+  "deletePlantTitle": "Delete plant?",
+  "deletePlantBody": "All records of this plant will be removed.",
+  "cancelSelection": "Cancel selection",
+  "selectedCount": "{count} selected",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "deleteSelected": "Delete selected",
+
+  "editPlant": "Edit plant",
+  "newPlant": "New plant",
+  "addPlant": "Add plant",
+  "sectionIdentification": "Identification",
+  "sectionCare": "Care",
+  "sectionDetails": "Details",
+  "sectionInformation": "Information",
+  "sectionCoordinates": "Coordinates",
+  "nicknameLabel": "Nickname",
+  "nicknameHint": "E.g.: Living room fern",
+  "nicknameRequired": "Enter a nickname",
+  "speciesRequired": "Select a species",
+  "selectSpeciesFromList": "Select a species from the list",
+  "selectSoilType": "Select a soil type",
+  "newSoilType": "New soil type",
+  "newLocation": "New location",
+  "irrigationFrequencyLabel": "Watering frequency (days)",
+  "irrigationFrequencyShort": "Watering frequency",
+  "irrigationFrequencyHelper": "If set, the app will send watering reminders.",
+  "recommendedSuffix": "(recommended)",
+  "locationLabel": "Location",
+  "acquisitionDateLabel": "Acquisition date",
+  "acquiredOnLabel": "Acquired on",
+
+  "plantNotFound": "Plant not found",
+  "soilLabel": "Soil",
+  "needsWater": "Needs water!",
+  "wateringUpToDate": "Watering up to date",
+  "lastWateringNotRecorded": "Last watering not recorded",
+  "daysOverdue": "{days, plural, one{{days} day overdue} other{{days} days overdue}}",
+  "@daysOverdue": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "nextWateringInDays": "{days, plural, one{Next watering in {days} day} other{Next watering in {days} days}}",
+  "@nextWateringInDays": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "wateredNow": "Watered now",
+  "irrigationRecorded": "Watering recorded!",
+  "irrigationRecordError": "Error recording watering: {error}",
+  "@irrigationRecordError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "entriesTitle": "Entries",
+  "entryTypesTitle": "Entry types",
+  "filterTypes": "Filter types",
+  "noEntriesFound": "No entries found",
+  "deleteEntryTitle": "Delete entry?",
+  "severityMild": "Mild",
+  "severityModerate": "Moderate",
+  "severitySevere": "Severe",
+  "severityActive": "Active",
+  "pestBadge": "Pest",
+
+  "entryTypeIrrigation": "Watering",
+  "entryTypeFertilizer": "Fertilizing",
+  "entryTypePruning": "Pruning",
+  "entryTypeObservation": "Observation",
+  "entryTypeHeight": "Height",
+  "entryTypeChlorosis": "Chlorosis",
+  "entryTypePest": "Pests",
+  "entryTypeOther": "Other",
+  "entryTypeHistory": "History",
+
+  "newEntryTitle": "New Entry",
+  "entryTypeCardTitle": "Entry type",
+  "notesTitle": "Notes",
+  "noteHintIrrigation": "Anything in the water? Any observations?",
+  "noteHintFertilizer": "Frequency, application method...",
+  "noteHintPruning": "How was the plant before pruning?",
+  "noteHintObservation": "How is the plant today?",
+  "noteHintHeight": "Any observations about growth?",
+  "noteHintChlorosis": "Which leaves are affected?",
+  "noteHintPest": "Where was it found? Any treatment?",
+  "noteHintDefault": "Optional notes...",
+  "photoTitle": "Photo",
+  "saveEntry": "Save entry",
+  "pruningFormation": "Formation",
+  "pruningCleaning": "Cleaning",
+  "pruningRejuvenation": "Rejuvenation",
+  "pruningHarvest": "Harvest",
+  "pruningReasonHint": "Reason (optional)",
+  "irrigationScarce": "Scarce",
+  "irrigationScarceDesc": "Soil slightly moist",
+  "irrigationModerate": "Moderate",
+  "irrigationModerateDesc": "Normal watering, soil well moistened",
+  "irrigationIntense": "Intense",
+  "irrigationIntenseDesc": "Soaked soil / long duration",
+  "irrigationIntensityHint": "Watering intensity (optional)",
+  "fertilizerProductsHint": "Product(s) used — optional",
+  "productLabel": "Product",
+  "productHint": "E.g.: Growth fertilizer",
+  "doseLabel": "Dose",
+  "addProduct": "Add product",
+  "healthScoreHint": "Plant health score (optional)",
+  "healthCritical": "Critical",
+  "healthBad": "Bad",
+  "healthRegular": "Fair",
+  "healthGood": "Good",
+  "healthExcellent": "Excellent",
+  "healthSummary": "Health {score}/5",
+  "@healthSummary": {
+    "placeholders": {
+      "score": {"type": "int"}
+    }
+  },
+  "heightSectionTitle": "Plant height",
+  "heightCmLabel": "Height in cm",
+  "heightHint": "E.g.: 32.5",
+  "heightInvalid": "Enter a valid height in cm",
+  "heightMeasureHint": "Measure from soil level to the tallest leaf.",
+  "severitySelectHint": "Select the severity *",
+  "chlorosisCured": "Cured",
+  "chlorosisCuredDesc": "Plant with no active chlorosis",
+  "chlorosisMildDesc": "Few yellowing leaves",
+  "chlorosisModerateDesc": "Several leaves affected",
+  "chlorosisSevereDesc": "Most leaves affected",
+  "pestTypeLabel": "Pest type",
+  "pestTypeHint": "E.g.: Mealybug, Aphid, Mite...",
+  "pestTypeRequired": "Enter the pest type",
+  "pestSeverityHint": "Infestation severity *",
+  "pestEradicated": "Eradicated",
+  "pestEradicatedDesc": "Plant free of pests",
+  "pestMildDesc": "Few individuals / small area",
+  "pestModerateDesc": "Several areas affected",
+  "pestSevereDesc": "Widespread infestation",
+  "productsCount": "{count, plural, one{{count} product} other{{count} products}}",
+  "@productsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+
+  "editSpecies": "Edit species",
+  "newSpecies": "New species",
+  "addSpecies": "Add species",
+  "popularNameLabel": "Popular name",
+  "scientificNameLabel": "Scientific name",
+  "scientificNameHint": "E.g.: Nephrolepis exaltata",
+  "defaultIrrigationFrequencyLabel": "Default watering frequency (days)",
+  "recommendedSoils": "Recommended soils",
+  "speciesFieldLabel": "Species",
+  "speciesSearchFieldHint": "Search the official or local database...",
+  "noSpeciesFound": "No species found",
+  "noSpeciesRegistered": "No species registered",
+  "tapToAddSpecies": "Tap + to add a new species.",
+  "deleteSpeciesTitle": "Delete species?",
+  "deleteSpeciesBody": "Plants linked to this species will not be affected.",
+  "floraBrasilBanner": "Using official data from Flora e Funga do Brasil (JBRJ).",
+  "totalSpeciesAvailable": "Total species available: {count}",
+  "@totalSpeciesAvailable": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "lastUpdate": "Last update: {date}",
+  "@lastUpdate": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "downloadUpdatedDataset": "Download updated version (JBRJ)",
+  "datasetDownloadStarted": "Starting download of the official dataset...",
+  "datasetUpdated": "Dataset updated successfully!",
+  "datasetUpdateError": "Error updating: {error}",
+  "@datasetUpdateError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+
+  "soilSandy": "Sandy",
+  "soilClay": "Clay",
+  "soilLoamy": "Loam",
+  "soilPeaty": "Peaty",
+  "soilChalky": "Chalky",
+  "soilSilty": "Silty",
+  "soilLatosol": "Latosol",
+  "soilArgisol": "Argisol",
+  "soilTerraRoxa": "Terra Roxa",
+  "soilMassape": "Massapê",
+  "soilAlluvial": "Alluvial/Floodplain",
+  "soilTerraVegetal": "Topsoil",
+  "soilPottingMix": "Potting Mix",
+  "soilWormCastings": "Worm Castings",
+  "soilSucculentMix": "Succulent Mix",
+  "soilCoconutFiber": "Coconut Fiber",
+  "soilManure": "Aged Manure",
+  "soilSandyDesc": "High drainage, low nutrient retention.",
+  "soilClayDesc": "High water retention, tends to compact.",
+  "soilLoamyDesc": "Balanced mix of sand, silt and clay.",
+  "soilPeatyDesc": "Rich in organic matter, retains a lot of moisture.",
+  "soilChalkyDesc": "Stony and alkaline, good drainage.",
+  "soilSiltyDesc": "Retains moisture well, fertile and soft.",
+  "soilLatosolDesc": "Rich in iron and aluminum. Very porous and well drained.",
+  "soilArgisolDesc": "Clay accumulation at depth. Erosion risk.",
+  "soilTerraRoxaDesc": "Volcanic origin. Extremely fertile with a reddish color.",
+  "soilMassapeDesc": "Dark, very clayey and fertile. Typical of NE Brazil.",
+  "soilAlluvialDesc": "River sediments. Naturally fertile and young.",
+  "soilTerraVegetalDesc": "Mineral soil mixed with decomposed plant matter.",
+  "soilPottingMixDesc": "Balanced mix of peat, pine bark and perlite.",
+  "soilWormCastingsDesc": "Rich in NPK and microorganisms. Great fertilizer.",
+  "soilSucculentMixDesc": "High drainage. 50% organic and 50% sand or perlite.",
+  "soilCoconutFiberDesc": "Improves aeration and keeps moisture controlled.",
+  "soilManureDesc": "Rich organic fertilizer. Always use it decomposed.",
+
+  "editSoil": "Edit soil",
+  "newSoil": "New Soil",
+  "createSoil": "Create soil",
+  "selectSoilTitle": "Select Soil",
+  "soilTypeLabel": "Soil type",
+  "soilNameLabel": "Soil Name",
+  "soilNameHint": "E.g.: Premium Organic Soil",
+  "compositionLabel": "Composition (optional)",
+  "compositionHint": "E.g.: 40% humus, 30% perlite, 30% coconut fiber",
+  "compositionHelper": "One line describing the mix.",
+  "imageSourceLabel": "Image Source (optional)",
+  "imageSourceHint": "E.g.: https://example.com/photo",
+  "imageSource": "Source: {source}",
+  "@imageSource": {
+    "placeholders": {
+      "source": {"type": "String"}
+    }
+  },
+  "tapToChangeImage": "Tap to change the image",
+  "noSoilsFound": "No soils found",
+  "noSoilsRegistered": "No soil types registered",
+  "tapToAddSoil": "Tap + to add a soil type.",
+  "deleteSoilTitle": "Delete soil?",
+  "deleteSoilBody": "Plants and species linked to this soil will not be deleted, but the reference to the soil may be lost.",
+
+  "editLocation": "Edit location",
+  "addLocation": "Add location",
+  "locationNameHint": "E.g.: Living room, Balcony, Bedroom",
+  "latitudeLabel": "Latitude",
+  "longitudeLabel": "Longitude",
+  "outOfRange": "Out of range [{min}, {max}]",
+  "@outOfRange": {
+    "placeholders": {
+      "min": {"type": "String"},
+      "max": {"type": "String"}
+    }
+  },
+  "gettingLocation": "Getting location...",
+  "useCurrentLocation": "Use current location",
+  "noLocationsFound": "No locations found",
+  "noLocationsRegistered": "No locations registered",
+  "tapToAddLocation": "Tap + to add a location.",
+  "deleteLocationTitle": "Delete location?",
+  "deleteLocationBody": "Plants linked to this location will not be deleted, but will be left without a location.",
+
+  "settingsGeneral": "General",
+  "settingsAppearance": "Appearance",
+  "settingsSync": "Sync",
+  "settingsData": "Data",
+  "wateringNotifications": "Watering Notifications",
+  "wateringNotificationsSubtitle": "Enable or disable reminders",
+  "transparencyAndBlur": "Transparency and Blur",
+  "transparencyAndBlurSubtitle": "Visual effects on cards and menus",
+  "darkMode": "Dark Mode",
+  "themeAuto": "Auto",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "aboutApp": "About the App",
+
+  "noRemoteWorkspaces": "No remote workspaces yet. Add one to sync this data with a server.",
+  "addRemoteWorkspace": "Add remote workspace",
+  "reconnectWorkspace": "Reconnect \"{name}\"",
+  "@reconnectWorkspace": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "disconnectBody": "This workspace's data stays on this device. To sync again, sign in with your account.",
+  "deleteWorkspaceTitle": "Delete \"{name}\"?",
+  "@deleteWorkspaceTitle": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "deleteWorkspaceBody": "This workspace's data will be erased from this device. This does not affect the account or the data on the server.",
+  "adminPermissionLost": "You no longer have administrator permission.",
+  "renameWorkspace": "Rename workspace",
+  "localChip": "Local",
+  "localNoSync": "Local — does not sync",
+  "dataOnlyOnDevice": "Data only on this device",
+  "serverAdministration": "Server administration",
+
+  "serverAddressTitle": "Server address",
+  "createFirstAccountTitle": "Create the server's first account",
+  "migrateLocalDataTitle": "Migrate local data?",
+  "migrateLocalDataBody": "We found data saved only on this device (local workspace). Do you want to send it to this server now?",
+  "serverUrlLabel": "Server URL",
+  "mustStartWithHttp": "Must start with http:// or https://",
+  "firstAccountInfo": "This server has no accounts yet. Create the main account below — it will be used to access it from now on.",
+  "workspaceNameLabel": "Name of this workspace",
+  "workspaceNameHint": "E.g.: Home greenhouse",
+  "emailLabel": "Email",
+  "passwordLabel": "Password",
+  "confirmPasswordLabel": "Confirm password",
+  "passwordMinChars": "At least 6 characters",
+  "passwordsDontMatch": "Passwords do not match",
+  "unexpectedConnectError": "Unexpected error while connecting.",
+  "unexpectedLoginError": "Unexpected error while signing in.",
+  "unexpectedRegisterError": "Unexpected error while creating the account.",
+  "unexpectedMigrateError": "Unexpected error while migrating the data.",
+
+  "promoteToAdminTitle": "Promote to admin?",
+  "demoteToMemberTitle": "Demote to member?",
+  "promoteToAdminBody": "{email} will get full server administration access.",
+  "@promoteToAdminBody": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "demoteToMemberBody": "{email} will lose server administration access.",
+  "@demoteToMemberBody": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "promote": "Promote",
+  "demote": "Demote",
+  "promoteToAdmin": "Promote to admin",
+  "demoteToMember": "Demote to member",
+  "disableAccountTitle": "Disable account?",
+  "enableAccountTitle": "Re-enable account?",
+  "disableAccountBody": "{email} will no longer be able to sign in. The data is kept.",
+  "@disableAccountBody": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "enableAccountBody": "{email} will be able to sign in again.",
+  "@enableAccountBody": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "disable": "Disable",
+  "enable": "Re-enable",
+  "disableAccount": "Disable account",
+  "enableAccount": "Re-enable account",
+  "addUser": "Add user",
+  "errorLoadingUsers": "Error loading users: {error}",
+  "@errorLoadingUsers": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "errorLoadingStatus": "Error loading status: {error}",
+  "@errorLoadingStatus": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "errorLoadingPermissions": "Error loading permissions: {error}",
+  "@errorLoadingPermissions": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "serverCardTitle": "Server",
+  "serverUptime": "Uptime: {uptime}",
+  "@serverUptime": {
+    "placeholders": {
+      "uptime": {"type": "String"}
+    }
+  },
+  "serverVersion": "Version: {version}",
+  "@serverVersion": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  "serverUsers": "Users: {count}",
+  "@serverUsers": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "memberPermissions": "Member permissions",
+  "memberExportSubtitle": "Members can export their own data",
+  "memberImportSubtitle": "Members can import data from a backup",
+  "youChip": "You",
+  "roleAdmin": "Admin",
+  "roleMember": "Member",
+  "accountDisabled": "Disabled",
+
+  "exportData": "Export data",
+  "importData": "Import data",
+  "exportDataSubtitle": "Creates a .zip file with the data and photos",
+  "importDataSubtitle": "Merges an exported backup with the current data",
+  "checkingPermission": "Checking permission...",
+  "permissionCheckFailed": "Could not verify the permission with the server.",
+  "connectToTransfer": "Connect to the server to export or import.",
+  "disabledByAdmin": "Disabled by the server administrator.",
+  "dataExportedTo": "Data exported to {path}",
+  "@dataExportedTo": {
+    "placeholders": {
+      "path": {"type": "String"}
+    }
+  },
+  "exportError": "Error exporting: {error}",
+  "@exportError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "importDataTitle": "Import data?",
+  "importDataBody": "The data from \"{fileName}\" will be merged into this workspace's data. Items edited more recently in the app are kept.",
+  "@importDataBody": {
+    "placeholders": {
+      "fileName": {"type": "String"}
+    }
+  },
+  "importAction": "Import",
+  "importDone": "{applied, plural, one{Import complete: {applied} item applied.} other{Import complete: {applied} items applied.}}",
+  "@importDone": {
+    "placeholders": {
+      "applied": {"type": "int"}
+    }
+  },
+  "importDoneWithSkipped": "Import complete: {applied} item(s) applied, {skipped} skipped for being older.",
+  "@importDoneWithSkipped": {
+    "placeholders": {
+      "applied": {"type": "int"},
+      "skipped": {"type": "int"}
+    }
+  },
+  "backupCorrupt": "Invalid backup file.",
+  "backupUnrecognized": "Unrecognized file: expected a backup .zip or .json.",
+  "backupNotPolypodium": "This file is not a Polypodium backup.",
+  "backupNewerVersion": "Backup created by a newer version of the app. Update Polypodium to import it."
+}

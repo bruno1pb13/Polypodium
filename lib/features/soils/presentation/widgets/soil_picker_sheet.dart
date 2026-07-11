@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/enums.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/widgets/app_search_bar.dart';
 import '../../domain/soil_model.dart';
 import '../providers/soils_search_providers.dart';
@@ -56,9 +57,9 @@ class _SoilPickerSheetState extends ConsumerState<SoilPickerSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Selecionar Solo',
-                style: TextStyle(
+              Text(
+                context.l10n.selectSoilTitle,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -66,7 +67,7 @@ class _SoilPickerSheetState extends ConsumerState<SoilPickerSheet> {
               ),
               AppSearchBar<SoilSortOption>(
                 controller: _searchController,
-                hintText: 'Buscar solos...',
+                hintText: context.l10n.searchSoilsHint,
                 onChanged: (value) {
                   ref.read(soilSearchQueryProvider.notifier).setQuery(value);
                 },
@@ -75,18 +76,18 @@ class _SoilPickerSheetState extends ConsumerState<SoilPickerSheet> {
                       .read(soilSortOptionNotifierProvider.notifier)
                       .setSortOption(option);
                 },
-                sortOptions: const [
+                sortOptions: [
                   PopupMenuItem(
                     value: SoilSortOption.nameAZ,
-                    child: Text('Nome (A-Z)'),
+                    child: Text(context.l10n.sortNameAZ),
                   ),
                   PopupMenuItem(
                     value: SoilSortOption.nameZA,
-                    child: Text('Nome (Z-A)'),
+                    child: Text(context.l10n.sortNameZA),
                   ),
                   PopupMenuItem(
                     value: SoilSortOption.dateAdded,
-                    child: Text('Data de Adição'),
+                    child: Text(context.l10n.sortDateAdded),
                   ),
                 ],
               ),
@@ -97,16 +98,16 @@ class _SoilPickerSheetState extends ConsumerState<SoilPickerSheet> {
                   ),
                   error: (e, _) => Center(
                     child: Text(
-                      'Erro: $e',
+                      context.l10n.errorGeneric('$e'),
                       style: const TextStyle(color: Colors.white),
                     ),
                   ),
                   data: (soils) {
                     if (soils.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Text(
-                          'Nenhum solo encontrado',
-                          style: TextStyle(color: Colors.white70),
+                          context.l10n.noSoilsFound,
+                          style: const TextStyle(color: Colors.white70),
                         ),
                       );
                     }
@@ -126,7 +127,7 @@ class _SoilPickerSheetState extends ConsumerState<SoilPickerSheet> {
                                 ),
                               ),
                               icon: const Icon(Icons.add),
-                              label: const Text('Novo Solo'),
+                              label: Text(context.l10n.newSoil),
                               style: FilledButton.styleFrom(
                                 backgroundColor:
                                     Colors.white.withValues(alpha: 0.1),

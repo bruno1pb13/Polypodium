@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/enums.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../domain/entry_model.dart';
 
 class EntryListItem extends StatelessWidget {
@@ -44,11 +45,13 @@ class EntryListItem extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        entry.type.label,
+                        entry.type.label(context.l10n),
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       Text(
-                        DateFormat('dd/MM/yy HH:mm').format(entry.date),
+                        DateFormat.yMd(context.l10n.localeName)
+                            .add_Hm()
+                            .format(entry.date),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],

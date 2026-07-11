@@ -147,8 +147,7 @@ void main() {
 
     expect(
       () => entriesRepo.delete(entry.id),
-      throwsA(isA<Exception>()
-          .having((e) => e.toString(), 'message', contains('histórico'))),
+      throwsA(isA<StateError>()),
     );
 
     final savedEntry = await entriesRepo.getById(entry.id);

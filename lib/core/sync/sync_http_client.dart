@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'models/entity_change.dart';
+import 'sync_exceptions.dart';
 
 class ChangesPage {
   final List<EntityChange> changes;
@@ -33,10 +34,10 @@ class SyncHttpClient {
         .timeout(const Duration(seconds: 30));
 
     if (response.statusCode == 401) {
-      throw Exception('Sessão expirada. Faça login novamente.');
+      throw const SessionExpiredException();
     }
     if (response.statusCode != 200) {
-      throw Exception('Erro ao receber dados do servidor');
+      throw const SyncReceiveException();
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -69,10 +70,10 @@ class SyncHttpClient {
         .timeout(const Duration(seconds: 30));
 
     if (response.statusCode == 401) {
-      throw Exception('Sessão expirada. Faça login novamente.');
+      throw const SessionExpiredException();
     }
     if (response.statusCode != 200) {
-      throw Exception('Erro ao enviar dados para o servidor');
+      throw const SyncSendException();
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;

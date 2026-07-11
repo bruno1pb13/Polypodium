@@ -7,6 +7,7 @@ import 'package:workmanager/workmanager.dart';
 
 import 'core/notifications/notification_service.dart';
 import 'core/sync/auto_sync_controller.dart';
+import 'l10n/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/app_shell.dart';
 import 'core/widgets/sync_status_banner.dart';
@@ -64,6 +65,10 @@ class PolypodiumApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
+      // Locale is resolved automatically from the device language; English
+      // is the fallback for any language other than Portuguese.
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: const AppShell(),
       debugShowCheckedModeBanner: false,
       builder: (context, child) => _AutoSyncScope(child: child!),

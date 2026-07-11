@@ -13,6 +13,8 @@ import '../providers/plant_search_providers.dart';
 import '../providers/plant_selection_provider.dart';
 import '../providers/plants_providers.dart';
 import '../../../../core/enums.dart';
+import '../../../../core/l10n/error_messages.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../../../core/widgets/app_shell.dart';
 import '../widgets/plant_list_item.dart';
@@ -53,17 +55,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(
-            'Deletar ${plantIds.length} planta(s)?'),
-        content: const Text('Todos os registros dessas plantas serão removidos.'),
+        title: Text(ctx.l10n.deletePlantsTitle(plantIds.length)),
+        content: Text(ctx.l10n.deletePlantsBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ctx.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Deletar'),
+            child: Text(ctx.l10n.delete),
           ),
         ],
       ),
@@ -83,7 +84,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (state.hasError) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(state.error.toString()),
+          content: Text(localizedErrorMessage(state.error!, context.l10n)),
           backgroundColor: Colors.red,
         ),
       );
@@ -108,18 +109,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               iconTheme: const IconThemeData(color: Colors.white),
               leading: IconButton(
                 icon: const Icon(Icons.close),
-                tooltip: 'Cancelar seleção',
+                tooltip: context.l10n.cancelSelection,
                 onPressed: () =>
                     ref.read(plantSelectionProvider.notifier).state = {},
               ),
               title: Text(
-                '${selectedIds.length} selecionada(s)',
+                context.l10n.selectedCount(selectedIds.length),
                 style: const TextStyle(color: Colors.white),
               ),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
-                  tooltip: 'Excluir selecionadas',
+                  tooltip: context.l10n.deleteSelected,
                   onPressed: () => _confirmBulkDelete(context, ref, selectedIds),
                 ),
               ],
@@ -161,7 +162,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                           )
                         : const Icon(Icons.sync),
-                    tooltip: 'Sincronizar agora',
+                    tooltip: context.l10n.syncNow,
                     onPressed: syncState.isLoading ? null : _manualSync,
                   ),
               ],
@@ -199,7 +200,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 AppSearchBar<PlantSortOption>(
                   controller: _searchController,
-                  hintText: 'Buscar plantas...',
+                  hintText: context.l10n.searchPlantsHint,
                   onChanged: (value) {
                     ref.read(plantSearchQueryProvider.notifier).setQuery(value);
                   },
@@ -208,26 +209,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         .read(plantSortOptionNotifierProvider.notifier)
                         .setSortOption(option);
                   },
-                  sortOptions: const [
+                  sortOptions: [
                     PopupMenuItem(
                       value: PlantSortOption.wateringNeeds,
-                      child: Text('Necessidade de rega'),
+                      child: Text(context.l10n.sortWateringNeeds),
                     ),
                     PopupMenuItem(
                       value: PlantSortOption.nameAZ,
-                      child: Text('Nome (A-Z)'),
+                      child: Text(context.l10n.sortNameAZ),
                     ),
                     PopupMenuItem(
                       value: PlantSortOption.nameZA,
-                      child: Text('Nome (Z-A)'),
+                      child: Text(context.l10n.sortNameZA),
                     ),
                     PopupMenuItem(
                       value: PlantSortOption.lastWatered,
-                      child: Text('Última rega'),
+                      child: Text(context.l10n.sortLastWatered),
                     ),
                     PopupMenuItem(
                       value: PlantSortOption.dateAdded,
-                      child: Text('Data de adição'),
+                      child: Text(context.l10n.sortDateAdded),
                     ),
                   ],
                 ),
@@ -240,7 +241,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       loading: () =>
                           const Center(child: CircularProgressIndicator()),
                       error: (e, _) => Center(
-                          child: Text('Erro ao carregar plantas: $e',
+                          child: Text(context.l10n.errorLoadingPlants('$e'),
                               style: const TextStyle(color: Colors.white))),
                       data: (plants) {
                         if (plants.isEmpty) {
@@ -250,9 +251,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               child: SizedBox(
                                 height: constraints.maxHeight,
                                 child: _searchController.text.isNotEmpty
-                                    ? const Center(
-                                        child: Text('Nenhuma planta encontrada',
-                                            style: TextStyle(color: Colors.white)))
+                                    ? Center(
+                                        child: Text(context.l10n.noPlantsFound,
+                                            style: const TextStyle(
+                                                color: Colors.white)))
                                     : const _EmptyState(),
                               ),
                             ),
@@ -323,11 +325,11 @@ class _EmptyState extends StatelessWidget {
           Icon(Icons.local_florist_outlined,
               size: 64, color: Colors.white.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
-          const Text('Nenhuma planta cadastrada',
-              style: TextStyle(color: Colors.white, fontSize: 16)),
+          Text(context.l10n.noPlantsRegistered,
+              style: const TextStyle(color: Colors.white, fontSize: 16)),
           const SizedBox(height: 8),
-          const Text('Toque em + para adicionar sua primeira planta.',
-              style: TextStyle(fontSize: 13, color: Colors.white70)),
+          Text(context.l10n.tapToAddFirstPlant,
+              style: const TextStyle(fontSize: 13, color: Colors.white70)),
         ],
       ),
     );

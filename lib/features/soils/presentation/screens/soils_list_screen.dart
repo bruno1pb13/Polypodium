@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/enums.dart';
+import '../../../../core/l10n/error_messages.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/widgets/app_search_bar.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/soil_model.dart';
@@ -46,9 +48,9 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'Solos',
-          style: TextStyle(
+        title: Text(
+          context.l10n.navSoils,
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
             shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
@@ -83,7 +85,7 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
               children: [
                 AppSearchBar<SoilSortOption>(
                   controller: _searchController,
-                  hintText: 'Buscar solos...',
+                  hintText: context.l10n.searchSoilsHint,
                   onChanged: (value) {
                     ref.read(soilSearchQueryProvider.notifier).setQuery(value);
                   },
@@ -92,18 +94,18 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
                         .read(soilSortOptionNotifierProvider.notifier)
                         .setSortOption(option);
                   },
-                  sortOptions: const [
+                  sortOptions: [
                     PopupMenuItem(
                       value: SoilSortOption.nameAZ,
-                      child: Text('Nome (A-Z)'),
+                      child: Text(context.l10n.sortNameAZ),
                     ),
                     PopupMenuItem(
                       value: SoilSortOption.nameZA,
-                      child: Text('Nome (Z-A)'),
+                      child: Text(context.l10n.sortNameZA),
                     ),
                     PopupMenuItem(
                       value: SoilSortOption.dateAdded,
-                      child: Text('Data de Adição'),
+                      child: Text(context.l10n.sortDateAdded),
                     ),
                   ],
                 ),
@@ -118,7 +120,7 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
                       ),
                       error: (e, _) => Center(
                         child: Text(
-                          'Erro: $e',
+                          context.l10n.errorGeneric('$e'),
                           style: const TextStyle(color: Colors.white),
                         ),
                       ),
@@ -130,9 +132,10 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
                               child: SizedBox(
                                 height: constraints.maxHeight,
                                 child: _searchController.text.isNotEmpty
-                                    ? const Center(
-                                        child: Text('Nenhum solo encontrado',
-                                            style: TextStyle(color: Colors.white)))
+                                    ? Center(
+                                        child: Text(context.l10n.noSoilsFound,
+                                            style: const TextStyle(
+                                                color: Colors.white)))
                                     : const _EmptyState(),
                               ),
                             ),
@@ -180,23 +183,30 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Deletar solo?'),
-        content: const Text(
-            'Plantas e espécies vinculadas a este solo não serão deletadas, mas a referência ao solo pode ser perdida.'),
+        title: Text(ctx.l10n.deleteSoilTitle),
+        content: Text(ctx.l10n.deleteSoilBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ctx.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Deletar'),
+            child: Text(ctx.l10n.delete),
           ),
         ],
       ),
     );
     if (confirmed == true) {
-      await ref.read(soilsNotifierProvider.notifier).delete(id);
+      try {
+        await ref.read(soilsNotifierProvider.notifier).delete(id);
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(localizedErrorMessage(e, context.l10n))),
+          );
+        }
+      }
     }
   }
 }
@@ -315,7 +325,7 @@ class _SoilListItem extends ConsumerWidget {
                               soil.imageSource!.isNotEmpty) ...[
                             const SizedBox(height: 2),
                             Text(
-                              'Fonte: ${soil.imageSource}',
+                              context.l10n.imageSource('${soil.imageSource}'),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontStyle: FontStyle.italic,
@@ -371,14 +381,14 @@ class _EmptyState extends StatelessWidget {
             color: Colors.white.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Nenhum tipo de solo cadastrado',
-            style: TextStyle(color: Colors.white, fontSize: 16),
+          Text(
+            context.l10n.noSoilsRegistered,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Toque em + para adicionar um tipo de solo.',
-            style: TextStyle(fontSize: 13, color: Colors.white70),
+          Text(
+            context.l10n.tapToAddSoil,
+            style: const TextStyle(fontSize: 13, color: Colors.white70),
           ),
         ],
       ),

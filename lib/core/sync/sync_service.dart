@@ -6,6 +6,7 @@ import '../storage/photo_storage.dart';
 import 'drift_sync_cursor_store.dart';
 import 'drift_sync_storage_adapter.dart';
 import 'photo_sync_client.dart';
+import 'sync_exceptions.dart';
 import 'sync_http_client.dart';
 import 'sync_orchestrator.dart';
 import 'workspace_config_store.dart';
@@ -67,7 +68,7 @@ class SyncService {
   }
 
   Future<SyncResult> sync() async {
-    if (!isLoggedIn) throw Exception('Não autenticado');
+    if (!isLoggedIn) throw const NotAuthenticatedException();
     final result = await _orchestrator.sync(
       serverUrl: serverUrl!,
       token: token!,

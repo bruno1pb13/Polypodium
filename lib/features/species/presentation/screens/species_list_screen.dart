@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/enums.dart';
+import '../../../../core/l10n/error_messages.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/sync/sync_providers.dart';
 import '../../../../core/widgets/app_search_bar.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
@@ -47,9 +49,9 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'Espécies',
-          style: TextStyle(
+        title: Text(
+          context.l10n.navSpecies,
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
             shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
@@ -84,7 +86,7 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
               children: [
                 AppSearchBar<SpeciesSortOption>(
                   controller: _searchController,
-                  hintText: 'Buscar espécies...',
+                  hintText: context.l10n.searchSpeciesHint,
                   onChanged: (value) {
                     ref.read(speciesSearchQueryProvider.notifier).setQuery(value);
                   },
@@ -93,26 +95,26 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                         .read(speciesSortOptionNotifierProvider.notifier)
                         .setSortOption(option);
                   },
-                  sortOptions: const [
+                  sortOptions: [
                     PopupMenuItem(
                       value: SpeciesSortOption.popularAZ,
-                      child: Text('Nome Popular (A-Z)'),
+                      child: Text(context.l10n.sortPopularNameAZ),
                     ),
                     PopupMenuItem(
                       value: SpeciesSortOption.popularZA,
-                      child: Text('Nome Popular (Z-A)'),
+                      child: Text(context.l10n.sortPopularNameZA),
                     ),
                     PopupMenuItem(
                       value: SpeciesSortOption.scientificAZ,
-                      child: Text('Nome Científico (A-Z)'),
+                      child: Text(context.l10n.sortScientificNameAZ),
                     ),
                     PopupMenuItem(
                       value: SpeciesSortOption.scientificZA,
-                      child: Text('Nome Científico (Z-A)'),
+                      child: Text(context.l10n.sortScientificNameZA),
                     ),
                     PopupMenuItem(
                       value: SpeciesSortOption.dateAdded,
-                      child: Text('Data de Adição'),
+                      child: Text(context.l10n.sortDateAdded),
                     ),
                   ],
                 ),
@@ -128,7 +130,7 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                       ),
                       error: (e, _) => Center(
                         child: Text(
-                          'Erro: $e',
+                          context.l10n.errorGeneric('$e'),
                           style: const TextStyle(color: Colors.white),
                         ),
                       ),
@@ -140,9 +142,11 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                               child: SizedBox(
                                 height: constraints.maxHeight,
                                 child: _searchController.text.isNotEmpty
-                                    ? const Center(
-                                        child: Text('Nenhuma espécie encontrada',
-                                            style: TextStyle(color: Colors.white)))
+                                    ? Center(
+                                        child: Text(
+                                            context.l10n.noSpeciesFound,
+                                            style: const TextStyle(
+                                                color: Colors.white)))
                                     : const _EmptyState(),
                               ),
                             ),
@@ -192,23 +196,30 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Deletar espécie?'),
-        content:
-            const Text('Plantas vinculadas a esta espécie não serão afetadas.'),
+        title: Text(ctx.l10n.deleteSpeciesTitle),
+        content: Text(ctx.l10n.deleteSpeciesBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ctx.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Deletar'),
+            child: Text(ctx.l10n.delete),
           ),
         ],
       ),
     );
     if (confirmed == true) {
-      await ref.read(speciesNotifierProvider.notifier).delete(id);
+      try {
+        await ref.read(speciesNotifierProvider.notifier).delete(id);
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(localizedErrorMessage(e, context.l10n))),
+          );
+        }
+      }
     }
   }
 }
@@ -254,7 +265,7 @@ class _InfoBanner extends ConsumerWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Usando dados oficiais da Flora e Funga do Brasil (JBRJ).',
+                        context.l10n.floraBrasilBanner,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -275,7 +286,8 @@ class _InfoBanner extends ConsumerWidget {
                       .getSpeciesCount(),
                   builder: (context, snapshot) {
                     return Text(
-                      'Total de espécies disponíveis: ${snapshot.data ?? "..."}',
+                      context.l10n
+                          .totalSpeciesAvailable('${snapshot.data ?? "..."}'),
                       style: TextStyle(
                         fontSize: 12,
                         color: transparencyEnabled
@@ -295,7 +307,7 @@ class _InfoBanner extends ConsumerWidget {
                       .getLastUpdateDate(),
                   builder: (context, snapshot) {
                     return Text(
-                      'Última atualização: ${snapshot.data ?? "..."}',
+                      context.l10n.lastUpdate(snapshot.data ?? '...'),
                       style: TextStyle(
                         fontSize: 12,
                         color: transparencyEnabled
@@ -312,7 +324,7 @@ class _InfoBanner extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: () => _handleUpdate(context, ref),
                   icon: const Icon(Icons.download, size: 16),
-                  label: const Text('Baixar versão atualizada (JBRJ)'),
+                  label: Text(context.l10n.downloadUpdatedDataset),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: transparencyEnabled
                         ? Colors.white
@@ -336,9 +348,10 @@ class _InfoBanner extends ConsumerWidget {
 
   Future<void> _handleUpdate(BuildContext context, WidgetRef ref) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
 
     scaffoldMessenger.showSnackBar(
-      const SnackBar(content: Text('Iniciando download do dataset oficial...')),
+      SnackBar(content: Text(l10n.datasetDownloadStarted)),
     );
 
     try {
@@ -346,11 +359,11 @@ class _InfoBanner extends ConsumerWidget {
           .read(externalSpeciesRepositoryProvider.notifier)
           .downloadAndUpdate();
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Dataset atualizado com sucesso!')),
+        SnackBar(content: Text(l10n.datasetUpdated)),
       );
     } catch (e) {
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('Erro ao atualizar: $e')),
+        SnackBar(content: Text(l10n.datasetUpdateError('$e'))),
       );
     }
   }
@@ -458,7 +471,7 @@ class _SpeciesListItem extends ConsumerWidget {
                     ),
                     if (isPendingSync)
                       Tooltip(
-                        message: 'Pendente de sincronização',
+                        message: context.l10n.pendingSync,
                         child: Icon(
                           Icons.cloud_upload_outlined,
                           size: 16,
@@ -507,14 +520,14 @@ class _EmptyState extends StatelessWidget {
             color: Colors.white.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Nenhuma espécie cadastrada',
-            style: TextStyle(color: Colors.white, fontSize: 16),
+          Text(
+            context.l10n.noSpeciesRegistered,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Toque em + para adicionar uma nova espécie.',
-            style: TextStyle(fontSize: 13, color: Colors.white70),
+          Text(
+            context.l10n.tapToAddSpecies,
+            style: const TextStyle(fontSize: 13, color: Colors.white70),
           ),
         ],
       ),
