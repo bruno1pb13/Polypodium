@@ -32,8 +32,8 @@ jobs:
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_OUTPUT
 
-  # ── Android APK ────────────────────────────────────────────────────────────
-  build-apk:
+  # ── Android APK + AAB (Google Play) ────────────────────────────────────────
+  build-android:
     needs: version
     runs-on: ubuntu-latest
     steps:
@@ -76,6 +76,17 @@ jobs:
         with:
           name: apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Build AAB (Google Play)
+        run: |
+          flutter build appbundle --release \
+            --build-name=${{ needs.version.outputs.build_name }} \
+            --build-number=${{ needs.version.outputs.build_number }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aab
+          path: build/app/outputs/bundle/release/app-release.aab
 
   # ── Linux AppImage ─────────────────────────────────────────────────────────
   build-linux:
@@ -157,7 +168,7 @@ jobs:
 
   # ── GitHub Release (agrega APK + AppImage + Windows) ───────────────────────
   release:
-    needs: [version, build-apk, build-linux, build-windows]
+    needs: [version, build-android, build-linux, build-windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -165,6 +176,11 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: apk
+          path: artifacts/
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: aab
           path: artifacts/
 
       - uses: actions/download-artifact@v4
@@ -186,6 +202,7 @@ jobs:
         with:
           files: |
             artifacts/app-release.apk
+            artifacts/app-release.aab
             artifacts/Polypodium-x86_64.AppImage
             artifacts/Polypodium.msix
             artifacts/Polypodium-Windows-Portable.zip
