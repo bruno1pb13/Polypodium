@@ -42,6 +42,17 @@
   "nameLabel": "Nome",
   "descriptionLabel": "Descrição",
 
+  "introSkip": "Pular",
+  "introGetStarted": "Começar",
+  "introWelcomeTitle": "Bem-vindo ao Polypodium",
+  "introWelcomeBody": "Seu companheiro para cuidar da sua coleção de plantas.",
+  "introPlantsTitle": "Acompanhe suas plantas",
+  "introPlantsBody": "Cadastre cada planta com fotos, espécie, localização e solo, e mantenha todo o histórico em um só lugar.",
+  "introRemindersTitle": "Lembretes de rega",
+  "introRemindersBody": "Receba notificações quando for hora de regar, de acordo com as necessidades de cada espécie.",
+  "introSyncTitle": "Seus dados, em todo lugar",
+  "introSyncBody": "Tudo funciona offline. Conecte-se a um servidor depois para sincronizar entre dispositivos e fazer backup dos seus dados.",
+
   "dateFormatPattern": "dd/MM/yyyy",
 
   "daysCount": "{days, plural, one{{days} dia} other{{days} dias}}",
