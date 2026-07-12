@@ -780,6 +780,57 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get viewDiary => 'Diário';
+
+  @override
+  String get viewCharts => 'Gráficos';
+
+  @override
+  String get viewPhotos => 'Fotos';
+
+  @override
+  String get chartGrowthTitle => 'Crescimento';
+
+  @override
+  String get chartHealthTitle => 'Saúde geral';
+
+  @override
+  String get chartWateringTitle => 'Regularidade de rega';
+
+  @override
+  String get chartNeedTwoHeights =>
+      'Registre a altura pelo menos duas vezes para ver a curva de crescimento.';
+
+  @override
+  String get chartNeedTwoHealth =>
+      'Registre observações com nota de saúde para ver a tendência.';
+
+  @override
+  String get chartNeedTwoWaterings =>
+      'Registre pelo menos duas regas para ver os intervalos.';
+
+  @override
+  String get chartsEmpty =>
+      'Ainda não há dados para gráficos. Registre alturas, notas de saúde e regas no diário.';
+
+  @override
+  String get photosEmpty =>
+      'Nenhuma foto nos registros ainda. Adicione fotos aos registros para montar a linha do tempo visual.';
+
+  @override
+  String chartWateringSummary(String avg, int ideal) {
+    return 'Média: a cada $avg dias · Ideal: a cada $ideal dias';
+  }
+
+  @override
+  String chartWateringAvgOnly(String avg) {
+    return 'Média: a cada $avg dias';
+  }
+
+  @override
+  String get chartIdealLabel => 'Ideal';
+
+  @override
   String get editSpecies => 'Editar espécie';
 
   @override

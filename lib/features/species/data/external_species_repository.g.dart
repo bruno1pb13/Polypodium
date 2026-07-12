@@ -34,7 +34,7 @@ final class ExternalSpeciesRepositoryProvider
 }
 
 String _$externalSpeciesRepositoryHash() =>
-    r'9346b3bedf5376a74f52236cc6a56ebbe85b5c14';
+    r'91b912d00e35264c4ae913ff77c3071ade9c4856';
 
 abstract class _$ExternalSpeciesRepository extends $AsyncNotifier<void> {
   FutureOr<void> build();

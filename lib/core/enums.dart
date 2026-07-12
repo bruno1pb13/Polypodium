@@ -66,6 +66,20 @@ enum EntrySortOption {
   typeAZ,
 }
 
+enum PlantDetailView {
+  diary,
+  charts,
+  photos,
+}
+
+extension PlantDetailViewX on PlantDetailView {
+  String label(AppLocalizations l10n) => switch (this) {
+        PlantDetailView.diary => l10n.viewDiary,
+        PlantDetailView.charts => l10n.viewCharts,
+        PlantDetailView.photos => l10n.viewPhotos,
+      };
+}
+
 extension EntrySortOptionX on EntrySortOption {
   String label(AppLocalizations l10n) => switch (this) {
         EntrySortOption.dateDesc => l10n.sortNewestFirst,

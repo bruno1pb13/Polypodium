@@ -16,7 +16,8 @@ import '../../features/species/domain/species_model.dart';
 import '../l10n/l10n.dart';
 
 abstract interface class INotificationService {
-  Future<void> schedule({required PlantModel plant, required SpeciesModel species});
+  Future<void> schedule(
+      {required PlantModel plant, required SpeciesModel species});
   Future<void> cancel(String plantId);
 }
 
@@ -103,7 +104,7 @@ class NotificationService implements INotificationService {
 
     final frequencyDays =
         plant.irrigationFrequencyDays ?? species.defaultIrrigationFrequencyDays;
-    
+
     if (frequencyDays == null) {
       await cancelNotification(plant.id);
       return;
@@ -141,13 +142,12 @@ class NotificationService implements INotificationService {
   }
 
   static Future<void> cancelNotification(String plantId) async {
-    // flutter_local_notifications has no Windows implementation (< v19);
-    // cancel() falls through to the default method channel there and throws
-    // MissingPluginException, which would abort callers such as plant delete.
-    if (!(Platform.isAndroid ||
-        Platform.isIOS ||
-        Platform.isMacOS ||
-        Platform.isLinux)) {
+    // Notifications are only scheduled on Android/iOS/macOS (zonedSchedule is
+    // unimplemented elsewhere), so there is nothing to cancel on other
+    // platforms — and calling cancel() there throws: Windows has no
+    // implementation (< v19) and on Linux the plugin is only registered in a
+    // real app, not under `flutter test`.
+    if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) {
       return;
     }
     await _plugin.cancel(_notificationId(plantId));
@@ -241,8 +241,8 @@ class NotificationService implements INotificationService {
     int frequencyDays,
   ) {
     final now = tz.TZDateTime.now(tz.local);
-    final result =
-        computeNextIrrigationDate(lastIrrigatedAt, frequencyDays, now.toLocal());
+    final result = computeNextIrrigationDate(
+        lastIrrigatedAt, frequencyDays, now.toLocal());
     return tz.TZDateTime(
         tz.local, result.year, result.month, result.day, result.hour);
   }

@@ -21,7 +21,10 @@ import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../../soils/presentation/providers/soils_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
 import '../../domain/plant_model.dart';
+import '../providers/plant_detail_view_provider.dart';
 import '../providers/plants_providers.dart';
+import '../widgets/plant_insights_view.dart';
+import '../widgets/plant_photos_sliver.dart';
 import 'add_edit_plant_screen.dart';
 
 class PlantDetailScreen extends ConsumerWidget {
@@ -38,6 +41,7 @@ class PlantDetailScreen extends ConsumerWidget {
     final entriesAsync = ref.watch(entriesNotifierProvider(plantId));
     final activeFilters = ref.watch(entryFiltersNotifierProvider(plantId));
     final activeSort = ref.watch(entrySortNotifierProvider(plantId));
+    final activeView = ref.watch(plantDetailViewNotifierProvider(plantId));
 
     return plantsAsync.when(
       loading: () =>
@@ -156,62 +160,92 @@ class PlantDetailScreen extends ConsumerWidget {
                         child: _IrrigationStatusCard(pws: pws),
                       ),
                     SliverToBoxAdapter(
-                      child: _EntriesHeader(plantId: plantId),
+                      child: _ViewSelector(plantId: plantId),
                     ),
-                    // Timeline Entries
-                    entriesAsync.when(
-                      loading: () => const SliverToBoxAdapter(
-                        child: Center(child: CircularProgressIndicator()),
+                    if (activeView == PlantDetailView.diary) ...[
+                      SliverToBoxAdapter(
+                        child: _EntriesHeader(plantId: plantId),
                       ),
-                      error: (e, _) => SliverToBoxAdapter(
-                        child:
-                            Center(child: Text(context.l10n.errorGeneric('$e'))),
-                      ),
-                      data: (entries) {
-                        final filteredEntries = entries
-                            .where((e) => activeFilters.contains(e.type))
-                            .toList();
+                      // Timeline Entries
+                      entriesAsync.when(
+                        loading: () => const SliverToBoxAdapter(
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        error: (e, _) => SliverToBoxAdapter(
+                          child: Center(
+                              child: Text(context.l10n.errorGeneric('$e'))),
+                        ),
+                        data: (entries) {
+                          final filteredEntries = entries
+                              .where((e) => activeFilters.contains(e.type))
+                              .toList();
 
-                        switch (activeSort) {
-                          case EntrySortOption.dateAsc:
-                            filteredEntries.sort(
-                                (a, b) => a.date.compareTo(b.date));
-                          case EntrySortOption.typeAZ:
-                            filteredEntries.sort((a, b) => a.type
-                                .label(context.l10n)
-                                .compareTo(b.type.label(context.l10n)));
-                          case EntrySortOption.dateDesc:
-                            break;
-                        }
+                          switch (activeSort) {
+                            case EntrySortOption.dateAsc:
+                              filteredEntries.sort(
+                                  (a, b) => a.date.compareTo(b.date));
+                            case EntrySortOption.typeAZ:
+                              filteredEntries.sort((a, b) => a.type
+                                  .label(context.l10n)
+                                  .compareTo(b.type.label(context.l10n)));
+                            case EntrySortOption.dateDesc:
+                              break;
+                          }
 
-                        if (filteredEntries.isEmpty) {
-                          return SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.all(48),
-                              child: Center(
-                                child: Text(
-                                  context.l10n.noEntriesFound,
-                                  style:
-                                      const TextStyle(color: Colors.white70),
+                          if (filteredEntries.isEmpty) {
+                            return SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.all(48),
+                                child: Center(
+                                  child: Text(
+                                    context.l10n.noEntriesFound,
+                                    style:
+                                        const TextStyle(color: Colors.white70),
+                                  ),
                                 ),
                               ),
+                            );
+                          }
+
+                          return SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (ctx, i) => EntryTimelineItem(
+                                entry: filteredEntries[i],
+                                isLast: i == filteredEntries.length - 1,
+                                onDelete: () => _deleteEntry(
+                                    context, ref, filteredEntries[i]),
+                              ),
+                              childCount: filteredEntries.length,
                             ),
                           );
-                        }
-
-                        return SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (ctx, i) => EntryTimelineItem(
-                              entry: filteredEntries[i],
-                              isLast: i == filteredEntries.length - 1,
-                              onDelete: () =>
-                                  _deleteEntry(context, ref, filteredEntries[i]),
-                            ),
-                            childCount: filteredEntries.length,
-                          ),
-                        );
-                      },
-                    ),
+                        },
+                      ),
+                    ] else if (activeView == PlantDetailView.charts)
+                      entriesAsync.when(
+                        loading: () => const SliverToBoxAdapter(
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        error: (e, _) => SliverToBoxAdapter(
+                          child: Center(
+                              child: Text(context.l10n.errorGeneric('$e'))),
+                        ),
+                        data: (entries) => SliverToBoxAdapter(
+                          child:
+                              PlantInsightsView(entries: entries, pws: pws),
+                        ),
+                      )
+                    else
+                      entriesAsync.when(
+                        loading: () => const SliverToBoxAdapter(
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        error: (e, _) => SliverToBoxAdapter(
+                          child: Center(
+                              child: Text(context.l10n.errorGeneric('$e'))),
+                        ),
+                        data: (entries) =>
+                            PlantPhotosSliver(entries: entries),
+                      ),
                     const SliverToBoxAdapter(child: SizedBox(height: 120)),
                   ],
                   ),
@@ -704,6 +738,120 @@ class _IrrigationStatusCard extends ConsumerWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ViewSelector extends ConsumerWidget {
+  final String plantId;
+  const _ViewSelector({required this.plantId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(plantDetailViewNotifierProvider(plantId));
+    final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: BackdropFilter(
+          filter: transparencyEnabled
+              ? ImageFilter.blur(sigmaX: 10, sigmaY: 10)
+              : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: transparencyEnabled
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: transparencyEnabled
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.transparent,
+              ),
+            ),
+            child: Row(
+              children: [
+                for (final view in PlantDetailView.values)
+                  Expanded(
+                    child: _Segment(
+                      view: view,
+                      selected: view == active,
+                      transparent: transparencyEnabled,
+                      onTap: () => ref
+                          .read(plantDetailViewNotifierProvider(plantId)
+                              .notifier)
+                          .setView(view),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Segment extends StatelessWidget {
+  final PlantDetailView view;
+  final bool selected;
+  final bool transparent;
+  final VoidCallback onTap;
+
+  const _Segment({
+    required this.view,
+    required this.selected,
+    required this.transparent,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final icon = switch (view) {
+      PlantDetailView.diary => Icons.article_outlined,
+      PlantDetailView.charts => Icons.show_chart,
+      PlantDetailView.photos => Icons.photo_library_outlined,
+    };
+    final fg = selected
+        ? (transparent ? Colors.white : colorScheme.onPrimaryContainer)
+        : (transparent ? Colors.white60 : colorScheme.onSurfaceVariant);
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: selected
+              ? (transparent
+                  ? Colors.white.withValues(alpha: 0.18)
+                  : colorScheme.primaryContainer)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: fg),
+            const SizedBox(width: 6),
+            Text(
+              view.label(context.l10n),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: fg,
+              ),
+            ),
+          ],
         ),
       ),
     );

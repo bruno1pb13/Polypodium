@@ -54,7 +54,7 @@ final class SyncBannerControllerProvider
 }
 
 String _$syncBannerControllerHash() =>
-    r'd7ad0b60e5fa383fd7e0ac7f685a50d6c394df1c';
+    r'a5b2c2b422b8d3d092882856ffa9d30b17108bfe';
 
 /// Transient top-of-screen banner shown for background sync activity: a
 /// green line when new content was pulled down, a red line when a sync

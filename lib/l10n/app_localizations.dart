@@ -1460,6 +1460,90 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{{count} product} other{{count} products}}'**
   String productsCount(int count);
 
+  /// No description provided for @viewDiary.
+  ///
+  /// In en, this message translates to:
+  /// **'Diary'**
+  String get viewDiary;
+
+  /// No description provided for @viewCharts.
+  ///
+  /// In en, this message translates to:
+  /// **'Charts'**
+  String get viewCharts;
+
+  /// No description provided for @viewPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get viewPhotos;
+
+  /// No description provided for @chartGrowthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Growth'**
+  String get chartGrowthTitle;
+
+  /// No description provided for @chartHealthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall health'**
+  String get chartHealthTitle;
+
+  /// No description provided for @chartWateringTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watering regularity'**
+  String get chartWateringTitle;
+
+  /// No description provided for @chartNeedTwoHeights.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the height at least twice to see the growth curve.'**
+  String get chartNeedTwoHeights;
+
+  /// No description provided for @chartNeedTwoHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Record observations with a health score to see the trend.'**
+  String get chartNeedTwoHealth;
+
+  /// No description provided for @chartNeedTwoWaterings.
+  ///
+  /// In en, this message translates to:
+  /// **'Record at least two waterings to see the intervals.'**
+  String get chartNeedTwoWaterings;
+
+  /// No description provided for @chartsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No chart data yet. Log heights, health scores and waterings in the diary.'**
+  String get chartsEmpty;
+
+  /// No description provided for @photosEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No photos in the entries yet. Add photos to entries to build the visual timeline.'**
+  String get photosEmpty;
+
+  /// No description provided for @chartWateringSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Average: every {avg} days · Ideal: every {ideal} days'**
+  String chartWateringSummary(String avg, int ideal);
+
+  /// No description provided for @chartWateringAvgOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Average: every {avg} days'**
+  String chartWateringAvgOnly(String avg);
+
+  /// No description provided for @chartIdealLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ideal'**
+  String get chartIdealLabel;
+
   /// No description provided for @editSpecies.
   ///
   /// In en, this message translates to:
