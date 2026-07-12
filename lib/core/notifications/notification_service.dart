@@ -140,8 +140,18 @@ class NotificationService implements INotificationService {
     );
   }
 
-  static Future<void> cancelNotification(String plantId) =>
-      _plugin.cancel(_notificationId(plantId));
+  static Future<void> cancelNotification(String plantId) async {
+    // flutter_local_notifications has no Windows implementation (< v19);
+    // cancel() falls through to the default method channel there and throws
+    // MissingPluginException, which would abort callers such as plant delete.
+    if (!(Platform.isAndroid ||
+        Platform.isIOS ||
+        Platform.isMacOS ||
+        Platform.isLinux)) {
+      return;
+    }
+    await _plugin.cancel(_notificationId(plantId));
+  }
 
   /// Called from the WorkManager background isolate every 12 h to recover
   /// notifications lost after a device reboot.
