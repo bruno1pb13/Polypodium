@@ -143,4 +143,4 @@ final class DataTransferPermissionProvider extends $FunctionalProvider<
 }
 
 String _$dataTransferPermissionHash() =>
-    r'f7f995af0d8740fb2970cff3f2016969143f713b';
+    r'1f91a4ac3629f84512ee618f0c77548e7d56cafc';

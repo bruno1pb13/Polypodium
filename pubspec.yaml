@@ -34,6 +34,7 @@ dependencies:
   share_plus: ^13.2.0
   file_selector: ^1.0.3
   battery_plus: ^6.2.1
+  fl_chart: ^1.2.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
