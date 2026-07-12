@@ -2,6 +2,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:polypodium/core/notifications/notification_service.dart';
 
 void main() {
+  group('NotificationService.cancelNotification', () {
+    test('is a no-op on platforms without a plugin implementation', () async {
+      // The test host (Windows) has no flutter_local_notifications
+      // implementation; without the platform guard this used to throw
+      // MissingPluginException and abort plant deletion.
+      await NotificationService.cancelNotification('some-plant-id');
+    });
+  });
+
   group('NotificationService.computeNextIrrigationDate', () {
     // Reference: Sunday 2026-05-24, 10:00
     final now = DateTime(2026, 5, 24, 10, 0);
