@@ -333,6 +333,32 @@
     }
   },
 
+  "viewDiary": "Diary",
+  "viewCharts": "Charts",
+  "viewPhotos": "Photos",
+  "chartGrowthTitle": "Growth",
+  "chartHealthTitle": "Overall health",
+  "chartWateringTitle": "Watering regularity",
+  "chartNeedTwoHeights": "Record the height at least twice to see the growth curve.",
+  "chartNeedTwoHealth": "Record observations with a health score to see the trend.",
+  "chartNeedTwoWaterings": "Record at least two waterings to see the intervals.",
+  "chartsEmpty": "No chart data yet. Log heights, health scores and waterings in the diary.",
+  "photosEmpty": "No photos in the entries yet. Add photos to entries to build the visual timeline.",
+  "chartWateringSummary": "Average: every {avg} days · Ideal: every {ideal} days",
+  "@chartWateringSummary": {
+    "placeholders": {
+      "avg": {"type": "String"},
+      "ideal": {"type": "int"}
+    }
+  },
+  "chartWateringAvgOnly": "Average: every {avg} days",
+  "@chartWateringAvgOnly": {
+    "placeholders": {
+      "avg": {"type": "String"}
+    }
+  },
+  "chartIdealLabel": "Ideal",
+
   "editSpecies": "Edit species",
   "newSpecies": "New species",
   "addSpecies": "Add species",
