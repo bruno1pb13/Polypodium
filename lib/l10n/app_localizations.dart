@@ -332,6 +332,66 @@ abstract class AppLocalizations {
   /// **'Description'**
   String get descriptionLabel;
 
+  /// No description provided for @introSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get introSkip;
+
+  /// No description provided for @introGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get introGetStarted;
+
+  /// No description provided for @introWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Polypodium'**
+  String get introWelcomeTitle;
+
+  /// No description provided for @introWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your companion for caring for your plant collection.'**
+  String get introWelcomeBody;
+
+  /// No description provided for @introPlantsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your plants'**
+  String get introPlantsTitle;
+
+  /// No description provided for @introPlantsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Register each plant with photos, species, location and soil, and keep its whole history in one place.'**
+  String get introPlantsBody;
+
+  /// No description provided for @introRemindersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watering reminders'**
+  String get introRemindersTitle;
+
+  /// No description provided for @introRemindersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified when it\'s time to water, based on each species\' needs.'**
+  String get introRemindersBody;
+
+  /// No description provided for @introSyncTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data, everywhere'**
+  String get introSyncTitle;
+
+  /// No description provided for @introSyncBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything works offline. Connect to a server later to sync across devices and back up your data.'**
+  String get introSyncBody;
+
   /// Date pattern used for dates embedded in persisted history notes
   ///
   /// In en, this message translates to:

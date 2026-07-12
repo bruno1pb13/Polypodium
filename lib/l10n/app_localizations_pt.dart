@@ -126,6 +126,40 @@ class AppLocalizationsPt extends AppLocalizations {
   String get descriptionLabel => 'Descrição';
 
   @override
+  String get introSkip => 'Pular';
+
+  @override
+  String get introGetStarted => 'Começar';
+
+  @override
+  String get introWelcomeTitle => 'Bem-vindo ao Polypodium';
+
+  @override
+  String get introWelcomeBody =>
+      'Seu companheiro para cuidar da sua coleção de plantas.';
+
+  @override
+  String get introPlantsTitle => 'Acompanhe suas plantas';
+
+  @override
+  String get introPlantsBody =>
+      'Cadastre cada planta com fotos, espécie, localização e solo, e mantenha todo o histórico em um só lugar.';
+
+  @override
+  String get introRemindersTitle => 'Lembretes de rega';
+
+  @override
+  String get introRemindersBody =>
+      'Receba notificações quando for hora de regar, de acordo com as necessidades de cada espécie.';
+
+  @override
+  String get introSyncTitle => 'Seus dados, em todo lugar';
+
+  @override
+  String get introSyncBody =>
+      'Tudo funciona offline. Conecte-se a um servidor depois para sincronizar entre dispositivos e fazer backup dos seus dados.';
+
+  @override
   String get dateFormatPattern => 'dd/MM/yyyy';
 
   @override

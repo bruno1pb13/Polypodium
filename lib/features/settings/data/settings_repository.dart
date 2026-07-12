@@ -9,6 +9,7 @@ class SettingsRepository {
   static const _themeModeKey = 'theme_mode';
   static const _syncServerUrlKey = 'sync_server_url';
   static const _autoSyncEnabledKey = 'auto_sync_enabled';
+  static const _introSeenKey = 'intro_seen';
 
   final SharedPreferences _prefs;
 
@@ -46,6 +47,12 @@ class SettingsRepository {
     } else {
       await _prefs.setString(_syncServerUrlKey, url);
     }
+  }
+
+  bool hasSeenIntro() => _prefs.getBool(_introSeenKey) ?? false;
+
+  Future<void> setIntroSeen() async {
+    await _prefs.setBool(_introSeenKey, true);
   }
 
   bool isAutoSyncEnabled() => _prefs.getBool(_autoSyncEnabledKey) ?? true;
