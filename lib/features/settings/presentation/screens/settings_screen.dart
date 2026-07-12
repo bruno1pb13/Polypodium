@@ -49,35 +49,56 @@ class SettingsScreen extends ConsumerWidget {
                   .setEnabled(value);
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.dark_mode_outlined),
-            title: Text(context.l10n.darkMode),
-            trailing: SegmentedButton<String>(
-              segments: [
-                ButtonSegment(
-                  value: 'system',
-                  icon: const Icon(Icons.brightness_auto),
-                  label: Text(context.l10n.themeAuto),
-                ),
-                ButtonSegment(
-                  value: 'light',
-                  icon: const Icon(Icons.light_mode),
-                  label: Text(context.l10n.themeLight),
-                ),
-                ButtonSegment(
-                  value: 'dark',
-                  icon: const Icon(Icons.dark_mode),
-                  label: Text(context.l10n.themeDark),
-                ),
-              ],
-              selected: {themeModeStr},
-              onSelectionChanged: (newSelection) {
-                ref
-                    .read(themeModeNotifierProvider.notifier)
-                    .setThemeMode(newSelection.first);
-              },
-              showSelectedIcon: false,
-            ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final themeSelector = SegmentedButton<String>(
+                segments: [
+                  ButtonSegment(
+                    value: 'system',
+                    icon: const Icon(Icons.brightness_auto),
+                    label: Text(context.l10n.themeAuto),
+                  ),
+                  ButtonSegment(
+                    value: 'light',
+                    icon: const Icon(Icons.light_mode),
+                    label: Text(context.l10n.themeLight),
+                  ),
+                  ButtonSegment(
+                    value: 'dark',
+                    icon: const Icon(Icons.dark_mode),
+                    label: Text(context.l10n.themeDark),
+                  ),
+                ],
+                selected: {themeModeStr},
+                onSelectionChanged: (newSelection) {
+                  ref
+                      .read(themeModeNotifierProvider.notifier)
+                      .setThemeMode(newSelection.first);
+                },
+                showSelectedIcon: false,
+              );
+              // Em telas estreitas o SegmentedButton como trailing esmaga o
+              // título; nesse caso ele desce para uma linha própria.
+              if (constraints.maxWidth < 480) {
+                return Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.dark_mode_outlined),
+                      title: Text(context.l10n.darkMode),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                      child: themeSelector,
+                    ),
+                  ],
+                );
+              }
+              return ListTile(
+                leading: const Icon(Icons.dark_mode_outlined),
+                title: Text(context.l10n.darkMode),
+                trailing: themeSelector,
+              );
+            },
           ),
           const Divider(),
           _SectionHeader(title: context.l10n.settingsSync),
