@@ -11,6 +11,8 @@ import 'l10n/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/app_shell.dart';
 import 'core/widgets/sync_status_banner.dart';
+import 'features/onboarding/presentation/screens/intro_screen.dart';
+import 'features/settings/data/settings_repository.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
 import 'features/workspaces/data/workspace_repository.dart';
 
@@ -33,6 +35,7 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
   await WorkspaceRepository(prefs).ensureBootstrapped();
+  final showIntro = !SettingsRepository(prefs).hasSeenIntro();
 
   if (Platform.isAndroid) {
     await Workmanager().initialize(callbackDispatcher);
@@ -44,11 +47,14 @@ Future<void> main() async {
     );
   }
 
-  runApp(const ProviderScope(child: PolypodiumApp()));
+  runApp(ProviderScope(child: PolypodiumApp(showIntro: showIntro)));
 }
 
 class PolypodiumApp extends ConsumerWidget {
-  const PolypodiumApp({super.key});
+  const PolypodiumApp({super.key, this.showIntro = false});
+
+  /// Whether to show the first-launch introduction instead of the app shell.
+  final bool showIntro;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -69,7 +75,7 @@ class PolypodiumApp extends ConsumerWidget {
       // is the fallback for any language other than Portuguese.
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const AppShell(),
+      home: showIntro ? const IntroScreen() : const AppShell(),
       debugShowCheckedModeBanner: false,
       builder: (context, child) => _AutoSyncScope(child: child!),
     );

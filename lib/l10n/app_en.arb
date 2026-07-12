@@ -42,6 +42,17 @@
   "nameLabel": "Name",
   "descriptionLabel": "Description",
 
+  "introSkip": "Skip",
+  "introGetStarted": "Get started",
+  "introWelcomeTitle": "Welcome to Polypodium",
+  "introWelcomeBody": "Your companion for caring for your plant collection.",
+  "introPlantsTitle": "Track your plants",
+  "introPlantsBody": "Register each plant with photos, species, location and soil, and keep its whole history in one place.",
+  "introRemindersTitle": "Watering reminders",
+  "introRemindersBody": "Get notified when it's time to water, based on each species' needs.",
+  "introSyncTitle": "Your data, everywhere",
+  "introSyncBody": "Everything works offline. Connect to a server later to sync across devices and back up your data.",
+
   "dateFormatPattern": "M/d/yyyy",
   "@dateFormatPattern": {
     "description": "Date pattern used for dates embedded in persisted history notes"
