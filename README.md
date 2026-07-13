@@ -17,7 +17,7 @@ App **offline-first** para gerenciar sua coleção de plantas. Todos os dados fi
 | Plataforma | Onde |
 |---|---|
 | Android | [Google Play](https://play.google.com/store/apps/details?id=com.zapperbrz.polypodium) |
-| Windows | [Microsoft Store](https://apps.microsoft.com/search?query=Polypodium) |
+| Windows | [Microsoft Store](https://apps.microsoft.com/detail/9ngjqhv1jn76) |
 | Linux | [AppImage nos Releases](https://github.com/bruno1pb13/Polypodium/releases/latest) |
 
 ## Desenvolvimento
