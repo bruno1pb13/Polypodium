@@ -454,6 +454,23 @@ class AppLocalizationsPt extends AppLocalizations {
   String get deleteSelected => 'Excluir selecionadas';
 
   @override
+  String get bulkEntryButton => 'Registro em massa';
+
+  @override
+  String get noPlantsAtLocation => 'Nenhuma planta nesta localização';
+
+  @override
+  String get plantsAtLocationHint =>
+      'Defina esta localização em uma planta para vê-la aqui.';
+
+  @override
+  String get noPlantsOfSpecies => 'Nenhuma planta desta espécie';
+
+  @override
+  String get plantsOfSpeciesHint =>
+      'Adicione uma planta desta espécie para vê-la aqui.';
+
+  @override
   String get editPlant => 'Editar planta';
 
   @override
@@ -632,6 +649,17 @@ class AppLocalizationsPt extends AppLocalizations {
   String get newEntryTitle => 'Novo Registro';
 
   @override
+  String newBulkEntryTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Novo registro ($count plantas)',
+      one: 'Novo registro ($count planta)',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get entryTypeCardTitle => 'Tipo de registro';
 
   @override
@@ -666,6 +694,17 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get saveEntry => 'Salvar registro';
+
+  @override
+  String saveEntryForPlants(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Salvar para $count plantas',
+      one: 'Salvar para $count planta',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get pruningFormation => 'Formação';

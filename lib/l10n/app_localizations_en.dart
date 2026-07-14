@@ -449,6 +449,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteSelected => 'Delete selected';
 
   @override
+  String get bulkEntryButton => 'Bulk entry';
+
+  @override
+  String get noPlantsAtLocation => 'No plants at this location';
+
+  @override
+  String get plantsAtLocationHint =>
+      'Assign this location to a plant to see it here.';
+
+  @override
+  String get noPlantsOfSpecies => 'No plants of this species';
+
+  @override
+  String get plantsOfSpeciesHint =>
+      'Add a plant of this species to see it here.';
+
+  @override
   String get editPlant => 'Edit plant';
 
   @override
@@ -627,6 +644,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newEntryTitle => 'New Entry';
 
   @override
+  String newBulkEntryTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'New entry ($count plants)',
+      one: 'New entry ($count plant)',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get entryTypeCardTitle => 'Entry type';
 
   @override
@@ -661,6 +689,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveEntry => 'Save entry';
+
+  @override
+  String saveEntryForPlants(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Save for $count plants',
+      one: 'Save for $count plant',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get pruningFormation => 'Formation';

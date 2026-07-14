@@ -205,6 +205,12 @@
   },
   "deleteSelected": "Delete selected",
 
+  "bulkEntryButton": "Bulk entry",
+  "noPlantsAtLocation": "No plants at this location",
+  "plantsAtLocationHint": "Assign this location to a plant to see it here.",
+  "noPlantsOfSpecies": "No plants of this species",
+  "plantsOfSpeciesHint": "Add a plant of this species to see it here.",
+
   "editPlant": "Edit plant",
   "newPlant": "New plant",
   "addPlant": "Add plant",
@@ -276,6 +282,12 @@
   "entryTypeHistory": "History",
 
   "newEntryTitle": "New Entry",
+  "newBulkEntryTitle": "{count, plural, one{New entry ({count} plant)} other{New entry ({count} plants)}}",
+  "@newBulkEntryTitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "entryTypeCardTitle": "Entry type",
   "notesTitle": "Notes",
   "noteHintIrrigation": "Anything in the water? Any observations?",
@@ -288,6 +300,12 @@
   "noteHintDefault": "Optional notes...",
   "photoTitle": "Photo",
   "saveEntry": "Save entry",
+  "saveEntryForPlants": "{count, plural, one{Save for {count} plant} other{Save for {count} plants}}",
+  "@saveEntryForPlants": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "pruningFormation": "Formation",
   "pruningCleaning": "Cleaning",
   "pruningRejuvenation": "Rejuvenation",

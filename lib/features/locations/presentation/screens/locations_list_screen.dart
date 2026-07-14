@@ -7,6 +7,7 @@ import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/sync/sync_providers.dart';
 import '../../../../core/widgets/app_search_bar.dart';
+import '../../../plants/presentation/screens/plant_group_screen.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/location_model.dart';
 import '../providers/locations_providers.dart';
@@ -147,6 +148,15 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
                           itemCount: locations.length,
                           itemBuilder: (ctx, i) => _LocationListItem(
                             location: locations[i],
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PlantGroupScreen.byLocation(
+                                  title: locations[i].name,
+                                  locationId: locations[i].id,
+                                ),
+                              ),
+                            ),
                             onEdit: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -207,11 +217,13 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
 
 class _LocationListItem extends ConsumerWidget {
   final LocationModel location;
+  final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _LocationListItem({
     required this.location,
+    required this.onTap,
     required this.onEdit,
     required this.onDelete,
   });
@@ -244,7 +256,7 @@ class _LocationListItem extends ConsumerWidget {
               ),
             ),
             child: InkWell(
-              onTap: onEdit,
+              onTap: onTap,
               borderRadius: BorderRadius.circular(16),
               child: Padding(
                 padding: const EdgeInsets.all(12),

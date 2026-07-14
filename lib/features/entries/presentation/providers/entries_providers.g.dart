@@ -52,6 +52,47 @@ final class EntriesRepositoryProvider extends $FunctionalProvider<
 
 String _$entriesRepositoryHash() => r'5cfd89564a430f86edc242884039887e067525d3';
 
+@ProviderFor(entryMutations)
+final entryMutationsProvider = EntryMutationsProvider._();
+
+final class EntryMutationsProvider
+    extends $FunctionalProvider<EntryMutations, EntryMutations, EntryMutations>
+    with $Provider<EntryMutations> {
+  EntryMutationsProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'entryMutationsProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$entryMutationsHash();
+
+  @$internal
+  @override
+  $ProviderElement<EntryMutations> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  EntryMutations create(Ref ref) {
+    return entryMutations(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EntryMutations value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EntryMutations>(value),
+    );
+  }
+}
+
+String _$entryMutationsHash() => r'b9c58869198d149dbae80ee6d694c81494c7397a';
+
 @ProviderFor(EntriesNotifier)
 final entriesNotifierProvider = EntriesNotifierFamily._();
 
@@ -93,7 +134,7 @@ final class EntriesNotifierProvider
   }
 }
 
-String _$entriesNotifierHash() => r'21449b8df65eae3ea8f712975c7606233011cb6c';
+String _$entriesNotifierHash() => r'b96cb47e6a9e1cbc8f35b7b777352abc819a5f0b';
 
 final class EntriesNotifierFamily extends $Family
     with

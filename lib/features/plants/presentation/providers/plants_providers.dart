@@ -48,10 +48,7 @@ class PlantsNotifier extends _$PlantsNotifier {
         note: note,
         createdAt: DateTime.now(),
       );
-      // We read the notifier and call create.
-      // Note: this will also trigger refreshPlantStatus if it were an irrigation,
-      // but for history it just creates the entry and invalidates entries.
-      await ref.read(entriesNotifierProvider(plant.id).notifier).create(entry);
+      await ref.read(entryMutationsProvider).create(entry);
     }
     
     // Trigger immediate sync if logged in
