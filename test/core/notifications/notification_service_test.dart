@@ -44,14 +44,15 @@ void main() {
       expect(result, DateTime(2026, 5, 25, 9));
     });
 
-    test('overdue plant (past due date and 9h already passed) schedules today', () {
-      // base = 2026-05-23, 9h on 23rd is before now → advance +1 day = today (24th) at 9h
-      // Today's 9h is still before now (10h), but the algorithm only adds one day, so
-      // the result lands at 2026-05-24 09:00 — closest possible slot for an overdue plant.
+    test('overdue plant schedules at the next 9h in the future', () {
+      // base = 2026-05-23, in the past; today's 9h has also passed (now = 10h),
+      // so the next valid slot is tomorrow at 9h. The result must never be in
+      // the past — zonedSchedule() throws for past dates.
       final lastIrrigated = DateTime(2026, 5, 23);
       final result =
           NotificationService.computeNextIrrigationDate(lastIrrigated, 0, now);
-      expect(result, DateTime(2026, 5, 24, 9));
+      expect(result.isAfter(now), isTrue);
+      expect(result, DateTime(2026, 5, 25, 9));
     });
 
     test('schedules at 9h exactly on the result date', () {

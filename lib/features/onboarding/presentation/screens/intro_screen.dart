@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/notifications/notification_service.dart';
 import '../../../../core/widgets/app_shell.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 
@@ -21,6 +22,10 @@ class IntroScreen extends ConsumerStatefulWidget {
 class _IntroScreenState extends ConsumerState<IntroScreen> {
   final _pageController = PageController();
   int _currentPage = 0;
+
+  /// Whether the user tapped "turn on reminders" on the reminders page.
+  /// Kept here (not in the page) so it survives swiping away and back.
+  bool _remindersOptedIn = false;
 
   static const _pageCount = 4;
 
@@ -49,6 +54,25 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
     );
   }
 
+  /// Explicit opt-in: only here (and via the settings toggle) does the app
+  /// ask the OS for notification permissions — never at startup.
+  Future<void> _enableReminders() async {
+    final granted = await NotificationService.requestPermissions();
+    await ref.read(settingsRepositoryProvider).setNotificationsEnabled(true);
+    if (!mounted) return;
+    setState(() => _remindersOptedIn = granted);
+  }
+
+  Future<void> _pickReminderTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: ref.read(notificationTimeNotifierProvider),
+    );
+    if (picked != null) {
+      await ref.read(notificationTimeNotifierProvider.notifier).setTime(picked);
+    }
+  }
+
   List<_IntroPageData> _pages(BuildContext context) => [
     _IntroPageData(
       icon: null, // welcome page shows the logo instead
@@ -64,6 +88,11 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
       icon: Icons.water_drop,
       title: context.l10n.introRemindersTitle,
       body: context.l10n.introRemindersBody,
+      child: _ReminderSetup(
+        optedIn: _remindersOptedIn,
+        onEnable: _enableReminders,
+        onPickTime: _pickReminderTime,
+      ),
     ),
     _IntroPageData(
       icon: Icons.cloud_sync,
@@ -163,11 +192,15 @@ class _IntroPageData {
     required this.icon,
     required this.title,
     required this.body,
+    this.child,
   });
 
   final IconData? icon;
   final String title;
   final String body;
+
+  /// Optional interactive content shown below the body inside the card.
+  final Widget? child;
 }
 
 class _IntroPage extends StatelessWidget {
@@ -231,6 +264,10 @@ class _IntroPage extends StatelessWidget {
                         color: Colors.white70,
                       ),
                     ),
+                    if (data.child != null) ...[
+                      const SizedBox(height: 24),
+                      data.child!,
+                    ],
                   ],
                 ),
               ),
@@ -238,6 +275,78 @@ class _IntroPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Opt-in block on the reminders page: pick the reminder time and, if the
+/// user wants reminders, request the OS notification permission — the app
+/// never asks for it unprompted.
+class _ReminderSetup extends ConsumerWidget {
+  const _ReminderSetup({
+    required this.optedIn,
+    required this.onEnable,
+    required this.onPickTime,
+  });
+
+  final bool optedIn;
+  final Future<void> Function() onEnable;
+  final Future<void> Function() onPickTime;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final time = ref.watch(notificationTimeNotifierProvider);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              context.l10n.introRemindersTimeLabel,
+              style: const TextStyle(color: Colors.white70, fontSize: 15),
+            ),
+            const SizedBox(width: 12),
+            OutlinedButton.icon(
+              onPressed: onPickTime,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: const BorderSide(color: Colors.white38),
+              ),
+              icon: const Icon(Icons.schedule, size: 18),
+              label: Text(
+                time.format(context),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: optedIn
+              ? FilledButton.tonalIcon(
+                  onPressed: null,
+                  icon: const Icon(Icons.check),
+                  label: Text(context.l10n.introRemindersEnabled),
+                )
+              : FilledButton.icon(
+                  onPressed: onEnable,
+                  icon: const Icon(Icons.notifications_active_outlined),
+                  label: Text(context.l10n.introRemindersEnable),
+                ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          context.l10n.introRemindersLaterNote,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.white54, fontSize: 12),
+        ),
+      ],
     );
   }
 }

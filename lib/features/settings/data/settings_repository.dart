@@ -5,6 +5,7 @@ import '../../plants/presentation/providers/plants_providers.dart';
 
 class SettingsRepository {
   static const _notificationsEnabledKey = 'notifications_enabled';
+  static const _notificationTimeKey = 'notification_time_minutes';
   static const _transparencyEnabledKey = 'transparency_enabled';
   static const _themeModeKey = 'theme_mode';
   static const _syncServerUrlKey = 'sync_server_url';
@@ -21,6 +22,17 @@ class SettingsRepository {
 
   Future<void> setNotificationsEnabled(bool enabled) async {
     await _prefs.setBool(_notificationsEnabledKey, enabled);
+  }
+
+  /// Time of day watering reminders are shown at, as (hour, minute).
+  ({int hour, int minute}) getNotificationTime() {
+    final minutes = _prefs.getInt(_notificationTimeKey) ??
+        NotificationService.defaultTimeMinutes;
+    return (hour: minutes ~/ 60, minute: minutes % 60);
+  }
+
+  Future<void> setNotificationTime(int hour, int minute) async {
+    await _prefs.setInt(_notificationTimeKey, hour * 60 + minute);
   }
 
   bool isTransparencyEnabled() {

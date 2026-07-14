@@ -27,6 +27,12 @@ class NotificationService implements INotificationService {
   static const irrigationCheckTask = 'irrigation-check';
   static const _channelId = 'polypodium_irrigation';
 
+  /// SharedPreferences keys — shared with SettingsRepository, which cannot be
+  /// imported here (it depends on this service).
+  static const _enabledKey = 'notifications_enabled';
+  static const _timeKey = 'notification_time_minutes';
+  static const defaultTimeMinutes = 9 * 60;
+
   static final _plugin = FlutterLocalNotificationsPlugin();
 
   /// Localizations resolved from the device locale — notifications are also
@@ -46,10 +52,12 @@ class NotificationService implements INotificationService {
     }
 
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    // Permissions are NOT requested here — the user opts in from the
+    // onboarding or the settings screen (see [requestPermissions]).
     const iOS = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
     );
     const linux = LinuxInitializationSettings(
       defaultActionName: 'Open',
@@ -62,8 +70,6 @@ class NotificationService implements INotificationService {
     if (Platform.isAndroid) {
       final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
-      await androidPlugin?.requestNotificationsPermission();
-      await androidPlugin?.requestExactAlarmsPermission();
       await androidPlugin?.createNotificationChannel(
         AndroidNotificationChannel(
           _channelId,
@@ -74,6 +80,36 @@ class NotificationService implements INotificationService {
     }
   }
 
+  /// Asks the OS for notification permissions. Call only after an explicit
+  /// user gesture (onboarding opt-in or the settings toggle).
+  ///
+  /// Returns whether notifications are allowed afterwards. On platforms
+  /// without a runtime permission this is a no-op returning true.
+  static Future<bool> requestPermissions() async {
+    if (Platform.isAndroid) {
+      final android = _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      final granted = await android?.requestNotificationsPermission();
+      await android?.requestExactAlarmsPermission();
+      return granted ?? false;
+    }
+    if (Platform.isIOS) {
+      final ios = _plugin.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
+      final granted =
+          await ios?.requestPermissions(alert: true, badge: true, sound: true);
+      return granted ?? false;
+    }
+    if (Platform.isMacOS) {
+      final macos = _plugin.resolvePlatformSpecificImplementation<
+          MacOSFlutterLocalNotificationsPlugin>();
+      final granted = await macos?.requestPermissions(
+          alert: true, badge: true, sound: true);
+      return granted ?? false;
+    }
+    return true;
+  }
+
   // INotificationService --------------------------------------------------
 
   @override
@@ -82,7 +118,7 @@ class NotificationService implements INotificationService {
     required SpeciesModel species,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final enabled = prefs.getBool('notifications_enabled') ?? true;
+    final enabled = prefs.getBool(_enabledKey) ?? true;
     await scheduleIrrigationNotification(
         plant: plant, species: species, enabled: enabled);
   }
@@ -115,8 +151,15 @@ class NotificationService implements INotificationService {
     // UnimplementedError.
     if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) return;
 
-    final scheduledDate =
-        _nextIrrigationTime(plant.lastIrrigatedAt, frequencyDays);
+    final prefs = await SharedPreferences.getInstance();
+    final timeMinutes = prefs.getInt(_timeKey) ?? defaultTimeMinutes;
+
+    final scheduledDate = _nextIrrigationTime(
+      plant.lastIrrigatedAt,
+      frequencyDays,
+      hour: timeMinutes ~/ 60,
+      minute: timeMinutes % 60,
+    );
 
     final l10n = _l10n;
     await _plugin.zonedSchedule(
@@ -174,6 +217,9 @@ class NotificationService implements INotificationService {
     await _plugin
         .initialize(const InitializationSettings(android: android, iOS: iOS));
 
+    final prefs = await SharedPreferences.getInstance();
+    final enabled = prefs.getBool(_enabledKey) ?? true;
+
     final dir = await getApplicationDocumentsDirectory();
     final file = File(p.join(dir.path, 'polypodium.db'));
     final db = AppDatabase.forTesting(NativeDatabase(file));
@@ -206,7 +252,8 @@ class NotificationService implements INotificationService {
           createdAt: speciesRow.createdAt,
         );
 
-        await scheduleIrrigationNotification(plant: plant, species: species);
+        await scheduleIrrigationNotification(
+            plant: plant, species: species, enabled: enabled);
       }
     } finally {
       await db.close();
@@ -215,7 +262,8 @@ class NotificationService implements INotificationService {
 
   // ---------------------------------------------------------------------------
 
-  /// Computes the next 9 am on or after the plant's due irrigation date.
+  /// Computes the next occurrence of the user's reminder time ([hour]:[minute],
+  /// default 9:00) on or after the plant's due irrigation date.
   ///
   /// Exposed for unit testing; prefer [scheduleIrrigationNotification] in
   /// production code.
@@ -223,28 +271,39 @@ class NotificationService implements INotificationService {
   static DateTime computeNextIrrigationDate(
     DateTime? lastIrrigatedAt,
     int frequencyDays,
-    DateTime now,
-  ) {
+    DateTime now, {
+    int hour = 9,
+    int minute = 0,
+  }) {
     final base = lastIrrigatedAt == null
         ? now
         : lastIrrigatedAt.add(Duration(days: frequencyDays));
 
-    var scheduled = DateTime(base.year, base.month, base.day, 9);
-    if (scheduled.isBefore(now)) {
-      scheduled = scheduled.add(const Duration(days: 1));
+    // For overdue plants `base` can be arbitrarily far in the past; clamp to
+    // the next reminder time strictly after `now`, otherwise zonedSchedule()
+    // throws for dates in the past.
+    var scheduled = DateTime(base.year, base.month, base.day, hour, minute);
+    if (!scheduled.isAfter(now)) {
+      scheduled = DateTime(now.year, now.month, now.day, hour, minute);
+      if (!scheduled.isAfter(now)) {
+        scheduled = scheduled.add(const Duration(days: 1));
+      }
     }
     return scheduled;
   }
 
   static tz.TZDateTime _nextIrrigationTime(
     DateTime? lastIrrigatedAt,
-    int frequencyDays,
-  ) {
+    int frequencyDays, {
+    required int hour,
+    required int minute,
+  }) {
     final now = tz.TZDateTime.now(tz.local);
     final result = computeNextIrrigationDate(
-        lastIrrigatedAt, frequencyDays, now.toLocal());
-    return tz.TZDateTime(
-        tz.local, result.year, result.month, result.day, result.hour);
+        lastIrrigatedAt, frequencyDays, now.toLocal(),
+        hour: hour, minute: minute);
+    return tz.TZDateTime(tz.local, result.year, result.month, result.day,
+        result.hour, result.minute);
   }
 
   static int _notificationId(String uuid) => uuid.hashCode.abs() % 0x7FFFFFFF;

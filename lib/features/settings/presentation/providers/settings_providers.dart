@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/notifications/notification_service.dart';
 import '../../data/settings_repository.dart';
 
 part 'settings_providers.g.dart';
@@ -24,10 +26,33 @@ class NotificationsEnabledNotifier extends _$NotificationsEnabledNotifier {
   }
 
   Future<void> setEnabled(bool enabled) async {
+    // Permissions are only requested on an explicit opt-in, never at app
+    // startup; turning the switch on is that opt-in.
+    if (enabled) {
+      await NotificationService.requestPermissions();
+    }
     await ref.read(settingsRepositoryProvider).setNotificationsEnabled(enabled);
     state = enabled;
 
     // Reschedule all notifications based on the new setting
+    await ref.read(settingsRepositoryProvider).rescheduleAllNotifications(ref);
+  }
+}
+
+@riverpod
+class NotificationTimeNotifier extends _$NotificationTimeNotifier {
+  @override
+  TimeOfDay build() {
+    final time = ref.watch(settingsRepositoryProvider).getNotificationTime();
+    return TimeOfDay(hour: time.hour, minute: time.minute);
+  }
+
+  Future<void> setTime(TimeOfDay time) async {
+    await ref
+        .read(settingsRepositoryProvider)
+        .setNotificationTime(time.hour, time.minute);
+    state = time;
+
     await ref.read(settingsRepositoryProvider).rescheduleAllNotifications(ref);
   }
 }

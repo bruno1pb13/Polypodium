@@ -15,6 +15,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notificationsEnabled = ref.watch(notificationsEnabledNotifierProvider);
+    final notificationTime = ref.watch(notificationTimeNotifierProvider);
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
     final themeModeStr = ref.watch(themeModeNotifierProvider);
 
@@ -34,6 +35,27 @@ class SettingsScreen extends ConsumerWidget {
               ref
                   .read(notificationsEnabledNotifierProvider.notifier)
                   .setEnabled(value);
+            },
+          ),
+          ListTile(
+            enabled: notificationsEnabled,
+            leading: const Icon(Icons.schedule_outlined),
+            title: Text(context.l10n.notificationTime),
+            subtitle: Text(context.l10n.notificationTimeSubtitle),
+            trailing: Text(
+              notificationTime.format(context),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            onTap: () async {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: notificationTime,
+              );
+              if (picked != null) {
+                ref
+                    .read(notificationTimeNotifierProvider.notifier)
+                    .setTime(picked);
+              }
             },
           ),
           const Divider(),

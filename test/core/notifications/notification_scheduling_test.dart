@@ -48,5 +48,67 @@ void main() {
       expect(result.day, 25);
       expect(result.hour, 9);
     });
+
+    test('overdue plant is clamped to the next 9am, never a past date', () {
+      // Due on May 25th, but "now" is June 10th (16 days overdue).
+      final now = DateTime(2026, 6, 10, 10);
+      final result = NotificationService.computeNextIrrigationDate(
+        DateTime(2026, 5, 20),
+        5,
+        now,
+      );
+
+      expect(result.isAfter(now), isTrue,
+          reason: 'zonedSchedule throws for dates in the past');
+      expect(result, DateTime(2026, 6, 11, 9));
+    });
+
+    test('overdue plant checked before 9am schedules for today 9am', () {
+      final now = DateTime(2026, 6, 10, 7);
+      final result = NotificationService.computeNextIrrigationDate(
+        DateTime(2026, 5, 20),
+        5,
+        now,
+      );
+
+      expect(result, DateTime(2026, 6, 10, 9));
+    });
+
+    test('honors a user-chosen reminder time (20:30)', () {
+      // Due on May 25th; user prefers 20:30.
+      final result = NotificationService.computeNextIrrigationDate(
+        DateTime(2026, 5, 20),
+        5,
+        DateTime(2026, 5, 20, 10),
+        hour: 20,
+        minute: 30,
+      );
+
+      expect(result, DateTime(2026, 5, 25, 20, 30));
+    });
+
+    test('overdue plant with custom time clamps to the next occurrence', () {
+      // Overdue; now is 21:00, past today's 20:30 slot → tomorrow 20:30.
+      final now = DateTime(2026, 6, 10, 21);
+      final result = NotificationService.computeNextIrrigationDate(
+        DateTime(2026, 5, 20),
+        5,
+        now,
+        hour: 20,
+        minute: 30,
+      );
+
+      expect(result, DateTime(2026, 6, 11, 20, 30));
+    });
+
+    test('never irrigated plant schedules for the next 9am', () {
+      final result = NotificationService.computeNextIrrigationDate(
+        null,
+        5,
+        DateTime(2026, 6, 10, 10),
+      );
+
+      expect(result, DateTime(2026, 6, 11, 9));
+    });
   });
 }

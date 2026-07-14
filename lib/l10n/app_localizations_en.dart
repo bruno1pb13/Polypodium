@@ -153,6 +153,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Get notified when it\'s time to water, based on each species\' needs.';
 
   @override
+  String get introRemindersTimeLabel => 'Remind me at';
+
+  @override
+  String get introRemindersEnable => 'Turn on reminders';
+
+  @override
+  String get introRemindersEnabled => 'Reminders on!';
+
+  @override
+  String get introRemindersLaterNote =>
+      'You can change this anytime in Settings.';
+
+  @override
   String get introSyncTitle => 'Your data, everywhere';
 
   @override
@@ -1208,6 +1221,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wateringNotificationsSubtitle => 'Enable or disable reminders';
+
+  @override
+  String get notificationTime => 'Reminder time';
+
+  @override
+  String get notificationTimeSubtitle => 'When watering reminders are shown';
 
   @override
   String get transparencyAndBlur => 'Transparency and Blur';
