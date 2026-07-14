@@ -75,7 +75,7 @@ final class PlantsNotifierProvider
   PlantsNotifier create() => PlantsNotifier();
 }
 
-String _$plantsNotifierHash() => r'28580b15c379d67c6e4f5518328276e3a4aea698';
+String _$plantsNotifierHash() => r'e5d09d7d24cfc9326cc412377fdf97da291350d6';
 
 abstract class _$PlantsNotifier extends $StreamNotifier<List<PlantModel>> {
   Stream<List<PlantModel>> build();

@@ -860,6 +860,36 @@ abstract class AppLocalizations {
   /// **'Delete selected'**
   String get deleteSelected;
 
+  /// No description provided for @bulkEntryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk entry'**
+  String get bulkEntryButton;
+
+  /// No description provided for @noPlantsAtLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'No plants at this location'**
+  String get noPlantsAtLocation;
+
+  /// No description provided for @plantsAtLocationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign this location to a plant to see it here.'**
+  String get plantsAtLocationHint;
+
+  /// No description provided for @noPlantsOfSpecies.
+  ///
+  /// In en, this message translates to:
+  /// **'No plants of this species'**
+  String get noPlantsOfSpecies;
+
+  /// No description provided for @plantsOfSpeciesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a plant of this species to see it here.'**
+  String get plantsOfSpeciesHint;
+
   /// No description provided for @editPlant.
   ///
   /// In en, this message translates to:
@@ -1178,6 +1208,12 @@ abstract class AppLocalizations {
   /// **'New Entry'**
   String get newEntryTitle;
 
+  /// No description provided for @newBulkEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{New entry ({count} plant)} other{New entry ({count} plants)}}'**
+  String newBulkEntryTitle(int count);
+
   /// No description provided for @entryTypeCardTitle.
   ///
   /// In en, this message translates to:
@@ -1249,6 +1285,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save entry'**
   String get saveEntry;
+
+  /// No description provided for @saveEntryForPlants.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Save for {count} plant} other{Save for {count} plants}}'**
+  String saveEntryForPlants(int count);
 
   /// No description provided for @pruningFormation.
   ///

@@ -72,45 +72,66 @@ EntriesRepository entriesRepository(Ref ref) {
   );
 }
 
+@Riverpod(keepAlive: true)
+EntryMutations entryMutations(Ref ref) => EntryMutations(ref);
+
+/// Entry create/delete plus their side effects (plant status refresh, sync
+/// trigger). Lives in a keepAlive provider so in-flight work survives the
+/// autoDispose lifecycle of the notifiers/screens that initiate it — an
+/// autoDispose Ref becomes unusable after the first await if nothing is
+/// watching the provider (e.g. bulk entry creation for unwatched plants).
+class EntryMutations {
+  EntryMutations(this._ref);
+
+  final Ref _ref;
+
+  Future<void> create(EntryModel entry) async {
+    await _ref.read(entriesRepositoryProvider).create(entry);
+    if (entry.type == EntryType.irrigation) {
+      await _ref
+          .read(plantsRepositoryProvider)
+          .refreshPlantStatus(entry.plantId);
+    }
+    _triggerSync();
+  }
+
+  Future<void> delete(String id) async {
+    final entry = await _ref.read(entriesRepositoryProvider).getById(id);
+    await _ref.read(entriesRepositoryProvider).delete(id);
+
+    if (entry != null && entry.type == EntryType.irrigation) {
+      await _ref
+          .read(plantsRepositoryProvider)
+          .refreshPlantStatus(entry.plantId);
+    }
+    _triggerSync();
+  }
+
+  /// Trigger immediate sync if logged in.
+  void _triggerSync() {
+    try {
+      final syncService = _ref.read(syncServiceProvider);
+      if (syncService.isLoggedIn) {
+        _ref.read(syncNotifierProvider.notifier).sync().catchError((_) {});
+      }
+    } catch (_) {
+      // SharedPreferences might not be ready in tests
+    }
+  }
+}
+
 @riverpod
 class EntriesNotifier extends _$EntriesNotifier {
   @override
   Stream<List<EntryModel>> build(String plantId) =>
       ref.watch(entriesRepositoryProvider).watchByPlant(plantId);
 
-  Future<void> create(EntryModel entry) async {
-    await ref.read(entriesRepositoryProvider).create(entry);
-    if (entry.type == EntryType.irrigation) {
-      await ref.read(plantsRepositoryProvider).refreshPlantStatus(plantId);
-    }
+  // The synchronous ref.read hands the work to the keepAlive mutations
+  // service before any await, so it completes even if this autoDispose
+  // notifier is disposed mid-operation.
+  Future<void> create(EntryModel entry) =>
+      ref.read(entryMutationsProvider).create(entry);
 
-    // Trigger immediate sync if logged in
-    try {
-      final syncService = ref.read(syncServiceProvider);
-      if (syncService.isLoggedIn) {
-        ref.read(syncNotifierProvider.notifier).sync().catchError((_) {});
-      }
-    } catch (_) {
-      // SharedPreferences might not be ready in tests
-    }
-  }
-
-  Future<void> delete(String id) async {
-    final entry = await ref.read(entriesRepositoryProvider).getById(id);
-    await ref.read(entriesRepositoryProvider).delete(id);
-
-    if (entry?.type == EntryType.irrigation) {
-      await ref.read(plantsRepositoryProvider).refreshPlantStatus(plantId);
-    }
-
-    // Trigger immediate sync if logged in
-    try {
-      final syncService = ref.read(syncServiceProvider);
-      if (syncService.isLoggedIn) {
-        ref.read(syncNotifierProvider.notifier).sync().catchError((_) {});
-      }
-    } catch (_) {
-      // SharedPreferences might not be ready in tests
-    }
-  }
+  Future<void> delete(String id) =>
+      ref.read(entryMutationsProvider).delete(id);
 }

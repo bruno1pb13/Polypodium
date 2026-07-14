@@ -8,6 +8,7 @@ import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/sync/sync_providers.dart';
 import '../../../../core/widgets/app_search_bar.dart';
+import '../../../plants/presentation/screens/plant_group_screen.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../data/external_species_repository.dart';
 import '../../domain/species_model.dart';
@@ -158,6 +159,15 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                           itemCount: species.length,
                           itemBuilder: (ctx, i) => _SpeciesListItem(
                             species: species[i],
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PlantGroupScreen.bySpecies(
+                                  title: species[i].popularName,
+                                  speciesId: species[i].id,
+                                ),
+                              ),
+                            ),
                             onEdit: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -371,11 +381,13 @@ class _InfoBanner extends ConsumerWidget {
 
 class _SpeciesListItem extends ConsumerWidget {
   final SpeciesModel species;
+  final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _SpeciesListItem({
     required this.species,
+    required this.onTap,
     required this.onEdit,
     required this.onDelete,
   });
@@ -408,7 +420,7 @@ class _SpeciesListItem extends ConsumerWidget {
               ),
             ),
             child: InkWell(
-              onTap: onEdit,
+              onTap: onTap,
               borderRadius: BorderRadius.circular(16),
               child: Padding(
                 padding: const EdgeInsets.all(12),

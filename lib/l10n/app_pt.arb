@@ -142,6 +142,12 @@
   "selectedCount": "{count} selecionada(s)",
   "deleteSelected": "Excluir selecionadas",
 
+  "bulkEntryButton": "Registro em massa",
+  "noPlantsAtLocation": "Nenhuma planta nesta localização",
+  "plantsAtLocationHint": "Defina esta localização em uma planta para vê-la aqui.",
+  "noPlantsOfSpecies": "Nenhuma planta desta espécie",
+  "plantsOfSpeciesHint": "Adicione uma planta desta espécie para vê-la aqui.",
+
   "editPlant": "Editar planta",
   "newPlant": "Nova planta",
   "addPlant": "Adicionar planta",
@@ -198,6 +204,7 @@
   "entryTypeHistory": "Histórico",
 
   "newEntryTitle": "Novo Registro",
+  "newBulkEntryTitle": "{count, plural, one{Novo registro ({count} planta)} other{Novo registro ({count} plantas)}}",
   "entryTypeCardTitle": "Tipo de registro",
   "notesTitle": "Notas",
   "noteHintIrrigation": "Tinha algo na água? Alguma observação?",
@@ -210,6 +217,7 @@
   "noteHintDefault": "Notas opcionais...",
   "photoTitle": "Foto",
   "saveEntry": "Salvar registro",
+  "saveEntryForPlants": "{count, plural, one{Salvar para {count} planta} other{Salvar para {count} plantas}}",
   "pruningFormation": "Formação",
   "pruningCleaning": "Limpeza",
   "pruningRejuvenation": "Rejuvenescimento",

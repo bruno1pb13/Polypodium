@@ -27,9 +27,13 @@ class _ProductEntry {
 }
 
 class AddEntryScreen extends ConsumerStatefulWidget {
-  final String plantId;
+  /// One entry is created per plant; with a single id this is the regular
+  /// "new entry" flow, with several it acts as a bulk entry for all of them.
+  final List<String> plantIds;
 
-  const AddEntryScreen({super.key, required this.plantId});
+  AddEntryScreen({super.key, required String plantId}) : plantIds = [plantId];
+
+  const AddEntryScreen.bulk({super.key, required this.plantIds});
 
   @override
   ConsumerState<AddEntryScreen> createState() => _AddEntryScreenState();
@@ -161,7 +165,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
-          context.l10n.newEntryTitle,
+          widget.plantIds.length > 1
+              ? context.l10n.newBulkEntryTitle(widget.plantIds.length)
+              : context.l10n.newEntryTitle,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -398,7 +404,10 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                             ),
                           )
                         : Text(
-                            context.l10n.saveEntry,
+                            widget.plantIds.length > 1
+                                ? context.l10n
+                                    .saveEntryForPlants(widget.plantIds.length)
+                                : context.l10n.saveEntry,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -852,20 +861,30 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
 
     setState(() => _saving = true);
     try {
-      final entry = EntryModel(
-        id: const Uuid().v4(),
-        plantId: widget.plantId,
-        date: DateTime.now(),
-        photoPath: _photoPath,
-        note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
-        type: _type,
-        numericValue: _numericValue,
-        extraData: _extraData,
-        createdAt: DateTime.now(),
-      );
-      await ref
-          .read(entriesNotifierProvider(widget.plantId).notifier)
-          .create(entry);
+      final now = DateTime.now();
+      final note =
+          _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim();
+      final mutations = ref.read(entryMutationsProvider);
+      for (var i = 0; i < widget.plantIds.length; i++) {
+        final plantId = widget.plantIds[i];
+        // Each entry owns its photo file (deleting an entry deletes the
+        // photo), so extra plants get their own copy of the picked photo.
+        final photoPath = i == 0 || _photoPath == null
+            ? _photoPath
+            : await _photoStorage.savePhoto(File(_photoPath!));
+        final entry = EntryModel(
+          id: const Uuid().v4(),
+          plantId: plantId,
+          date: now,
+          photoPath: photoPath,
+          note: note,
+          type: _type,
+          numericValue: _numericValue,
+          extraData: _extraData,
+          createdAt: now,
+        );
+        await mutations.create(entry);
+      }
       _submitted = true;
       if (mounted) Navigator.pop(context);
     } finally {
