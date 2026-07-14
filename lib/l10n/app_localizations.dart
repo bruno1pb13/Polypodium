@@ -380,6 +380,30 @@ abstract class AppLocalizations {
   /// **'Get notified when it\'s time to water, based on each species\' needs.'**
   String get introRemindersBody;
 
+  /// No description provided for @introRemindersTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me at'**
+  String get introRemindersTimeLabel;
+
+  /// No description provided for @introRemindersEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on reminders'**
+  String get introRemindersEnable;
+
+  /// No description provided for @introRemindersEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders on!'**
+  String get introRemindersEnabled;
+
+  /// No description provided for @introRemindersLaterNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this anytime in Settings.'**
+  String get introRemindersLaterNote;
+
   /// No description provided for @introSyncTitle.
   ///
   /// In en, this message translates to:
@@ -2209,6 +2233,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable or disable reminders'**
   String get wateringNotificationsSubtitle;
+
+  /// No description provided for @notificationTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder time'**
+  String get notificationTime;
+
+  /// No description provided for @notificationTimeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When watering reminders are shown'**
+  String get notificationTimeSubtitle;
 
   /// No description provided for @transparencyAndBlur.
   ///

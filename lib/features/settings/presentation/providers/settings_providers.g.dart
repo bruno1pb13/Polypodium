@@ -125,7 +125,7 @@ final class NotificationsEnabledNotifierProvider
 }
 
 String _$notificationsEnabledNotifierHash() =>
-    r'3ad1775d5a384ab11ec1fb8d3e657d0d7dfcda35';
+    r'a2c339c527964d4a7e73b35554641657b1a8354d';
 
 abstract class _$NotificationsEnabledNotifier extends $Notifier<bool> {
   bool build();
@@ -135,6 +135,53 @@ abstract class _$NotificationsEnabledNotifier extends $Notifier<bool> {
     final ref = this.ref as $Ref<bool, bool>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<bool, bool>, bool, Object?, Object?>;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(NotificationTimeNotifier)
+final notificationTimeNotifierProvider = NotificationTimeNotifierProvider._();
+
+final class NotificationTimeNotifierProvider
+    extends $NotifierProvider<NotificationTimeNotifier, TimeOfDay> {
+  NotificationTimeNotifierProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'notificationTimeNotifierProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$notificationTimeNotifierHash();
+
+  @$internal
+  @override
+  NotificationTimeNotifier create() => NotificationTimeNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TimeOfDay value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TimeOfDay>(value),
+    );
+  }
+}
+
+String _$notificationTimeNotifierHash() =>
+    r'65aa30e947b43f32d8af4a883cdfc5a3e5ba65ad';
+
+abstract class _$NotificationTimeNotifier extends $Notifier<TimeOfDay> {
+  TimeOfDay build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<TimeOfDay, TimeOfDay>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<TimeOfDay, TimeOfDay>, TimeOfDay, Object?, Object?>;
     return element.handleCreate(ref, build);
   }
 }

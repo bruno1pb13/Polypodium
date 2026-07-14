@@ -153,6 +153,19 @@ class AppLocalizationsPt extends AppLocalizations {
       'Receba notificações quando for hora de regar, de acordo com as necessidades de cada espécie.';
 
   @override
+  String get introRemindersTimeLabel => 'Lembrar às';
+
+  @override
+  String get introRemindersEnable => 'Ativar lembretes';
+
+  @override
+  String get introRemindersEnabled => 'Lembretes ativados!';
+
+  @override
+  String get introRemindersLaterNote =>
+      'Você pode mudar isso quando quiser nas Configurações.';
+
+  @override
   String get introSyncTitle => 'Seus dados, em todo lugar';
 
   @override
@@ -1212,6 +1225,13 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get wateringNotificationsSubtitle =>
       'Habilitar ou desabilitar lembretes';
+
+  @override
+  String get notificationTime => 'Horário dos lembretes';
+
+  @override
+  String get notificationTimeSubtitle =>
+      'Quando os lembretes de rega são exibidos';
 
   @override
   String get transparencyAndBlur => 'Transparência e Blur';
