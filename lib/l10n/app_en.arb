@@ -402,6 +402,7 @@
   "recommendedSoils": "Recommended soils",
   "speciesFieldLabel": "Species",
   "speciesSearchFieldHint": "Search the official or local database...",
+  "speciesCustomHelper": "Can't find it? Tap + to add your own species.",
   "noSpeciesFound": "No species found",
   "noSpeciesRegistered": "No species registered",
   "tapToAddSpecies": "Tap + to add a new species.",

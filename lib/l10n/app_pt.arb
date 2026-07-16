@@ -293,6 +293,7 @@
   "recommendedSoils": "Solos recomendados",
   "speciesFieldLabel": "Espécie",
   "speciesSearchFieldHint": "Busque na base oficial ou local...",
+  "speciesCustomHelper": "Não encontrou? Toque em + para cadastrar sua própria espécie.",
   "noSpeciesFound": "Nenhuma espécie encontrada",
   "noSpeciesRegistered": "Nenhuma espécie cadastrada",
   "tapToAddSpecies": "Toque em + para adicionar uma nova espécie.",

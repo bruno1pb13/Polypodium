@@ -163,7 +163,7 @@ class _AddSpeciesScreenState extends ConsumerState<AddSpeciesScreen> {
         createdAt: widget.species?.createdAt ?? DateTime.now(),
       );
       await ref.read(speciesNotifierProvider.notifier).save(species);
-      if (mounted) Navigator.pop(context);
+      if (mounted) Navigator.pop(context, species);
     } finally {
       if (mounted) setState(() => _saving = false);
     }

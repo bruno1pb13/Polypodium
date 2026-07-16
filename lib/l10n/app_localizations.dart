@@ -1730,6 +1730,12 @@ abstract class AppLocalizations {
   /// **'Search the official or local database...'**
   String get speciesSearchFieldHint;
 
+  /// No description provided for @speciesCustomHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t find it? Tap + to add your own species.'**
+  String get speciesCustomHelper;
+
   /// No description provided for @noSpeciesFound.
   ///
   /// In en, this message translates to:
