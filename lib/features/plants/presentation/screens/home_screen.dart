@@ -121,7 +121,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
                   tooltip: context.l10n.deleteSelected,
-                  onPressed: () => _confirmBulkDelete(context, ref, selectedIds),
+                  onPressed: () =>
+                      _confirmBulkDelete(context, ref, selectedIds),
                 ),
               ],
             )
@@ -237,61 +238,70 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     onRefresh: _refresh,
                     color: Colors.white,
                     backgroundColor: Colors.black54,
-                    child: plantsAsync.when(
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (e, _) => Center(
-                          child: Text(context.l10n.errorLoadingPlants('$e'),
-                              style: const TextStyle(color: Colors.white))),
-                      data: (plants) {
-                        if (plants.isEmpty) {
-                          return LayoutBuilder(
-                            builder: (_, constraints) => SingleChildScrollView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              child: SizedBox(
-                                height: constraints.maxHeight,
-                                child: _searchController.text.isNotEmpty
-                                    ? Center(
-                                        child: Text(context.l10n.noPlantsFound,
-                                            style: const TextStyle(
-                                                color: Colors.white)))
-                                    : const _EmptyState(),
-                              ),
-                            ),
-                          );
-                        }
-                        return ListView.builder(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.only(bottom: 80),
-                          itemCount: plants.length,
-                          itemBuilder: (ctx, i) {
-                            final plantId = plants[i].plant.id;
-                            return PlantListItem(
-                              plantWithSpecies: plants[i],
-                              isSelectionMode: isSelectionMode,
-                              isSelected: selectedIds.contains(plantId),
-                              onStartSelection: () => ref
-                                  .read(plantSelectionProvider.notifier)
-                                  .state = {plantId},
-                              onToggleSelect: () {
-                                final current = Set<String>.from(selectedIds);
-                                if (!current.remove(plantId)) {
-                                  current.add(plantId);
-                                }
-                                ref.read(plantSelectionProvider.notifier).state =
-                                    current;
-                              },
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      PlantDetailScreen(plantId: plantId),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      child: plantsAsync.when(
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (e, _) => Center(
+                            child: Text(context.l10n.errorLoadingPlants('$e'),
+                                style: const TextStyle(color: Colors.white))),
+                        data: (plants) {
+                          if (plants.isEmpty) {
+                            return LayoutBuilder(
+                              builder: (_, constraints) =>
+                                  SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                child: SizedBox(
+                                  height: constraints.maxHeight,
+                                  child: _searchController.text.isNotEmpty
+                                      ? Center(
+                                          child: Text(
+                                              context.l10n.noPlantsFound,
+                                              style: const TextStyle(
+                                                  color: Colors.white)))
+                                      : const _EmptyState(),
                                 ),
                               ),
                             );
-                          },
-                        );
-                      },
+                          }
+                          return ListView.builder(
+                            key: const ValueKey('plants-list'),
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.only(bottom: 80),
+                            itemCount: plants.length,
+                            itemBuilder: (ctx, i) {
+                              final plantId = plants[i].plant.id;
+                              return PlantListItem(
+                                plantWithSpecies: plants[i],
+                                isSelectionMode: isSelectionMode,
+                                isSelected: selectedIds.contains(plantId),
+                                onStartSelection: () => ref
+                                    .read(plantSelectionProvider.notifier)
+                                    .state = {plantId},
+                                onToggleSelect: () {
+                                  final current = Set<String>.from(selectedIds);
+                                  if (!current.remove(plantId)) {
+                                    current.add(plantId);
+                                  }
+                                  ref
+                                      .read(plantSelectionProvider.notifier)
+                                      .state = current;
+                                },
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        PlantDetailScreen(plantId: plantId),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
