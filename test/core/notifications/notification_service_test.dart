@@ -2,12 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:polypodium/core/notifications/notification_service.dart';
 
 void main() {
-  group('NotificationService.cancelNotification', () {
+  group('NotificationService.rescheduleAllNotifications', () {
     test('is a no-op on platforms without a plugin implementation', () async {
       // The test host (Windows) has no flutter_local_notifications
       // implementation; without the platform guard this used to throw
       // MissingPluginException and abort plant deletion.
-      await NotificationService.cancelNotification('some-plant-id');
+      await NotificationService.rescheduleAllNotifications(const []);
     });
   });
 

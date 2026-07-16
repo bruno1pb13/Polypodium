@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polypodium/core/notifications/notification_service.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
+import 'package:polypodium/features/species/domain/species_model.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -109,6 +110,120 @@ void main() {
       );
 
       expect(result, DateTime(2026, 6, 11, 9));
+    });
+  });
+
+  group('NotificationService.groupPlantsByDueDate', () {
+    final species = SpeciesModel(
+      id: 'species-1',
+      scientificName: 'Ocimum basilicum',
+      popularName: 'Basil',
+      defaultIrrigationFrequencyDays: 7,
+      recommendedSoilIds: const ['loamy'],
+      createdAt: DateTime(2026, 1, 1),
+    );
+
+    PlantWithSpecies makePlant(String nickname,
+            {DateTime? lastIrrigatedAt, int? frequencyDays}) =>
+        PlantWithSpecies(
+          plant: PlantModel(
+            id: 'plant-$nickname',
+            speciesId: species.id,
+            nickname: nickname,
+            soilId: 'loamy',
+            acquisitionDate: DateTime(2026, 1, 1),
+            createdAt: DateTime(2026, 1, 1),
+            lastIrrigatedAt: lastIrrigatedAt,
+            irrigationFrequencyDays: frequencyDays,
+          ),
+          species: species,
+        );
+
+    final now = DateTime(2026, 5, 20, 10);
+
+    test('plants due on the same day share a single group', () {
+      final groups = NotificationService.groupPlantsByDueDate(
+        [
+          makePlant('Basil',
+              lastIrrigatedAt: DateTime(2026, 5, 20), frequencyDays: 5),
+          makePlant('Fern',
+              lastIrrigatedAt: DateTime(2026, 5, 22), frequencyDays: 3),
+        ],
+        now,
+      );
+
+      expect(groups, hasLength(1));
+      expect(groups[DateTime(2026, 5, 25)], ['Basil', 'Fern']);
+    });
+
+    test('plants due on different days get separate groups', () {
+      final groups = NotificationService.groupPlantsByDueDate(
+        [
+          makePlant('Basil',
+              lastIrrigatedAt: DateTime(2026, 5, 20), frequencyDays: 5),
+          makePlant('Cactus',
+              lastIrrigatedAt: DateTime(2026, 5, 20), frequencyDays: 10),
+        ],
+        now,
+      );
+
+      expect(groups, hasLength(2));
+      expect(groups[DateTime(2026, 5, 25)], ['Basil']);
+      expect(groups[DateTime(2026, 5, 30)], ['Cactus']);
+    });
+
+    test('falls back to the species default frequency', () {
+      final groups = NotificationService.groupPlantsByDueDate(
+        [makePlant('Basil', lastIrrigatedAt: DateTime(2026, 5, 20))],
+        now,
+      );
+
+      expect(groups[DateTime(2026, 5, 27)], ['Basil']);
+    });
+
+    test('skips plants without any irrigation frequency', () {
+      final noFrequencySpecies = SpeciesModel(
+        id: 'species-2',
+        scientificName: 'Unknown',
+        popularName: 'Unknown',
+        defaultIrrigationFrequencyDays: null,
+        recommendedSoilIds: const [],
+        createdAt: DateTime(2026, 1, 1),
+      );
+      final groups = NotificationService.groupPlantsByDueDate(
+        [
+          PlantWithSpecies(
+            plant: PlantModel(
+              id: 'plant-x',
+              speciesId: noFrequencySpecies.id,
+              nickname: 'Mystery',
+              soilId: 'loamy',
+              acquisitionDate: DateTime(2026, 1, 1),
+              createdAt: DateTime(2026, 1, 1),
+            ),
+            species: noFrequencySpecies,
+          ),
+        ],
+        now,
+      );
+
+      expect(groups, isEmpty);
+    });
+
+    test('overdue plants land in the next reminder slot together', () {
+      // Both long overdue; now is past today's 9am → both tomorrow 9am.
+      final groups = NotificationService.groupPlantsByDueDate(
+        [
+          makePlant('Basil',
+              lastIrrigatedAt: DateTime(2026, 4, 1), frequencyDays: 5),
+          makePlant('Fern',
+              lastIrrigatedAt: DateTime(2026, 3, 1), frequencyDays: 3),
+        ],
+        now,
+      );
+
+      expect(groups, hasLength(1));
+      expect(groups[DateTime(2026, 5, 21)], ['Basil', 'Fern']);
     });
   });
 }

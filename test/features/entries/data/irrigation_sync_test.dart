@@ -34,11 +34,7 @@ class MockPhotoStorage implements PhotoStorage {
 
 class MockNotificationService implements INotificationService {
   @override
-  Future<void> schedule(
-          {required PlantModel plant, required SpeciesModel species}) async {}
-
-  @override
-  Future<void> cancel(String plantId) async {}
+  Future<void> rescheduleAll(List<PlantWithSpecies> plants) async {}
 }
 
 void main() {

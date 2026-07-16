@@ -76,13 +76,9 @@ class SettingsRepository {
   Future<void> rescheduleAllNotifications(Ref ref) async {
     final enabled = areNotificationsEnabled();
     final plantsWithSpecies = await ref.read(plantsWithSpeciesProvider.future);
-
-    for (final p in plantsWithSpecies) {
-      await NotificationService.scheduleIrrigationNotification(
-        plant: p.plant,
-        species: p.species,
-        enabled: enabled,
-      );
-    }
+    await NotificationService.rescheduleAllNotifications(
+      plantsWithSpecies,
+      enabled: enabled,
+    );
   }
 }

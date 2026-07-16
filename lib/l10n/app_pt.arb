@@ -104,6 +104,8 @@
   "irrigationChannelDescription": "Lembretes de irrigação das suas plantas",
   "irrigationNotificationTitle": "Hora de regar! 🌿",
   "irrigationNotificationBody": "{nickname} precisa ser regada hoje.",
+  "irrigationNotificationBodyMany": "{count} plantas precisam ser regadas hoje: {names}.",
+  "irrigationNotificationBodyCount": "{count} plantas precisam de água hoje.",
 
   "historyPlantAdded": "Planta adicionada ao sistema:",
   "historyFieldNickname": "Apelido",

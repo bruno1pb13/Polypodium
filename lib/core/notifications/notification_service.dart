@@ -16,9 +16,10 @@ import '../../features/species/domain/species_model.dart';
 import '../l10n/l10n.dart';
 
 abstract interface class INotificationService {
-  Future<void> schedule(
-      {required PlantModel plant, required SpeciesModel species});
-  Future<void> cancel(String plantId);
+  /// Rebuilds the whole irrigation reminder schedule from [plants] — the
+  /// full set of active plants. Anything previously scheduled that is no
+  /// longer due (watered meanwhile, deleted, disabled) is cancelled.
+  Future<void> rescheduleAll(List<PlantWithSpecies> plants);
 }
 
 class NotificationService implements INotificationService {
@@ -26,6 +27,10 @@ class NotificationService implements INotificationService {
 
   static const irrigationCheckTask = 'irrigation-check';
   static const _channelId = 'polypodium_irrigation';
+
+  /// Groups every irrigation reminder in the notification shade (Android
+  /// bundles by groupKey; iOS threads by threadIdentifier).
+  static const _groupKey = 'polypodium_irrigation_group';
 
   /// SharedPreferences keys — shared with SettingsRepository, which cannot be
   /// imported here (it depends on this service).
@@ -113,87 +118,82 @@ class NotificationService implements INotificationService {
   // INotificationService --------------------------------------------------
 
   @override
-  Future<void> schedule({
-    required PlantModel plant,
-    required SpeciesModel species,
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
-    final enabled = prefs.getBool(_enabledKey) ?? true;
-    await scheduleIrrigationNotification(
-        plant: plant, species: species, enabled: enabled);
-  }
-
-  @override
-  Future<void> cancel(String plantId) => cancelNotification(plantId);
+  Future<void> rescheduleAll(List<PlantWithSpecies> plants) =>
+      rescheduleAllNotifications(plants);
 
   // Static API ------------------------------------------------------------
 
-  static Future<void> scheduleIrrigationNotification({
-    required PlantModel plant,
-    required SpeciesModel species,
-    bool enabled = true,
+  /// Cancels every pending irrigation reminder and schedules a fresh set:
+  /// one notification per due date, listing all plants due that day.
+  ///
+  /// Starting from a clean slate is what keeps the schedule honest — a plant
+  /// watered or deleted on another device (applied locally by a sync pull)
+  /// loses its stale reminder here instead of firing it later.
+  ///
+  /// [enabled] overrides the persisted setting when the caller already knows
+  /// it (e.g. the settings toggle mid-write); when null it is read from
+  /// SharedPreferences.
+  static Future<void> rescheduleAllNotifications(
+    List<PlantWithSpecies> plants, {
+    bool? enabled,
   }) async {
-    if (!enabled) {
-      await cancelNotification(plant.id);
-      return;
-    }
-
-    final frequencyDays =
-        plant.irrigationFrequencyDays ?? species.defaultIrrigationFrequencyDays;
-
-    if (frequencyDays == null) {
-      await cancelNotification(plant.id);
-      return;
-    }
-
     // flutter_local_notifications only implements scheduling on
-    // Android, iOS and macOS; calling zonedSchedule() elsewhere throws
-    // UnimplementedError.
+    // Android, iOS and macOS; calling zonedSchedule()/cancelAll() elsewhere
+    // throws UnimplementedError.
     if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) return;
 
     final prefs = await SharedPreferences.getInstance();
-    final timeMinutes = prefs.getInt(_timeKey) ?? defaultTimeMinutes;
+    final isEnabled = enabled ?? (prefs.getBool(_enabledKey) ?? true);
 
-    final scheduledDate = _nextIrrigationTime(
-      plant.lastIrrigatedAt,
-      frequencyDays,
-      hour: timeMinutes ~/ 60,
-      minute: timeMinutes % 60,
-    );
+    await _plugin.cancelAll();
+    if (!isEnabled) return;
+
+    final timeMinutes = prefs.getInt(_timeKey) ?? defaultTimeMinutes;
+    final hour = timeMinutes ~/ 60;
+    final minute = timeMinutes % 60;
+
+    final now = tz.TZDateTime.now(tz.local);
+    final groups =
+        groupPlantsByDueDate(plants, now.toLocal(), hour: hour, minute: minute);
 
     final l10n = _l10n;
-    await _plugin.zonedSchedule(
-      _notificationId(plant.id),
-      l10n.irrigationNotificationTitle,
-      l10n.irrigationNotificationBody(plant.nickname),
-      scheduledDate,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channelId,
-          l10n.irrigationChannelName,
-          channelDescription: l10n.irrigationChannelDescription,
-          importance: Importance.defaultImportance,
-          priority: Priority.defaultPriority,
-        ),
-        iOS: const DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      // No matchDateTimeComponents — one-shot; rescheduled after each irrigation
-    );
-  }
+    for (final entry in groups.entries) {
+      final date = entry.key;
+      final nicknames = entry.value;
+      // Up to 2 plants the names fit comfortably; beyond that just the count.
+      final body = switch (nicknames.length) {
+        1 => l10n.irrigationNotificationBody(nicknames.single),
+        2 => l10n.irrigationNotificationBodyMany(
+            nicknames.length, nicknames.join(', ')),
+        _ => l10n.irrigationNotificationBodyCount(nicknames.length),
+      };
 
-  static Future<void> cancelNotification(String plantId) async {
-    // Notifications are only scheduled on Android/iOS/macOS (zonedSchedule is
-    // unimplemented elsewhere), so there is nothing to cancel on other
-    // platforms — and calling cancel() there throws: Windows has no
-    // implementation (< v19) and on Linux the plugin is only registered in a
-    // real app, not under `flutter test`.
-    if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) {
-      return;
+      await _plugin.zonedSchedule(
+        _dateNotificationId(date),
+        l10n.irrigationNotificationTitle,
+        body,
+        tz.TZDateTime(tz.local, date.year, date.month, date.day, hour, minute),
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            _channelId,
+            l10n.irrigationChannelName,
+            channelDescription: l10n.irrigationChannelDescription,
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+            groupKey: _groupKey,
+            // Long plant lists stay readable when the user expands the card.
+            styleInformation: BigTextStyleInformation(body),
+          ),
+          iOS: const DarwinNotificationDetails(threadIdentifier: _channelId),
+        ),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        // No matchDateTimeComponents — one-shot; the schedule is rebuilt after
+        // every irrigation/save/delete/sync pull and by the 12 h background
+        // check.
+      );
     }
-    await _plugin.cancel(_notificationId(plantId));
   }
 
   /// Called from the WorkManager background isolate every 12 h to recover
@@ -217,14 +217,12 @@ class NotificationService implements INotificationService {
     await _plugin
         .initialize(const InitializationSettings(android: android, iOS: iOS));
 
-    final prefs = await SharedPreferences.getInstance();
-    final enabled = prefs.getBool(_enabledKey) ?? true;
-
     final dir = await getApplicationDocumentsDirectory();
     final file = File(p.join(dir.path, 'polypodium.db'));
     final db = AppDatabase.forTesting(NativeDatabase(file));
 
     try {
+      final items = <PlantWithSpecies>[];
       final plantRows = await db.plantsDao.getAll();
       for (final row in plantRows) {
         final speciesRow = await db.speciesDao.getById(row.speciesId);
@@ -251,10 +249,9 @@ class NotificationService implements INotificationService {
           recommendedSoilIds: speciesRow.recommendedSoilTypes,
           createdAt: speciesRow.createdAt,
         );
-
-        await scheduleIrrigationNotification(
-            plant: plant, species: species, enabled: enabled);
+        items.add(PlantWithSpecies(plant: plant, species: species));
       }
+      await rescheduleAllNotifications(items);
     } finally {
       await db.close();
     }
@@ -265,7 +262,7 @@ class NotificationService implements INotificationService {
   /// Computes the next occurrence of the user's reminder time ([hour]:[minute],
   /// default 9:00) on or after the plant's due irrigation date.
   ///
-  /// Exposed for unit testing; prefer [scheduleIrrigationNotification] in
+  /// Exposed for unit testing; prefer [rescheduleAllNotifications] in
   /// production code.
   @visibleForTesting
   static DateTime computeNextIrrigationDate(
@@ -292,19 +289,33 @@ class NotificationService implements INotificationService {
     return scheduled;
   }
 
-  static tz.TZDateTime _nextIrrigationTime(
-    DateTime? lastIrrigatedAt,
-    int frequencyDays, {
-    required int hour,
-    required int minute,
+  /// Groups the plants due on the same date into a single reminder: date
+  /// (at midnight) → nicknames of every plant due that day. Plants without
+  /// an irrigation frequency (own or species default) are skipped.
+  @visibleForTesting
+  static Map<DateTime, List<String>> groupPlantsByDueDate(
+    List<PlantWithSpecies> plants,
+    DateTime now, {
+    int hour = 9,
+    int minute = 0,
   }) {
-    final now = tz.TZDateTime.now(tz.local);
-    final result = computeNextIrrigationDate(
-        lastIrrigatedAt, frequencyDays, now.toLocal(),
-        hour: hour, minute: minute);
-    return tz.TZDateTime(tz.local, result.year, result.month, result.day,
-        result.hour, result.minute);
+    final groups = <DateTime, List<String>>{};
+    for (final item in plants) {
+      final frequencyDays = item.effectiveFrequencyDays;
+      if (frequencyDays == null) continue;
+
+      final scheduled = computeNextIrrigationDate(
+          item.plant.lastIrrigatedAt, frequencyDays, now,
+          hour: hour, minute: minute);
+      final date = DateTime(scheduled.year, scheduled.month, scheduled.day);
+      groups.putIfAbsent(date, () => []).add(item.plant.nickname);
+    }
+    return groups;
   }
 
-  static int _notificationId(String uuid) => uuid.hashCode.abs() % 0x7FFFFFFF;
+  /// One deterministic id per due date (e.g. 2026-07-16 → 20260716), so a
+  /// reschedule for the same day replaces the pending notification instead
+  /// of stacking a new one.
+  static int _dateNotificationId(DateTime date) =>
+      date.year * 10000 + date.month * 100 + date.day;
 }

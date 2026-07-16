@@ -656,6 +656,18 @@ abstract class AppLocalizations {
   /// **'{nickname} needs to be watered today.'**
   String irrigationNotificationBody(String nickname);
 
+  /// No description provided for @irrigationNotificationBodyMany.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} plants need watering today: {names}.'**
+  String irrigationNotificationBodyMany(int count, String names);
+
+  /// No description provided for @irrigationNotificationBodyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} plants need water today.'**
+  String irrigationNotificationBodyCount(int count);
+
   /// No description provided for @historyPlantAdded.
   ///
   /// In en, this message translates to:

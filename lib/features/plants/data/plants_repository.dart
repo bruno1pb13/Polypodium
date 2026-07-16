@@ -40,7 +40,7 @@ class PlantsRepository {
       await _dao
           .upsert(_toCompanion(plant, updatedAt: DateTime.now(), rev: rev));
     });
-    await _rescheduleNotification(plant);
+    await rescheduleNotifications();
   }
 
   /// Records an irrigation event and updates lastIrrigatedAt.
@@ -52,7 +52,7 @@ class PlantsRepository {
     });
     final updated = await getById(plantId);
     if (updated != null) {
-      await _rescheduleNotification(updated);
+      await rescheduleNotifications();
     }
     return updated;
   }
@@ -65,14 +65,10 @@ class PlantsRepository {
       await _dao.updateLastIrrigated(plantId, lastDate,
           updatedAt: DateTime.now(), rev: rev);
     });
-    final plant = await getById(plantId);
-    if (plant != null) {
-      await _rescheduleNotification(plant);
-    }
+    await rescheduleNotifications();
   }
 
   Future<void> delete(String id) async {
-    await _notifications.cancel(id);
     final now = DateTime.now();
     await _db.transaction(() async {
       // Replicates the `KeyAction.cascade` FK behavior that only fires on a
@@ -83,20 +79,34 @@ class PlantsRepository {
       final plantRev = await _db.syncMetaDao.nextRev();
       await _dao.softDelete(id, deletedAt: now, rev: plantRev);
     });
+    await rescheduleNotifications();
   }
 
   // ---------------------------------------------------------------------------
 
-  Future<void> _rescheduleNotification(PlantModel plant) async {
-    final species = await _speciesRepo.getById(plant.speciesId);
-    if (species == null) {
-      // ignore: avoid_print
-      print(
-          '[PlantsRepository] Species ${plant.speciesId} not found for plant '
-          '${plant.id}; irrigation notification skipped');
-      return;
+  /// Rebuilds the whole irrigation reminder schedule from the active plants.
+  /// Called after every local mutation and after a sync pull — the pull
+  /// writes plants/entries straight into the database, so a plant watered or
+  /// deleted on another device must have its stale local reminder replaced
+  /// here rather than left pending.
+  Future<void> rescheduleNotifications() async {
+    final plants = await getAll();
+    final species = await _speciesRepo.getAll();
+    final speciesById = {for (final s in species) s.id: s};
+
+    final items = <PlantWithSpecies>[];
+    for (final plant in plants) {
+      final plantSpecies = speciesById[plant.speciesId];
+      if (plantSpecies == null) {
+        // ignore: avoid_print
+        print(
+            '[PlantsRepository] Species ${plant.speciesId} not found for plant '
+            '${plant.id}; irrigation notification skipped');
+        continue;
+      }
+      items.add(PlantWithSpecies(plant: plant, species: plantSpecies));
     }
-    await _notifications.schedule(plant: plant, species: species);
+    await _notifications.rescheduleAll(items);
   }
 
   static PlantModel _fromRow(PlantsTableData row) => PlantModel(

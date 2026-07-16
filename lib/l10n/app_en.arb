@@ -147,6 +147,19 @@
       "nickname": {"type": "String"}
     }
   },
+  "irrigationNotificationBodyMany": "{count} plants need watering today: {names}.",
+  "@irrigationNotificationBodyMany": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "names": {"type": "String"}
+    }
+  },
+  "irrigationNotificationBodyCount": "{count} plants need water today.",
+  "@irrigationNotificationBodyCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
 
   "historyPlantAdded": "Plant added to the system:",
   "historyFieldNickname": "Nickname",
