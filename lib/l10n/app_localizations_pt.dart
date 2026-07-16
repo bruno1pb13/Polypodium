@@ -948,6 +948,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get speciesSearchFieldHint => 'Busque na base oficial ou local...';
 
   @override
+  String get speciesCustomHelper =>
+      'Não encontrou? Toque em + para cadastrar sua própria espécie.';
+
+  @override
   String get noSpeciesFound => 'Nenhuma espécie encontrada';
 
   @override

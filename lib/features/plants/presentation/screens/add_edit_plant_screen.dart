@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../species/domain/species_model.dart';
 import '../../../species/presentation/providers/species_providers.dart';
+import '../../../species/presentation/screens/add_species_screen.dart';
 import '../../../species/presentation/widgets/species_autocomplete.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
 import '../../../locations/presentation/screens/add_edit_location_screen.dart';
@@ -192,14 +193,44 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                                       : null,
                                 ),
                                 const SizedBox(height: 16),
-                                SpeciesAutocomplete(
-                                  localSpecies: species,
-                                  controller: _speciesSearchCtrl,
-                                  onSelected: _onSpeciesSelected(species),
-                                  validator: (v) =>
-                                      (v == null || v.trim().isEmpty)
-                                          ? context.l10n.speciesRequired
-                                          : null,
+                                Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: SpeciesAutocomplete(
+                                        localSpecies: species,
+                                        controller: _speciesSearchCtrl,
+                                        helperText: context
+                                            .l10n.speciesCustomHelper,
+                                        onSelected:
+                                            _onSpeciesSelected(species),
+                                        validator: (v) =>
+                                            (v == null || v.trim().isEmpty)
+                                                ? context.l10n.speciesRequired
+                                                : null,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: IconButton.filled(
+                                        icon: const Icon(
+                                            Icons.add_circle_outline),
+                                        tooltip: context.l10n.newSpecies,
+                                        style: IconButton.styleFrom(
+                                          backgroundColor: Colors.white
+                                              .withValues(alpha: 0.1),
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        onPressed: _createCustomSpecies,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -429,6 +460,24 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
         }
       });
     };
+  }
+
+  Future<void> _createCustomSpecies() async {
+    final created = await Navigator.push<SpeciesModel>(
+      context,
+      MaterialPageRoute(builder: (_) => const AddSpeciesScreen()),
+    );
+    if (created == null || !mounted) return;
+
+    final speciesList = await ref.read(speciesNotifierProvider.future);
+    if (!mounted) return;
+    _speciesSearchCtrl.text =
+        '${created.popularName} (${created.scientificName})';
+    _onSpeciesSelected(speciesList)(
+      created.id,
+      created.popularName,
+      created.scientificName,
+    );
   }
 
   Future<void> _pickDate() async {

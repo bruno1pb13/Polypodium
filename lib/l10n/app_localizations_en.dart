@@ -944,6 +944,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Search the official or local database...';
 
   @override
+  String get speciesCustomHelper =>
+      'Can\'t find it? Tap + to add your own species.';
+
+  @override
   String get noSpeciesFound => 'No species found';
 
   @override

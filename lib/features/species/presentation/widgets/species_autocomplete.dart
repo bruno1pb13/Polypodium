@@ -16,6 +16,9 @@ class SpeciesAutocomplete extends ConsumerStatefulWidget {
 
   /// Defaults to the localized search hint when null.
   final String? hint;
+
+  /// Optional helper text shown below the field.
+  final String? helperText;
   final String? Function(String?)? validator;
 
   const SpeciesAutocomplete({
@@ -25,6 +28,7 @@ class SpeciesAutocomplete extends ConsumerStatefulWidget {
     required this.onSelected,
     this.label,
     this.hint,
+    this.helperText,
     this.validator,
   });
 
@@ -272,6 +276,8 @@ class _SpeciesAutocompleteState extends ConsumerState<SpeciesAutocomplete> {
         decoration: InputDecoration(
           labelText: widget.label ?? '${context.l10n.speciesFieldLabel} *',
           hintText: widget.hint ?? context.l10n.speciesSearchFieldHint,
+          helperText: widget.helperText,
+          helperMaxLines: 2,
           suffixIcon: _isLoading 
             ? const SizedBox(width: 20, height: 20, child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator(strokeWidth: 2)))
             : const Icon(Icons.search, size: 20),
