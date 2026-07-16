@@ -33,8 +33,14 @@ class PlantListItem extends ConsumerWidget {
     final days = pws.daysRelativeToSchedule;
     final overdue = pws.needsWatering;
     final photoAsync = ref.watch(latestPlantPhotoProvider(pws.plant.id));
-    final alertStatus = ref.watch(plantAlertStatusProvider(pws.plant.id)).value
-        ?? (hasActiveChlorosis: false, chlorosisSeverity: null, hasActivePest: false, pestSeverity: null);
+    final alertStatus =
+        ref.watch(plantAlertStatusProvider(pws.plant.id)).value ??
+            (
+              hasActiveChlorosis: false,
+              chlorosisSeverity: null,
+              hasActivePest: false,
+              pestSeverity: null
+            );
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -225,22 +231,40 @@ class _PlantThumbnail extends StatelessWidget {
 
   const _PlantThumbnail({this.photoPath, required this.overdue});
 
+  static const _size = 72.0;
+
   @override
   Widget build(BuildContext context) {
-    if (photoPath != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.file(
-          File(photoPath!),
-          width: 72,
-          height: 72,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _ThumbnailPlaceholder(overdue: overdue),
-        ),
-      );
-    }
+    final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
 
-    return _ThumbnailPlaceholder(overdue: overdue);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Stack(
+        children: [
+          _ThumbnailPlaceholder(overdue: overdue),
+          if (photoPath != null)
+            Image.file(
+              File(photoPath!),
+              width: _size,
+              height: _size,
+              fit: BoxFit.cover,
+              // Decodifica já no tamanho do thumbnail em vez da foto inteira.
+              cacheWidth: (_size * devicePixelRatio).round(),
+              gaplessPlayback: true,
+              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                if (wasSynchronouslyLoaded) return child;
+                return AnimatedOpacity(
+                  opacity: frame == null ? 0 : 1,
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  child: child,
+                );
+              },
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+        ],
+      ),
+    );
   }
 }
 
@@ -256,7 +280,8 @@ class _ThumbnailPlaceholder extends StatelessWidget {
       width: 72,
       height: 72,
       decoration: BoxDecoration(
-        color: overdue ? colorScheme.errorContainer : colorScheme.primaryContainer,
+        color:
+            overdue ? colorScheme.errorContainer : colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(
@@ -327,7 +352,9 @@ class _IrrigationBadge extends StatelessWidget {
         color: bgColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: overdue ? Colors.transparent : Colors.white.withValues(alpha: 0.1),
+          color: overdue
+              ? Colors.transparent
+              : Colors.white.withValues(alpha: 0.1),
         ),
       ),
       child: Row(
