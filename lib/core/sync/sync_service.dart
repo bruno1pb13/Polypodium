@@ -1,7 +1,9 @@
 import 'package:uuid/uuid.dart';
 
+import '../../features/plants/data/plants_repository.dart';
 import '../../features/workspaces/data/workspace_auth_client.dart';
 import '../database/app_database.dart';
+import '../notifications/notification_service.dart';
 import '../storage/photo_storage.dart';
 import 'drift_sync_cursor_store.dart';
 import 'drift_sync_storage_adapter.dart';
@@ -25,7 +27,9 @@ class SyncService {
     PhotoStorage photoStorage, {
     WorkspaceAuthClient authClient = const WorkspaceAuthClient(),
     SyncHttpClient httpClient = const SyncHttpClient(),
+    INotificationService notifications = const NotificationService(),
   })  : _authClient = authClient,
+        _plantsRepo = PlantsRepository(db, notifications),
         _orchestrator = SyncOrchestrator(
           storage: DriftSyncStorageAdapter(db),
           cursors: DriftSyncCursorStore(db),
@@ -36,6 +40,7 @@ class SyncService {
   final WorkspaceConfigStore _store;
   final WorkspaceAuthClient _authClient;
   final SyncOrchestrator _orchestrator;
+  final PlantsRepository _plantsRepo;
 
   String? get token => _store.current.token;
   String? get deviceId => _store.current.deviceId;
@@ -74,6 +79,12 @@ class SyncService {
       token: token!,
       deviceId: deviceId!,
     );
+    if (result.pulled > 0) {
+      // The pull applies remote changes straight to the database, bypassing
+      // PlantsRepository — rebuild the reminders so a plant watered or
+      // deleted on another device doesn't fire its stale notification here.
+      await _plantsRepo.rescheduleNotifications();
+    }
     await _store.save(_store.current.copyWith(lastSyncAt: DateTime.now()));
     return result;
   }

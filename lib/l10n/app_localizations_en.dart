@@ -334,6 +334,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String irrigationNotificationBodyMany(int count, String names) {
+    return '$count plants need watering today: $names.';
+  }
+
+  @override
+  String irrigationNotificationBodyCount(int count) {
+    return '$count plants need water today.';
+  }
+
+  @override
   String get historyPlantAdded => 'Plant added to the system:';
 
   @override
