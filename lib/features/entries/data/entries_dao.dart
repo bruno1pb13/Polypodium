@@ -42,6 +42,19 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
     return row?.date;
   }
 
+  /// Most recent (non-deleted) entry of [type] for [plantId], or null.
+  Future<EntriesTableData?> getLastEntryOfType(
+      String plantId, EntryType type) async {
+    final query = select(entriesTable)
+      ..where((t) =>
+          t.plantId.equals(plantId) &
+          t.type.equalsValue(type) &
+          t.deletedAt.isNull())
+      ..orderBy([(t) => OrderingTerm.desc(t.date)])
+      ..limit(1);
+    return query.getSingleOrNull();
+  }
+
   Future<void> insert(EntriesTableCompanion companion) =>
       into(entriesTable).insert(companion);
 

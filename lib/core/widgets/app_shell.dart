@@ -4,6 +4,7 @@ import '../../features/plants/presentation/screens/home_screen.dart';
 import '../../features/species/presentation/screens/species_list_screen.dart';
 import '../../features/locations/presentation/screens/locations_list_screen.dart';
 import '../../features/soils/presentation/screens/soils_list_screen.dart';
+import '../../features/defensivos/presentation/screens/defensivos_list_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/workspaces/presentation/widgets/workspace_selector.dart';
 
@@ -26,6 +27,7 @@ class _AppShellState extends State<AppShell> {
     context.l10n.navSpecies,
     context.l10n.navLocations,
     context.l10n.navSoils,
+    context.l10n.navDefensivos,
     context.l10n.navSettings,
   ];
   static const _icons = [
@@ -33,6 +35,7 @@ class _AppShellState extends State<AppShell> {
     Icons.eco_outlined,
     Icons.location_on_outlined,
     Icons.terrain_outlined,
+    Icons.science_outlined,
     Icons.settings_outlined,
   ];
   static const _selectedIcons = [
@@ -40,6 +43,7 @@ class _AppShellState extends State<AppShell> {
     Icons.eco,
     Icons.location_on,
     Icons.terrain,
+    Icons.science,
     Icons.settings,
   ];
 
@@ -48,7 +52,8 @@ class _AppShellState extends State<AppShell> {
     1 => const SpeciesListScreen(),
     2 => const LocationsListScreen(),
     3 => const SoilsListScreen(),
-    4 => const SettingsScreen(),
+    4 => const DefensivosListScreen(),
+    5 => const SettingsScreen(),
     _ => const HomeScreen(),
   };
 

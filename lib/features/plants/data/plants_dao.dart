@@ -34,6 +34,18 @@ class PlantsDao extends DatabaseAccessor<AppDatabase> with _$PlantsDaoMixin {
         ),
       );
 
+  Future<void> updateLastPesticideApplication(
+          String id, DateTime? appliedAt, int? reapplicationDays,
+          {required DateTime updatedAt, required int rev}) =>
+      (update(plantsTable)..where((t) => t.id.equals(id))).write(
+        PlantsTableCompanion(
+          lastPesticideAppliedAt: Value(appliedAt),
+          pesticideReapplicationDays: Value(reapplicationDays),
+          updatedAt: Value(updatedAt),
+          localRev: Value(rev),
+        ),
+      );
+
   Future<void> softDelete(String id,
           {required DateTime deletedAt, required int rev}) =>
       (update(plantsTable)..where((t) => t.id.equals(id))).write(

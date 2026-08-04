@@ -226,4 +226,63 @@ void main() {
       expect(groups[DateTime(2026, 5, 21)], ['Basil', 'Fern']);
     });
   });
+
+  group('NotificationService.groupPlantsByPesticideDueDate', () {
+    final species = SpeciesModel(
+      id: 'species-1',
+      scientificName: 'Ocimum basilicum',
+      popularName: 'Basil',
+      defaultIrrigationFrequencyDays: 7,
+      recommendedSoilIds: const ['loamy'],
+      createdAt: DateTime(2026, 1, 1),
+    );
+
+    PlantWithSpecies makePlant(String nickname,
+            {DateTime? lastPesticideAppliedAt, int? reapplicationDays}) =>
+        PlantWithSpecies(
+          plant: PlantModel(
+            id: 'plant-$nickname',
+            speciesId: species.id,
+            nickname: nickname,
+            soilId: 'loamy',
+            acquisitionDate: DateTime(2026, 1, 1),
+            createdAt: DateTime(2026, 1, 1),
+            lastPesticideAppliedAt: lastPesticideAppliedAt,
+            pesticideReapplicationDays: reapplicationDays,
+          ),
+          species: species,
+        );
+
+    final now = DateTime(2026, 5, 20, 10);
+
+    test('groups plants due on the same day', () {
+      final groups = NotificationService.groupPlantsByPesticideDueDate(
+        [
+          makePlant('Basil',
+              lastPesticideAppliedAt: DateTime(2026, 5, 20),
+              reapplicationDays: 5),
+          makePlant('Fern',
+              lastPesticideAppliedAt: DateTime(2026, 5, 22),
+              reapplicationDays: 3),
+        ],
+        now,
+      );
+
+      expect(groups, hasLength(1));
+      expect(groups[DateTime(2026, 5, 25)], ['Basil', 'Fern']);
+    });
+
+    test('skips plants without an active pesticide reminder', () {
+      final groups = NotificationService.groupPlantsByPesticideDueDate(
+        [
+          makePlant('Basil'),
+          makePlant('Fern', lastPesticideAppliedAt: DateTime(2026, 5, 20)),
+          makePlant('Cactus', reapplicationDays: 5),
+        ],
+        now,
+      );
+
+      expect(groups, isEmpty);
+    });
+  });
 }

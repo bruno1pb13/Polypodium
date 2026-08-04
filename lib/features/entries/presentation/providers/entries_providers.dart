@@ -91,6 +91,10 @@ class EntryMutations {
       await _ref
           .read(plantsRepositoryProvider)
           .refreshPlantStatus(entry.plantId);
+    } else if (entry.type == EntryType.pesticide) {
+      await _ref
+          .read(plantsRepositoryProvider)
+          .refreshPesticideStatus(entry.plantId);
     }
     _triggerSync();
   }
@@ -103,6 +107,10 @@ class EntryMutations {
       await _ref
           .read(plantsRepositoryProvider)
           .refreshPlantStatus(entry.plantId);
+    } else if (entry != null && entry.type == EntryType.pesticide) {
+      await _ref
+          .read(plantsRepositoryProvider)
+          .refreshPesticideStatus(entry.plantId);
     }
     _triggerSync();
   }

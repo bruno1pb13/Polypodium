@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/enums.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../species/data/species_repository.dart';
 import '../domain/plant_model.dart';
@@ -68,6 +71,26 @@ class PlantsRepository {
     await rescheduleNotifications();
   }
 
+  /// Recalculates lastPesticideAppliedAt/pesticideReapplicationDays from the
+  /// most recent 'pesticide' entry — the reminder always tracks that single
+  /// latest application, so a newer entry without a recurrence value clears
+  /// any pending reminder.
+  Future<void> refreshPesticideStatus(String plantId) async {
+    final last = await _db.entriesDao.getLastEntryOfType(
+        plantId, EntryType.pesticide);
+    final recurrenceDays = last == null
+        ? null
+        : (jsonDecode(last.extraData ?? '{}')
+            as Map<String, dynamic>)['recurrenceDays'] as int?;
+    await _db.transaction(() async {
+      final rev = await _db.syncMetaDao.nextRev();
+      await _dao.updateLastPesticideApplication(
+          plantId, last?.date, recurrenceDays,
+          updatedAt: DateTime.now(), rev: rev);
+    });
+    await rescheduleNotifications();
+  }
+
   Future<void> delete(String id) async {
     final now = DateTime.now();
     await _db.transaction(() async {
@@ -119,6 +142,8 @@ class PlantsRepository {
         location: row.location,
         locationId: row.locationId,
         lastIrrigatedAt: row.lastIrrigatedAt,
+        lastPesticideAppliedAt: row.lastPesticideAppliedAt,
+        pesticideReapplicationDays: row.pesticideReapplicationDays,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         deletedAt: row.deletedAt,
@@ -137,6 +162,8 @@ class PlantsRepository {
         location: Value(m.location),
         locationId: Value(m.locationId),
         lastIrrigatedAt: Value(m.lastIrrigatedAt),
+        lastPesticideAppliedAt: Value(m.lastPesticideAppliedAt),
+        pesticideReapplicationDays: Value(m.pesticideReapplicationDays),
         createdAt: m.createdAt,
         updatedAt: updatedAt,
         localRev: Value(rev),

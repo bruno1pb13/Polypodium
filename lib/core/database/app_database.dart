@@ -7,6 +7,8 @@ import 'package:path_provider/path_provider.dart';
 
 import '../enums.dart';
 import '../l10n/l10n.dart';
+import '../../features/defensivos/data/defensivos_dao.dart';
+import '../../features/defensivos/data/defensivos_table.dart';
 import '../../features/entries/data/entries_dao.dart';
 import '../../features/entries/data/entries_table.dart';
 import '../../features/locations/data/locations_dao.dart';
@@ -23,6 +25,7 @@ import 'sync_cursors_table.dart';
 import 'sync_meta_dao.dart';
 import 'sync_meta_table.dart';
 
+export '../../features/defensivos/data/defensivos_table.dart';
 export '../../features/entries/data/entries_table.dart';
 export '../../features/locations/data/locations_table.dart';
 export '../../features/plants/data/plants_table.dart';
@@ -40,6 +43,7 @@ part 'app_database.g.dart';
     EntriesTable,
     LocationsTable,
     SoilsTable,
+    DefensivosTable,
     SyncMetaTable,
     SyncCursorsTable,
   ],
@@ -50,13 +54,14 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
   late final EntriesDao entriesDao = EntriesDao(this);
   late final LocationsDao locationsDao = LocationsDao(this);
   late final SoilsDao soilsDao = SoilsDao(this);
+  late final DefensivosDao defensivosDao = DefensivosDao(this);
   late final SyncMetaDao syncMetaDao = SyncMetaDao(this);
   late final SyncCursorsDao syncCursorsDao = SyncCursorsDao(this);
 
@@ -118,6 +123,12 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(syncCursorsTable);
 
             await _seedFresh();
+          }
+          if (from < 11) {
+            await m.createTable(defensivosTable);
+            await m.addColumn(plantsTable, plantsTable.lastPesticideAppliedAt);
+            await m.addColumn(
+                plantsTable, plantsTable.pesticideReapplicationDays);
           }
         },
       );

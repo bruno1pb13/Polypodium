@@ -5,6 +5,7 @@ import '../../features/plants/presentation/screens/home_screen.dart';
 import '../../features/species/presentation/screens/species_list_screen.dart';
 import '../../features/locations/presentation/screens/locations_list_screen.dart';
 import '../../features/soils/presentation/screens/soils_list_screen.dart';
+import '../../features/defensivos/presentation/screens/defensivos_list_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/workspaces/presentation/widgets/workspace_selector.dart';
 
@@ -123,6 +124,18 @@ class AppDrawer extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (_) => const SoilsListScreen()),
+                    );
+                  },
+                ),
+                _DrawerItem(
+                  icon: Icons.science_outlined,
+                  label: context.l10n.navDefensivos,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const DefensivosListScreen()),
                     );
                   },
                 ),

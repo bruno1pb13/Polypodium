@@ -5,6 +5,7 @@
   "navSpecies": "Species",
   "navLocations": "Locations",
   "navSoils": "Soils",
+  "navDefensivos": "Pesticides",
   "navSettings": "Settings",
 
   "cancel": "Cancel",
@@ -161,6 +162,29 @@
     }
   },
 
+  "pesticideChannelName": "Pesticides",
+  "pesticideChannelDescription": "Pesticide reapplication reminders",
+  "pesticideNotificationTitle": "Time to reapply! 🧪",
+  "pesticideNotificationBody": "{nickname} needs a pesticide reapplication today.",
+  "@pesticideNotificationBody": {
+    "placeholders": {
+      "nickname": {"type": "String"}
+    }
+  },
+  "pesticideNotificationBodyMany": "{count} plants need reapplication today: {names}.",
+  "@pesticideNotificationBodyMany": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "names": {"type": "String"}
+    }
+  },
+  "pesticideNotificationBodyCount": "{count} plants need reapplication today.",
+  "@pesticideNotificationBodyCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+
   "historyPlantAdded": "Plant added to the system:",
   "historyFieldNickname": "Nickname",
   "historyFieldSpecies": "Species",
@@ -287,6 +311,7 @@
   "severitySevere": "Severe",
   "severityActive": "Active",
   "pestBadge": "Pest",
+  "pesticideReapplyBadge": "Reapply",
 
   "entryTypeIrrigation": "Watering",
   "entryTypeFertilizer": "Fertilizing",
@@ -295,6 +320,7 @@
   "entryTypeHeight": "Height",
   "entryTypeChlorosis": "Chlorosis",
   "entryTypePest": "Pests",
+  "entryTypePesticide": "Pesticides",
   "entryTypeOther": "Other",
   "entryTypeHistory": "History",
 
@@ -314,6 +340,7 @@
   "noteHintHeight": "Any observations about growth?",
   "noteHintChlorosis": "Which leaves are affected?",
   "noteHintPest": "Where was it found? Any treatment?",
+  "noteHintPesticide": "Where was it applied? Any reaction from the plant?",
   "noteHintDefault": "Optional notes...",
   "photoTitle": "Photo",
   "saveEntry": "Save entry",
@@ -340,6 +367,14 @@
   "productHint": "E.g.: Growth fertilizer",
   "doseLabel": "Dose",
   "addProduct": "Add product",
+  "pesticideProductsHint": "Applied pesticide(s)",
+  "pesticideDoseLabel": "Dose/Amount",
+  "pesticideDoseHint": "E.g.: 2ml/L",
+  "addDefensivo": "Add pesticide",
+  "defensivoRequired": "Select a pesticide",
+  "pesticideRecurrenceLabel": "Repeat application in (optional)",
+  "pesticideRecurrenceHint": "Leave blank to skip the reapplication reminder.",
+  "daysSuffix": "days",
   "healthScoreHint": "Plant health score (optional)",
   "healthCritical": "Critical",
   "healthBad": "Bad",
@@ -503,6 +538,34 @@
   "tapToAddSoil": "Tap + to add a soil type.",
   "deleteSoilTitle": "Delete soil?",
   "deleteSoilBody": "Plants and species linked to this soil will not be deleted, but the reference to the soil may be lost.",
+
+  "editDefensivo": "Edit pesticide",
+  "newDefensivo": "New Pesticide",
+  "createDefensivo": "Create pesticide",
+  "selectDefensivoTitle": "Select Pesticide",
+  "defensivoFieldLabel": "Pesticide",
+  "defensivoNameLabel": "Pesticide Name",
+  "defensivoNameHint": "E.g.: Bordeaux mixture",
+  "defensivoCategoryLabel": "Category",
+  "defensivoCategoryInsecticide": "Insecticide",
+  "defensivoCategoryFungicide": "Fungicide",
+  "defensivoCategoryHerbicide": "Herbicide",
+  "defensivoCategoryAcaricide": "Acaricide",
+  "defensivoCategoryBactericide": "Bactericide",
+  "defensivoCategoryNematicide": "Nematicide",
+  "defensivoCategoryCustom": "Other",
+  "defensivoCustomCategoryLabel": "Custom category",
+  "defensivoCustomCategoryHint": "E.g.: Biological",
+  "defensivoCompositionLabel": "Composition and application instructions (optional)",
+  "defensivoCompositionHint": "E.g.: Active ingredient, recommended dose, how to apply",
+  "defensivoCarenciaLabel": "Withdrawal / re-entry period (optional)",
+  "defensivoCarenciaHint": "Days",
+  "searchDefensivosHint": "Search pesticides...",
+  "noDefensivosFound": "No pesticides found",
+  "noDefensivosRegistered": "No pesticides registered",
+  "tapToAddDefensivo": "Tap + to add a pesticide.",
+  "deleteDefensivoTitle": "Delete pesticide?",
+  "deleteDefensivoBody": "Records that already used this pesticide will not be affected.",
 
   "editLocation": "Edit location",
   "addLocation": "Add location",

@@ -23,6 +23,15 @@ class PlantsTable extends Table {
       .nullable()
       .references(LocationsTable, #id, onDelete: KeyAction.setNull)();
   DateTimeColumn get lastIrrigatedAt => dateTime().nullable()();
+
+  /// Derived from the most recent 'pesticide' entry — always recomputed by
+  /// PlantsRepository.refreshPesticideStatus, never user-editable.
+  DateTimeColumn get lastPesticideAppliedAt => dateTime().nullable()();
+
+  /// Recurrence (in days) set on the most recent 'pesticide' entry, or null
+  /// if that entry didn't request a reminder.
+  IntColumn get pesticideReapplicationDays => integer().nullable()();
+
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();

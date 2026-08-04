@@ -21,6 +21,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get navSoils => 'Solos';
 
   @override
+  String get navDefensivos => 'Defensivos';
+
+  @override
   String get navSettings => 'Configurações';
 
   @override
@@ -346,6 +349,31 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get pesticideChannelName => 'Defensivos';
+
+  @override
+  String get pesticideChannelDescription =>
+      'Lembretes de reaplicação de defensivos';
+
+  @override
+  String get pesticideNotificationTitle => 'Hora de reaplicar! 🧪';
+
+  @override
+  String pesticideNotificationBody(String nickname) {
+    return '$nickname precisa de reaplicação de defensivo hoje.';
+  }
+
+  @override
+  String pesticideNotificationBodyMany(int count, String names) {
+    return '$count plantas precisam de reaplicação hoje: $names.';
+  }
+
+  @override
+  String pesticideNotificationBodyCount(int count) {
+    return '$count plantas precisam de reaplicação hoje.';
+  }
+
+  @override
   String get historyPlantAdded => 'Planta adicionada ao sistema:';
 
   @override
@@ -642,6 +670,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get pestBadge => 'Praga';
 
   @override
+  String get pesticideReapplyBadge => 'Reaplicar';
+
+  @override
   String get entryTypeIrrigation => 'Irrigação';
 
   @override
@@ -661,6 +692,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get entryTypePest => 'Parasitas';
+
+  @override
+  String get entryTypePesticide => 'Defensivos';
 
   @override
   String get entryTypeOther => 'Outro';
@@ -708,6 +742,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get noteHintPest => 'Onde foi identificado? Algum tratamento?';
+
+  @override
+  String get noteHintPesticide => 'Onde foi aplicado? Alguma reação da planta?';
 
   @override
   String get noteHintDefault => 'Notas opcionais...';
@@ -779,6 +816,31 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get addProduct => 'Adicionar produto';
+
+  @override
+  String get pesticideProductsHint => 'Defensivo(s) aplicado(s)';
+
+  @override
+  String get pesticideDoseLabel => 'Dose/Quantidade';
+
+  @override
+  String get pesticideDoseHint => 'Ex: 2ml/L';
+
+  @override
+  String get addDefensivo => 'Adicionar defensivo';
+
+  @override
+  String get defensivoRequired => 'Selecione um defensivo';
+
+  @override
+  String get pesticideRecurrenceLabel => 'Repetir aplicação em (opcional)';
+
+  @override
+  String get pesticideRecurrenceHint =>
+      'Deixe em branco para não criar lembrete de reaplicação.';
+
+  @override
+  String get daysSuffix => 'dias';
 
   @override
   String get healthScoreHint => 'Nota de saúde da planta (opcional)';
@@ -1178,6 +1240,90 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get deleteSoilBody =>
       'Plantas e espécies vinculadas a este solo não serão deletadas, mas a referência ao solo pode ser perdida.';
+
+  @override
+  String get editDefensivo => 'Editar defensivo';
+
+  @override
+  String get newDefensivo => 'Novo Defensivo';
+
+  @override
+  String get createDefensivo => 'Criar defensivo';
+
+  @override
+  String get selectDefensivoTitle => 'Selecionar Defensivo';
+
+  @override
+  String get defensivoFieldLabel => 'Defensivo';
+
+  @override
+  String get defensivoNameLabel => 'Nome do Defensivo';
+
+  @override
+  String get defensivoNameHint => 'Ex: Calda bordalesa';
+
+  @override
+  String get defensivoCategoryLabel => 'Categoria';
+
+  @override
+  String get defensivoCategoryInsecticide => 'Inseticida';
+
+  @override
+  String get defensivoCategoryFungicide => 'Fungicida';
+
+  @override
+  String get defensivoCategoryHerbicide => 'Herbicida';
+
+  @override
+  String get defensivoCategoryAcaricide => 'Acaricida';
+
+  @override
+  String get defensivoCategoryBactericide => 'Bactericida';
+
+  @override
+  String get defensivoCategoryNematicide => 'Nematicida';
+
+  @override
+  String get defensivoCategoryCustom => 'Outro';
+
+  @override
+  String get defensivoCustomCategoryLabel => 'Categoria personalizada';
+
+  @override
+  String get defensivoCustomCategoryHint => 'Ex: Biológico';
+
+  @override
+  String get defensivoCompositionLabel =>
+      'Composição e instruções de aplicação (opcional)';
+
+  @override
+  String get defensivoCompositionHint =>
+      'Ex: Ingrediente ativo, dose recomendada, modo de aplicação';
+
+  @override
+  String get defensivoCarenciaLabel => 'Carência / reentrada (opcional)';
+
+  @override
+  String get defensivoCarenciaHint => 'Dias';
+
+  @override
+  String get searchDefensivosHint => 'Buscar defensivos...';
+
+  @override
+  String get noDefensivosFound => 'Nenhum defensivo encontrado';
+
+  @override
+  String get noDefensivosRegistered => 'Nenhum defensivo cadastrado';
+
+  @override
+  String get tapToAddDefensivo => 'Toque em + para adicionar um defensivo.';
+
+  @override
+  String get deleteDefensivoTitle => 'Deletar defensivo?';
+
+  @override
+  String get deleteDefensivoBody =>
+      'Registros que já usaram este defensivo não serão afetados.';
 
   @override
   String get editLocation => 'Editar localização';

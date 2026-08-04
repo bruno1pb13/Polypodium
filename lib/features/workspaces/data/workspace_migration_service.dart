@@ -34,6 +34,7 @@ class WorkspaceMigrationService {
     if ((await db.speciesDao.getAll()).isNotEmpty) return true;
     if ((await db.soilsDao.getAllSoils()).any((s) => !s.isSeeded)) return true;
     if ((await db.locationsDao.getAll()).isNotEmpty) return true;
+    if ((await db.defensivosDao.getAllDefensivos()).isNotEmpty) return true;
     if ((await db.plantsDao.getAll()).isNotEmpty) return true;
     if ((await db.entriesDao.getAll()).isNotEmpty) return true;
     return false;
@@ -69,6 +70,7 @@ class WorkspaceMigrationService {
     await _migrateSpecies(sourceDb, targetDb);
     await _migrateSoils(sourceDb, targetDb);
     await _migrateLocations(sourceDb, targetDb);
+    await _migrateDefensivos(sourceDb, targetDb);
     await _migratePlants(sourceDb, targetDb);
     await _migrateEntries(sourceDb, targetDb, targetPhotos);
   }
@@ -131,6 +133,28 @@ class WorkspaceMigrationService {
     }
   }
 
+  Future<void> _migrateDefensivos(AppDatabase source, AppDatabase target) async {
+    for (final row in await source.defensivosDao.getAllDefensivos()) {
+      await target.transaction(() async {
+        final rev = await target.syncMetaDao.nextRev();
+        await target.defensivosDao
+            .insertDefensivo(DefensivosTableCompanion.insert(
+          id: row.id,
+          name: row.name,
+          category: Value(row.category),
+          customCategoryLabel: Value(row.customCategoryLabel),
+          composition: Value(row.composition),
+          carenciaDays: Value(row.carenciaDays),
+          imagePath: Value(row.imagePath),
+          imageSource: Value(row.imageSource),
+          createdAt: row.createdAt,
+          updatedAt: DateTime.now(),
+          localRev: Value(rev),
+        ));
+      });
+    }
+  }
+
   Future<void> _migratePlants(AppDatabase source, AppDatabase target) async {
     for (final row in await source.plantsDao.getAll()) {
       await target.transaction(() async {
@@ -145,6 +169,8 @@ class WorkspaceMigrationService {
           location: Value(row.location),
           locationId: Value(row.locationId),
           lastIrrigatedAt: Value(row.lastIrrigatedAt),
+          lastPesticideAppliedAt: Value(row.lastPesticideAppliedAt),
+          pesticideReapplicationDays: Value(row.pesticideReapplicationDays),
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),

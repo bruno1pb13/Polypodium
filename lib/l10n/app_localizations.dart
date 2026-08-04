@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'Soils'**
   String get navSoils;
 
+  /// No description provided for @navDefensivos.
+  ///
+  /// In en, this message translates to:
+  /// **'Pesticides'**
+  String get navDefensivos;
+
   /// No description provided for @navSettings.
   ///
   /// In en, this message translates to:
@@ -668,6 +674,42 @@ abstract class AppLocalizations {
   /// **'{count} plants need water today.'**
   String irrigationNotificationBodyCount(int count);
 
+  /// No description provided for @pesticideChannelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Pesticides'**
+  String get pesticideChannelName;
+
+  /// No description provided for @pesticideChannelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Pesticide reapplication reminders'**
+  String get pesticideChannelDescription;
+
+  /// No description provided for @pesticideNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to reapply! 🧪'**
+  String get pesticideNotificationTitle;
+
+  /// No description provided for @pesticideNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{nickname} needs a pesticide reapplication today.'**
+  String pesticideNotificationBody(String nickname);
+
+  /// No description provided for @pesticideNotificationBodyMany.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} plants need reapplication today: {names}.'**
+  String pesticideNotificationBodyMany(int count, String names);
+
+  /// No description provided for @pesticideNotificationBodyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} plants need reapplication today.'**
+  String pesticideNotificationBodyCount(int count);
+
   /// No description provided for @historyPlantAdded.
   ///
   /// In en, this message translates to:
@@ -1184,6 +1226,12 @@ abstract class AppLocalizations {
   /// **'Pest'**
   String get pestBadge;
 
+  /// No description provided for @pesticideReapplyBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Reapply'**
+  String get pesticideReapplyBadge;
+
   /// No description provided for @entryTypeIrrigation.
   ///
   /// In en, this message translates to:
@@ -1225,6 +1273,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pests'**
   String get entryTypePest;
+
+  /// No description provided for @entryTypePesticide.
+  ///
+  /// In en, this message translates to:
+  /// **'Pesticides'**
+  String get entryTypePesticide;
 
   /// No description provided for @entryTypeOther.
   ///
@@ -1303,6 +1357,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Where was it found? Any treatment?'**
   String get noteHintPest;
+
+  /// No description provided for @noteHintPesticide.
+  ///
+  /// In en, this message translates to:
+  /// **'Where was it applied? Any reaction from the plant?'**
+  String get noteHintPesticide;
 
   /// No description provided for @noteHintDefault.
   ///
@@ -1429,6 +1489,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add product'**
   String get addProduct;
+
+  /// No description provided for @pesticideProductsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied pesticide(s)'**
+  String get pesticideProductsHint;
+
+  /// No description provided for @pesticideDoseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dose/Amount'**
+  String get pesticideDoseLabel;
+
+  /// No description provided for @pesticideDoseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g.: 2ml/L'**
+  String get pesticideDoseHint;
+
+  /// No description provided for @addDefensivo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add pesticide'**
+  String get addDefensivo;
+
+  /// No description provided for @defensivoRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a pesticide'**
+  String get defensivoRequired;
+
+  /// No description provided for @pesticideRecurrenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat application in (optional)'**
+  String get pesticideRecurrenceLabel;
+
+  /// No description provided for @pesticideRecurrenceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave blank to skip the reapplication reminder.'**
+  String get pesticideRecurrenceHint;
+
+  /// No description provided for @daysSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get daysSuffix;
 
   /// No description provided for @healthScoreHint.
   ///
@@ -2137,6 +2245,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plants and species linked to this soil will not be deleted, but the reference to the soil may be lost.'**
   String get deleteSoilBody;
+
+  /// No description provided for @editDefensivo.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit pesticide'**
+  String get editDefensivo;
+
+  /// No description provided for @newDefensivo.
+  ///
+  /// In en, this message translates to:
+  /// **'New Pesticide'**
+  String get newDefensivo;
+
+  /// No description provided for @createDefensivo.
+  ///
+  /// In en, this message translates to:
+  /// **'Create pesticide'**
+  String get createDefensivo;
+
+  /// No description provided for @selectDefensivoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Pesticide'**
+  String get selectDefensivoTitle;
+
+  /// No description provided for @defensivoFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pesticide'**
+  String get defensivoFieldLabel;
+
+  /// No description provided for @defensivoNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pesticide Name'**
+  String get defensivoNameLabel;
+
+  /// No description provided for @defensivoNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g.: Bordeaux mixture'**
+  String get defensivoNameHint;
+
+  /// No description provided for @defensivoCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get defensivoCategoryLabel;
+
+  /// No description provided for @defensivoCategoryInsecticide.
+  ///
+  /// In en, this message translates to:
+  /// **'Insecticide'**
+  String get defensivoCategoryInsecticide;
+
+  /// No description provided for @defensivoCategoryFungicide.
+  ///
+  /// In en, this message translates to:
+  /// **'Fungicide'**
+  String get defensivoCategoryFungicide;
+
+  /// No description provided for @defensivoCategoryHerbicide.
+  ///
+  /// In en, this message translates to:
+  /// **'Herbicide'**
+  String get defensivoCategoryHerbicide;
+
+  /// No description provided for @defensivoCategoryAcaricide.
+  ///
+  /// In en, this message translates to:
+  /// **'Acaricide'**
+  String get defensivoCategoryAcaricide;
+
+  /// No description provided for @defensivoCategoryBactericide.
+  ///
+  /// In en, this message translates to:
+  /// **'Bactericide'**
+  String get defensivoCategoryBactericide;
+
+  /// No description provided for @defensivoCategoryNematicide.
+  ///
+  /// In en, this message translates to:
+  /// **'Nematicide'**
+  String get defensivoCategoryNematicide;
+
+  /// No description provided for @defensivoCategoryCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get defensivoCategoryCustom;
+
+  /// No description provided for @defensivoCustomCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom category'**
+  String get defensivoCustomCategoryLabel;
+
+  /// No description provided for @defensivoCustomCategoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g.: Biological'**
+  String get defensivoCustomCategoryHint;
+
+  /// No description provided for @defensivoCompositionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Composition and application instructions (optional)'**
+  String get defensivoCompositionLabel;
+
+  /// No description provided for @defensivoCompositionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g.: Active ingredient, recommended dose, how to apply'**
+  String get defensivoCompositionHint;
+
+  /// No description provided for @defensivoCarenciaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawal / re-entry period (optional)'**
+  String get defensivoCarenciaLabel;
+
+  /// No description provided for @defensivoCarenciaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Days'**
+  String get defensivoCarenciaHint;
+
+  /// No description provided for @searchDefensivosHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search pesticides...'**
+  String get searchDefensivosHint;
+
+  /// No description provided for @noDefensivosFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No pesticides found'**
+  String get noDefensivosFound;
+
+  /// No description provided for @noDefensivosRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'No pesticides registered'**
+  String get noDefensivosRegistered;
+
+  /// No description provided for @tapToAddDefensivo.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to add a pesticide.'**
+  String get tapToAddDefensivo;
+
+  /// No description provided for @deleteDefensivoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete pesticide?'**
+  String get deleteDefensivoTitle;
+
+  /// No description provided for @deleteDefensivoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Records that already used this pesticide will not be affected.'**
+  String get deleteDefensivoBody;
 
   /// No description provided for @editLocation.
   ///
