@@ -12,6 +12,8 @@ import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/storage/photo_storage.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
+import '../../../defensivos/domain/defensivo_model.dart';
+import '../../../defensivos/presentation/widgets/defensivo_selection_field.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 
@@ -22,6 +24,17 @@ class _ProductEntry {
 
   void dispose() {
     nameCtrl.dispose();
+    doseCtrl.dispose();
+  }
+}
+
+// Holds a selected catalog defensivo + dose controller for one pesticide
+// application row.
+class _PesticideEntry {
+  DefensivoModel? selected;
+  final TextEditingController doseCtrl = TextEditingController();
+
+  void dispose() {
     doseCtrl.dispose();
   }
 }
@@ -65,6 +78,10 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   // Fertilizer: dynamic list of product rows
   final List<_ProductEntry> _fertilizerProducts = [_ProductEntry()];
 
+  // Pesticide: dynamic list of applied-defensivo rows + optional recurrence
+  final List<_PesticideEntry> _pesticideProducts = [_PesticideEntry()];
+  final _pesticideRecurrenceCtrl = TextEditingController();
+
   bool _saving = false;
   bool _submitted = false;
   bool _showFieldErrors = false;
@@ -91,6 +108,10 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     for (final p in _fertilizerProducts) {
       p.dispose();
     }
+    for (final p in _pesticideProducts) {
+      p.dispose();
+    }
+    _pesticideRecurrenceCtrl.dispose();
     if (!_submitted && _photoPath != null) {
       _photoStorage.deletePhoto(_photoPath!);
     }
@@ -104,6 +125,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     }
     if (_type == EntryType.pest) {
       return _pestTypeCtrl.text.trim().isEmpty;
+    }
+    if (_type == EntryType.pesticide) {
+      return _pesticideProducts.every((p) => p.selected == null);
     }
     return false;
   }
@@ -146,6 +170,26 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
         return _pruningReason == null
             ? null
             : jsonEncode({'reason': _pruningReason});
+      case EntryType.pesticide:
+        final products = _pesticideProducts
+            .where((p) => p.selected != null)
+            .map((p) {
+              final dose = p.doseCtrl.text.trim();
+              return {
+                'defensivoId': p.selected!.id,
+                'name': p.selected!.name,
+                if (dose.isNotEmpty) 'dose': dose,
+              };
+            })
+            .toList();
+        final recurrenceDays =
+            double.tryParse(_pesticideRecurrenceCtrl.text.replaceAll(',', '.'))
+                ?.round();
+        if (products.isEmpty && recurrenceDays == null) return null;
+        return jsonEncode({
+          if (products.isNotEmpty) 'products': products,
+          if (recurrenceDays != null) 'recurrenceDays': recurrenceDays,
+        });
       default:
         return null;
     }
@@ -291,6 +335,8 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                             EntryType.chlorosis =>
                               context.l10n.noteHintChlorosis,
                             EntryType.pest => context.l10n.noteHintPest,
+                            EntryType.pesticide =>
+                              context.l10n.noteHintPesticide,
                             _ => context.l10n.noteHintDefault,
                           },
                           hintStyle: TextStyle(
@@ -432,6 +478,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
       EntryType.height => _buildHeightFields(context),
       EntryType.chlorosis => _buildChlorosisFields(context),
       EntryType.pest => _buildPestFields(context),
+      EntryType.pesticide => _buildPesticideFields(context),
       _ => const SizedBox.shrink(),
     };
   }
@@ -791,6 +838,103 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                 context: context,
               ),
             )),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Pesticide — dynamic list of catalog-picked defensivos + optional
+  // reapplication recurrence
+  // ---------------------------------------------------------------------------
+
+  Widget _buildPesticideFields(BuildContext context) {
+    final hasError = _showFieldErrors && _hasRequiredFieldError;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionTitle(emoji: '🧪', label: context.l10n.entryTypePesticide),
+        const SizedBox(height: 4),
+        _HintText(context.l10n.pesticideProductsHint),
+        const SizedBox(height: 12),
+        ...List.generate(_pesticideProducts.length, (i) {
+          final p = _pesticideProducts[i];
+          final canRemove = _pesticideProducts.length > 1;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: DefensivoSelectionField(
+                        selectedDefensivo: p.selected,
+                        errorText: hasError && i == 0
+                            ? context.l10n.defensivoRequired
+                            : null,
+                        onDefensivoSelected: (d) =>
+                            setState(() => p.selected = d),
+                      ),
+                    ),
+                    if (canRemove) ...[
+                      const SizedBox(width: 4),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: IconButton(
+                          onPressed: () => setState(() {
+                            _pesticideProducts[i].dispose();
+                            _pesticideProducts.removeAt(i);
+                          }),
+                          icon: const Icon(Icons.remove_circle_outline,
+                              color: Colors.white54, size: 22),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 8),
+                _TextField(
+                  controller: p.doseCtrl,
+                  label: context.l10n.pesticideDoseLabel,
+                  hint: context.l10n.pesticideDoseHint,
+                  context: context,
+                ),
+                if (i < _pesticideProducts.length - 1) ...[
+                  const SizedBox(height: 12),
+                  Divider(color: Colors.white.withValues(alpha: 0.1), height: 1),
+                ],
+              ],
+            ),
+          );
+        }),
+        TextButton.icon(
+          onPressed: () =>
+              setState(() => _pesticideProducts.add(_PesticideEntry())),
+          icon: const Icon(Icons.add, size: 18, color: Colors.white70),
+          label: Text(
+            context.l10n.addDefensivo,
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
+          ),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: const BorderSide(color: Colors.white24),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        _NumericField(
+          controller: _pesticideRecurrenceCtrl,
+          label: context.l10n.pesticideRecurrenceLabel,
+          suffix: context.l10n.daysSuffix,
+          hint: '15',
+          context: context,
+        ),
+        const SizedBox(height: 4),
+        _HintText(context.l10n.pesticideRecurrenceHint),
       ],
     );
   }

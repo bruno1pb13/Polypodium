@@ -1580,6 +1580,18 @@ class $PlantsTableTable extends PlantsTable
   late final GeneratedColumn<DateTime> lastIrrigatedAt =
       GeneratedColumn<DateTime>('last_irrigated_at', aliasedName, true,
           type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _lastPesticideAppliedAtMeta =
+      const VerificationMeta('lastPesticideAppliedAt');
+  @override
+  late final GeneratedColumn<DateTime> lastPesticideAppliedAt =
+      GeneratedColumn<DateTime>('last_pesticide_applied_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _pesticideReapplicationDaysMeta =
+      const VerificationMeta('pesticideReapplicationDays');
+  @override
+  late final GeneratedColumn<int> pesticideReapplicationDays =
+      GeneratedColumn<int>('pesticide_reapplication_days', aliasedName, true,
+          type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -1617,6 +1629,8 @@ class $PlantsTableTable extends PlantsTable
         location,
         locationId,
         lastIrrigatedAt,
+        lastPesticideAppliedAt,
+        pesticideReapplicationDays,
         createdAt,
         updatedAt,
         deletedAt,
@@ -1686,6 +1700,19 @@ class $PlantsTableTable extends PlantsTable
           lastIrrigatedAt.isAcceptableOrUnknown(
               data['last_irrigated_at']!, _lastIrrigatedAtMeta));
     }
+    if (data.containsKey('last_pesticide_applied_at')) {
+      context.handle(
+          _lastPesticideAppliedAtMeta,
+          lastPesticideAppliedAt.isAcceptableOrUnknown(
+              data['last_pesticide_applied_at']!, _lastPesticideAppliedAtMeta));
+    }
+    if (data.containsKey('pesticide_reapplication_days')) {
+      context.handle(
+          _pesticideReapplicationDaysMeta,
+          pesticideReapplicationDays.isAcceptableOrUnknown(
+              data['pesticide_reapplication_days']!,
+              _pesticideReapplicationDaysMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -1734,6 +1761,12 @@ class $PlantsTableTable extends PlantsTable
           .read(DriftSqlType.string, data['${effectivePrefix}location_id']),
       lastIrrigatedAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}last_irrigated_at']),
+      lastPesticideAppliedAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime,
+          data['${effectivePrefix}last_pesticide_applied_at']),
+      pesticideReapplicationDays: attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}pesticide_reapplication_days']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -1763,6 +1796,14 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
   final String? location;
   final String? locationId;
   final DateTime? lastIrrigatedAt;
+
+  /// Derived from the most recent 'pesticide' entry — always recomputed by
+  /// PlantsRepository.refreshPesticideStatus, never user-editable.
+  final DateTime? lastPesticideAppliedAt;
+
+  /// Recurrence (in days) set on the most recent 'pesticide' entry, or null
+  /// if that entry didn't request a reminder.
+  final int? pesticideReapplicationDays;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -1777,6 +1818,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       this.location,
       this.locationId,
       this.lastIrrigatedAt,
+      this.lastPesticideAppliedAt,
+      this.pesticideReapplicationDays,
       required this.createdAt,
       required this.updatedAt,
       this.deletedAt,
@@ -1800,6 +1843,14 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
     }
     if (!nullToAbsent || lastIrrigatedAt != null) {
       map['last_irrigated_at'] = Variable<DateTime>(lastIrrigatedAt);
+    }
+    if (!nullToAbsent || lastPesticideAppliedAt != null) {
+      map['last_pesticide_applied_at'] =
+          Variable<DateTime>(lastPesticideAppliedAt);
+    }
+    if (!nullToAbsent || pesticideReapplicationDays != null) {
+      map['pesticide_reapplication_days'] =
+          Variable<int>(pesticideReapplicationDays);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -1829,6 +1880,13 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       lastIrrigatedAt: lastIrrigatedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastIrrigatedAt),
+      lastPesticideAppliedAt: lastPesticideAppliedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastPesticideAppliedAt),
+      pesticideReapplicationDays:
+          pesticideReapplicationDays == null && nullToAbsent
+              ? const Value.absent()
+              : Value(pesticideReapplicationDays),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -1852,6 +1910,10 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       location: serializer.fromJson<String?>(json['location']),
       locationId: serializer.fromJson<String?>(json['locationId']),
       lastIrrigatedAt: serializer.fromJson<DateTime?>(json['lastIrrigatedAt']),
+      lastPesticideAppliedAt:
+          serializer.fromJson<DateTime?>(json['lastPesticideAppliedAt']),
+      pesticideReapplicationDays:
+          serializer.fromJson<int?>(json['pesticideReapplicationDays']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -1872,6 +1934,10 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       'location': serializer.toJson<String?>(location),
       'locationId': serializer.toJson<String?>(locationId),
       'lastIrrigatedAt': serializer.toJson<DateTime?>(lastIrrigatedAt),
+      'lastPesticideAppliedAt':
+          serializer.toJson<DateTime?>(lastPesticideAppliedAt),
+      'pesticideReapplicationDays':
+          serializer.toJson<int?>(pesticideReapplicationDays),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -1889,6 +1955,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           Value<String?> location = const Value.absent(),
           Value<String?> locationId = const Value.absent(),
           Value<DateTime?> lastIrrigatedAt = const Value.absent(),
+          Value<DateTime?> lastPesticideAppliedAt = const Value.absent(),
+          Value<int?> pesticideReapplicationDays = const Value.absent(),
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
@@ -1907,6 +1975,12 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
         lastIrrigatedAt: lastIrrigatedAt.present
             ? lastIrrigatedAt.value
             : this.lastIrrigatedAt,
+        lastPesticideAppliedAt: lastPesticideAppliedAt.present
+            ? lastPesticideAppliedAt.value
+            : this.lastPesticideAppliedAt,
+        pesticideReapplicationDays: pesticideReapplicationDays.present
+            ? pesticideReapplicationDays.value
+            : this.pesticideReapplicationDays,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -1930,6 +2004,12 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       lastIrrigatedAt: data.lastIrrigatedAt.present
           ? data.lastIrrigatedAt.value
           : this.lastIrrigatedAt,
+      lastPesticideAppliedAt: data.lastPesticideAppliedAt.present
+          ? data.lastPesticideAppliedAt.value
+          : this.lastPesticideAppliedAt,
+      pesticideReapplicationDays: data.pesticideReapplicationDays.present
+          ? data.pesticideReapplicationDays.value
+          : this.pesticideReapplicationDays,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -1949,6 +2029,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ..write('location: $location, ')
           ..write('locationId: $locationId, ')
           ..write('lastIrrigatedAt: $lastIrrigatedAt, ')
+          ..write('lastPesticideAppliedAt: $lastPesticideAppliedAt, ')
+          ..write('pesticideReapplicationDays: $pesticideReapplicationDays, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -1968,6 +2050,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       location,
       locationId,
       lastIrrigatedAt,
+      lastPesticideAppliedAt,
+      pesticideReapplicationDays,
       createdAt,
       updatedAt,
       deletedAt,
@@ -1985,6 +2069,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           other.location == this.location &&
           other.locationId == this.locationId &&
           other.lastIrrigatedAt == this.lastIrrigatedAt &&
+          other.lastPesticideAppliedAt == this.lastPesticideAppliedAt &&
+          other.pesticideReapplicationDays == this.pesticideReapplicationDays &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -2001,6 +2087,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
   final Value<String?> location;
   final Value<String?> locationId;
   final Value<DateTime?> lastIrrigatedAt;
+  final Value<DateTime?> lastPesticideAppliedAt;
+  final Value<int?> pesticideReapplicationDays;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -2016,6 +2104,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.location = const Value.absent(),
     this.locationId = const Value.absent(),
     this.lastIrrigatedAt = const Value.absent(),
+    this.lastPesticideAppliedAt = const Value.absent(),
+    this.pesticideReapplicationDays = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -2032,6 +2122,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.location = const Value.absent(),
     this.locationId = const Value.absent(),
     this.lastIrrigatedAt = const Value.absent(),
+    this.lastPesticideAppliedAt = const Value.absent(),
+    this.pesticideReapplicationDays = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -2054,6 +2146,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     Expression<String>? location,
     Expression<String>? locationId,
     Expression<DateTime>? lastIrrigatedAt,
+    Expression<DateTime>? lastPesticideAppliedAt,
+    Expression<int>? pesticideReapplicationDays,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -2071,6 +2165,10 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       if (location != null) 'location': location,
       if (locationId != null) 'location_id': locationId,
       if (lastIrrigatedAt != null) 'last_irrigated_at': lastIrrigatedAt,
+      if (lastPesticideAppliedAt != null)
+        'last_pesticide_applied_at': lastPesticideAppliedAt,
+      if (pesticideReapplicationDays != null)
+        'pesticide_reapplication_days': pesticideReapplicationDays,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -2089,6 +2187,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       Value<String?>? location,
       Value<String?>? locationId,
       Value<DateTime?>? lastIrrigatedAt,
+      Value<DateTime?>? lastPesticideAppliedAt,
+      Value<int?>? pesticideReapplicationDays,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
@@ -2105,6 +2205,10 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       location: location ?? this.location,
       locationId: locationId ?? this.locationId,
       lastIrrigatedAt: lastIrrigatedAt ?? this.lastIrrigatedAt,
+      lastPesticideAppliedAt:
+          lastPesticideAppliedAt ?? this.lastPesticideAppliedAt,
+      pesticideReapplicationDays:
+          pesticideReapplicationDays ?? this.pesticideReapplicationDays,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -2144,6 +2248,14 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     if (lastIrrigatedAt.present) {
       map['last_irrigated_at'] = Variable<DateTime>(lastIrrigatedAt.value);
     }
+    if (lastPesticideAppliedAt.present) {
+      map['last_pesticide_applied_at'] =
+          Variable<DateTime>(lastPesticideAppliedAt.value);
+    }
+    if (pesticideReapplicationDays.present) {
+      map['pesticide_reapplication_days'] =
+          Variable<int>(pesticideReapplicationDays.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -2174,6 +2286,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
           ..write('location: $location, ')
           ..write('locationId: $locationId, ')
           ..write('lastIrrigatedAt: $lastIrrigatedAt, ')
+          ..write('lastPesticideAppliedAt: $lastPesticideAppliedAt, ')
+          ..write('pesticideReapplicationDays: $pesticideReapplicationDays, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -2775,6 +2889,632 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
   }
 }
 
+class $DefensivosTableTable extends DefensivosTable
+    with TableInfo<$DefensivosTableTable, DefensivosTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DefensivosTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _categoryMeta =
+      const VerificationMeta('category');
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+      'category', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _customCategoryLabelMeta =
+      const VerificationMeta('customCategoryLabel');
+  @override
+  late final GeneratedColumn<String> customCategoryLabel =
+      GeneratedColumn<String>('custom_category_label', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _compositionMeta =
+      const VerificationMeta('composition');
+  @override
+  late final GeneratedColumn<String> composition = GeneratedColumn<String>(
+      'composition', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _carenciaDaysMeta =
+      const VerificationMeta('carenciaDays');
+  @override
+  late final GeneratedColumn<int> carenciaDays = GeneratedColumn<int>(
+      'carencia_days', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _imagePathMeta =
+      const VerificationMeta('imagePath');
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+      'image_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _imageSourceMeta =
+      const VerificationMeta('imageSource');
+  @override
+  late final GeneratedColumn<String> imageSource = GeneratedColumn<String>(
+      'image_source', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _localRevMeta =
+      const VerificationMeta('localRev');
+  @override
+  late final GeneratedColumn<int> localRev = GeneratedColumn<int>(
+      'local_rev', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        category,
+        customCategoryLabel,
+        composition,
+        carenciaDays,
+        imagePath,
+        imageSource,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        localRev
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'defensivos';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<DefensivosTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(_categoryMeta,
+          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+    }
+    if (data.containsKey('custom_category_label')) {
+      context.handle(
+          _customCategoryLabelMeta,
+          customCategoryLabel.isAcceptableOrUnknown(
+              data['custom_category_label']!, _customCategoryLabelMeta));
+    }
+    if (data.containsKey('composition')) {
+      context.handle(
+          _compositionMeta,
+          composition.isAcceptableOrUnknown(
+              data['composition']!, _compositionMeta));
+    }
+    if (data.containsKey('carencia_days')) {
+      context.handle(
+          _carenciaDaysMeta,
+          carenciaDays.isAcceptableOrUnknown(
+              data['carencia_days']!, _carenciaDaysMeta));
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(_imagePathMeta,
+          imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta));
+    }
+    if (data.containsKey('image_source')) {
+      context.handle(
+          _imageSourceMeta,
+          imageSource.isAcceptableOrUnknown(
+              data['image_source']!, _imageSourceMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    if (data.containsKey('local_rev')) {
+      context.handle(_localRevMeta,
+          localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DefensivosTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DefensivosTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      category: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}category']),
+      customCategoryLabel: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}custom_category_label']),
+      composition: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}composition']),
+      carenciaDays: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}carencia_days']),
+      imagePath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}image_path']),
+      imageSource: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}image_source']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      localRev: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
+    );
+  }
+
+  @override
+  $DefensivosTableTable createAlias(String alias) {
+    return $DefensivosTableTable(attachedDatabase, alias);
+  }
+}
+
+class DefensivosTableData extends DataClass
+    implements Insertable<DefensivosTableData> {
+  final String id;
+  final String name;
+
+  /// Stores a [DefensivoCategory] name, or null.
+  final String? category;
+
+  /// Only meaningful when [category] is [DefensivoCategory.custom] — the
+  /// free-text label the user typed for their own category.
+  final String? customCategoryLabel;
+
+  /// Composition + application instructions.
+  final String? composition;
+  final int? carenciaDays;
+  final String? imagePath;
+  final String? imageSource;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int localRev;
+  const DefensivosTableData(
+      {required this.id,
+      required this.name,
+      this.category,
+      this.customCategoryLabel,
+      this.composition,
+      this.carenciaDays,
+      this.imagePath,
+      this.imageSource,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt,
+      required this.localRev});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<String>(category);
+    }
+    if (!nullToAbsent || customCategoryLabel != null) {
+      map['custom_category_label'] = Variable<String>(customCategoryLabel);
+    }
+    if (!nullToAbsent || composition != null) {
+      map['composition'] = Variable<String>(composition);
+    }
+    if (!nullToAbsent || carenciaDays != null) {
+      map['carencia_days'] = Variable<int>(carenciaDays);
+    }
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
+    }
+    if (!nullToAbsent || imageSource != null) {
+      map['image_source'] = Variable<String>(imageSource);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['local_rev'] = Variable<int>(localRev);
+    return map;
+  }
+
+  DefensivosTableCompanion toCompanion(bool nullToAbsent) {
+    return DefensivosTableCompanion(
+      id: Value(id),
+      name: Value(name),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
+      customCategoryLabel: customCategoryLabel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customCategoryLabel),
+      composition: composition == null && nullToAbsent
+          ? const Value.absent()
+          : Value(composition),
+      carenciaDays: carenciaDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(carenciaDays),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
+      imageSource: imageSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imageSource),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      localRev: Value(localRev),
+    );
+  }
+
+  factory DefensivosTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DefensivosTableData(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      category: serializer.fromJson<String?>(json['category']),
+      customCategoryLabel:
+          serializer.fromJson<String?>(json['customCategoryLabel']),
+      composition: serializer.fromJson<String?>(json['composition']),
+      carenciaDays: serializer.fromJson<int?>(json['carenciaDays']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
+      imageSource: serializer.fromJson<String?>(json['imageSource']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      localRev: serializer.fromJson<int>(json['localRev']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'category': serializer.toJson<String?>(category),
+      'customCategoryLabel': serializer.toJson<String?>(customCategoryLabel),
+      'composition': serializer.toJson<String?>(composition),
+      'carenciaDays': serializer.toJson<int?>(carenciaDays),
+      'imagePath': serializer.toJson<String?>(imagePath),
+      'imageSource': serializer.toJson<String?>(imageSource),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'localRev': serializer.toJson<int>(localRev),
+    };
+  }
+
+  DefensivosTableData copyWith(
+          {String? id,
+          String? name,
+          Value<String?> category = const Value.absent(),
+          Value<String?> customCategoryLabel = const Value.absent(),
+          Value<String?> composition = const Value.absent(),
+          Value<int?> carenciaDays = const Value.absent(),
+          Value<String?> imagePath = const Value.absent(),
+          Value<String?> imageSource = const Value.absent(),
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent(),
+          int? localRev}) =>
+      DefensivosTableData(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        category: category.present ? category.value : this.category,
+        customCategoryLabel: customCategoryLabel.present
+            ? customCategoryLabel.value
+            : this.customCategoryLabel,
+        composition: composition.present ? composition.value : this.composition,
+        carenciaDays:
+            carenciaDays.present ? carenciaDays.value : this.carenciaDays,
+        imagePath: imagePath.present ? imagePath.value : this.imagePath,
+        imageSource: imageSource.present ? imageSource.value : this.imageSource,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        localRev: localRev ?? this.localRev,
+      );
+  DefensivosTableData copyWithCompanion(DefensivosTableCompanion data) {
+    return DefensivosTableData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      category: data.category.present ? data.category.value : this.category,
+      customCategoryLabel: data.customCategoryLabel.present
+          ? data.customCategoryLabel.value
+          : this.customCategoryLabel,
+      composition:
+          data.composition.present ? data.composition.value : this.composition,
+      carenciaDays: data.carenciaDays.present
+          ? data.carenciaDays.value
+          : this.carenciaDays,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      imageSource:
+          data.imageSource.present ? data.imageSource.value : this.imageSource,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      localRev: data.localRev.present ? data.localRev.value : this.localRev,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DefensivosTableData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('category: $category, ')
+          ..write('customCategoryLabel: $customCategoryLabel, ')
+          ..write('composition: $composition, ')
+          ..write('carenciaDays: $carenciaDays, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('imageSource: $imageSource, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      name,
+      category,
+      customCategoryLabel,
+      composition,
+      carenciaDays,
+      imagePath,
+      imageSource,
+      createdAt,
+      updatedAt,
+      deletedAt,
+      localRev);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DefensivosTableData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.category == this.category &&
+          other.customCategoryLabel == this.customCategoryLabel &&
+          other.composition == this.composition &&
+          other.carenciaDays == this.carenciaDays &&
+          other.imagePath == this.imagePath &&
+          other.imageSource == this.imageSource &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.localRev == this.localRev);
+}
+
+class DefensivosTableCompanion extends UpdateCompanion<DefensivosTableData> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String?> category;
+  final Value<String?> customCategoryLabel;
+  final Value<String?> composition;
+  final Value<int?> carenciaDays;
+  final Value<String?> imagePath;
+  final Value<String?> imageSource;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> localRev;
+  final Value<int> rowid;
+  const DefensivosTableCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.category = const Value.absent(),
+    this.customCategoryLabel = const Value.absent(),
+    this.composition = const Value.absent(),
+    this.carenciaDays = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.imageSource = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DefensivosTableCompanion.insert({
+    required String id,
+    required String name,
+    this.category = const Value.absent(),
+    this.customCategoryLabel = const Value.absent(),
+    this.composition = const Value.absent(),
+    this.carenciaDays = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.imageSource = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<DefensivosTableData> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? category,
+    Expression<String>? customCategoryLabel,
+    Expression<String>? composition,
+    Expression<int>? carenciaDays,
+    Expression<String>? imagePath,
+    Expression<String>? imageSource,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? localRev,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (category != null) 'category': category,
+      if (customCategoryLabel != null)
+        'custom_category_label': customCategoryLabel,
+      if (composition != null) 'composition': composition,
+      if (carenciaDays != null) 'carencia_days': carenciaDays,
+      if (imagePath != null) 'image_path': imagePath,
+      if (imageSource != null) 'image_source': imageSource,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (localRev != null) 'local_rev': localRev,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DefensivosTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String?>? category,
+      Value<String?>? customCategoryLabel,
+      Value<String?>? composition,
+      Value<int?>? carenciaDays,
+      Value<String?>? imagePath,
+      Value<String?>? imageSource,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? localRev,
+      Value<int>? rowid}) {
+    return DefensivosTableCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      category: category ?? this.category,
+      customCategoryLabel: customCategoryLabel ?? this.customCategoryLabel,
+      composition: composition ?? this.composition,
+      carenciaDays: carenciaDays ?? this.carenciaDays,
+      imagePath: imagePath ?? this.imagePath,
+      imageSource: imageSource ?? this.imageSource,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      localRev: localRev ?? this.localRev,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (customCategoryLabel.present) {
+      map['custom_category_label'] =
+          Variable<String>(customCategoryLabel.value);
+    }
+    if (composition.present) {
+      map['composition'] = Variable<String>(composition.value);
+    }
+    if (carenciaDays.present) {
+      map['carencia_days'] = Variable<int>(carenciaDays.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
+    if (imageSource.present) {
+      map['image_source'] = Variable<String>(imageSource.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (localRev.present) {
+      map['local_rev'] = Variable<int>(localRev.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DefensivosTableCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('category: $category, ')
+          ..write('customCategoryLabel: $customCategoryLabel, ')
+          ..write('composition: $composition, ')
+          ..write('carenciaDays: $carenciaDays, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('imageSource: $imageSource, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncMetaTableTable extends SyncMetaTable
     with TableInfo<$SyncMetaTableTable, SyncMetaTableData> {
   @override
@@ -3197,6 +3937,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocationsTableTable locationsTable = $LocationsTableTable(this);
   late final $PlantsTableTable plantsTable = $PlantsTableTable(this);
   late final $EntriesTableTable entriesTable = $EntriesTableTable(this);
+  late final $DefensivosTableTable defensivosTable =
+      $DefensivosTableTable(this);
   late final $SyncMetaTableTable syncMetaTable = $SyncMetaTableTable(this);
   late final $SyncCursorsTableTable syncCursorsTable =
       $SyncCursorsTableTable(this);
@@ -3210,6 +3952,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         locationsTable,
         plantsTable,
         entriesTable,
+        defensivosTable,
         syncMetaTable,
         syncCursorsTable
       ];
@@ -4211,6 +4954,8 @@ typedef $$PlantsTableTableCreateCompanionBuilder = PlantsTableCompanion
   Value<String?> location,
   Value<String?> locationId,
   Value<DateTime?> lastIrrigatedAt,
+  Value<DateTime?> lastPesticideAppliedAt,
+  Value<int?> pesticideReapplicationDays,
   required DateTime createdAt,
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
@@ -4228,6 +4973,8 @@ typedef $$PlantsTableTableUpdateCompanionBuilder = PlantsTableCompanion
   Value<String?> location,
   Value<String?> locationId,
   Value<DateTime?> lastIrrigatedAt,
+  Value<DateTime?> lastPesticideAppliedAt,
+  Value<int?> pesticideReapplicationDays,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
@@ -4324,6 +5071,14 @@ class $$PlantsTableTableFilterComposer
 
   ColumnFilters<DateTime> get lastIrrigatedAt => $composableBuilder(
       column: $table.lastIrrigatedAt,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastPesticideAppliedAt => $composableBuilder(
+      column: $table.lastPesticideAppliedAt,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get pesticideReapplicationDays => $composableBuilder(
+      column: $table.pesticideReapplicationDays,
       builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
@@ -4450,6 +5205,14 @@ class $$PlantsTableTableOrderingComposer
       column: $table.lastIrrigatedAt,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<DateTime> get lastPesticideAppliedAt => $composableBuilder(
+      column: $table.lastPesticideAppliedAt,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get pesticideReapplicationDays => $composableBuilder(
+      column: $table.pesticideReapplicationDays,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -4549,6 +5312,12 @@ class $$PlantsTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get lastIrrigatedAt => $composableBuilder(
       column: $table.lastIrrigatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastPesticideAppliedAt => $composableBuilder(
+      column: $table.lastPesticideAppliedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get pesticideReapplicationDays => $composableBuilder(
+      column: $table.pesticideReapplicationDays, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -4680,6 +5449,8 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<String?> location = const Value.absent(),
             Value<String?> locationId = const Value.absent(),
             Value<DateTime?> lastIrrigatedAt = const Value.absent(),
+            Value<DateTime?> lastPesticideAppliedAt = const Value.absent(),
+            Value<int?> pesticideReapplicationDays = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -4696,6 +5467,8 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             location: location,
             locationId: locationId,
             lastIrrigatedAt: lastIrrigatedAt,
+            lastPesticideAppliedAt: lastPesticideAppliedAt,
+            pesticideReapplicationDays: pesticideReapplicationDays,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -4712,6 +5485,8 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<String?> location = const Value.absent(),
             Value<String?> locationId = const Value.absent(),
             Value<DateTime?> lastIrrigatedAt = const Value.absent(),
+            Value<DateTime?> lastPesticideAppliedAt = const Value.absent(),
+            Value<int?> pesticideReapplicationDays = const Value.absent(),
             required DateTime createdAt,
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -4728,6 +5503,8 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             location: location,
             locationId: locationId,
             lastIrrigatedAt: lastIrrigatedAt,
+            lastPesticideAppliedAt: lastPesticideAppliedAt,
+            pesticideReapplicationDays: pesticideReapplicationDays,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -5214,6 +5991,288 @@ typedef $$EntriesTableTableProcessedTableManager = ProcessedTableManager<
     (EntriesTableData, $$EntriesTableTableReferences),
     EntriesTableData,
     PrefetchHooks Function({bool plantId})>;
+typedef $$DefensivosTableTableCreateCompanionBuilder = DefensivosTableCompanion
+    Function({
+  required String id,
+  required String name,
+  Value<String?> category,
+  Value<String?> customCategoryLabel,
+  Value<String?> composition,
+  Value<int?> carenciaDays,
+  Value<String?> imagePath,
+  Value<String?> imageSource,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
+  Value<int> rowid,
+});
+typedef $$DefensivosTableTableUpdateCompanionBuilder = DefensivosTableCompanion
+    Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String?> category,
+  Value<String?> customCategoryLabel,
+  Value<String?> composition,
+  Value<int?> carenciaDays,
+  Value<String?> imagePath,
+  Value<String?> imageSource,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
+  Value<int> rowid,
+});
+
+class $$DefensivosTableTableFilterComposer
+    extends Composer<_$AppDatabase, $DefensivosTableTable> {
+  $$DefensivosTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get customCategoryLabel => $composableBuilder(
+      column: $table.customCategoryLabel,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get composition => $composableBuilder(
+      column: $table.composition, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get carenciaDays => $composableBuilder(
+      column: $table.carenciaDays, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imageSource => $composableBuilder(
+      column: $table.imageSource, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnFilters(column));
+}
+
+class $$DefensivosTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $DefensivosTableTable> {
+  $$DefensivosTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get customCategoryLabel => $composableBuilder(
+      column: $table.customCategoryLabel,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get composition => $composableBuilder(
+      column: $table.composition, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get carenciaDays => $composableBuilder(
+      column: $table.carenciaDays,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get imageSource => $composableBuilder(
+      column: $table.imageSource, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnOrderings(column));
+}
+
+class $$DefensivosTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DefensivosTableTable> {
+  $$DefensivosTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get customCategoryLabel => $composableBuilder(
+      column: $table.customCategoryLabel, builder: (column) => column);
+
+  GeneratedColumn<String> get composition => $composableBuilder(
+      column: $table.composition, builder: (column) => column);
+
+  GeneratedColumn<int> get carenciaDays => $composableBuilder(
+      column: $table.carenciaDays, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
+  GeneratedColumn<String> get imageSource => $composableBuilder(
+      column: $table.imageSource, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get localRev =>
+      $composableBuilder(column: $table.localRev, builder: (column) => column);
+}
+
+class $$DefensivosTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $DefensivosTableTable,
+    DefensivosTableData,
+    $$DefensivosTableTableFilterComposer,
+    $$DefensivosTableTableOrderingComposer,
+    $$DefensivosTableTableAnnotationComposer,
+    $$DefensivosTableTableCreateCompanionBuilder,
+    $$DefensivosTableTableUpdateCompanionBuilder,
+    (
+      DefensivosTableData,
+      BaseReferences<_$AppDatabase, $DefensivosTableTable, DefensivosTableData>
+    ),
+    DefensivosTableData,
+    PrefetchHooks Function()> {
+  $$DefensivosTableTableTableManager(
+      _$AppDatabase db, $DefensivosTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DefensivosTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DefensivosTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DefensivosTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String?> category = const Value.absent(),
+            Value<String?> customCategoryLabel = const Value.absent(),
+            Value<String?> composition = const Value.absent(),
+            Value<int?> carenciaDays = const Value.absent(),
+            Value<String?> imagePath = const Value.absent(),
+            Value<String?> imageSource = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DefensivosTableCompanion(
+            id: id,
+            name: name,
+            category: category,
+            customCategoryLabel: customCategoryLabel,
+            composition: composition,
+            carenciaDays: carenciaDays,
+            imagePath: imagePath,
+            imageSource: imageSource,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            Value<String?> category = const Value.absent(),
+            Value<String?> customCategoryLabel = const Value.absent(),
+            Value<String?> composition = const Value.absent(),
+            Value<int?> carenciaDays = const Value.absent(),
+            Value<String?> imagePath = const Value.absent(),
+            Value<String?> imageSource = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DefensivosTableCompanion.insert(
+            id: id,
+            name: name,
+            category: category,
+            customCategoryLabel: customCategoryLabel,
+            composition: composition,
+            carenciaDays: carenciaDays,
+            imagePath: imagePath,
+            imageSource: imageSource,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$DefensivosTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $DefensivosTableTable,
+    DefensivosTableData,
+    $$DefensivosTableTableFilterComposer,
+    $$DefensivosTableTableOrderingComposer,
+    $$DefensivosTableTableAnnotationComposer,
+    $$DefensivosTableTableCreateCompanionBuilder,
+    $$DefensivosTableTableUpdateCompanionBuilder,
+    (
+      DefensivosTableData,
+      BaseReferences<_$AppDatabase, $DefensivosTableTable, DefensivosTableData>
+    ),
+    DefensivosTableData,
+    PrefetchHooks Function()>;
 typedef $$SyncMetaTableTableCreateCompanionBuilder = SyncMetaTableCompanion
     Function({
   Value<int> id,
@@ -5497,6 +6556,8 @@ class $AppDatabaseManager {
       $$PlantsTableTableTableManager(_db, _db.plantsTable);
   $$EntriesTableTableTableManager get entriesTable =>
       $$EntriesTableTableTableManager(_db, _db.entriesTable);
+  $$DefensivosTableTableTableManager get defensivosTable =>
+      $$DefensivosTableTableTableManager(_db, _db.defensivosTable);
   $$SyncMetaTableTableTableManager get syncMetaTable =>
       $$SyncMetaTableTableTableManager(_db, _db.syncMetaTable);
   $$SyncCursorsTableTableTableManager get syncCursorsTable =>

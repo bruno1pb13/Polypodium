@@ -89,6 +89,7 @@ class DataImportService {
     var applied = 0;
     var skipped = 0;
     final irrigatedPlantIds = <String>{};
+    final pesticidePlantIds = <String>{};
 
     try {
       await _db.transaction(() async {
@@ -114,6 +115,13 @@ class DataImportService {
             skipped++;
           }
         }
+        for (final row in rowsOf('defensivos')) {
+          if (await _applyDefensivo(row)) {
+            applied++;
+          } else {
+            skipped++;
+          }
+        }
         for (final row in rowsOf('plants')) {
           if (await _applyPlant(row)) {
             applied++;
@@ -128,6 +136,10 @@ class DataImportService {
                 row['type'] == EntryType.irrigation.name) {
               irrigatedPlantIds.add(row['plantId'] as String);
             }
+            if (row['deletedAt'] == null &&
+                row['type'] == EntryType.pesticide.name) {
+              pesticidePlantIds.add(row['plantId'] as String);
+            }
           } else {
             skipped++;
           }
@@ -141,6 +153,19 @@ class DataImportService {
           final lastDate = await _db.entriesDao.getLastIrrigationDate(plantId);
           final rev = await _db.syncMetaDao.nextRev();
           await _db.plantsDao.updateLastIrrigated(plantId, lastDate,
+              updatedAt: DateTime.now(), rev: rev);
+        }
+        for (final plantId in pesticidePlantIds) {
+          if (await _db.plantsDao.getById(plantId) == null) continue;
+          final last = await _db.entriesDao
+              .getLastEntryOfType(plantId, EntryType.pesticide);
+          final recurrenceDays = last == null
+              ? null
+              : (jsonDecode(last.extraData ?? '{}')
+                  as Map<String, dynamic>)['recurrenceDays'] as int?;
+          final rev = await _db.syncMetaDao.nextRev();
+          await _db.plantsDao.updateLastPesticideApplication(
+              plantId, last?.date, recurrenceDays,
               updatedAt: DateTime.now(), rev: rev);
         }
       });
@@ -306,6 +331,11 @@ class DataImportService {
       lastIrrigatedAt: Value(row['lastIrrigatedAt'] != null
           ? DateTime.parse(row['lastIrrigatedAt'] as String)
           : null),
+      lastPesticideAppliedAt: Value(row['lastPesticideAppliedAt'] != null
+          ? DateTime.parse(row['lastPesticideAppliedAt'] as String)
+          : null),
+      pesticideReapplicationDays:
+          Value(row['pesticideReapplicationDays'] as int?),
       createdAt: DateTime.parse(row['createdAt'] as String),
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),
@@ -338,6 +368,31 @@ class DataImportService {
       type: EntryType.values.byName(row['type'] as String),
       numericValue: Value((row['numericValue'] as num?)?.toDouble()),
       extraData: Value(row['extraData'] as String?),
+      createdAt: DateTime.parse(row['createdAt'] as String),
+      updatedAt: updatedAt,
+      deletedAt: Value(_deletedAt(row)),
+      localRev: Value(rev),
+    ));
+    return true;
+  }
+
+  Future<bool> _applyDefensivo(Map<String, dynamic> row) async {
+    final existing = await _db.defensivosDao.getDefensivoById(row['id'] as String);
+    final updatedAt = _updatedAt(row);
+    if (!shouldApplyRemote(
+        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: updatedAt)) {
+      return false;
+    }
+    final rev = await _db.syncMetaDao.nextRev();
+    await _db.defensivosDao.insertDefensivo(DefensivosTableCompanion.insert(
+      id: row['id'] as String,
+      name: row['name'] as String,
+      category: Value(row['category'] as String?),
+      customCategoryLabel: Value(row['customCategoryLabel'] as String?),
+      composition: Value(row['composition'] as String?),
+      carenciaDays: Value(row['carenciaDays'] as int?),
+      imagePath: Value(row['imagePath'] as String?),
+      imageSource: Value(row['imageSource'] as String?),
       createdAt: DateTime.parse(row['createdAt'] as String),
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),

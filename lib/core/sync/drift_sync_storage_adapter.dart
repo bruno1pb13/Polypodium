@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
@@ -23,6 +25,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
     'location',
     'plant',
     'entry',
+    'defensivo',
   ];
 
   @override
@@ -59,6 +62,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
         await _applyLocation(change);
       case 'soil':
         await _applySoil(change);
+      case 'defensivo':
+        await _applyDefensivo(change);
     }
   }
 
@@ -77,6 +82,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
         return _db.locationsDao.changesSince(since, limit: limit);
       case 'soil':
         return _db.soilsDao.changesSince(since, limit: limit);
+      case 'defensivo':
+        return _db.defensivosDao.changesSince(since, limit: limit);
       default:
         throw ArgumentError('Unknown entityType: $entityType');
     }
@@ -120,6 +127,9 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'location': r.location,
           'locationId': r.locationId,
           'lastIrrigatedAt': r.lastIrrigatedAt?.toIso8601String(),
+          'lastPesticideAppliedAt':
+              r.lastPesticideAppliedAt?.toIso8601String(),
+          'pesticideReapplicationDays': r.pesticideReapplicationDays,
           'createdAt': r.createdAt.toIso8601String(),
         };
       case 'entry':
@@ -163,6 +173,23 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'id': r.id,
           'name': r.name,
           'composition': r.composition,
+          'imagePath': r.imagePath,
+          'imageSource': r.imageSource,
+          'createdAt': r.createdAt.toIso8601String(),
+        };
+      case 'defensivo':
+        final r = row as DefensivosTableData;
+        entityId = r.id;
+        updatedAt = r.updatedAt;
+        deletedAt = r.deletedAt;
+        rev = r.localRev;
+        payload = {
+          'id': r.id,
+          'name': r.name,
+          'category': r.category,
+          'customCategoryLabel': r.customCategoryLabel,
+          'composition': r.composition,
+          'carenciaDays': r.carenciaDays,
           'imagePath': r.imagePath,
           'imageSource': r.imageSource,
           'createdAt': r.createdAt.toIso8601String(),
@@ -225,6 +252,11 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       lastIrrigatedAt: Value(p['lastIrrigatedAt'] != null
           ? DateTime.parse(p['lastIrrigatedAt'] as String)
           : null),
+      lastPesticideAppliedAt: Value(p['lastPesticideAppliedAt'] != null
+          ? DateTime.parse(p['lastPesticideAppliedAt'] as String)
+          : null),
+      pesticideReapplicationDays:
+          Value(p['pesticideReapplicationDays'] as int?),
       createdAt: DateTime.parse(p['createdAt'] as String),
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),
@@ -254,8 +286,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       localRev: const Value(0),
     ));
 
-    if (change.deletedAt == null &&
-        EntryType.values.byName(p['type'] as String) == EntryType.irrigation) {
+    final entryType = EntryType.values.byName(p['type'] as String);
+    if (change.deletedAt == null && entryType == EntryType.irrigation) {
       // Recomputing lastIrrigatedAt from entries is a locally-derived fact,
       // not itself remote data -- stamp it as a fresh local write (own
       // rev/updatedAt) so it propagates on the next push, rather than
@@ -265,6 +297,23 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       await _db.transaction(() async {
         final rev = await _db.syncMetaDao.nextRev();
         await _db.plantsDao.updateLastIrrigated(plantId, lastDate,
+            updatedAt: DateTime.now(), rev: rev);
+      });
+    } else if (change.deletedAt == null &&
+        entryType == EntryType.pesticide) {
+      // Same idea as the irrigation branch above, mirroring
+      // PlantsRepository.refreshPesticideStatus.
+      final plantId = p['plantId'] as String;
+      final last = await _db.entriesDao
+          .getLastEntryOfType(plantId, EntryType.pesticide);
+      final recurrenceDays = last == null
+          ? null
+          : (jsonDecode(last.extraData ?? '{}')
+              as Map<String, dynamic>)['recurrenceDays'] as int?;
+      await _db.transaction(() async {
+        final rev = await _db.syncMetaDao.nextRev();
+        await _db.plantsDao.updateLastPesticideApplication(
+            plantId, last?.date, recurrenceDays,
             updatedAt: DateTime.now(), rev: rev);
       });
     }
@@ -309,6 +358,29 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       localRev: const Value(0),
       // A soil arriving via sync is never a fresh local seed.
       isSeeded: const Value(false),
+    ));
+  }
+
+  Future<void> _applyDefensivo(EntityChange change) async {
+    final existing = await _db.defensivosDao.getDefensivoById(change.entityId);
+    if (!shouldApplyRemote(
+        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
+      return;
+    }
+    final p = change.payload;
+    await _db.defensivosDao.insertDefensivo(DefensivosTableCompanion.insert(
+      id: change.entityId,
+      name: p['name'] as String,
+      category: Value(p['category'] as String?),
+      customCategoryLabel: Value(p['customCategoryLabel'] as String?),
+      composition: Value(p['composition'] as String?),
+      carenciaDays: Value(p['carenciaDays'] as int?),
+      imagePath: Value(p['imagePath'] as String?),
+      imageSource: Value(p['imageSource'] as String?),
+      createdAt: DateTime.parse(p['createdAt'] as String),
+      updatedAt: change.updatedAt,
+      deletedAt: Value(change.deletedAt),
+      localRev: const Value(0),
     ));
   }
 }

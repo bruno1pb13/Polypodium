@@ -28,8 +28,19 @@ enum EntryType {
   height,
   chlorosis,
   pest,
+  pesticide,
   other,
   history,
+}
+
+enum DefensivoCategory {
+  insecticide,
+  fungicide,
+  herbicide,
+  acaricide,
+  bactericide,
+  nematicide,
+  custom,
 }
 
 enum PlantSortOption {
@@ -49,6 +60,12 @@ enum SpeciesSortOption {
 }
 
 enum SoilSortOption {
+  nameAZ,
+  nameZA,
+  dateAdded,
+}
+
+enum DefensivoSortOption {
   nameAZ,
   nameZA,
   dateAdded,
@@ -192,6 +209,7 @@ extension EntryTypeX on EntryType {
         EntryType.height => l10n.entryTypeHeight,
         EntryType.chlorosis => l10n.entryTypeChlorosis,
         EntryType.pest => l10n.entryTypePest,
+        EntryType.pesticide => l10n.entryTypePesticide,
         EntryType.other => l10n.entryTypeOther,
         EntryType.history => l10n.entryTypeHistory,
       };
@@ -204,7 +222,20 @@ extension EntryTypeX on EntryType {
         EntryType.height => '📏',
         EntryType.chlorosis => '🟡',
         EntryType.pest => '🐛',
+        EntryType.pesticide => '🧪',
         EntryType.other => '📝',
         EntryType.history => '📜',
+      };
+}
+
+extension DefensivoCategoryX on DefensivoCategory {
+  String label(AppLocalizations l10n) => switch (this) {
+        DefensivoCategory.insecticide => l10n.defensivoCategoryInsecticide,
+        DefensivoCategory.fungicide => l10n.defensivoCategoryFungicide,
+        DefensivoCategory.herbicide => l10n.defensivoCategoryHerbicide,
+        DefensivoCategory.acaricide => l10n.defensivoCategoryAcaricide,
+        DefensivoCategory.bactericide => l10n.defensivoCategoryBactericide,
+        DefensivoCategory.nematicide => l10n.defensivoCategoryNematicide,
+        DefensivoCategory.custom => l10n.defensivoCategoryCustom,
       };
 }

@@ -27,10 +27,17 @@ class NotificationService implements INotificationService {
 
   static const irrigationCheckTask = 'irrigation-check';
   static const _channelId = 'polypodium_irrigation';
+  static const _pesticideChannelId = 'polypodium_defensivo';
 
   /// Groups every irrigation reminder in the notification shade (Android
   /// bundles by groupKey; iOS threads by threadIdentifier).
   static const _groupKey = 'polypodium_irrigation_group';
+  static const _pesticideGroupKey = 'polypodium_defensivo_group';
+
+  /// Notification ids are namespaced by "kind" (added to the date-based id)
+  /// so an irrigation reminder and a pesticide reminder due on the same
+  /// calendar date never collide/overwrite each other.
+  static const _pesticideIdOffset = 1000000000;
 
   /// SharedPreferences keys — shared with SettingsRepository, which cannot be
   /// imported here (it depends on this service).
@@ -79,6 +86,13 @@ class NotificationService implements INotificationService {
         AndroidNotificationChannel(
           _channelId,
           _l10n.irrigationChannelName,
+          importance: Importance.defaultImportance,
+        ),
+      );
+      await androidPlugin?.createNotificationChannel(
+        AndroidNotificationChannel(
+          _pesticideChannelId,
+          _l10n.pesticideChannelName,
           importance: Importance.defaultImportance,
         ),
       );
@@ -155,6 +169,9 @@ class NotificationService implements INotificationService {
     final now = tz.TZDateTime.now(tz.local);
     final groups =
         groupPlantsByDueDate(plants, now.toLocal(), hour: hour, minute: minute);
+    final pesticideGroups = groupPlantsByPesticideDueDate(
+        plants, now.toLocal(),
+        hour: hour, minute: minute);
 
     final l10n = _l10n;
     for (final entry in groups.entries) {
@@ -192,6 +209,40 @@ class NotificationService implements INotificationService {
         // No matchDateTimeComponents — one-shot; the schedule is rebuilt after
         // every irrigation/save/delete/sync pull and by the 12 h background
         // check.
+      );
+    }
+
+    for (final entry in pesticideGroups.entries) {
+      final date = entry.key;
+      final nicknames = entry.value;
+      final body = switch (nicknames.length) {
+        1 => l10n.pesticideNotificationBody(nicknames.single),
+        2 => l10n.pesticideNotificationBodyMany(
+            nicknames.length, nicknames.join(', ')),
+        _ => l10n.pesticideNotificationBodyCount(nicknames.length),
+      };
+
+      await _plugin.zonedSchedule(
+        _dateNotificationId(date, kindOffset: _pesticideIdOffset),
+        l10n.pesticideNotificationTitle,
+        body,
+        tz.TZDateTime(tz.local, date.year, date.month, date.day, hour, minute),
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            _pesticideChannelId,
+            l10n.pesticideChannelName,
+            channelDescription: l10n.pesticideChannelDescription,
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+            groupKey: _pesticideGroupKey,
+            styleInformation: BigTextStyleInformation(body),
+          ),
+          iOS: const DarwinNotificationDetails(
+              threadIdentifier: _pesticideChannelId),
+        ),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
     }
   }
@@ -238,6 +289,8 @@ class NotificationService implements INotificationService {
           location: row.location,
           locationId: row.locationId,
           lastIrrigatedAt: row.lastIrrigatedAt,
+          lastPesticideAppliedAt: row.lastPesticideAppliedAt,
+          pesticideReapplicationDays: row.pesticideReapplicationDays,
           createdAt: row.createdAt,
         );
         final species = SpeciesModel(
@@ -313,9 +366,36 @@ class NotificationService implements INotificationService {
     return groups;
   }
 
+  /// Groups the plants due for pesticide reapplication on the same date,
+  /// mirroring [groupPlantsByDueDate]. Plants without an active pesticide
+  /// reminder (no recurrence set on their most recent 'pesticide' entry) are
+  /// skipped.
+  @visibleForTesting
+  static Map<DateTime, List<String>> groupPlantsByPesticideDueDate(
+    List<PlantWithSpecies> plants,
+    DateTime now, {
+    int hour = 9,
+    int minute = 0,
+  }) {
+    final groups = <DateTime, List<String>>{};
+    for (final item in plants) {
+      final frequencyDays = item.plant.pesticideReapplicationDays;
+      final lastApplied = item.plant.lastPesticideAppliedAt;
+      if (frequencyDays == null || lastApplied == null) continue;
+
+      final scheduled = computeNextIrrigationDate(
+          lastApplied, frequencyDays, now,
+          hour: hour, minute: minute);
+      final date = DateTime(scheduled.year, scheduled.month, scheduled.day);
+      groups.putIfAbsent(date, () => []).add(item.plant.nickname);
+    }
+    return groups;
+  }
+
   /// One deterministic id per due date (e.g. 2026-07-16 → 20260716), so a
   /// reschedule for the same day replaces the pending notification instead
-  /// of stacking a new one.
-  static int _dateNotificationId(DateTime date) =>
-      date.year * 10000 + date.month * 100 + date.day;
+  /// of stacking a new one. [kindOffset] namespaces ids across reminder
+  /// kinds (irrigation vs. pesticide) so they never collide.
+  static int _dateNotificationId(DateTime date, {int kindOffset = 0}) =>
+      kindOffset + date.year * 10000 + date.month * 100 + date.day;
 }

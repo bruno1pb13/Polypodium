@@ -13,6 +13,11 @@ class PlantModel {
   final String? location;
   final String? locationId;
   final DateTime? lastIrrigatedAt;
+
+  /// Derived from the most recent 'pesticide' entry — see
+  /// PlantsRepository.refreshPesticideStatus.
+  final DateTime? lastPesticideAppliedAt;
+  final int? pesticideReapplicationDays;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -28,6 +33,8 @@ class PlantModel {
     this.location,
     this.locationId,
     this.lastIrrigatedAt,
+    this.lastPesticideAppliedAt,
+    this.pesticideReapplicationDays,
     required this.createdAt,
     DateTime? updatedAt,
     this.deletedAt,
@@ -44,6 +51,8 @@ class PlantModel {
     Object? location = _sentinel,
     Object? locationId = _sentinel,
     Object? lastIrrigatedAt = _sentinel,
+    Object? lastPesticideAppliedAt = _sentinel,
+    Object? pesticideReapplicationDays = _sentinel,
     DateTime? createdAt,
     DateTime? updatedAt,
     Object? deletedAt = _sentinel,
@@ -64,6 +73,12 @@ class PlantModel {
         lastIrrigatedAt: lastIrrigatedAt == _sentinel
             ? this.lastIrrigatedAt
             : lastIrrigatedAt as DateTime?,
+        lastPesticideAppliedAt: lastPesticideAppliedAt == _sentinel
+            ? this.lastPesticideAppliedAt
+            : lastPesticideAppliedAt as DateTime?,
+        pesticideReapplicationDays: pesticideReapplicationDays == _sentinel
+            ? this.pesticideReapplicationDays
+            : pesticideReapplicationDays as int?,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt == _sentinel ? this.deletedAt : deletedAt as DateTime?,
@@ -110,5 +125,24 @@ class PlantWithSpecies {
     final freq = effectiveFrequencyDays;
     if (freq == null) return null;
     return daysSinceIrrigation - freq;
+  }
+
+  /// Whether the most recent pesticide application requested a reapplication
+  /// reminder that is now due (or overdue).
+  bool get needsPesticideReapplication {
+    final freq = plant.pesticideReapplicationDays;
+    final lastApplied = plant.lastPesticideAppliedAt;
+    if (freq == null || lastApplied == null) return false;
+    return pesticideDaysRelative != null && pesticideDaysRelative! >= 0;
+  }
+
+  /// Positive = days overdue, negative = days until due, null when there's
+  /// no active pesticide reminder.
+  int? get pesticideDaysRelative {
+    final freq = plant.pesticideReapplicationDays;
+    final lastApplied = plant.lastPesticideAppliedAt;
+    if (freq == null || lastApplied == null) return null;
+    final daysSinceApplied = DateTime.now().difference(lastApplied).inDays;
+    return daysSinceApplied - freq;
   }
 }

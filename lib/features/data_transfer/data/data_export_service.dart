@@ -37,6 +37,7 @@ class DataExportService {
     final locations = await _db.select(_db.locationsTable).get();
     final plants = await _db.select(_db.plantsTable).get();
     final entries = await _db.select(_db.entriesTable).get();
+    final defensivos = await _db.select(_db.defensivosTable).get();
 
     final archive = Archive();
     final photoNames = <String>{};
@@ -132,12 +133,31 @@ class DataExportService {
               'location': r.location,
               'locationId': r.locationId,
               'lastIrrigatedAt': r.lastIrrigatedAt?.toIso8601String(),
+              'lastPesticideAppliedAt':
+                  r.lastPesticideAppliedAt?.toIso8601String(),
+              'pesticideReapplicationDays': r.pesticideReapplicationDays,
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),
             }
         ],
         'entries': entryMaps,
+        'defensivos': [
+          for (final r in defensivos)
+            {
+              'id': r.id,
+              'name': r.name,
+              'category': r.category,
+              'customCategoryLabel': r.customCategoryLabel,
+              'composition': r.composition,
+              'carenciaDays': r.carenciaDays,
+              'imagePath': r.imagePath,
+              'imageSource': r.imageSource,
+              'createdAt': r.createdAt.toIso8601String(),
+              'updatedAt': r.updatedAt.toIso8601String(),
+              'deletedAt': r.deletedAt?.toIso8601String(),
+            }
+        ],
       },
     };
 
