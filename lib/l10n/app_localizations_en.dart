@@ -664,7 +664,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pestBadge => 'Pest';
 
   @override
-  String get pesticideReapplyBadge => 'Reapply';
+  String get pesticideActiveControlBadge => 'Pest control';
+
+  @override
+  String nextPesticideApplication(String date) {
+    return 'Next application: $date';
+  }
+
+  @override
+  String get needsPesticideApplication => 'Apply pesticide!';
+
+  @override
+  String get pesticideApproachingTitle => 'Pesticide due soon';
+
+  @override
+  String nextPesticideInDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Next application in $days days',
+      one: 'Next application in $days day',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get entryTypeIrrigation => 'Watering';

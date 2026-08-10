@@ -159,6 +159,10 @@ class PlantDetailScreen extends ConsumerWidget {
                       SliverToBoxAdapter(
                         child: _IrrigationStatusCard(pws: pws),
                       ),
+                    if (pws != null)
+                      SliverToBoxAdapter(
+                        child: _PesticideStatusCard(pws: pws),
+                      ),
                     SliverToBoxAdapter(
                       child: _ViewSelector(plantId: plantId),
                     ),
@@ -673,15 +677,102 @@ class _IrrigationStatusCard extends ConsumerWidget {
     final overdue = pws.needsWatering;
     final days = pws.daysRelativeToSchedule;
 
-    if (days == null) return const SizedBox.shrink();
+    // Only worth a card once it's due (today) or overdue; while there's
+    // still time left, the card stays hidden.
+    if (days == null || !overdue) return const SizedBox.shrink();
+
+    final cardColor = transparencyEnabled
+        ? colorScheme.errorContainer.withValues(alpha: 0.8)
+        : colorScheme.errorContainer;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: transparencyEnabled
+              ? ImageFilter.blur(sigmaX: 10, sigmaY: 10)
+              : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.water_drop, color: colorScheme.error),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.l10n.needsWater,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.onErrorContainer,
+                        ),
+                      ),
+                      Text(
+                        pws.plant.lastIrrigatedAt == null
+                            ? context.l10n.lastWateringNotRecorded
+                            : context.l10n.daysOverdue(days),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: colorScheme.onErrorContainer,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Pesticide reapplication status, mirroring [_IrrigationStatusCard]. Unlike
+/// irrigation, this card only appears when there's actually something to
+/// flag — overdue or approaching within
+/// [PlantWithSpecies.pesticideApproachingWindowDays] — and stays hidden the
+/// rest of the time, since a healthy reminder that's still far out isn't
+/// worth a permanent card.
+class _PesticideStatusCard extends ConsumerWidget {
+  final PlantWithSpecies pws;
+
+  const _PesticideStatusCard({required this.pws});
+
+  static const _approachingContainer = Color(0xFFFEF3C7);
+  static const _approachingAccent = Color(0xFFD97706);
+  static const _approachingOnContainer = Color(0xFF78350F);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final overdue = pws.needsPesticideReapplication;
+    final approaching = pws.pesticideReapplicationApproaching;
+    final days = pws.pesticideDaysRelative;
+
+    if (!overdue && !approaching || days == null) {
+      return const SizedBox.shrink();
+    }
 
     final cardColor = overdue
         ? (transparencyEnabled
             ? colorScheme.errorContainer.withValues(alpha: 0.8)
             : colorScheme.errorContainer)
         : (transparencyEnabled
-            ? colorScheme.primaryContainer.withValues(alpha: 0.6)
-            : colorScheme.primaryContainer);
+            ? _approachingContainer.withValues(alpha: 0.6)
+            : _approachingContainer);
+
+    final iconColor = overdue ? colorScheme.error : _approachingAccent;
+    final textColor =
+        overdue ? colorScheme.onErrorContainer : _approachingOnContainer;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -700,8 +791,8 @@ class _IrrigationStatusCard extends ConsumerWidget {
             child: Row(
               children: [
                 Icon(
-                  overdue ? Icons.water_drop : Icons.check_circle_outline,
-                  color: overdue ? colorScheme.error : colorScheme.primary,
+                  overdue ? Icons.science : Icons.science_outlined,
+                  color: iconColor,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -710,27 +801,18 @@ class _IrrigationStatusCard extends ConsumerWidget {
                     children: [
                       Text(
                         overdue
-                            ? context.l10n.needsWater
-                            : context.l10n.wateringUpToDate,
+                            ? context.l10n.needsPesticideApplication
+                            : context.l10n.pesticideApproachingTitle,
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          color: overdue
-                              ? colorScheme.onErrorContainer
-                              : colorScheme.onPrimaryContainer,
+                          color: textColor,
                         ),
                       ),
                       Text(
-                        pws.plant.lastIrrigatedAt == null
-                            ? context.l10n.lastWateringNotRecorded
-                            : overdue
-                                ? context.l10n.daysOverdue(days)
-                                : context.l10n.nextWateringInDays(-days),
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: overdue
-                              ? colorScheme.onErrorContainer
-                              : colorScheme.onPrimaryContainer,
-                        ),
+                        overdue
+                            ? context.l10n.daysOverdue(days)
+                            : context.l10n.nextPesticideInDays(-days),
+                        style: TextStyle(fontSize: 13, color: textColor),
                       ),
                     ],
                   ),

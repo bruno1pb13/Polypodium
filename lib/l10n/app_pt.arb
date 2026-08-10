@@ -206,7 +206,11 @@
   "severitySevere": "Severa",
   "severityActive": "Ativa",
   "pestBadge": "Praga",
-  "pesticideReapplyBadge": "Reaplicar",
+  "pesticideActiveControlBadge": "Em controle",
+  "nextPesticideApplication": "Próxima aplicação: {date}",
+  "needsPesticideApplication": "Aplicar defensivo!",
+  "pesticideApproachingTitle": "Defensivo em breve",
+  "nextPesticideInDays": "{days, plural, one{Próxima aplicação em {days} dia} other{Próxima aplicação em {days} dias}}",
 
   "entryTypeIrrigation": "Irrigação",
   "entryTypeFertilizer": "Fertilização",

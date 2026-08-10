@@ -670,7 +670,29 @@ class AppLocalizationsPt extends AppLocalizations {
   String get pestBadge => 'Praga';
 
   @override
-  String get pesticideReapplyBadge => 'Reaplicar';
+  String get pesticideActiveControlBadge => 'Em controle';
+
+  @override
+  String nextPesticideApplication(String date) {
+    return 'Próxima aplicação: $date';
+  }
+
+  @override
+  String get needsPesticideApplication => 'Aplicar defensivo!';
+
+  @override
+  String get pesticideApproachingTitle => 'Defensivo em breve';
+
+  @override
+  String nextPesticideInDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Próxima aplicação em $days dias',
+      one: 'Próxima aplicação em $days dia',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get entryTypeIrrigation => 'Irrigação';
