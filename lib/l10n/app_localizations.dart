@@ -1226,11 +1226,35 @@ abstract class AppLocalizations {
   /// **'Pest'**
   String get pestBadge;
 
-  /// No description provided for @pesticideReapplyBadge.
+  /// No description provided for @pesticideActiveControlBadge.
   ///
   /// In en, this message translates to:
-  /// **'Reapply'**
-  String get pesticideReapplyBadge;
+  /// **'Pest control'**
+  String get pesticideActiveControlBadge;
+
+  /// No description provided for @nextPesticideApplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Next application: {date}'**
+  String nextPesticideApplication(String date);
+
+  /// No description provided for @needsPesticideApplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply pesticide!'**
+  String get needsPesticideApplication;
+
+  /// No description provided for @pesticideApproachingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pesticide due soon'**
+  String get pesticideApproachingTitle;
+
+  /// No description provided for @nextPesticideInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, one{Next application in {days} day} other{Next application in {days} days}}'**
+  String nextPesticideInDays(int days);
 
   /// No description provided for @entryTypeIrrigation.
   ///

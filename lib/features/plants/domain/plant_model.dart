@@ -145,4 +145,34 @@ class PlantWithSpecies {
     final daysSinceApplied = DateTime.now().difference(lastApplied).inDays;
     return daysSinceApplied - freq;
   }
+
+  /// Days before the due date that a pesticide reminder starts counting as
+  /// "approaching" for the plant detail screen's status card.
+  static const pesticideApproachingWindowDays = 3;
+
+  /// Whether the pesticide reapplication is coming up within the next
+  /// [pesticideApproachingWindowDays] days, but isn't due yet (see
+  /// [needsPesticideReapplication] for that). Drives the plant detail
+  /// screen's status card.
+  bool get pesticideReapplicationApproaching {
+    final rel = pesticideDaysRelative;
+    if (rel == null) return false;
+    return rel < 0 && rel >= -pesticideApproachingWindowDays;
+  }
+
+  /// How many days a pesticide application still counts as an active pest-
+  /// control routine for the home list badge, regardless of any
+  /// reapplication schedule.
+  static const pesticideActiveControlWindowDays = 45;
+
+  /// Whether the plant had a pesticide applied recently enough
+  /// ([pesticideActiveControlWindowDays]) to be flagged on the home list as
+  /// currently under pest control — independent of [needsPesticideReapplication]
+  /// or any reapplication reminder.
+  bool get pesticideUnderActiveControl {
+    final lastApplied = plant.lastPesticideAppliedAt;
+    if (lastApplied == null) return false;
+    final daysSince = DateTime.now().difference(lastApplied).inDays;
+    return daysSince < pesticideActiveControlWindowDays;
+  }
 }

@@ -233,6 +233,7 @@ class _EntryDataBadge extends StatelessWidget {
       EntryType.fertilizer => _fertilizerSummary(l10n, extra),
       EntryType.pruning when extra != null =>
         '✂️ ${_pruningLabel(l10n, extra['reason'] as String?)}',
+      EntryType.pesticide => _pesticideSummary(l10n, extra, entry.date),
       EntryType.observation when nv != null =>
         '${_healthEmoji(nv.toInt())} ${l10n.healthSummary(nv.toInt())} — ${_healthLabel(l10n, nv.toInt())}',
       _ => null,
@@ -268,6 +269,32 @@ class _EntryDataBadge extends StatelessWidget {
       return '🌱 ${l10n.productsCount(products.length)}';
     }
     return null;
+  }
+
+  String? _pesticideSummary(
+      AppLocalizations l10n, Map<String, dynamic>? extra, DateTime date) {
+    if (extra == null) return null;
+    final products = extra['products'] as List<dynamic>?;
+    final recurrenceDays = (extra['recurrenceDays'] as num?)?.toInt();
+
+    final productsPart = switch (products) {
+      null || [] => null,
+      [final p] => (p as Map<String, dynamic>)['name'] as String?,
+      _ => l10n.productsCount(products.length),
+    };
+
+    final nextPart = recurrenceDays != null
+        ? l10n.nextPesticideApplication(
+            DateFormat.yMd(l10n.localeName)
+                .format(date.add(Duration(days: recurrenceDays))))
+        : null;
+
+    final parts = [
+      if (productsPart != null && productsPart.isNotEmpty) productsPart,
+      if (nextPart != null) nextPart,
+    ];
+    if (parts.isEmpty) return null;
+    return '🧪 ${parts.join(' · ')}';
   }
 
   String _fmt(double v) =>

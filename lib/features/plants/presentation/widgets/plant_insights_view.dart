@@ -42,7 +42,9 @@ class PlantInsightsView extends ConsumerWidget {
         sorted.where((e) => e.type == EntryType.irrigation).toList();
     final careEvents = sorted
         .where((e) =>
-            e.type == EntryType.fertilizer || e.type == EntryType.pruning)
+            e.type == EntryType.fertilizer ||
+            e.type == EntryType.pruning ||
+            e.type == EntryType.pesticide)
         .toList();
     // Pest/chlorosis onsets also matter for the health trend (null severity
     // counts as active, matching plantAlertStatusProvider).
@@ -50,6 +52,7 @@ class PlantInsightsView extends ConsumerWidget {
         .where((e) =>
             e.type == EntryType.fertilizer ||
             e.type == EntryType.pruning ||
+            e.type == EntryType.pesticide ||
             ((e.type == EntryType.pest || e.type == EntryType.chlorosis) &&
                 (e.numericValue ?? 1) > 0))
         .toList();
@@ -159,17 +162,29 @@ class PlantInsightsView extends ConsumerWidget {
         : l10n.chartWateringAvgOnly(_fmtNum(avg));
   }
 
-  /// Key line for the event markers actually visible in the chart's window.
+  /// Key line for the event markers actually visible in the chart's window:
+  /// the observação (note) logged with each care event (poda, fertilização,
+  /// defensivos, ...) when there is one, otherwise just which types occurred.
   String? _eventsCaption(AppLocalizations l10n, List<EntryModel> events,
       List<EntryModel> points) {
     final start = points.first.date;
     final end = points.last.date;
-    final present = events
+    final visible = events
         .where((e) => !e.date.isBefore(start) && !e.date.isAfter(end))
-        .map((e) => e.type)
-        .toSet();
-    if (present.isEmpty) return null;
-    return present.map((t) => '${t.emoji} ${t.label(l10n)}').join('   ');
+        .toList();
+    if (visible.isEmpty) return null;
+
+    final notes =
+        visible.where((e) => (e.note ?? '').trim().isNotEmpty).toList();
+    if (notes.isEmpty) {
+      final present = visible.map((e) => e.type).toSet();
+      return present.map((t) => '${t.emoji} ${t.label(l10n)}').join('   ');
+    }
+    final dateFmt = DateFormat.Md(l10n.localeName);
+    return notes
+        .map((e) =>
+            '${e.type.emoji} ${dateFmt.format(e.date)} — ${e.note!.trim()}')
+        .join('\n');
   }
 }
 

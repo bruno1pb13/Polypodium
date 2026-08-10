@@ -311,7 +311,21 @@
   "severitySevere": "Severe",
   "severityActive": "Active",
   "pestBadge": "Pest",
-  "pesticideReapplyBadge": "Reapply",
+  "pesticideActiveControlBadge": "Pest control",
+  "nextPesticideApplication": "Next application: {date}",
+  "@nextPesticideApplication": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "needsPesticideApplication": "Apply pesticide!",
+  "pesticideApproachingTitle": "Pesticide due soon",
+  "nextPesticideInDays": "{days, plural, one{Next application in {days} day} other{Next application in {days} days}}",
+  "@nextPesticideInDays": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
 
   "entryTypeIrrigation": "Watering",
   "entryTypeFertilizer": "Fertilizing",

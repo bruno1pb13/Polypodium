@@ -188,7 +188,7 @@ class PlantListItem extends ConsumerWidget {
                           if (days != null && overdue ||
                               alertStatus.hasActiveChlorosis ||
                               alertStatus.hasActivePest ||
-                              pws.needsPesticideReapplication) ...[
+                              pws.pesticideUnderActiveControl) ...[
                             const SizedBox(height: 8),
                             Wrap(
                               spacing: 6,
@@ -209,11 +209,12 @@ class PlantListItem extends ConsumerWidget {
                                     label: context.l10n.pestBadge,
                                     color: const Color(0xFFF97316),
                                   ),
-                                if (pws.needsPesticideReapplication)
+                                if (pws.pesticideUnderActiveControl)
                                   _AlertBadge(
                                     emoji: '🧪',
-                                    label: context.l10n.pesticideReapplyBadge,
-                                    color: const Color(0xFFDC2626),
+                                    label:
+                                        context.l10n.pesticideActiveControlBadge,
+                                    color: const Color(0xFF0D9488),
                                   ),
                               ],
                             ),
