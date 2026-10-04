@@ -9,8 +9,8 @@ import '../providers/plants_providers.dart';
 import '../widgets/plant_list_item.dart';
 import 'plant_detail_screen.dart';
 
-/// Lists the plants of a single location or species, with a bulk-entry
-/// action that creates one entry for every plant shown.
+/// Lists the active plants of a single location or species, with a
+/// bulk-entry action that creates one entry for every plant shown.
 class PlantGroupScreen extends ConsumerWidget {
   final String title;
   final String? locationId;
@@ -32,6 +32,7 @@ class PlantGroupScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final plantsAsync = ref.watch(plantsWithSpeciesProvider).whenData(
           (plants) => plants
+              .where((p) => p.plant.isActive)
               .where((p) => locationId != null
                   ? p.plant.locationId == locationId
                   : p.plant.speciesId == speciesId)
@@ -54,6 +55,9 @@ class PlantGroupScreen extends ConsumerWidget {
             shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
           ),
         ),
+        bottom: speciesId == null
+            ? null
+            : _SurvivalLine(speciesId: speciesId!),
         actions: [
           if (plants.isNotEmpty)
             IconButton(
@@ -155,6 +159,37 @@ Future<void> _waterAll(
       content: Text(l10n.irrigationRecordError('$e')),
       backgroundColor: Colors.red,
     ));
+  }
+}
+
+/// One-line survival rate of the species under the app bar title, counting
+/// the plants that are no longer active too.
+class _SurvivalLine extends ConsumerWidget implements PreferredSizeWidget {
+  final String speciesId;
+
+  const _SurvivalLine({required this.speciesId});
+
+  @override
+  Size get preferredSize => const Size.fromHeight(24);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final survival = ref.watch(speciesSurvivalProvider(speciesId)).value;
+    if (survival == null || survival.total == 0) {
+      return const SizedBox.shrink();
+    }
+    final percent = (survival.alive * 100 / survival.total).round();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          context.l10n
+              .speciesSurvivalRate(survival.total, percent, survival.alive),
+          style: const TextStyle(fontSize: 13, color: Colors.white70),
+        ),
+      ),
+    );
   }
 }
 

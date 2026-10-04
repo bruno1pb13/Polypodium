@@ -15,7 +15,8 @@ import '../../domain/plant_model.dart';
 enum StatusTone {
   danger(Color(0xFFDC2626), Color(0xFFFCA5A5), Color(0xFFB91C1C)),
   warning(Color(0xFFD97706), Color(0xFFFCD34D), Color(0xFFB45309)),
-  positive(Color(0xFF0D9488), Color(0xFF5EEAD4), Color(0xFF0F766E));
+  positive(Color(0xFF0D9488), Color(0xFF5EEAD4), Color(0xFF0F766E)),
+  neutral(Color(0xFF64748B), Color(0xFFCBD5E1), Color(0xFF475569));
 
   const StatusTone(this.base, this.onDark, this.onLight);
 
@@ -35,15 +36,26 @@ enum StatusTone {
       severity == 3 ? StatusTone.danger : StatusTone.warning;
 }
 
-typedef PlantStatus = ({String emoji, String label, StatusTone tone});
+typedef PlantStatusBadge = ({String emoji, String label, StatusTone tone});
 
-/// Badges for the home list, most urgent first.
-List<PlantStatus> plantListStatuses(
+/// Badges for the home list, most urgent first. A plant that is no longer
+/// active only shows its lifecycle status.
+List<PlantStatusBadge> plantListStatuses(
   AppLocalizations l10n,
   PlantWithSpecies pws,
   PlantAlertStatus alerts,
 ) {
-  final statuses = <PlantStatus>[
+  final status = pws.plant.status;
+  if (!pws.plant.isActive) {
+    return [
+      (
+        emoji: status.emoji,
+        label: status.label(l10n),
+        tone: StatusTone.neutral,
+      ),
+    ];
+  }
+  final statuses = <PlantStatusBadge>[
     if (pws.needsWatering)
       (
         emoji: EntryType.irrigation.emoji,
@@ -95,7 +107,7 @@ class PlantStatusChip extends ConsumerWidget {
     required this.tone,
   });
 
-  PlantStatusChip.fromStatus(PlantStatus status, {super.key})
+  PlantStatusChip.fromStatus(PlantStatusBadge status, {super.key})
       : emoji = status.emoji,
         label = status.label,
         tone = status.tone;

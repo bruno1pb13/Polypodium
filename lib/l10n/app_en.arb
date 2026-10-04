@@ -239,6 +239,35 @@
   "deletePlantsBody": "All records of these plants will be removed.",
   "deletePlantTitle": "Delete plant?",
   "deletePlantBody": "All records of this plant will be removed.",
+  "deletePlantArchiveHint": "To keep its diary, consider archiving it instead.",
+  "deletePlantsArchiveHint": "To keep their diaries, consider archiving them instead.",
+  "plantStatusActive": "Active",
+  "plantStatusDead": "Dead",
+  "plantStatusDonated": "Donated",
+  "plantStatusArchived": "Archived",
+  "plantStatusMarkDead": "Mark as dead",
+  "plantStatusMarkDonated": "Mark as donated",
+  "plantStatusArchive": "Archive",
+  "plantStatusReactivate": "Reactivate",
+  "plantStatusChange": "Change status",
+  "plantStatusSince": "{status} since {date}",
+  "@plantStatusSince": {
+    "placeholders": {
+      "status": {"type": "String"},
+      "date": {"type": "String"}
+    }
+  },
+  "plantInactiveHint": "No reminders while inactive. The diary is kept.",
+  "showArchivedPlants": "Show archived",
+  "historyFieldStatus": "Status",
+  "speciesSurvivalRate": "{total, plural, one{Survival: {percent}% ({alive} of {total} plant)} other{Survival: {percent}% ({alive} of {total} plants)}}",
+  "@speciesSurvivalRate": {
+    "placeholders": {
+      "total": {"type": "int"},
+      "percent": {"type": "int"},
+      "alive": {"type": "int"}
+    }
+  },
   "cancelSelection": "Cancel selection",
   "selectedCount": "{count} selected",
   "@selectedCount": {
