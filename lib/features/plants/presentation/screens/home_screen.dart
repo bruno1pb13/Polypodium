@@ -54,29 +54,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WidgetRef ref,
     Set<String> plantIds,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final choice = await showDialog<_DeleteChoice>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(ctx.l10n.deletePlantsTitle(plantIds.length)),
-        content: Text(ctx.l10n.deletePlantsBody),
+        content: Text(
+            '${ctx.l10n.deletePlantsBody}\n\n${ctx.l10n.deletePlantsArchiveHint}'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => Navigator.pop(ctx),
             child: Text(ctx.l10n.cancel),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: () => Navigator.pop(ctx, _DeleteChoice.archive),
+            child: Text(ctx.l10n.plantStatusArchive),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, _DeleteChoice.delete),
             child: Text(ctx.l10n.delete),
           ),
         ],
       ),
     );
-    if (confirmed == true) {
-      for (final id in plantIds) {
-        await ref.read(plantsNotifierProvider.notifier).delete(id);
+    if (choice == null) return;
+    final notifier = ref.read(plantsNotifierProvider.notifier);
+    for (final id in plantIds) {
+      switch (choice) {
+        case _DeleteChoice.archive:
+          await notifier.setStatus(id, PlantStatus.archived);
+        case _DeleteChoice.delete:
+          await notifier.delete(id);
       }
-      ref.read(plantSelectionProvider.notifier).state = {};
     }
+    ref.read(plantSelectionProvider.notifier).state = {};
   }
 
   Future<void> _waterSelected(Set<String> plantIds) async {
@@ -128,6 +138,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isSelectionMode = selectedIds.isNotEmpty;
     final workspace = ref.watch(activeWorkspaceProvider);
     final syncState = ref.watch(syncNotifierProvider);
+    final showArchived = ref.watch(plantShowArchivedNotifierProvider);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -271,6 +282,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       value: PlantSortOption.dateAdded,
                       child: Text(context.l10n.sortDateAdded),
                     ),
+                    const PopupMenuDivider(),
+                    CheckedPopupMenuItem(
+                      checked: showArchived,
+                      onTap: () => ref
+                          .read(plantShowArchivedNotifierProvider.notifier)
+                          .toggle(),
+                      child: Text(context.l10n.showArchivedPlants),
+                    ),
                   ],
                 ),
                 Expanded(
@@ -362,6 +381,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
+
+enum _DeleteChoice { archive, delete }
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState();

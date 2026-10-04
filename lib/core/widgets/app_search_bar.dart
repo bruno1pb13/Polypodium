@@ -5,7 +5,7 @@ class AppSearchBar<T> extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final String hintText;
-  final List<PopupMenuItem<T>>? sortOptions;
+  final List<PopupMenuEntry<T>>? sortOptions;
   final ValueChanged<T>? onSortSelected;
 
   const AppSearchBar({

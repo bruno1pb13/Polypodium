@@ -189,6 +189,44 @@ void main() {
       expect(capturedEntry.note, contains('Nickname: Ferny → Ferny Updated'));
     });
 
+    test('setStatus saves the new status and records it in the diary',
+        () async {
+      final plant = PlantModel(
+        id: 'p1',
+        speciesId: 's1',
+        nickname: 'Ferny',
+        soilId: 'loamy',
+        acquisitionDate: DateTime(2024, 1, 1),
+        createdAt: now,
+      );
+
+      when(() => mockPlantsRepo.watchAll())
+          .thenAnswer((_) => Stream.value([plant]));
+      when(() => mockPlantsRepo.getById('p1')).thenAnswer((_) async => plant);
+      when(() => mockPlantsRepo.save(any())).thenAnswer((_) async => {});
+      when(() => mockEntriesRepo.create(any())).thenAnswer((_) async => {});
+
+      container.listen(plantsNotifierProvider, (_, __) {});
+      await container.read(plantsNotifierProvider.future);
+
+      await container
+          .read(plantsNotifierProvider.notifier)
+          .setStatus('p1', PlantStatus.dead);
+
+      final saved = verify(() => mockPlantsRepo.save(captureAny()))
+          .captured
+          .single as PlantModel;
+      expect(saved.status, PlantStatus.dead);
+      expect(saved.statusChangedAt, isNotNull);
+      expect(saved.nickname, 'Ferny');
+
+      final capturedEntry = verify(() => mockEntriesRepo.create(captureAny()))
+          .captured
+          .single as EntryModel;
+      expect(capturedEntry.type, EntryType.history);
+      expect(capturedEntry.note, contains('Status: Active → Dead'));
+    });
+
     test('irrigate calls repository', () async {
       const plantId = 'p1';
       when(() => mockPlantsRepo.irrigate(plantId))

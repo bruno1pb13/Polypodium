@@ -62,6 +62,15 @@ class PlantsNotifier extends _$PlantsNotifier {
     }
   }
 
+  /// Moves the plant through its lifecycle (dead, donated, archived, or back
+  /// to active). Goes through [save], so the change lands in the diary as a
+  /// history entry and the reminders are rebuilt without it.
+  Future<void> setStatus(String plantId, PlantStatus status) async {
+    final plant = await ref.read(plantsRepositoryProvider).getById(plantId);
+    if (plant == null || plant.status == status) return;
+    await save(plant.copyWith(status: status, statusChangedAt: DateTime.now()));
+  }
+
   Future<String?> _generateHistoryNote(PlantModel? old, PlantModel next) async {
     // History notes are persisted (and synced) as entry text, so they are
     // written once in the device language at the time of the change. The
@@ -145,6 +154,11 @@ class PlantsNotifier extends _$PlantsNotifier {
           '${l10n.historyFieldAcquisitionDate}: ${dateFmt.format(old.acquisitionDate)} → ${dateFmt.format(next.acquisitionDate)}');
     }
 
+    if (old.status != next.status) {
+      changes.add(
+          '${l10n.historyFieldStatus}: ${old.status.label(l10n)} → ${next.status.label(l10n)}');
+    }
+
     if (changes.isEmpty) return null;
     return '${l10n.historyUpdatedHeader}\n${changes.map((c) => '• $c').join('\n')}';
   }
@@ -222,4 +236,18 @@ Future<List<PlantWithSpecies>> plantsWithSpecies(Ref ref) async {
   }
 
   return results;
+}
+
+/// Survival of the species' plants: every non-deleted plant counts towards
+/// [total], and all but the dead ones towards [alive] (donated and archived
+/// plants survived, they just left the collection).
+@riverpod
+Future<({int alive, int total})> speciesSurvival(
+    Ref ref, String speciesId) async {
+  final plants = await ref.watch(plantsNotifierProvider.future);
+  final ofSpecies = plants.where((p) => p.speciesId == speciesId);
+  return (
+    alive: ofSpecies.where((p) => p.status != PlantStatus.dead).length,
+    total: ofSpecies.length,
+  );
 }

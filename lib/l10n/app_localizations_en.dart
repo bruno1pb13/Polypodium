@@ -494,6 +494,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deletePlantBody => 'All records of this plant will be removed.';
 
   @override
+  String get deletePlantArchiveHint =>
+      'To keep its diary, consider archiving it instead.';
+
+  @override
+  String get deletePlantsArchiveHint =>
+      'To keep their diaries, consider archiving them instead.';
+
+  @override
+  String get plantStatusActive => 'Active';
+
+  @override
+  String get plantStatusDead => 'Dead';
+
+  @override
+  String get plantStatusDonated => 'Donated';
+
+  @override
+  String get plantStatusArchived => 'Archived';
+
+  @override
+  String get plantStatusMarkDead => 'Mark as dead';
+
+  @override
+  String get plantStatusMarkDonated => 'Mark as donated';
+
+  @override
+  String get plantStatusArchive => 'Archive';
+
+  @override
+  String get plantStatusReactivate => 'Reactivate';
+
+  @override
+  String get plantStatusChange => 'Change status';
+
+  @override
+  String plantStatusSince(String status, String date) {
+    return '$status since $date';
+  }
+
+  @override
+  String get plantInactiveHint =>
+      'No reminders while inactive. The diary is kept.';
+
+  @override
+  String get showArchivedPlants => 'Show archived';
+
+  @override
+  String get historyFieldStatus => 'Status';
+
+  @override
+  String speciesSurvivalRate(int total, int percent, int alive) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'Survival: $percent% ($alive of $total plants)',
+      one: 'Survival: $percent% ($alive of $total plant)',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get cancelSelection => 'Cancel selection';
 
   @override

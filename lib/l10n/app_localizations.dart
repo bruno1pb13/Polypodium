@@ -932,6 +932,102 @@ abstract class AppLocalizations {
   /// **'All records of this plant will be removed.'**
   String get deletePlantBody;
 
+  /// No description provided for @deletePlantArchiveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'To keep its diary, consider archiving it instead.'**
+  String get deletePlantArchiveHint;
+
+  /// No description provided for @deletePlantsArchiveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'To keep their diaries, consider archiving them instead.'**
+  String get deletePlantsArchiveHint;
+
+  /// No description provided for @plantStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get plantStatusActive;
+
+  /// No description provided for @plantStatusDead.
+  ///
+  /// In en, this message translates to:
+  /// **'Dead'**
+  String get plantStatusDead;
+
+  /// No description provided for @plantStatusDonated.
+  ///
+  /// In en, this message translates to:
+  /// **'Donated'**
+  String get plantStatusDonated;
+
+  /// No description provided for @plantStatusArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get plantStatusArchived;
+
+  /// No description provided for @plantStatusMarkDead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as dead'**
+  String get plantStatusMarkDead;
+
+  /// No description provided for @plantStatusMarkDonated.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as donated'**
+  String get plantStatusMarkDonated;
+
+  /// No description provided for @plantStatusArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get plantStatusArchive;
+
+  /// No description provided for @plantStatusReactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate'**
+  String get plantStatusReactivate;
+
+  /// No description provided for @plantStatusChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change status'**
+  String get plantStatusChange;
+
+  /// No description provided for @plantStatusSince.
+  ///
+  /// In en, this message translates to:
+  /// **'{status} since {date}'**
+  String plantStatusSince(String status, String date);
+
+  /// No description provided for @plantInactiveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No reminders while inactive. The diary is kept.'**
+  String get plantInactiveHint;
+
+  /// No description provided for @showArchivedPlants.
+  ///
+  /// In en, this message translates to:
+  /// **'Show archived'**
+  String get showArchivedPlants;
+
+  /// No description provided for @historyFieldStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get historyFieldStatus;
+
+  /// No description provided for @speciesSurvivalRate.
+  ///
+  /// In en, this message translates to:
+  /// **'{total, plural, one{Survival: {percent}% ({alive} of {total} plant)} other{Survival: {percent}% ({alive} of {total} plants)}}'**
+  String speciesSurvivalRate(int total, int percent, int alive);
+
   /// No description provided for @cancelSelection.
   ///
   /// In en, this message translates to:

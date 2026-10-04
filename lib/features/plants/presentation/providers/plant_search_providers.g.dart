@@ -105,6 +105,63 @@ abstract class _$PlantSortOptionNotifier extends $Notifier<PlantSortOption> {
   }
 }
 
+/// Whether the Home list also shows plants that are no longer active (dead,
+/// donated or archived). Off by default.
+
+@ProviderFor(PlantShowArchivedNotifier)
+final plantShowArchivedNotifierProvider = PlantShowArchivedNotifierProvider._();
+
+/// Whether the Home list also shows plants that are no longer active (dead,
+/// donated or archived). Off by default.
+final class PlantShowArchivedNotifierProvider
+    extends $NotifierProvider<PlantShowArchivedNotifier, bool> {
+  /// Whether the Home list also shows plants that are no longer active (dead,
+  /// donated or archived). Off by default.
+  PlantShowArchivedNotifierProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'plantShowArchivedNotifierProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$plantShowArchivedNotifierHash();
+
+  @$internal
+  @override
+  PlantShowArchivedNotifier create() => PlantShowArchivedNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$plantShowArchivedNotifierHash() =>
+    r'c4e30dc3d4f1bccf52c7462cbff17a4bdd0c2551';
+
+/// Whether the Home list also shows plants that are no longer active (dead,
+/// donated or archived). Off by default.
+
+abstract class _$PlantShowArchivedNotifier extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<bool, bool>, bool, Object?, Object?>;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(filteredSortedPlants)
 final filteredSortedPlantsProvider = FilteredSortedPlantsProvider._();
 
@@ -142,4 +199,4 @@ final class FilteredSortedPlantsProvider extends $FunctionalProvider<
 }
 
 String _$filteredSortedPlantsHash() =>
-    r'8452628106646af79ce341bdab529618bb647859';
+    r'01f08e5a08895fd6e61eba20fdcefe6396510046';
