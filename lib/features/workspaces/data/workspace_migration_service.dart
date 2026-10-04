@@ -37,6 +37,7 @@ class WorkspaceMigrationService {
     if ((await db.defensivosDao.getAllDefensivos()).isNotEmpty) return true;
     if ((await db.plantsDao.getAll()).isNotEmpty) return true;
     if ((await db.entriesDao.getAll()).isNotEmpty) return true;
+    if ((await db.remindersDao.getAll()).isNotEmpty) return true;
     return false;
   }
 
@@ -73,6 +74,7 @@ class WorkspaceMigrationService {
     await _migrateDefensivos(sourceDb, targetDb);
     await _migratePlants(sourceDb, targetDb);
     await _migrateEntries(sourceDb, targetDb, targetPhotos);
+    await _migrateReminders(sourceDb, targetDb);
   }
 
   Future<void> _migrateSpecies(AppDatabase source, AppDatabase target) async {
@@ -209,6 +211,24 @@ class WorkspaceMigrationService {
           type: row.type,
           numericValue: Value(row.numericValue),
           extraData: Value(row.extraData),
+          createdAt: row.createdAt,
+          updatedAt: DateTime.now(),
+          localRev: Value(rev),
+        ));
+      });
+    }
+  }
+
+  Future<void> _migrateReminders(AppDatabase source, AppDatabase target) async {
+    for (final row in await source.remindersDao.getAll()) {
+      await target.transaction(() async {
+        final rev = await target.syncMetaDao.nextRev();
+        await target.remindersDao.upsert(RemindersTableCompanion.insert(
+          id: row.id,
+          plantId: row.plantId,
+          entryType: row.entryType,
+          intervalDays: row.intervalDays,
+          enabled: Value(row.enabled),
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),

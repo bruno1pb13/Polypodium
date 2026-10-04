@@ -205,4 +205,62 @@ void main() {
       expect(row!.status, PlantStatus.active);
     });
   });
+
+  test('reminders round-trip through localChangesSince/applyRemoteChange',
+      () async {
+    await db.remindersDao.upsert(RemindersTableCompanion.insert(
+      id: 'rem1',
+      plantId: 'plant1',
+      entryType: EntryType.pruning,
+      intervalDays: 90,
+      enabled: const Value(false),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 2, 1),
+      localRev: const Value(4),
+    ));
+
+    final change = (await adapter.localChangesSince(0,
+            limit: 100, deviceId: 'device-1'))
+        .single;
+    expect(change.entityType, 'reminder');
+    expect(change.payload['entryType'], 'pruning');
+
+    // Through the wire format into a second device.
+    final other = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(other.close);
+    await DriftSyncStorageAdapter(other)
+        .applyRemoteChange(EntityChange.fromJson(change.toJson()));
+
+    final applied = await other.remindersDao.getById('rem1');
+    expect(applied, isNotNull);
+    expect(applied!.plantId, 'plant1');
+    expect(applied.entryType, EntryType.pruning);
+    expect(applied.intervalDays, 90);
+    expect(applied.enabled, isFalse);
+    expect(applied.createdAt, DateTime(2026, 1, 1));
+    expect(applied.updatedAt, DateTime(2026, 2, 1));
+    // Freshly-arrived remote data is already in sync with the peer.
+    expect(applied.localRev, 0);
+  });
+
+  test('a reminder for an unknown entry type is skipped', () async {
+    await adapter.applyRemoteChange(EntityChange(
+      entityType: 'reminder',
+      entityId: 'rem1',
+      payload: {
+        'id': 'rem1',
+        'plantId': 'plant1',
+        'entryType': 'repotting',
+        'intervalDays': 365,
+        'enabled': true,
+        'createdAt': DateTime(2026, 1, 1).toIso8601String(),
+      },
+      updatedAt: DateTime(2026, 1, 1),
+      deviceId: 'device-2',
+      rev: 1,
+    ));
+
+    expect(await db.remindersDao.getById('rem1'), isNull);
+  });
 }
+

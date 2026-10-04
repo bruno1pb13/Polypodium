@@ -26,6 +26,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
     'plant',
     'entry',
     'defensivo',
+    'reminder',
   ];
 
   @override
@@ -64,6 +65,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
         await _applySoil(change);
       case 'defensivo':
         await _applyDefensivo(change);
+      case 'reminder':
+        await _applyReminder(change);
     }
   }
 
@@ -84,6 +87,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
         return _db.soilsDao.changesSince(since, limit: limit);
       case 'defensivo':
         return _db.defensivosDao.changesSince(since, limit: limit);
+      case 'reminder':
+        return _db.remindersDao.changesSince(since, limit: limit);
       default:
         throw ArgumentError('Unknown entityType: $entityType');
     }
@@ -194,6 +199,20 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'carenciaDays': r.carenciaDays,
           'imagePath': r.imagePath,
           'imageSource': r.imageSource,
+          'createdAt': r.createdAt.toIso8601String(),
+        };
+      case 'reminder':
+        final r = row as RemindersTableData;
+        entityId = r.id;
+        updatedAt = r.updatedAt;
+        deletedAt = r.deletedAt;
+        rev = r.localRev;
+        payload = {
+          'id': r.id,
+          'plantId': r.plantId,
+          'entryType': r.entryType.name,
+          'intervalDays': r.intervalDays,
+          'enabled': r.enabled,
           'createdAt': r.createdAt.toIso8601String(),
         };
       default:
@@ -384,6 +403,30 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       carenciaDays: Value(p['carenciaDays'] as int?),
       imagePath: Value(p['imagePath'] as String?),
       imageSource: Value(p['imageSource'] as String?),
+      createdAt: DateTime.parse(p['createdAt'] as String),
+      updatedAt: change.updatedAt,
+      deletedAt: Value(change.deletedAt),
+      localRev: const Value(0),
+    ));
+  }
+
+  Future<void> _applyReminder(EntityChange change) async {
+    final p = change.payload;
+    // A reminder for an entry type this app version doesn't know (created by
+    // a newer client) can't be represented locally; skip it.
+    final entryType = EntryType.values.asNameMap()[p['entryType']];
+    if (entryType == null) return;
+    final existing = await _db.remindersDao.getById(change.entityId);
+    if (!shouldApplyRemote(
+        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
+      return;
+    }
+    await _db.remindersDao.upsert(RemindersTableCompanion.insert(
+      id: change.entityId,
+      plantId: p['plantId'] as String,
+      entryType: entryType,
+      intervalDays: p['intervalDays'] as int,
+      enabled: Value(p['enabled'] as bool? ?? true),
       createdAt: DateTime.parse(p['createdAt'] as String),
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),

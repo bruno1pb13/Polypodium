@@ -15,6 +15,8 @@ import '../../features/locations/data/locations_dao.dart';
 import '../../features/locations/data/locations_table.dart';
 import '../../features/plants/data/plants_dao.dart';
 import '../../features/plants/data/plants_table.dart';
+import '../../features/reminders/data/reminders_dao.dart';
+import '../../features/reminders/data/reminders_table.dart';
 import '../../features/species/data/species_dao.dart';
 import '../../features/species/data/species_table.dart';
 import '../../features/soils/data/soils_dao.dart';
@@ -29,6 +31,7 @@ export '../../features/defensivos/data/defensivos_table.dart';
 export '../../features/entries/data/entries_table.dart';
 export '../../features/locations/data/locations_table.dart';
 export '../../features/plants/data/plants_table.dart';
+export '../../features/reminders/data/reminders_table.dart';
 export '../../features/soils/data/soils_table.dart';
 export '../../features/species/data/species_table.dart';
 export 'sync_cursors_table.dart';
@@ -44,6 +47,7 @@ part 'app_database.g.dart';
     LocationsTable,
     SoilsTable,
     DefensivosTable,
+    RemindersTable,
     SyncMetaTable,
     SyncCursorsTable,
   ],
@@ -54,7 +58,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -62,6 +66,7 @@ class AppDatabase extends _$AppDatabase {
   late final LocationsDao locationsDao = LocationsDao(this);
   late final SoilsDao soilsDao = SoilsDao(this);
   late final DefensivosDao defensivosDao = DefensivosDao(this);
+  late final RemindersDao remindersDao = RemindersDao(this);
   late final SyncMetaDao syncMetaDao = SyncMetaDao(this);
   late final SyncCursorsDao syncCursorsDao = SyncCursorsDao(this);
 
@@ -133,6 +138,9 @@ class AppDatabase extends _$AppDatabase {
           if (from < 12) {
             await m.addColumn(plantsTable, plantsTable.status);
             await m.addColumn(plantsTable, plantsTable.statusChangedAt);
+          }
+          if (from < 13) {
+            await m.createTable(remindersTable);
           }
         },
       );

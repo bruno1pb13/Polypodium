@@ -144,6 +144,14 @@ class DataImportService {
             skipped++;
           }
         }
+        // Backups made before reminders existed have no such section.
+        for (final row in rowsOf('reminders')) {
+          if (await _applyReminder(row)) {
+            applied++;
+          } else {
+            skipped++;
+          }
+        }
 
         // Imported irrigation entries may change a plant's irrigation
         // history; recompute the derived lastIrrigatedAt as a fresh local
@@ -398,6 +406,31 @@ class DataImportService {
       carenciaDays: Value(row['carenciaDays'] as int?),
       imagePath: Value(row['imagePath'] as String?),
       imageSource: Value(row['imageSource'] as String?),
+      createdAt: DateTime.parse(row['createdAt'] as String),
+      updatedAt: updatedAt,
+      deletedAt: Value(_deletedAt(row)),
+      localRev: Value(rev),
+    ));
+    return true;
+  }
+
+  Future<bool> _applyReminder(Map<String, dynamic> row) async {
+    // Entry types unknown to this version (newer backup) are skipped.
+    final entryType = EntryType.values.asNameMap()[row['entryType']];
+    if (entryType == null) return false;
+    final existing = await _db.remindersDao.getById(row['id'] as String);
+    final updatedAt = _updatedAt(row);
+    if (!shouldApplyRemote(
+        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: updatedAt)) {
+      return false;
+    }
+    final rev = await _db.syncMetaDao.nextRev();
+    await _db.remindersDao.upsert(RemindersTableCompanion.insert(
+      id: row['id'] as String,
+      plantId: row['plantId'] as String,
+      entryType: entryType,
+      intervalDays: row['intervalDays'] as int,
+      enabled: Value(row['enabled'] as bool? ?? true),
       createdAt: DateTime.parse(row['createdAt'] as String),
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),

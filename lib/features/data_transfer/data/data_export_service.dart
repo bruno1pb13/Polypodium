@@ -38,6 +38,7 @@ class DataExportService {
     final plants = await _db.select(_db.plantsTable).get();
     final entries = await _db.select(_db.entriesTable).get();
     final defensivos = await _db.select(_db.defensivosTable).get();
+    final reminders = await _db.select(_db.remindersTable).get();
 
     final archive = Archive();
     final photoNames = <String>{};
@@ -155,6 +156,19 @@ class DataExportService {
               'carenciaDays': r.carenciaDays,
               'imagePath': r.imagePath,
               'imageSource': r.imageSource,
+              'createdAt': r.createdAt.toIso8601String(),
+              'updatedAt': r.updatedAt.toIso8601String(),
+              'deletedAt': r.deletedAt?.toIso8601String(),
+            }
+        ],
+        'reminders': [
+          for (final r in reminders)
+            {
+              'id': r.id,
+              'plantId': r.plantId,
+              'entryType': r.entryType.name,
+              'intervalDays': r.intervalDays,
+              'enabled': r.enabled,
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),

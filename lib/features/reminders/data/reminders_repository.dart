@@ -1,0 +1,73 @@
+import 'package:drift/drift.dart';
+
+import '../../../core/database/app_database.dart';
+import '../domain/reminder_model.dart';
+import 'reminders_dao.dart';
+
+class RemindersRepository {
+  RemindersRepository(AppDatabase db)
+      : _db = db,
+        _dao = db.remindersDao;
+
+  final AppDatabase _db;
+  final RemindersDao _dao;
+
+  /// Every active reminder (enabled or not) with its derived last-done date.
+  Future<List<ReminderStatus>> getAllStatuses() async =>
+      (await _dao.getAllWithLastDone()).map(_statusFromRow).toList();
+
+  /// Re-emits on reminder changes and on entry changes (new last-done date).
+  Stream<List<ReminderStatus>> watchStatusesByPlant(String plantId) => _dao
+      .watchByPlantWithLastDone(plantId)
+      .map((rows) => rows.map(_statusFromRow).toList());
+
+  Future<ReminderModel?> getById(String id) async {
+    final row = await _dao.getById(id);
+    return row == null ? null : _fromRow(row);
+  }
+
+  Future<void> save(ReminderModel reminder) async {
+    await _db.transaction(() async {
+      final rev = await _db.syncMetaDao.nextRev();
+      await _dao
+          .upsert(_toCompanion(reminder, updatedAt: DateTime.now(), rev: rev));
+    });
+  }
+
+  Future<void> delete(String id) async {
+    await _db.transaction(() async {
+      final rev = await _db.syncMetaDao.nextRev();
+      await _dao.softDelete(id, deletedAt: DateTime.now(), rev: rev);
+    });
+  }
+
+  static ReminderStatus _statusFromRow(ReminderRow row) => ReminderStatus(
+        reminder: _fromRow(row.reminder),
+        lastDoneAt: row.lastDoneAt,
+      );
+
+  static ReminderModel _fromRow(RemindersTableData row) => ReminderModel(
+        id: row.id,
+        plantId: row.plantId,
+        entryType: row.entryType,
+        intervalDays: row.intervalDays,
+        enabled: row.enabled,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        deletedAt: row.deletedAt,
+        localRev: row.localRev,
+      );
+
+  static RemindersTableCompanion _toCompanion(ReminderModel m,
+          {required DateTime updatedAt, required int rev}) =>
+      RemindersTableCompanion.insert(
+        id: m.id,
+        plantId: m.plantId,
+        entryType: m.entryType,
+        intervalDays: m.intervalDays,
+        enabled: Value(m.enabled),
+        createdAt: m.createdAt,
+        updatedAt: updatedAt,
+        localRev: Value(rev),
+      );
+}
