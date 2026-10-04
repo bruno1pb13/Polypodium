@@ -44,9 +44,14 @@ class AddEntryScreen extends ConsumerStatefulWidget {
   /// "new entry" flow, with several it acts as a bulk entry for all of them.
   final List<String> plantIds;
 
-  AddEntryScreen({super.key, required String plantId}) : plantIds = [plantId];
+  /// Entry type preselected when the screen opens (defaults to observation).
+  final EntryType? initialType;
 
-  const AddEntryScreen.bulk({super.key, required this.plantIds});
+  AddEntryScreen({super.key, required String plantId, this.initialType})
+      : plantIds = [plantId];
+
+  const AddEntryScreen.bulk(
+      {super.key, required this.plantIds, this.initialType});
 
   @override
   ConsumerState<AddEntryScreen> createState() => _AddEntryScreenState();
@@ -57,7 +62,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   final _heightCtrl = TextEditingController();
   final _pestTypeCtrl = TextEditingController();
 
-  EntryType _type = EntryType.observation;
+  late EntryType _type = widget.initialType ?? EntryType.observation;
   String? _photoPath;
 
   // Chlorosis
