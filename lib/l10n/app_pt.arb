@@ -116,6 +116,12 @@
   "pesticideNotificationBodyCount": "{count} plantas precisam de reaplicação hoje.",
   "notificationActionWatered": "Reguei",
   "notificationActionSnooze": "Lembrar em 3 h",
+  "careChannelName": "Outros lembretes",
+  "careChannelDescription": "Lembretes recorrentes de adubação, poda e outros cuidados",
+  "careNotificationTitle": "Lembrete: {type} {emoji}",
+  "careNotificationBody": "Prevista para hoje: {nickname}.",
+  "careNotificationBodyMany": "Prevista para hoje em {count} plantas: {names}.",
+  "careNotificationBodyCount": "Prevista para hoje em {count} plantas.",
 
   "historyPlantAdded": "Planta adicionada ao sistema:",
   "historyFieldNickname": "Apelido",

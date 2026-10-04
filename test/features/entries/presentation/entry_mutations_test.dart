@@ -69,11 +69,40 @@ void main() {
           id: 'e1',
           plantId: 'p1',
           date: DateTime(2026),
-          type: EntryType.observation,
+          type: EntryType.pest,
           createdAt: DateTime(2026),
         ));
 
     verify(() => entriesRepo.create(any())).called(1);
     verifyNever(() => plantsRepo.rescheduleNotifications());
+  });
+
+  test('entries of a type with recurring reminders reschedule', () async {
+    await container.read(entryMutationsProvider).create(EntryModel(
+          id: 'e1',
+          plantId: 'p1',
+          date: DateTime(2026),
+          type: EntryType.fertilizer,
+          createdAt: DateTime(2026),
+        ));
+
+    verify(() => plantsRepo.rescheduleNotifications()).called(1);
+    verifyNever(() => plantsRepo.refreshPlantStatus(any(),
+        reschedule: any(named: 'reschedule')));
+  });
+
+  test('deleting such an entry reschedules too', () async {
+    when(() => entriesRepo.getById('e1')).thenAnswer((_) async => EntryModel(
+          id: 'e1',
+          plantId: 'p1',
+          date: DateTime(2026),
+          type: EntryType.pruning,
+          createdAt: DateTime(2026),
+        ));
+    when(() => entriesRepo.delete('e1')).thenAnswer((_) async {});
+
+    await container.read(entryMutationsProvider).delete('e1');
+
+    verify(() => plantsRepo.rescheduleNotifications()).called(1);
   });
 }

@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../plants/presentation/providers/plants_providers.dart';
+import '../../../reminders/domain/reminder_model.dart';
 import '../../../../core/enums.dart';
 import '../../data/entries_repository.dart';
 import '../../domain/entry_model.dart';
@@ -113,6 +114,9 @@ class EntryMutations {
         await plantsRepo.refreshPesticideStatus(entry.plantId,
             reschedule: false);
         needsReschedule = true;
+      } else if (reminderEntryTypes.contains(entry.type)) {
+        // Moves the derived due date of a recurring reminder of this type.
+        needsReschedule = true;
       }
     }
     if (needsReschedule) await plantsRepo.rescheduleNotifications();
@@ -146,6 +150,8 @@ class EntryMutations {
       await _ref
           .read(plantsRepositoryProvider)
           .refreshPesticideStatus(entry.plantId);
+    } else if (entry != null && reminderEntryTypes.contains(entry.type)) {
+      await _ref.read(plantsRepositoryProvider).rescheduleNotifications();
     }
     _triggerSync();
   }

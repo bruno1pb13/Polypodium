@@ -377,6 +377,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationActionSnooze => 'Remind in 3 h';
 
   @override
+  String get careChannelName => 'Other reminders';
+
+  @override
+  String get careChannelDescription =>
+      'Recurring fertilizing, pruning and other care reminders';
+
+  @override
+  String careNotificationTitle(String type, String emoji) {
+    return 'Reminder: $type $emoji';
+  }
+
+  @override
+  String careNotificationBody(String nickname) {
+    return 'Due today for $nickname.';
+  }
+
+  @override
+  String careNotificationBodyMany(int count, String names) {
+    return 'Due today for $count plants: $names.';
+  }
+
+  @override
+  String careNotificationBodyCount(int count) {
+    return 'Due today for $count plants.';
+  }
+
+  @override
   String get historyPlantAdded => 'Plant added to the system:';
 
   @override

@@ -2,8 +2,20 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Which reminder a notification is about.
-enum ReminderKind { irrigation, pesticide }
+import '../enums.dart';
+
+/// Which reminder a notification is about. [care] covers the user-configured
+/// recurring reminders (fertilizing, pruning, ...), told apart by the
+/// entry type carried alongside it.
+enum ReminderKind { irrigation, pesticide, care }
+
+/// Reads the entry type of a [ReminderKind.care] reminder from [json]. Throws
+/// when it's missing or unknown, so the whole payload is rejected; other
+/// kinds carry none.
+EntryType? _entryTypeFromJson(ReminderKind kind, Map<String, dynamic> json) {
+  if (kind != ReminderKind.care) return null;
+  return EntryType.values.byName(json['entryType'] as String);
+}
 
 /// Action ids of the buttons shown on reminder notifications.
 abstract final class ReminderAction {
@@ -18,12 +30,20 @@ abstract final class ReminderAction {
 /// which plants the reminder covered (one notification groups every plant
 /// due on the same date).
 class ReminderPayload {
-  const ReminderPayload(this.kind, this.plantIds);
+  const ReminderPayload(this.kind, this.plantIds, {this.entryType})
+      : assert((kind == ReminderKind.care) == (entryType != null));
 
   final ReminderKind kind;
   final List<String> plantIds;
 
-  String encode() => jsonEncode({'kind': kind.name, 'plantIds': plantIds});
+  /// Set only for [ReminderKind.care].
+  final EntryType? entryType;
+
+  String encode() => jsonEncode({
+        'kind': kind.name,
+        'plantIds': plantIds,
+        if (entryType != null) 'entryType': entryType!.name,
+      });
 
   /// Null for a missing or malformed payload (e.g. a notification scheduled
   /// by an older app version, before payloads existed).
@@ -33,7 +53,8 @@ class ReminderPayload {
       final json = jsonDecode(raw) as Map<String, dynamic>;
       final kind = ReminderKind.values.byName(json['kind'] as String);
       final ids = (json['plantIds'] as List).cast<String>();
-      return ReminderPayload(kind, ids);
+      return ReminderPayload(kind, ids,
+          entryType: _entryTypeFromJson(kind, json));
     } catch (_) {
       return null;
     }
@@ -43,23 +64,31 @@ class ReminderPayload {
 /// A reminder the user postponed from the notification, to be shown again
 /// at [at] for the plants that still need it by then.
 class ReminderSnooze {
-  const ReminderSnooze(this.kind, this.plantIds, this.at);
+  const ReminderSnooze(this.kind, this.plantIds, this.at, {this.entryType});
 
   final ReminderKind kind;
   final List<String> plantIds;
   final DateTime at;
 
+  /// Set only for [ReminderKind.care].
+  final EntryType? entryType;
+
   Map<String, dynamic> toJson() => {
         'kind': kind.name,
         'plantIds': plantIds,
         'at': at.toIso8601String(),
+        if (entryType != null) 'entryType': entryType!.name,
       };
 
-  factory ReminderSnooze.fromJson(Map<String, dynamic> json) => ReminderSnooze(
-        ReminderKind.values.byName(json['kind'] as String),
-        (json['plantIds'] as List).cast<String>(),
-        DateTime.parse(json['at'] as String),
-      );
+  factory ReminderSnooze.fromJson(Map<String, dynamic> json) {
+    final kind = ReminderKind.values.byName(json['kind'] as String);
+    return ReminderSnooze(
+      kind,
+      (json['plantIds'] as List).cast<String>(),
+      DateTime.parse(json['at'] as String),
+      entryType: _entryTypeFromJson(kind, json),
+    );
+  }
 }
 
 /// Persists snoozed reminders in SharedPreferences. They have to outlive the

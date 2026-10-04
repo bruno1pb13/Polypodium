@@ -186,6 +186,34 @@
   },
   "notificationActionWatered": "Watered",
   "notificationActionSnooze": "Remind in 3 h",
+  "careChannelName": "Other reminders",
+  "careChannelDescription": "Recurring fertilizing, pruning and other care reminders",
+  "careNotificationTitle": "Reminder: {type} {emoji}",
+  "@careNotificationTitle": {
+    "placeholders": {
+      "type": {"type": "String"},
+      "emoji": {"type": "String"}
+    }
+  },
+  "careNotificationBody": "Due today for {nickname}.",
+  "@careNotificationBody": {
+    "placeholders": {
+      "nickname": {"type": "String"}
+    }
+  },
+  "careNotificationBodyMany": "Due today for {count} plants: {names}.",
+  "@careNotificationBodyMany": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "names": {"type": "String"}
+    }
+  },
+  "careNotificationBodyCount": "Due today for {count} plants.",
+  "@careNotificationBodyCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
 
   "historyPlantAdded": "Plant added to the system:",
   "historyFieldNickname": "Nickname",
