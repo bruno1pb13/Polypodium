@@ -474,6 +474,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noPlantsRegistered => 'Nenhuma planta cadastrada';
 
   @override
+  String get allPlantsArchived => 'Todas as plantas estão arquivadas';
+
+  @override
+  String get allPlantsArchivedHint =>
+      'Ative \"Mostrar arquivadas\" no menu para vê-las, ou toque em + para adicionar uma nova planta.';
+
+  @override
   String get tapToAddFirstPlant =>
       'Toque em + para adicionar sua primeira planta.';
 

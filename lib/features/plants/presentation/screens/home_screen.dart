@@ -139,6 +139,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final workspace = ref.watch(activeWorkspaceProvider);
     final syncState = ref.watch(syncNotifierProvider);
     final showArchived = ref.watch(plantShowArchivedNotifierProvider);
+    final hasAnyPlant =
+        ref.watch(plantsWithSpeciesProvider).value?.isNotEmpty ?? false;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -321,7 +323,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                               context.l10n.noPlantsFound,
                                               style: const TextStyle(
                                                   color: Colors.white)))
-                                      : const _EmptyState(),
+                                      : !showArchived && hasAnyPlant
+                                          ? const _AllArchivedState()
+                                          : const _EmptyState(),
                                 ),
                               ),
                             );
@@ -383,6 +387,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 enum _DeleteChoice { archive, delete }
+
+/// Shown when plants exist but none is active and archived ones are hidden.
+class _AllArchivedState extends StatelessWidget {
+  const _AllArchivedState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.inventory_2_outlined,
+                size: 64, color: Colors.white.withValues(alpha: 0.4)),
+            const SizedBox(height: 16),
+            Text(context.l10n.allPlantsArchived,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
+            const SizedBox(height: 8),
+            Text(context.l10n.allPlantsArchivedHint,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 13, color: Colors.white70)),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState();

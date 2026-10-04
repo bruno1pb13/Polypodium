@@ -149,6 +149,8 @@
   "errorLoadingPlants": "Erro ao carregar plantas: {error}",
   "noPlantsFound": "Nenhuma planta encontrada",
   "noPlantsRegistered": "Nenhuma planta cadastrada",
+  "allPlantsArchived": "Todas as plantas estão arquivadas",
+  "allPlantsArchivedHint": "Ative \"Mostrar arquivadas\" no menu para vê-las, ou toque em + para adicionar uma nova planta.",
   "tapToAddFirstPlant": "Toque em + para adicionar sua primeira planta.",
   "deletePlantsTitle": "{count, plural, one{Deletar {count} planta?} other{Deletar {count} plantas?}}",
   "deletePlantsBody": "Todos os registros dessas plantas serão removidos.",

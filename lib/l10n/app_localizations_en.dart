@@ -471,6 +471,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noPlantsRegistered => 'No plants registered';
 
   @override
+  String get allPlantsArchived => 'All plants are archived';
+
+  @override
+  String get allPlantsArchivedHint =>
+      'Turn on \"Show archived\" in the menu to see them, or tap + to add a new plant.';
+
+  @override
   String get tapToAddFirstPlant => 'Tap + to add your first plant.';
 
   @override
