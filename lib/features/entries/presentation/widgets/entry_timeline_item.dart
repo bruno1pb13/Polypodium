@@ -283,10 +283,13 @@ class _EntryDataBadge extends StatelessWidget {
       _ => l10n.productsCount(products.length),
     };
 
-    final nextPart = recurrenceDays != null
+    // Only worth showing while the next application is still ahead; on older
+    // entries that date has long passed.
+    final nextDate =
+        recurrenceDays != null ? date.add(Duration(days: recurrenceDays)) : null;
+    final nextPart = nextDate != null && nextDate.isAfter(DateTime.now())
         ? l10n.nextPesticideApplication(
-            DateFormat.yMd(l10n.localeName)
-                .format(date.add(Duration(days: recurrenceDays))))
+            DateFormat.yMd(l10n.localeName).format(nextDate))
         : null;
 
     final parts = [

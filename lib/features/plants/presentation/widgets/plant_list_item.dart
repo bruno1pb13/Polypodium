@@ -8,6 +8,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/plant_model.dart';
+import 'plant_status.dart';
 
 class PlantListItem extends ConsumerWidget {
   final PlantWithSpecies plantWithSpecies;
@@ -30,17 +31,12 @@ class PlantListItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pws = plantWithSpecies;
-    final days = pws.daysRelativeToSchedule;
     final overdue = pws.needsWatering;
     final photoAsync = ref.watch(latestPlantPhotoProvider(pws.plant.id));
     final alertStatus =
         ref.watch(plantAlertStatusProvider(pws.plant.id)).value ??
-            (
-              hasActiveChlorosis: false,
-              chlorosisSeverity: null,
-              hasActivePest: false,
-              pestSeverity: null
-            );
+            noPlantAlerts;
+    final statuses = plantListStatuses(context.l10n, pws, alertStatus);
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -185,37 +181,14 @@ class PlantListItem extends ConsumerWidget {
                                       .withValues(alpha: 0.7),
                             ),
                           ),
-                          if (days != null && overdue ||
-                              alertStatus.hasActiveChlorosis ||
-                              alertStatus.hasActivePest ||
-                              pws.pesticideUnderActiveControl) ...[
+                          if (statuses.isNotEmpty) ...[
                             const SizedBox(height: 8),
                             Wrap(
                               spacing: 6,
                               runSpacing: 4,
                               children: [
-                                if (days != null && overdue)
-                                  _IrrigationBadge(
-                                      daysRelative: days, overdue: overdue),
-                                if (alertStatus.hasActiveChlorosis)
-                                  _AlertBadge(
-                                    emoji: '🟡',
-                                    label: context.l10n.entryTypeChlorosis,
-                                    color: const Color(0xFFEAB308),
-                                  ),
-                                if (alertStatus.hasActivePest)
-                                  _AlertBadge(
-                                    emoji: '🐛',
-                                    label: context.l10n.pestBadge,
-                                    color: const Color(0xFFF97316),
-                                  ),
-                                if (pws.pesticideUnderActiveControl)
-                                  _AlertBadge(
-                                    emoji: '🧪',
-                                    label:
-                                        context.l10n.pesticideActiveControlBadge,
-                                    color: const Color(0xFF0D9488),
-                                  ),
+                                for (final status in statuses)
+                                  PlantStatusChip.fromStatus(status),
                               ],
                             ),
                           ],
@@ -296,89 +269,6 @@ class _ThumbnailPlaceholder extends StatelessWidget {
         Icons.local_florist_outlined,
         size: 32,
         color: overdue ? colorScheme.error : colorScheme.primary,
-      ),
-    );
-  }
-}
-
-class _AlertBadge extends StatelessWidget {
-  final String emoji;
-  final String label;
-  final Color color;
-
-  const _AlertBadge({
-    required this.emoji,
-    required this.label,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.5)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 11)),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _IrrigationBadge extends StatelessWidget {
-  final int daysRelative;
-  final bool overdue;
-
-  const _IrrigationBadge({required this.daysRelative, required this.overdue});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final color = overdue ? colorScheme.onErrorContainer : Colors.white;
-    final bgColor = overdue
-        ? colorScheme.errorContainer.withValues(alpha: 0.8)
-        : Colors.white.withValues(alpha: 0.15);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: overdue
-              ? Colors.transparent
-              : Colors.white.withValues(alpha: 0.1),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.water_drop, size: 13, color: color),
-          const SizedBox(width: 6),
-          Text(
-            context.l10n.entryTypeIrrigation,
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
       ),
     );
   }

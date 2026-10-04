@@ -1124,12 +1124,6 @@ abstract class AppLocalizations {
   /// **'Needs water!'**
   String get needsWater;
 
-  /// No description provided for @wateringUpToDate.
-  ///
-  /// In en, this message translates to:
-  /// **'Watering up to date'**
-  String get wateringUpToDate;
-
   /// No description provided for @lastWateringNotRecorded.
   ///
   /// In en, this message translates to:
@@ -1141,12 +1135,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{days, plural, one{{days} day overdue} other{{days} days overdue}}'**
   String daysOverdue(int days);
-
-  /// No description provided for @nextWateringInDays.
-  ///
-  /// In en, this message translates to:
-  /// **'{days, plural, one{Next watering in {days} day} other{Next watering in {days} days}}'**
-  String nextWateringInDays(int days);
 
   /// No description provided for @wateredNow.
   ///
@@ -1231,6 +1219,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pest control'**
   String get pesticideActiveControlBadge;
+
+  /// No description provided for @pesticideReapplyBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Reapply'**
+  String get pesticideReapplyBadge;
+
+  /// No description provided for @waterBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get waterBadge;
+
+  /// No description provided for @dueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today'**
+  String get dueToday;
 
   /// No description provided for @nextPesticideApplication.
   ///

@@ -180,11 +180,18 @@ class PlantInsightsView extends ConsumerWidget {
       final present = visible.map((e) => e.type).toSet();
       return present.map((t) => '${t.emoji} ${t.label(l10n)}').join('   ');
     }
+    // Keep the key short: only the most recent notes, with a count of the
+    // ones left out.
+    const maxNotes = 4;
+    final shown = notes.length > maxNotes
+        ? notes.sublist(notes.length - maxNotes)
+        : notes;
     final dateFmt = DateFormat.Md(l10n.localeName);
-    return notes
-        .map((e) =>
-            '${e.type.emoji} ${dateFmt.format(e.date)} — ${e.note!.trim()}')
-        .join('\n');
+    return [
+      if (notes.length > maxNotes) '… +${notes.length - maxNotes}',
+      for (final e in shown)
+        '${e.type.emoji} ${dateFmt.format(e.date)} — ${e.note!.trim()}',
+    ].join('\n');
   }
 }
 

@@ -595,9 +595,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get needsWater => 'Needs water!';
 
   @override
-  String get wateringUpToDate => 'Watering up to date';
-
-  @override
   String get lastWateringNotRecorded => 'Last watering not recorded';
 
   @override
@@ -607,17 +604,6 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$days days overdue',
       one: '$days day overdue',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String nextWateringInDays(int days) {
-    String _temp0 = intl.Intl.pluralLogic(
-      days,
-      locale: localeName,
-      other: 'Next watering in $days days',
-      one: 'Next watering in $days day',
     );
     return '$_temp0';
   }
@@ -665,6 +651,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pesticideActiveControlBadge => 'Pest control';
+
+  @override
+  String get pesticideReapplyBadge => 'Reapply';
+
+  @override
+  String get waterBadge => 'Water';
+
+  @override
+  String get dueToday => 'Due today';
 
   @override
   String nextPesticideApplication(String date) {
