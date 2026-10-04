@@ -43,6 +43,18 @@ enum DefensivoCategory {
   custom,
 }
 
+enum PlantStatus {
+  active,
+  dead,
+  donated,
+  archived;
+
+  /// Unknown or missing values (rows from older clients, backups or servers)
+  /// fall back to [active].
+  static PlantStatus fromName(String? name) =>
+      PlantStatus.values.asNameMap()[name] ?? PlantStatus.active;
+}
+
 enum PlantSortOption {
   wateringNeeds,
   nameAZ,

@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:polypodium/core/database/app_database.dart';
+import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/core/sync/drift_sync_storage_adapter.dart';
 import 'package:polypodium/core/sync/models/entity_change.dart';
 
@@ -127,5 +128,81 @@ void main() {
 
     final row = await db.locationsDao.getById('loc1');
     expect(row!.name, 'Newer name');
+  });
+
+  group('plant status', () {
+    Map<String, dynamic> plantPayload() => {
+          'id': 'plant1',
+          'speciesId': 'species1',
+          'nickname': 'Planta',
+          'soilId': 'sandy',
+          'irrigationFrequencyDays': null,
+          'acquisitionDate': DateTime(2026, 1, 1).toIso8601String(),
+          'location': null,
+          'locationId': null,
+          'lastIrrigatedAt': null,
+          'lastPesticideAppliedAt': null,
+          'pesticideReapplicationDays': null,
+          'createdAt': DateTime(2026, 1, 1).toIso8601String(),
+        };
+
+    EntityChange plantChange(Map<String, dynamic> payload) => EntityChange(
+          entityType: 'plant',
+          entityId: 'plant1',
+          payload: payload,
+          updatedAt: DateTime(2026, 2, 1),
+          deviceId: 'device-2',
+          rev: 1,
+        );
+
+    test('is serialized in the outgoing payload', () async {
+      await db.plantsDao.upsert(PlantsTableCompanion.insert(
+        id: 'plant1',
+        speciesId: 'species1',
+        nickname: 'Planta',
+        soilType: 'sandy',
+        acquisitionDate: DateTime(2026, 1, 1),
+        status: const Value(PlantStatus.dead),
+        statusChangedAt: Value(DateTime(2026, 3, 1)),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+        localRev: const Value(1),
+      ));
+
+      final change = (await adapter.localChangesSince(0,
+              limit: 100, deviceId: 'device-1'))
+          .single;
+      expect(change.payload['status'], 'dead');
+      expect(change.payload['statusChangedAt'],
+          DateTime(2026, 3, 1).toIso8601String());
+    });
+
+    test('is applied from a remote change', () async {
+      await adapter.applyRemoteChange(plantChange({
+        ...plantPayload(),
+        'status': 'donated',
+        'statusChangedAt': DateTime(2026, 3, 1).toIso8601String(),
+      }));
+
+      final row = await db.plantsDao.getById('plant1');
+      expect(row!.status, PlantStatus.donated);
+      expect(row.statusChangedAt, DateTime(2026, 3, 1));
+    });
+
+    test('defaults to active when an older client omits it', () async {
+      await adapter.applyRemoteChange(plantChange(plantPayload()));
+
+      final row = await db.plantsDao.getById('plant1');
+      expect(row!.status, PlantStatus.active);
+      expect(row.statusChangedAt, isNull);
+    });
+
+    test('falls back to active for an unknown value', () async {
+      await adapter.applyRemoteChange(
+          plantChange({...plantPayload(), 'status': 'composted'}));
+
+      final row = await db.plantsDao.getById('plant1');
+      expect(row!.status, PlantStatus.active);
+    });
   });
 }

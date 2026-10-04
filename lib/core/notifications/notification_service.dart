@@ -36,7 +36,8 @@ void onBackgroundNotificationResponse(NotificationResponse response) {
 abstract interface class INotificationService {
   /// Rebuilds the whole irrigation reminder schedule from [plants] — the
   /// full set of active plants. Anything previously scheduled that is no
-  /// longer due (watered meanwhile, deleted, disabled) is cancelled.
+  /// longer due (watered meanwhile, deleted, archived, disabled) is
+  /// cancelled.
   Future<void> rescheduleAll(List<PlantWithSpecies> plants);
 }
 
@@ -266,7 +267,8 @@ class NotificationService implements INotificationService {
     }
 
     // Snoozed reminders, narrowed to the plants that still need it — one
-    // watered (or deleted) meanwhile drops out, and an empty one is skipped.
+    // watered, archived or deleted meanwhile drops out, and an empty one is
+    // skipped.
     final snoozes = await ReminderSnoozeStore(prefs).loadPending(now.toLocal());
     final byId = {for (final item in plants) item.plant.id: item};
     for (final (index, snooze) in snoozes.indexed) {
@@ -417,9 +419,11 @@ class NotificationService implements INotificationService {
                 ? PhotoStorage()
                 : PhotoStorage(baseDirName: photoDirNameFor(ws)),
           );
-          // Skip plants deleted since the notification was scheduled.
+          // Skip plants deleted or archived since the notification was
+          // scheduled.
           final existing = {
-            for (final plant in await plantsRepo.getAll()) plant.id
+            for (final plant in await plantsRepo.getAll())
+              if (plant.isActive) plant.id
           };
           final now = DateTime.now();
           for (final plantId in payload.plantIds.where(existing.contains)) {
@@ -512,8 +516,9 @@ class NotificationService implements INotificationService {
   }
 
   /// Groups the plants due on the same date into a single reminder: date
-  /// (at midnight) → every plant due that day. Plants without
-  /// an irrigation frequency (own or species default) are skipped.
+  /// (at midnight) → every plant due that day. Plants that are no longer
+  /// active, or without an irrigation frequency (own or species default),
+  /// are skipped.
   @visibleForTesting
   static Map<DateTime, List<PlantModel>> groupPlantsByDueDate(
     List<PlantWithSpecies> plants,
@@ -523,6 +528,7 @@ class NotificationService implements INotificationService {
   }) {
     final groups = <DateTime, List<PlantModel>>{};
     for (final item in plants) {
+      if (!item.plant.isActive) continue;
       final frequencyDays = item.effectiveFrequencyDays;
       if (frequencyDays == null) continue;
 
@@ -536,9 +542,9 @@ class NotificationService implements INotificationService {
   }
 
   /// Groups the plants due for pesticide reapplication on the same date,
-  /// mirroring [groupPlantsByDueDate]. Plants without an active pesticide
-  /// reminder (no recurrence set on their most recent 'pesticide' entry) are
-  /// skipped.
+  /// mirroring [groupPlantsByDueDate]. Plants that are no longer active, or
+  /// without an active pesticide reminder (no recurrence set on their most
+  /// recent 'pesticide' entry), are skipped.
   @visibleForTesting
   static Map<DateTime, List<PlantModel>> groupPlantsByPesticideDueDate(
     List<PlantWithSpecies> plants,
@@ -548,6 +554,7 @@ class NotificationService implements INotificationService {
   }) {
     final groups = <DateTime, List<PlantModel>>{};
     for (final item in plants) {
+      if (!item.plant.isActive) continue;
       final frequencyDays = item.plant.pesticideReapplicationDays;
       final lastApplied = item.plant.lastPesticideAppliedAt;
       if (frequencyDays == null || lastApplied == null) continue;

@@ -1,3 +1,4 @@
+import '../../../core/enums.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../locations/domain/location_model.dart';
 import '../../species/domain/species_model.dart';
@@ -19,6 +20,8 @@ class PlantModel {
   /// PlantsRepository.refreshPesticideStatus.
   final DateTime? lastPesticideAppliedAt;
   final int? pesticideReapplicationDays;
+  final PlantStatus status;
+  final DateTime? statusChangedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -36,11 +39,15 @@ class PlantModel {
     this.lastIrrigatedAt,
     this.lastPesticideAppliedAt,
     this.pesticideReapplicationDays,
+    this.status = PlantStatus.active,
+    this.statusChangedAt,
     required this.createdAt,
     DateTime? updatedAt,
     this.deletedAt,
     this.localRev = 0,
   }) : updatedAt = updatedAt ?? createdAt;
+
+  bool get isActive => status == PlantStatus.active;
 
   PlantModel copyWith({
     String? id,
@@ -54,6 +61,8 @@ class PlantModel {
     Object? lastIrrigatedAt = _sentinel,
     Object? lastPesticideAppliedAt = _sentinel,
     Object? pesticideReapplicationDays = _sentinel,
+    PlantStatus? status,
+    Object? statusChangedAt = _sentinel,
     DateTime? createdAt,
     DateTime? updatedAt,
     Object? deletedAt = _sentinel,
@@ -80,6 +89,10 @@ class PlantModel {
         pesticideReapplicationDays: pesticideReapplicationDays == _sentinel
             ? this.pesticideReapplicationDays
             : pesticideReapplicationDays as int?,
+        status: status ?? this.status,
+        statusChangedAt: statusChangedAt == _sentinel
+            ? this.statusChangedAt
+            : statusChangedAt as DateTime?,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt == _sentinel ? this.deletedAt : deletedAt as DateTime?,
@@ -108,6 +121,7 @@ class PlantWithSpecies {
       plant.irrigationFrequencyDays ?? species.defaultIrrigationFrequencyDays;
 
   bool get needsWatering {
+    if (!plant.isActive) return false;
     final freq = effectiveFrequencyDays;
     if (freq == null) return false;
     if (plant.lastIrrigatedAt == null) return true;
@@ -121,8 +135,10 @@ class PlantWithSpecies {
     return calendarDaysBetween(plant.lastIrrigatedAt!);
   }
 
-  /// Positive = days overdue, negative = days until due
+  /// Positive = days overdue, negative = days until due. Null for plants
+  /// that are no longer active.
   int? get daysRelativeToSchedule {
+    if (!plant.isActive) return null;
     final freq = effectiveFrequencyDays;
     if (freq == null) return null;
     return daysSinceIrrigation - freq;
@@ -138,8 +154,9 @@ class PlantWithSpecies {
   }
 
   /// Positive = days overdue, negative = days until due, null when there's
-  /// no active pesticide reminder.
+  /// no active pesticide reminder (or the plant is no longer active).
   int? get pesticideDaysRelative {
+    if (!plant.isActive) return null;
     final freq = plant.pesticideReapplicationDays;
     final lastApplied = plant.lastPesticideAppliedAt;
     if (freq == null || lastApplied == null) return null;
@@ -171,6 +188,7 @@ class PlantWithSpecies {
   /// currently under pest control — independent of [needsPesticideReapplication]
   /// or any reapplication reminder.
   bool get pesticideUnderActiveControl {
+    if (!plant.isActive) return false;
     final lastApplied = plant.lastPesticideAppliedAt;
     if (lastApplied == null) return false;
     final daysSince = calendarDaysBetween(lastApplied);

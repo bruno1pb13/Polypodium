@@ -142,6 +142,8 @@ void main() {
         nickname: 'Planta',
         soilType: 'sandy',
         acquisitionDate: DateTime(2026, 1, 1),
+        status: const Value(PlantStatus.archived),
+        statusChangedAt: Value(DateTime(2026, 1, 3)),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       ));
@@ -166,6 +168,8 @@ void main() {
 
       expect(species, isNotNull);
       expect(plant, isNotNull);
+      expect(plant!.status, PlantStatus.archived);
+      expect(plant.statusChangedAt, DateTime(2026, 1, 3));
       expect(entry, isNotNull);
     });
 

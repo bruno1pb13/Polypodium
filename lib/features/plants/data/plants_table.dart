@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../../core/database/converters.dart';
 import '../../locations/data/locations_table.dart';
 import '../../soils/data/soils_table.dart';
 import '../../species/data/species_table.dart';
@@ -31,6 +32,13 @@ class PlantsTable extends Table {
   /// Recurrence (in days) set on the most recent 'pesticide' entry, or null
   /// if that entry didn't request a reminder.
   IntColumn get pesticideReapplicationDays => integer().nullable()();
+
+  /// Lifecycle status — only `active` plants get reminders and show up in
+  /// the default lists; the others keep their diary as history.
+  TextColumn get status => text()
+      .map(const PlantStatusConverter())
+      .withDefault(const Constant('active'))();
+  DateTimeColumn get statusChangedAt => dateTime().nullable()();
 
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();

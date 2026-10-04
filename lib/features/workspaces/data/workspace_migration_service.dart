@@ -171,6 +171,8 @@ class WorkspaceMigrationService {
           lastIrrigatedAt: Value(row.lastIrrigatedAt),
           lastPesticideAppliedAt: Value(row.lastPesticideAppliedAt),
           pesticideReapplicationDays: Value(row.pesticideReapplicationDays),
+          status: Value(row.status),
+          statusChangedAt: Value(row.statusChangedAt),
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/core/notifications/notification_service.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/species/domain/species_model.dart';
@@ -288,6 +289,65 @@ void main() {
       );
 
       expect(groups, isEmpty);
+    });
+  });
+
+  group('NotificationService skips plants that are no longer active', () {
+    final species = SpeciesModel(
+      id: 'species-1',
+      scientificName: 'Ocimum basilicum',
+      popularName: 'Basil',
+      defaultIrrigationFrequencyDays: 7,
+      recommendedSoilIds: const ['loamy'],
+      createdAt: DateTime(2026, 1, 1),
+    );
+
+    PlantWithSpecies makePlant(String nickname, PlantStatus status) =>
+        PlantWithSpecies(
+          plant: PlantModel(
+            id: 'plant-$nickname',
+            speciesId: species.id,
+            nickname: nickname,
+            soilId: 'loamy',
+            acquisitionDate: DateTime(2026, 1, 1),
+            createdAt: DateTime(2026, 1, 1),
+            lastIrrigatedAt: DateTime(2026, 5, 20),
+            irrigationFrequencyDays: 5,
+            lastPesticideAppliedAt: DateTime(2026, 5, 20),
+            pesticideReapplicationDays: 5,
+            status: status,
+          ),
+          species: species,
+        );
+
+    final plants = [
+      for (final status in PlantStatus.values) makePlant(status.name, status),
+    ];
+    final now = DateTime(2026, 5, 20, 10);
+
+    test('irrigation reminders', () {
+      final groups = NotificationService.groupPlantsByDueDate(plants, now);
+      expect(nicknames(groups[DateTime(2026, 5, 25)]), ['active']);
+    });
+
+    test('pesticide reminders', () {
+      final groups =
+          NotificationService.groupPlantsByPesticideDueDate(plants, now);
+      expect(nicknames(groups[DateTime(2026, 5, 25)]), ['active']);
+    });
+
+    test('snoozed reminders (needsWatering / needsPesticideReapplication)',
+        () {
+      final overdue = PlantWithSpecies(
+        plant: plants.last.plant.copyWith(
+          lastIrrigatedAt: DateTime(2026, 1, 1),
+          lastPesticideAppliedAt: DateTime(2026, 1, 1),
+        ),
+        species: species,
+      );
+      expect(overdue.plant.status, PlantStatus.archived);
+      expect(overdue.needsWatering, isFalse);
+      expect(overdue.needsPesticideReapplication, isFalse);
     });
   });
 }
