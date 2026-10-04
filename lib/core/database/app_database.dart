@@ -54,7 +54,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -129,6 +129,10 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(plantsTable, plantsTable.lastPesticideAppliedAt);
             await m.addColumn(
                 plantsTable, plantsTable.pesticideReapplicationDays);
+          }
+          if (from < 12) {
+            await m.addColumn(plantsTable, plantsTable.status);
+            await m.addColumn(plantsTable, plantsTable.statusChangedAt);
           }
         },
       );

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../species/domain/species_model.dart';
 import '../../../species/presentation/providers/species_providers.dart';
@@ -532,6 +533,10 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
         acquisitionDate: _acquisitionDate,
         locationId: _selectedLocationId,
         lastIrrigatedAt: widget.plant?.lastIrrigatedAt,
+        lastPesticideAppliedAt: widget.plant?.lastPesticideAppliedAt,
+        pesticideReapplicationDays: widget.plant?.pesticideReapplicationDays,
+        status: widget.plant?.status ?? PlantStatus.active,
+        statusChangedAt: widget.plant?.statusChangedAt,
         createdAt: widget.plant?.createdAt ?? DateTime.now(),
       );
 

@@ -27,10 +27,14 @@ class NotificationResponseHandler {
     try {
       switch (response.actionId) {
         case ReminderAction.water:
-          // Skip plants deleted since the notification was scheduled.
+          // Skip plants deleted or archived since the notification was
+          // scheduled.
           final plants =
               await _container.read(plantsRepositoryProvider).getAll();
-          final existing = {for (final plant in plants) plant.id};
+          final existing = {
+            for (final plant in plants)
+              if (plant.isActive) plant.id
+          };
           await _container
               .read(entryMutationsProvider)
               .recordIrrigation(payload.plantIds.where(existing.contains));

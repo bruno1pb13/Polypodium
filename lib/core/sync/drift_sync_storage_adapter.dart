@@ -130,6 +130,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'lastPesticideAppliedAt':
               r.lastPesticideAppliedAt?.toIso8601String(),
           'pesticideReapplicationDays': r.pesticideReapplicationDays,
+          'status': r.status.name,
+          'statusChangedAt': r.statusChangedAt?.toIso8601String(),
           'createdAt': r.createdAt.toIso8601String(),
         };
       case 'entry':
@@ -257,6 +259,11 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           : null),
       pesticideReapplicationDays:
           Value(p['pesticideReapplicationDays'] as int?),
+      // Older clients don't send a status: treat their plants as active.
+      status: Value(PlantStatus.fromName(p['status'] as String?)),
+      statusChangedAt: Value(p['statusChangedAt'] != null
+          ? DateTime.parse(p['statusChangedAt'] as String)
+          : null),
       createdAt: DateTime.parse(p['createdAt'] as String),
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),

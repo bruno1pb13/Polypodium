@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -125,6 +127,66 @@ void main() {
     final species = await target.speciesDao.getById('species1');
     expect(species, isNotNull);
     expect(species!.deletedAt, t1);
+  });
+
+  test('plant status survives the round trip', () async {
+    await seedSpecies(source, 'Ficus lyrata', t0);
+    await source.plantsDao.upsert(PlantsTableCompanion.insert(
+      id: 'plant1',
+      speciesId: 'species1',
+      nickname: 'Doada',
+      soilType: 'loamy',
+      acquisitionDate: t0,
+      status: const Value(PlantStatus.donated),
+      statusChangedAt: Value(t1),
+      createdAt: t0,
+      updatedAt: t1,
+      localRev: const Value(2),
+    ));
+
+    final bytes = await DataExportService(source).buildArchiveBytes();
+    await DataImportService(target, FakePhotoStorage())
+        .importFromBytes(bytes);
+
+    final plant = await target.plantsDao.getById('plant1');
+    expect(plant!.status, PlantStatus.donated);
+    expect(plant.statusChangedAt, t1);
+  });
+
+  test('plants from a backup without status are imported as active',
+      () async {
+    final backup = {
+      'format': DataExportService.formatName,
+      'version': DataExportService.formatVersion,
+      'exportedAt': t1.toIso8601String(),
+      'entities': {
+        'plants': [
+          {
+            'id': 'plant1',
+            'speciesId': 'species1',
+            'nickname': 'Antiga',
+            'soilId': 'loamy',
+            'irrigationFrequencyDays': null,
+            'acquisitionDate': t0.toIso8601String(),
+            'location': null,
+            'locationId': null,
+            'lastIrrigatedAt': null,
+            'lastPesticideAppliedAt': null,
+            'pesticideReapplicationDays': null,
+            'createdAt': t0.toIso8601String(),
+            'updatedAt': t0.toIso8601String(),
+            'deletedAt': null,
+          }
+        ],
+      },
+    };
+
+    await DataImportService(target, FakePhotoStorage())
+        .importFromBytes(Uint8List.fromList(utf8.encode(jsonEncode(backup))));
+
+    final plant = await target.plantsDao.getById('plant1');
+    expect(plant!.status, PlantStatus.active);
+    expect(plant.statusChangedAt, isNull);
   });
 
   test('rejects files that are not a Polypodium backup', () async {

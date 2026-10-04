@@ -336,6 +336,11 @@ class DataImportService {
           : null),
       pesticideReapplicationDays:
           Value(row['pesticideReapplicationDays'] as int?),
+      // Backups made before plant status existed have no such field.
+      status: Value(PlantStatus.fromName(row['status'] as String?)),
+      statusChangedAt: Value(row['statusChangedAt'] != null
+          ? DateTime.parse(row['statusChangedAt'] as String)
+          : null),
       createdAt: DateTime.parse(row['createdAt'] as String),
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),

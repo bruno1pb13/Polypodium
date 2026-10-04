@@ -113,11 +113,11 @@ class PlantsRepository {
 
   /// Rebuilds the whole irrigation reminder schedule from the active plants.
   /// Called after every local mutation and after a sync pull — the pull
-  /// writes plants/entries straight into the database, so a plant watered or
-  /// deleted on another device must have its stale local reminder replaced
-  /// here rather than left pending.
+  /// writes plants/entries straight into the database, so a plant watered,
+  /// archived or deleted on another device must have its stale local
+  /// reminder replaced here rather than left pending.
   Future<void> rescheduleNotifications() async {
-    final plants = await getAll();
+    final plants = (await getAll()).where((p) => p.isActive);
     final species = await _speciesRepo.getAll();
     final speciesById = {for (final s in species) s.id: s};
 
@@ -148,6 +148,8 @@ class PlantsRepository {
         lastIrrigatedAt: row.lastIrrigatedAt,
         lastPesticideAppliedAt: row.lastPesticideAppliedAt,
         pesticideReapplicationDays: row.pesticideReapplicationDays,
+        status: row.status,
+        statusChangedAt: row.statusChangedAt,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         deletedAt: row.deletedAt,
@@ -168,6 +170,8 @@ class PlantsRepository {
         lastIrrigatedAt: Value(m.lastIrrigatedAt),
         lastPesticideAppliedAt: Value(m.lastPesticideAppliedAt),
         pesticideReapplicationDays: Value(m.pesticideReapplicationDays),
+        status: Value(m.status),
+        statusChangedAt: Value(m.statusChangedAt),
         createdAt: m.createdAt,
         updatedAt: updatedAt,
         localRev: Value(rev),
