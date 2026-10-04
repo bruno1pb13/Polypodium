@@ -2,6 +2,7 @@
   "@@locale": "pt",
 
   "navMyPlants": "Minhas Plantas",
+  "navAgenda": "Agenda",
   "navSpecies": "Espécies",
   "navLocations": "Localizações",
   "navSoils": "Solos",
@@ -136,6 +137,14 @@
   "reminderOverdue": "{days, plural, one{Atrasado há {days} dia} other{Atrasado há {days} dias}}",
   "reminderLastDone": "Última: {date}",
   "reminderNeverDone": "Sem registro ainda",
+  "agendaOverdue": "Atrasados",
+  "agendaToday": "Hoje",
+  "agendaNextDays": "Próximos {days} dias",
+  "agendaTomorrow": "Amanhã",
+  "agendaRecord": "Registrar",
+  "agendaPesticideTask": "Reaplicação de defensivo",
+  "agendaAllCaughtUp": "Tudo em dia! 🌿",
+  "agendaAllCaughtUpHint": "Nenhum cuidado previsto para os próximos {days} dias.",
   "deleteReminderTitle": "Excluir lembrete?",
   "deleteReminderBody": "As entradas do diário são mantidas; só o lembrete é removido.",
 

@@ -34,6 +34,8 @@ class RemindersDao extends DatabaseAccessor<AppDatabase>
 
   Future<List<ReminderRow>> getAllWithLastDone() => _withLastDone().get();
 
+  Stream<List<ReminderRow>> watchAllWithLastDone() => _withLastDone().watch();
+
   Stream<List<ReminderRow>> watchByPlantWithLastDone(String plantId) =>
       _withLastDone(plantId: plantId).watch();
 

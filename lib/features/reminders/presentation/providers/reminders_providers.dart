@@ -18,6 +18,11 @@ RemindersRepository remindersRepository(Ref ref) =>
 Stream<List<ReminderStatus>> plantReminders(Ref ref, String plantId) =>
     ref.watch(remindersRepositoryProvider).watchStatusesByPlant(plantId);
 
+/// Every active reminder across all plants (enabled or not), for the agenda.
+@riverpod
+Stream<List<ReminderStatus>> allReminders(Ref ref) =>
+    ref.watch(remindersRepositoryProvider).watchAllStatuses();
+
 @Riverpod(keepAlive: true)
 ReminderMutations reminderMutations(Ref ref) => ReminderMutations(ref);
 

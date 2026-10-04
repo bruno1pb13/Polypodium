@@ -2,6 +2,7 @@
   "@@locale": "en",
 
   "navMyPlants": "My Plants",
+  "navAgenda": "Agenda",
   "navSpecies": "Species",
   "navLocations": "Locations",
   "navSoils": "Soils",
@@ -248,6 +249,24 @@
     }
   },
   "reminderNeverDone": "Not recorded yet",
+  "agendaOverdue": "Overdue",
+  "agendaToday": "Today",
+  "agendaNextDays": "Next {days} days",
+  "@agendaNextDays": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "agendaTomorrow": "Tomorrow",
+  "agendaRecord": "Record",
+  "agendaPesticideTask": "Pesticide reapplication",
+  "agendaAllCaughtUp": "All caught up! 🌿",
+  "agendaAllCaughtUpHint": "No care due in the next {days} days.",
+  "@agendaAllCaughtUpHint": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
   "deleteReminderTitle": "Delete reminder?",
   "deleteReminderBody": "The diary entries are kept; only the reminder is removed.",
 

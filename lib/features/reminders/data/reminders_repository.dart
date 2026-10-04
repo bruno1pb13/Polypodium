@@ -16,6 +16,10 @@ class RemindersRepository {
   Future<List<ReminderStatus>> getAllStatuses() async =>
       (await _dao.getAllWithLastDone()).map(_statusFromRow).toList();
 
+  Stream<List<ReminderStatus>> watchAllStatuses() => _dao
+      .watchAllWithLastDone()
+      .map((rows) => rows.map(_statusFromRow).toList());
+
   /// Re-emits on reminder changes and on entry changes (new last-done date).
   Stream<List<ReminderStatus>> watchStatusesByPlant(String plantId) => _dao
       .watchByPlantWithLastDone(plantId)

@@ -12,6 +12,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get navMyPlants => 'Minhas Plantas';
 
   @override
+  String get navAgenda => 'Agenda';
+
+  @override
   String get navSpecies => 'Espécies';
 
   @override
@@ -469,6 +472,34 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get reminderNeverDone => 'Sem registro ainda';
+
+  @override
+  String get agendaOverdue => 'Atrasados';
+
+  @override
+  String get agendaToday => 'Hoje';
+
+  @override
+  String agendaNextDays(int days) {
+    return 'Próximos $days dias';
+  }
+
+  @override
+  String get agendaTomorrow => 'Amanhã';
+
+  @override
+  String get agendaRecord => 'Registrar';
+
+  @override
+  String get agendaPesticideTask => 'Reaplicação de defensivo';
+
+  @override
+  String get agendaAllCaughtUp => 'Tudo em dia! 🌿';
+
+  @override
+  String agendaAllCaughtUpHint(int days) {
+    return 'Nenhum cuidado previsto para os próximos $days dias.';
+  }
 
   @override
   String get deleteReminderTitle => 'Excluir lembrete?';
