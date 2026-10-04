@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:drift/drift.dart';
 
+import '../../features/entries/domain/entry_details.dart';
 import '../database/app_database.dart';
 import '../enums.dart';
 import 'i_sync_storage_adapter.dart';
@@ -334,8 +333,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           .getLastEntryOfType(plantId, EntryType.pesticide);
       final recurrenceDays = last == null
           ? null
-          : (jsonDecode(last.extraData ?? '{}')
-              as Map<String, dynamic>)['recurrenceDays'] as int?;
+          : PesticideDetails.recurrenceDaysOf(last.extraData);
       await _db.transaction(() async {
         final rev = await _db.syncMetaDao.nextRev();
         await _db.plantsDao.updateLastPesticideApplication(

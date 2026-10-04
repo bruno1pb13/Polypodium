@@ -7,6 +7,7 @@ import '../../../core/database/app_database.dart';
 import '../../../core/enums.dart';
 import '../../../core/storage/photo_storage.dart';
 import '../../../core/sync/lww_merge.dart';
+import '../../entries/domain/entry_details.dart';
 import 'data_export_service.dart';
 
 class ImportSummary {
@@ -169,8 +170,7 @@ class DataImportService {
               .getLastEntryOfType(plantId, EntryType.pesticide);
           final recurrenceDays = last == null
               ? null
-              : (jsonDecode(last.extraData ?? '{}')
-                  as Map<String, dynamic>)['recurrenceDays'] as int?;
+              : PesticideDetails.recurrenceDaysOf(last.extraData);
           final rev = await _db.syncMetaDao.nextRev();
           await _db.plantsDao.updateLastPesticideApplication(
               plantId, last?.date, recurrenceDays,

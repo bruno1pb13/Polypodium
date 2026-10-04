@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
@@ -14,6 +13,7 @@ import '../../../../core/storage/photo_storage.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../defensivos/domain/defensivo_model.dart';
 import '../../../defensivos/presentation/widgets/defensivo_selection_field.dart';
+import '../../../entries/domain/entry_details.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 
@@ -154,47 +154,40 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     }
   }
 
-  String? get _extraData {
+  EntryDetails? get _details {
     switch (_type) {
       case EntryType.pest:
-        final t = _pestTypeCtrl.text.trim();
-        return t.isEmpty ? null : jsonEncode({'pestType': t});
+        return PestDetails(pestType: _pestTypeCtrl.text.trim());
       case EntryType.fertilizer:
-        final products = _fertilizerProducts
-            .map((p) {
-              final name = p.nameCtrl.text.trim();
-              if (name.isEmpty) return null;
-              final dose =
-                  double.tryParse(p.doseCtrl.text.replaceAll(',', '.'));
-              return {'name': name, if (dose != null) 'dose': dose};
-            })
-            .whereType<Map<String, dynamic>>()
-            .toList();
-        return products.isEmpty ? null : jsonEncode({'products': products});
+        return FertilizerDetails(
+          products: _fertilizerProducts
+              .where((p) => p.nameCtrl.text.trim().isNotEmpty)
+              .map((p) => FertilizerProduct(
+                    name: p.nameCtrl.text.trim(),
+                    dose: double.tryParse(
+                        p.doseCtrl.text.replaceAll(',', '.')),
+                  ))
+              .toList(),
+        );
       case EntryType.pruning:
-        return _pruningReason == null
-            ? null
-            : jsonEncode({'reason': _pruningReason});
+        return PruningDetails(reason: _pruningReason);
       case EntryType.pesticide:
-        final products = _pesticideProducts
-            .where((p) => p.selected != null)
-            .map((p) {
-              final dose = p.doseCtrl.text.trim();
-              return {
-                'defensivoId': p.selected!.id,
-                'name': p.selected!.name,
-                if (dose.isNotEmpty) 'dose': dose,
-              };
-            })
-            .toList();
-        final recurrenceDays =
-            double.tryParse(_pesticideRecurrenceCtrl.text.replaceAll(',', '.'))
-                ?.round();
-        if (products.isEmpty && recurrenceDays == null) return null;
-        return jsonEncode({
-          if (products.isNotEmpty) 'products': products,
-          if (recurrenceDays != null) 'recurrenceDays': recurrenceDays,
-        });
+        return PesticideDetails(
+          products: _pesticideProducts
+              .where((p) => p.selected != null)
+              .map((p) {
+                final dose = p.doseCtrl.text.trim();
+                return PesticideProduct(
+                  defensivoId: p.selected!.id,
+                  name: p.selected!.name,
+                  dose: dose.isEmpty ? null : dose,
+                );
+              })
+              .toList(),
+          recurrenceDays: double.tryParse(
+                  _pesticideRecurrenceCtrl.text.replaceAll(',', '.'))
+              ?.round(),
+        );
       default:
         return null;
     }
@@ -1030,7 +1023,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           note: note,
           type: _type,
           numericValue: _numericValue,
-          extraData: _extraData,
+          extraData: _details?.encode(),
           createdAt: now,
         );
         entries.add(entry);
