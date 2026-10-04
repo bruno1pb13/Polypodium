@@ -8,6 +8,7 @@ import 'package:polypodium/features/species/data/species_repository.dart';
 import 'package:polypodium/features/entries/data/entries_repository.dart';
 import 'package:polypodium/features/entries/domain/entry_model.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
+import 'package:polypodium/features/reminders/domain/reminder_model.dart';
 import 'package:polypodium/features/species/domain/species_model.dart';
 import 'package:polypodium/core/storage/photo_storage.dart';
 import 'package:uuid/uuid.dart';
@@ -34,7 +35,8 @@ class MockPhotoStorage implements PhotoStorage {
 
 class MockNotificationService implements INotificationService {
   @override
-  Future<void> rescheduleAll(List<PlantWithSpecies> plants) async {}
+  Future<void> rescheduleAll(List<PlantWithSpecies> plants,
+      {List<PlantReminder> reminders = const []}) async {}
 }
 
 void main() {

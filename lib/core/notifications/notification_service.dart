@@ -19,6 +19,7 @@ import '../../features/entries/data/entries_repository.dart';
 import '../../features/entries/domain/entry_model.dart';
 import '../../features/plants/data/plants_repository.dart';
 import '../../features/plants/domain/plant_model.dart';
+import '../../features/reminders/domain/reminder_model.dart';
 import '../../features/workspaces/data/workspace_repository.dart';
 import '../../features/workspaces/domain/workspace_model.dart';
 import '../../features/workspaces/domain/workspace_paths.dart';
@@ -34,11 +35,12 @@ void onBackgroundNotificationResponse(NotificationResponse response) {
 }
 
 abstract interface class INotificationService {
-  /// Rebuilds the whole irrigation reminder schedule from [plants] — the
-  /// full set of active plants. Anything previously scheduled that is no
-  /// longer due (watered meanwhile, deleted, archived, disabled) is
-  /// cancelled.
-  Future<void> rescheduleAll(List<PlantWithSpecies> plants);
+  /// Rebuilds the whole reminder schedule from [plants] — the full set of
+  /// active plants — and [reminders], their enabled recurring care
+  /// reminders. Anything previously scheduled that is no longer due
+  /// (watered meanwhile, deleted, archived, disabled) is cancelled.
+  Future<void> rescheduleAll(List<PlantWithSpecies> plants,
+      {List<PlantReminder> reminders = const []});
 }
 
 class NotificationService implements INotificationService {
@@ -47,16 +49,26 @@ class NotificationService implements INotificationService {
   static const irrigationCheckTask = 'irrigation-check';
   static const _channelId = 'polypodium_irrigation';
   static const _pesticideChannelId = 'polypodium_defensivo';
+  static const _careChannelId = 'polypodium_care';
 
   /// Groups every irrigation reminder in the notification shade (Android
   /// bundles by groupKey; iOS threads by threadIdentifier).
   static const _groupKey = 'polypodium_irrigation_group';
   static const _pesticideGroupKey = 'polypodium_defensivo_group';
+  static const _careGroupKey = 'polypodium_care_group';
 
   /// Notification ids are namespaced by "kind" (added to the date-based id)
   /// so an irrigation reminder and a pesticide reminder due on the same
   /// calendar date never collide/overwrite each other.
   static const _pesticideIdOffset = 1000000000;
+
+  /// Recurring care reminders use [_careIdOffset] + entry type index ×
+  /// 1 000 000 + days since 1970-01-01 of the due date. Days stay below
+  /// 1 000 000 until the year 4707 and EntryType has ~10 values, so these
+  /// ids live in [500 000 000, 600 000 000): above every irrigation id
+  /// (yyyymmdd < 100 000 000) and below the pesticide ones.
+  static const _careIdOffset = 500000000;
+  static const _careIdTypeStride = 1000000;
 
   /// Snoozed reminders get sequential ids above every date-based id (still
   /// below 2^31, the platform limit).
@@ -65,6 +77,7 @@ class NotificationService implements INotificationService {
   /// Darwin category ids, which select the action buttons shown on iOS/macOS.
   static const _irrigationCategoryId = 'irrigation';
   static const _pesticideCategoryId = 'pesticide';
+  static const _careCategoryId = 'care';
 
   /// SharedPreferences keys — shared with SettingsRepository, which cannot be
   /// imported here (it depends on this service).
@@ -104,6 +117,14 @@ class NotificationService implements INotificationService {
           importance: Importance.defaultImportance,
         ),
       );
+      await androidPlugin?.createNotificationChannel(
+        AndroidNotificationChannel(
+          _careChannelId,
+          _l10n.careChannelName,
+          description: _l10n.careChannelDescription,
+          importance: Importance.defaultImportance,
+        ),
+      );
     }
   }
 
@@ -126,6 +147,7 @@ class NotificationService implements INotificationService {
         DarwinNotificationCategory(_irrigationCategoryId,
             actions: [watered, snooze]),
         DarwinNotificationCategory(_pesticideCategoryId, actions: [snooze]),
+        DarwinNotificationCategory(_careCategoryId, actions: [snooze]),
       ],
     );
     const linux = LinuxInitializationSettings(
@@ -202,13 +224,15 @@ class NotificationService implements INotificationService {
   // INotificationService --------------------------------------------------
 
   @override
-  Future<void> rescheduleAll(List<PlantWithSpecies> plants) =>
-      rescheduleAllNotifications(plants);
+  Future<void> rescheduleAll(List<PlantWithSpecies> plants,
+          {List<PlantReminder> reminders = const []}) =>
+      rescheduleAllNotifications(plants, reminders: reminders);
 
   // Static API ------------------------------------------------------------
 
-  /// Cancels every pending irrigation reminder and schedules a fresh set:
-  /// one notification per due date, listing all plants due that day.
+  /// Cancels every pending reminder and schedules a fresh set: one
+  /// notification per due date (and, for care [reminders], per entry type),
+  /// listing all plants due that day.
   ///
   /// Starting from a clean slate is what keeps the schedule honest — a plant
   /// watered or deleted on another device (applied locally by a sync pull)
@@ -219,6 +243,7 @@ class NotificationService implements INotificationService {
   /// SharedPreferences.
   static Future<void> rescheduleAllNotifications(
     List<PlantWithSpecies> plants, {
+    List<PlantReminder> reminders = const [],
     bool? enabled,
   }) async {
     // flutter_local_notifications only implements scheduling on
@@ -246,6 +271,9 @@ class NotificationService implements INotificationService {
         plants, now.toLocal(),
         hour: hour, minute: minute);
 
+    final careGroups = groupRemindersByDueDate(reminders, now.toLocal(),
+        hour: hour, minute: minute);
+
     for (final entry in groups.entries) {
       final date = entry.key;
       await _schedule(
@@ -266,51 +294,111 @@ class NotificationService implements INotificationService {
       );
     }
 
+    for (final entry in careGroups.entries) {
+      final (:date, :type) = entry.key;
+      await _schedule(
+        ReminderKind.care,
+        careNotificationId(date, type),
+        tz.TZDateTime(tz.local, date.year, date.month, date.day, hour, minute),
+        entry.value,
+        entryType: type,
+      );
+    }
+
     // Snoozed reminders, narrowed to the plants that still need it — one
     // watered, archived or deleted meanwhile drops out, and an empty one is
     // skipped.
     final snoozes = await ReminderSnoozeStore(prefs).loadPending(now.toLocal());
     final byId = {for (final item in plants) item.plant.id: item};
+    final careDue = {
+      for (final r in reminders)
+        if (r.plant.isActive &&
+            r.status.reminder.enabled &&
+            r.status.isDue(now.toLocal()))
+          (r.plant.id, r.entryType): r.plant,
+    };
     for (final (index, snooze) in snoozes.indexed) {
+      PlantModel? stillDue(String id) => switch (snooze.kind) {
+            ReminderKind.irrigation when byId[id]?.needsWatering ?? false =>
+              byId[id]!.plant,
+            ReminderKind.pesticide
+                when byId[id]?.needsPesticideReapplication ?? false =>
+              byId[id]!.plant,
+            ReminderKind.care => careDue[(id, snooze.entryType)],
+            _ => null,
+          };
       final due = [
         for (final id in snooze.plantIds)
-          if (byId[id] case final item?)
-            if (switch (snooze.kind) {
-              ReminderKind.irrigation => item.needsWatering,
-              ReminderKind.pesticide => item.needsPesticideReapplication,
-            })
-              item.plant,
+          if (stillDue(id) case final plant?) plant,
       ];
       if (due.isEmpty) continue;
       await _schedule(snooze.kind, _snoozeIdOffset + index,
-          tz.TZDateTime.from(snooze.at, tz.local), due);
+          tz.TZDateTime.from(snooze.at, tz.local), due,
+          entryType: snooze.entryType);
     }
   }
 
   /// Schedules one reminder of [kind] listing [plants], with the action
-  /// buttons of that kind and a payload naming the plants.
+  /// buttons of that kind and a payload naming the plants. [entryType] is
+  /// required for (and only for) [ReminderKind.care].
   static Future<void> _schedule(
     ReminderKind kind,
     int id,
     tz.TZDateTime when,
-    List<PlantModel> plants,
-  ) async {
+    List<PlantModel> plants, {
+    EntryType? entryType,
+  }) async {
     final l10n = _l10n;
     final nicknames = [for (final plant in plants) plant.nickname];
-    final isIrrigation = kind == ReminderKind.irrigation;
+    final count = nicknames.length;
+    final names = nicknames.join(', ');
     // Up to 2 plants the names fit comfortably; beyond that just the count.
-    final body = switch (nicknames.length) {
-      1 => isIrrigation
-          ? l10n.irrigationNotificationBody(nicknames.single)
-          : l10n.pesticideNotificationBody(nicknames.single),
-      2 => isIrrigation
-          ? l10n.irrigationNotificationBodyMany(
-              nicknames.length, nicknames.join(', '))
-          : l10n.pesticideNotificationBodyMany(
-              nicknames.length, nicknames.join(', ')),
-      _ => isIrrigation
-          ? l10n.irrigationNotificationBodyCount(nicknames.length)
-          : l10n.pesticideNotificationBodyCount(nicknames.length),
+    final body = switch ((kind, count)) {
+      (ReminderKind.irrigation, 1) =>
+        l10n.irrigationNotificationBody(nicknames.single),
+      (ReminderKind.irrigation, 2) =>
+        l10n.irrigationNotificationBodyMany(count, names),
+      (ReminderKind.irrigation, _) =>
+        l10n.irrigationNotificationBodyCount(count),
+      (ReminderKind.pesticide, 1) =>
+        l10n.pesticideNotificationBody(nicknames.single),
+      (ReminderKind.pesticide, 2) =>
+        l10n.pesticideNotificationBodyMany(count, names),
+      (ReminderKind.pesticide, _) =>
+        l10n.pesticideNotificationBodyCount(count),
+      (ReminderKind.care, 1) => l10n.careNotificationBody(nicknames.single),
+      (ReminderKind.care, 2) => l10n.careNotificationBodyMany(count, names),
+      (ReminderKind.care, _) => l10n.careNotificationBodyCount(count),
+    };
+    final title = switch (kind) {
+      ReminderKind.irrigation => l10n.irrigationNotificationTitle,
+      ReminderKind.pesticide => l10n.pesticideNotificationTitle,
+      ReminderKind.care =>
+        l10n.careNotificationTitle(entryType!.label(l10n), entryType.emoji),
+    };
+    final (channelId, channelName, channelDescription, groupKey, categoryId) =
+        switch (kind) {
+      ReminderKind.irrigation => (
+          _channelId,
+          l10n.irrigationChannelName,
+          l10n.irrigationChannelDescription,
+          _groupKey,
+          _irrigationCategoryId,
+        ),
+      ReminderKind.pesticide => (
+          _pesticideChannelId,
+          l10n.pesticideChannelName,
+          l10n.pesticideChannelDescription,
+          _pesticideGroupKey,
+          _pesticideCategoryId,
+        ),
+      ReminderKind.care => (
+          _careChannelId,
+          l10n.careChannelName,
+          l10n.careChannelDescription,
+          _careGroupKey,
+          _careCategoryId,
+        ),
     };
 
     // Neither action opens the app: they run in
@@ -319,45 +407,40 @@ class NotificationService implements INotificationService {
         ReminderAction.snooze, l10n.notificationActionSnooze,
         showsUserInterface: false, cancelNotification: true);
     final actions = [
-      if (isIrrigation)
+      if (kind == ReminderKind.irrigation)
         AndroidNotificationAction(
             ReminderAction.water, l10n.notificationActionWatered,
             showsUserInterface: false, cancelNotification: true),
       snooze,
     ];
 
-    final channelId = isIrrigation ? _channelId : _pesticideChannelId;
     await _plugin.zonedSchedule(
       id,
-      isIrrigation
-          ? l10n.irrigationNotificationTitle
-          : l10n.pesticideNotificationTitle,
+      title,
       body,
       when,
       NotificationDetails(
         android: AndroidNotificationDetails(
           channelId,
-          isIrrigation ? l10n.irrigationChannelName : l10n.pesticideChannelName,
-          channelDescription: isIrrigation
-              ? l10n.irrigationChannelDescription
-              : l10n.pesticideChannelDescription,
+          channelName,
+          channelDescription: channelDescription,
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
-          groupKey: isIrrigation ? _groupKey : _pesticideGroupKey,
+          groupKey: groupKey,
           // Long plant lists stay readable when the user expands the card.
           styleInformation: BigTextStyleInformation(body),
           actions: actions,
         ),
         iOS: DarwinNotificationDetails(
           threadIdentifier: channelId,
-          categoryIdentifier:
-              isIrrigation ? _irrigationCategoryId : _pesticideCategoryId,
+          categoryIdentifier: categoryId,
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      payload: ReminderPayload(kind, [for (final plant in plants) plant.id])
+      payload: ReminderPayload(kind, [for (final plant in plants) plant.id],
+              entryType: entryType)
           .encode(),
       // No matchDateTimeComponents — one-shot; the schedule is rebuilt after
       // every irrigation/save/delete/sync pull and by the 12 h background
@@ -460,6 +543,7 @@ class NotificationService implements INotificationService {
       payload.kind,
       payload.plantIds,
       DateTime.now().add(ReminderSnoozeStore.snoozeDuration),
+      entryType: payload.entryType,
     ));
   }
 
@@ -566,6 +650,46 @@ class NotificationService implements INotificationService {
       groups.putIfAbsent(date, () => []).add(item.plant);
     }
     return groups;
+  }
+
+  /// Groups the enabled care [reminders] due on the same date for the same
+  /// entry type into a single notification. Reminders of plants that are no
+  /// longer active are skipped, and a plant listed twice for the same
+  /// (date, type) — duplicate reminders created on two synced devices — is
+  /// kept once.
+  @visibleForTesting
+  static Map<({DateTime date, EntryType type}), List<PlantModel>>
+      groupRemindersByDueDate(
+    List<PlantReminder> reminders,
+    DateTime now, {
+    int hour = 9,
+    int minute = 0,
+  }) {
+    final groups = <({DateTime date, EntryType type}), List<PlantModel>>{};
+    for (final item in reminders) {
+      if (!item.plant.isActive || !item.status.reminder.enabled) continue;
+
+      final scheduled = computeNextIrrigationDate(
+          item.status.dueDate, 0, now,
+          hour: hour, minute: minute);
+      final key = (
+        date: DateTime(scheduled.year, scheduled.month, scheduled.day),
+        type: item.entryType,
+      );
+      final plants = groups.putIfAbsent(key, () => []);
+      if (plants.every((p) => p.id != item.plant.id)) plants.add(item.plant);
+    }
+    return groups;
+  }
+
+  /// Deterministic id of the care reminder of [type] due on [date]; see
+  /// [_careIdOffset] for the layout.
+  @visibleForTesting
+  static int careNotificationId(DateTime date, EntryType type) {
+    final days = DateTime.utc(date.year, date.month, date.day)
+        .difference(DateTime.utc(1970))
+        .inDays;
+    return _careIdOffset + type.index * _careIdTypeStride + days;
   }
 
   /// One deterministic id per due date (e.g. 2026-07-16 → 20260716), so a

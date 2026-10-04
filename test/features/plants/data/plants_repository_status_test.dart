@@ -6,13 +6,18 @@ import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/core/notifications/notification_service.dart';
 import 'package:polypodium/features/plants/data/plants_repository.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
+import 'package:polypodium/features/reminders/data/reminders_repository.dart';
+import 'package:polypodium/features/reminders/domain/reminder_model.dart';
 
 class RecordingNotificationService implements INotificationService {
   List<PlantWithSpecies>? lastScheduled;
+  List<PlantReminder>? lastReminders;
 
   @override
-  Future<void> rescheduleAll(List<PlantWithSpecies> plants) async {
+  Future<void> rescheduleAll(List<PlantWithSpecies> plants,
+      {List<PlantReminder> reminders = const []}) async {
     lastScheduled = plants;
+    lastReminders = reminders;
   }
 }
 
@@ -98,5 +103,49 @@ void main() {
 
     expect((await repo.getAll()).map((p) => p.id), ['p1']);
     expect((await db.entriesDao.getById('e1'))!.deletedAt, isNull);
+  });
+
+  test('rescheduleNotifications passes enabled reminders of active plants',
+      () async {
+    await repo.save(plant('alive'));
+    await repo.save(plant('archived', status: PlantStatus.archived));
+    final reminders = RemindersRepository(db);
+    for (final (id, plantId, enabled) in [
+      ('r-alive', 'alive', true),
+      ('r-paused', 'alive', false),
+      ('r-archived', 'archived', true),
+    ]) {
+      await reminders.save(ReminderModel(
+        id: id,
+        plantId: plantId,
+        entryType: EntryType.fertilizer,
+        intervalDays: 30,
+        enabled: enabled,
+        createdAt: t0,
+      ));
+    }
+
+    await repo.rescheduleNotifications();
+
+    final scheduled = notifications.lastReminders!;
+    expect(scheduled.map((r) => r.status.reminder.id), ['r-alive']);
+    expect(scheduled.single.plant.nickname, 'Plant alive');
+  });
+
+  test('deleting a plant tombstones its reminders', () async {
+    await repo.save(plant('p1'));
+    final reminders = RemindersRepository(db);
+    await reminders.save(ReminderModel(
+      id: 'r1',
+      plantId: 'p1',
+      entryType: EntryType.pruning,
+      intervalDays: 90,
+      createdAt: t0,
+    ));
+
+    await repo.delete('p1');
+
+    expect((await reminders.getById('r1'))!.deletedAt, isNotNull);
+    expect(notifications.lastReminders, isEmpty);
   });
 }
