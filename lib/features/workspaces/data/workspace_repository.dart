@@ -51,6 +51,30 @@ class WorkspaceRepository {
     await _prefs.setString(_activeWorkspaceIdKey, id);
   }
 
+  /// The active workspace, falling back to the local one when the active id
+  /// is stale (mirrors WorkspacesNotifier.getById). Null only before
+  /// [ensureBootstrapped] ever ran.
+  Workspace? loadActiveWorkspace() {
+    final all = loadAll();
+    if (all.isEmpty) return null;
+    final activeId = loadActiveId();
+    return all.firstWhere(
+      (w) => w.id == activeId,
+      orElse: () => all.firstWhere(
+        (w) => w.id == Workspace.localId,
+        orElse: () => all.first,
+      ),
+    );
+  }
+
+  /// The Drift database file of the active workspace — what the UI opens.
+  /// Background isolates (no Riverpod) must resolve it the same way, or they
+  /// would read/create an unrelated empty database.
+  String activeDbFileName() {
+    final ws = loadActiveWorkspace();
+    return ws == null ? legacyDbFileName : dbFileNameFor(ws);
+  }
+
   /// One-time migration from the pre-workspaces single-server model.
   ///
   /// If the app was already logged into a server, that data was living in

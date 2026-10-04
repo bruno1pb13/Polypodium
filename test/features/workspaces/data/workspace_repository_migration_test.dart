@@ -125,4 +125,55 @@ void main() {
       expect(repo.loadActiveId(), firstActiveId);
     });
   });
+
+  group('WorkspaceRepository.activeDbFileName', () {
+    Workspace ws(String id, {String? override}) => Workspace(
+          id: id,
+          name: id,
+          type: id == Workspace.localId
+              ? WorkspaceType.local
+              : WorkspaceType.remote,
+          createdAt: DateTime(2026, 1, 1),
+          dbFileNameOverride: override,
+        );
+
+    Future<WorkspaceRepository> repoWith(List<Workspace> workspaces,
+        {String? activeId}) async {
+      SharedPreferences.setMockInitialValues({});
+      final repo = WorkspaceRepository(await SharedPreferences.getInstance());
+      await repo.saveAll(workspaces);
+      if (activeId != null) await repo.saveActiveId(activeId);
+      return repo;
+    }
+
+    test('resolves the active workspace file', () async {
+      final repo = await repoWith(
+          [ws(Workspace.localId), ws('abc')], activeId: 'abc');
+
+      expect(repo.activeDbFileName(), 'workspace_abc.db');
+    });
+
+    test('honors dbFileNameOverride of the active workspace', () async {
+      final repo = await repoWith(
+          [ws(Workspace.localId, override: legacyDbFileName)]);
+
+      expect(repo.activeDbFileName(), legacyDbFileName);
+    });
+
+    test('falls back to the local workspace for a stale active id',
+        () async {
+      final repo = await repoWith(
+          [ws(Workspace.localId), ws('abc')], activeId: 'removed');
+
+      expect(repo.loadActiveWorkspace()?.id, Workspace.localId);
+      expect(repo.activeDbFileName(), 'workspace_local.db');
+    });
+
+    test('falls back to the legacy file before bootstrap', () async {
+      final repo = await repoWith([]);
+
+      expect(repo.loadActiveWorkspace(), isNull);
+      expect(repo.activeDbFileName(), legacyDbFileName);
+    });
+  });
 }

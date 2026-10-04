@@ -11,8 +11,9 @@ import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../database/app_database.dart';
+import '../../features/plants/data/plants_repository.dart';
 import '../../features/plants/domain/plant_model.dart';
-import '../../features/species/domain/species_model.dart';
+import '../../features/workspaces/data/workspace_repository.dart';
 import '../l10n/l10n.dart';
 
 abstract interface class INotificationService {
@@ -52,16 +53,7 @@ class NotificationService implements INotificationService {
   static AppLocalizations get _l10n => systemL10n();
 
   static Future<void> initialize() async {
-    tz_data.initializeTimeZones();
-    try {
-      final timezoneName = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(timezoneName.identifier));
-    } catch (e) {
-      // ignore: avoid_print
-      print(
-          '[NotificationService] Failed to set local location, falling back to UTC: $e');
-      tz.setLocalLocation(tz.getLocation('UTC'));
-    }
+    await _initTimezone();
 
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     // Permissions are NOT requested here — the user opts in from the
@@ -96,6 +88,21 @@ class NotificationService implements INotificationService {
           importance: Importance.defaultImportance,
         ),
       );
+    }
+  }
+
+  /// Loads the timezone database and sets the device zone as tz.local, which
+  /// zonedSchedule() relies on. Needed once per isolate.
+  static Future<void> _initTimezone() async {
+    tz_data.initializeTimeZones();
+    try {
+      final timezoneName = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(timezoneName.identifier));
+    } catch (e) {
+      // ignore: avoid_print
+      print(
+          '[NotificationService] Failed to set local location, falling back to UTC: $e');
+      tz.setLocalLocation(tz.getLocation('UTC'));
     }
   }
 
@@ -254,13 +261,7 @@ class NotificationService implements INotificationService {
     // ignore: avoid_print
     print('[NotificationService] Background check triggered');
 
-    tz_data.initializeTimeZones();
-    try {
-      final timezoneName = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(timezoneName.identifier));
-    } catch (_) {
-      tz.setLocalLocation(tz.getLocation('UTC'));
-    }
+    await _initTimezone();
 
     // Re-initialise the plugin inside the background isolate
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -268,46 +269,29 @@ class NotificationService implements INotificationService {
     await _plugin
         .initialize(const InitializationSettings(android: android, iOS: iOS));
 
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, 'polypodium.db'));
-    final db = AppDatabase.forTesting(NativeDatabase(file));
-
+    final db = await _openActiveDatabase();
+    if (db == null) return;
     try {
-      final items = <PlantWithSpecies>[];
-      final plantRows = await db.plantsDao.getAll();
-      for (final row in plantRows) {
-        final speciesRow = await db.speciesDao.getById(row.speciesId);
-        if (speciesRow == null) continue;
-
-        final plant = PlantModel(
-          id: row.id,
-          speciesId: row.speciesId,
-          nickname: row.nickname,
-          soilId: row.soilType,
-          irrigationFrequencyDays: row.irrigationFrequencyDays,
-          acquisitionDate: row.acquisitionDate,
-          location: row.location,
-          locationId: row.locationId,
-          lastIrrigatedAt: row.lastIrrigatedAt,
-          lastPesticideAppliedAt: row.lastPesticideAppliedAt,
-          pesticideReapplicationDays: row.pesticideReapplicationDays,
-          createdAt: row.createdAt,
-        );
-        final species = SpeciesModel(
-          id: speciesRow.id,
-          scientificName: speciesRow.scientificName,
-          popularName: speciesRow.popularName,
-          defaultIrrigationFrequencyDays:
-              speciesRow.defaultIrrigationFrequencyDays,
-          recommendedSoilIds: speciesRow.recommendedSoilTypes,
-          createdAt: speciesRow.createdAt,
-        );
-        items.add(PlantWithSpecies(plant: plant, species: species));
-      }
-      await rescheduleAllNotifications(items);
+      await PlantsRepository(db, const NotificationService())
+          .rescheduleNotifications();
     } finally {
       await db.close();
     }
+  }
+
+  /// Opens the active workspace's database from an isolate without Riverpod
+  /// (WorkManager, notification actions). Null when that file doesn't exist
+  /// yet: opening it would create an empty database, and rescheduling from
+  /// it would cancel every pending reminder.
+  static Future<AppDatabase?> _openActiveDatabase() async {
+    final prefs = await SharedPreferences.getInstance();
+    // The cache may predate a workspace switch made in the UI isolate.
+    await prefs.reload();
+    final fileName = WorkspaceRepository(prefs).activeDbFileName();
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File(p.join(dir.path, fileName));
+    if (!file.existsSync()) return null;
+    return AppDatabase.forTesting(NativeDatabase(file));
   }
 
   // ---------------------------------------------------------------------------
