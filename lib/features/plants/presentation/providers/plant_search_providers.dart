@@ -33,15 +33,30 @@ class PlantSortOptionNotifier extends _$PlantSortOptionNotifier {
   void setSortOption(PlantSortOption option) => state = option;
 }
 
+/// Whether the Home list also shows plants that are no longer active (dead,
+/// donated or archived). Off by default.
+@riverpod
+class PlantShowArchivedNotifier extends _$PlantShowArchivedNotifier {
+  @override
+  bool build() => false;
+
+  void toggle() => state = !state;
+}
+
 @riverpod
 Future<List<PlantWithSpecies>> filteredSortedPlants(Ref ref) async {
   // Watch synchronous providers FIRST to ensure they are not disposed during await
   final query = ref.watch(plantSearchQueryProvider).normalize();
   final sortOption = ref.watch(plantSortOptionNotifierProvider);
+  final showArchived = ref.watch(plantShowArchivedNotifierProvider);
 
   final plantsAsync = await ref.watch(plantsWithSpeciesProvider.future);
 
   Iterable<PlantWithSpecies> filtered = plantsAsync;
+
+  if (!showArchived) {
+    filtered = filtered.where((p) => p.plant.isActive);
+  }
 
   if (query.isNotEmpty) {
     filtered = filtered.where((p) =>

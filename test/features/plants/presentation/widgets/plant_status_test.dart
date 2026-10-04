@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/plants/presentation/widgets/plant_status.dart';
@@ -22,6 +23,7 @@ void main() {
     int? daysSinceWatering = 1,
     int? daysSincePesticide,
     int? pesticideEvery,
+    PlantStatus status = PlantStatus.active,
   }) =>
       PlantWithSpecies(
         plant: PlantModel(
@@ -38,6 +40,7 @@ void main() {
               ? null
               : now.subtract(Duration(days: daysSincePesticide)),
           pesticideReapplicationDays: pesticideEvery,
+          status: status,
         ),
         species: species,
       );
@@ -114,6 +117,28 @@ void main() {
         StatusTone.warning,
         StatusTone.positive,
       ]);
+    });
+
+    test('an inactive plant only shows its lifecycle status', () {
+      final pws = plant(
+        daysSinceWatering: 10,
+        daysSincePesticide: 12,
+        pesticideEvery: 10,
+        status: PlantStatus.dead,
+      );
+      expect(pws.needsWatering, isFalse);
+      expect(pws.daysRelativeToSchedule, isNull);
+      expect(pws.needsPesticideReapplication, isFalse);
+      expect(pws.pesticideUnderActiveControl, isFalse);
+
+      final statuses = plantListStatuses(l10n, pws, (
+        hasActiveChlorosis: true,
+        chlorosisSeverity: 3,
+        hasActivePest: false,
+        pestSeverity: null,
+      ));
+      expect(statuses.map((s) => s.label), [l10n.plantStatusDead]);
+      expect(statuses.single.tone, StatusTone.neutral);
     });
   });
 }

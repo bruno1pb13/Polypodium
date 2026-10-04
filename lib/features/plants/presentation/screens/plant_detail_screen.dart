@@ -103,6 +103,21 @@ class PlantDetailScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+              PopupMenuButton<PlantStatus>(
+                icon: const Icon(Icons.inventory_2_outlined),
+                tooltip: context.l10n.plantStatusChange,
+                onSelected: (status) => ref
+                    .read(plantsNotifierProvider.notifier)
+                    .setStatus(plantId, status),
+                itemBuilder: (ctx) => [
+                  for (final status in PlantStatus.values)
+                    if (status != plant.status)
+                      PopupMenuItem(
+                        value: status,
+                        child: Text(_statusActionLabel(ctx, status)),
+                      ),
+                ],
+              ),
               IconButton(
                 icon: const Icon(Icons.delete_outline),
                 onPressed: () => _confirmDelete(context, ref),
@@ -153,6 +168,10 @@ class PlantDetailScreen extends ConsumerWidget {
                     SliverToBoxAdapter(
                       child: _HeaderSection(plant: plant, pws: pws),
                     ),
+                    if (!plant.isActive)
+                      SliverToBoxAdapter(
+                        child: _LifecycleBanner(plant: plant),
+                      ),
                     if (pws != null)
                       SliverToBoxAdapter(
                         child: _CareAlerts(pws: pws),
@@ -268,13 +287,15 @@ class PlantDetailScreen extends ConsumerWidget {
                 ),
                 child: const Icon(Icons.note_add_outlined),
               ),
-              const SizedBox(height: 8),
-              FloatingActionButton.extended(
-                heroTag: 'irrigate',
-                onPressed: () => _irrigate(context, ref),
-                icon: const Icon(Icons.water_drop),
-                label: Text(context.l10n.wateredNow),
-              ),
+              if (plant.isActive) ...[
+                const SizedBox(height: 8),
+                FloatingActionButton.extended(
+                  heroTag: 'irrigate',
+                  onPressed: () => _irrigate(context, ref),
+                  icon: const Icon(Icons.water_drop),
+                  label: Text(context.l10n.wateredNow),
+                ),
+              ],
             ],
           ),
         );
@@ -340,29 +361,79 @@ class PlantDetailScreen extends ConsumerWidget {
     }
   }
 
+  static String _statusActionLabel(BuildContext context, PlantStatus status) =>
+      switch (status) {
+        PlantStatus.active => context.l10n.plantStatusReactivate,
+        PlantStatus.dead => context.l10n.plantStatusMarkDead,
+        PlantStatus.donated => context.l10n.plantStatusMarkDonated,
+        PlantStatus.archived => context.l10n.plantStatusArchive,
+      };
+
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
+    final plant = await ref.read(plantsRepositoryProvider).getById(plantId);
+    if (!context.mounted) return;
+    final canArchive = plant != null && plant.isActive;
+    final choice = await showDialog<_DeleteChoice>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(ctx.l10n.deletePlantTitle),
-        content: Text(ctx.l10n.deletePlantBody),
+        content: Text(canArchive
+            ? '${ctx.l10n.deletePlantBody}\n\n${ctx.l10n.deletePlantArchiveHint}'
+            : ctx.l10n.deletePlantBody),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => Navigator.pop(ctx),
             child: Text(ctx.l10n.cancel),
           ),
+          if (canArchive)
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, _DeleteChoice.archive),
+              child: Text(ctx.l10n.plantStatusArchive),
+            ),
           TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: () => Navigator.pop(ctx, _DeleteChoice.delete),
             child: Text(ctx.l10n.delete),
           ),
         ],
       ),
     );
-    if (confirmed == true && context.mounted) {
-      final navigator = Navigator.of(context);
-      await ref.read(plantsNotifierProvider.notifier).delete(plantId);
-      navigator.pop();
+    if (!context.mounted) return;
+    final notifier = ref.read(plantsNotifierProvider.notifier);
+    switch (choice) {
+      case _DeleteChoice.archive:
+        await notifier.setStatus(plantId, PlantStatus.archived);
+      case _DeleteChoice.delete:
+        final navigator = Navigator.of(context);
+        await notifier.delete(plantId);
+        navigator.pop();
+      case null:
+        break;
     }
+  }
+}
+
+enum _DeleteChoice { archive, delete }
+
+/// Tells what happened to a plant that left the collection, and when.
+class _LifecycleBanner extends StatelessWidget {
+  final PlantModel plant;
+
+  const _LifecycleBanner({required this.plant});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final label = plant.status.label(l10n);
+    final since = plant.statusChangedAt;
+    return PlantStatusBanner(
+      emoji: plant.status.emoji,
+      title: since == null
+          ? label
+          : l10n.plantStatusSince(
+              label, DateFormat.yMd(l10n.localeName).format(since)),
+      subtitle: l10n.plantInactiveHint,
+      tone: StatusTone.neutral,
+    );
   }
 }
 

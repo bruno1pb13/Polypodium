@@ -109,6 +109,22 @@ extension PlantDetailViewX on PlantDetailView {
       };
 }
 
+extension PlantStatusX on PlantStatus {
+  String label(AppLocalizations l10n) => switch (this) {
+        PlantStatus.active => l10n.plantStatusActive,
+        PlantStatus.dead => l10n.plantStatusDead,
+        PlantStatus.donated => l10n.plantStatusDonated,
+        PlantStatus.archived => l10n.plantStatusArchived,
+      };
+
+  String get emoji => switch (this) {
+        PlantStatus.active => '🌿',
+        PlantStatus.dead => '🥀',
+        PlantStatus.donated => '🎁',
+        PlantStatus.archived => '📦',
+      };
+}
+
 extension EntrySortOptionX on EntrySortOption {
   String label(AppLocalizations l10n) => switch (this) {
         EntrySortOption.dateDesc => l10n.sortNewestFirst,

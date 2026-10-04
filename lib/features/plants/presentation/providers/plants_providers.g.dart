@@ -75,7 +75,7 @@ final class PlantsNotifierProvider
   PlantsNotifier create() => PlantsNotifier();
 }
 
-String _$plantsNotifierHash() => r'e5d09d7d24cfc9326cc412377fdf97da291350d6';
+String _$plantsNotifierHash() => r'aff6430dbc3a2839df4d39f57930f51d1fa105f4';
 
 abstract class _$PlantsNotifier extends $StreamNotifier<List<PlantModel>> {
   Stream<List<PlantModel>> build();
@@ -135,3 +135,135 @@ final class PlantsWithSpeciesProvider extends $FunctionalProvider<
 }
 
 String _$plantsWithSpeciesHash() => r'e795b5beadfa93afa9aaecac5c31622a8999d4e8';
+
+/// Survival of the species' plants: every non-deleted plant counts towards
+/// [total], and all but the dead ones towards [alive] (donated and archived
+/// plants survived, they just left the collection).
+
+@ProviderFor(speciesSurvival)
+final speciesSurvivalProvider = SpeciesSurvivalFamily._();
+
+/// Survival of the species' plants: every non-deleted plant counts towards
+/// [total], and all but the dead ones towards [alive] (donated and archived
+/// plants survived, they just left the collection).
+
+final class SpeciesSurvivalProvider extends $FunctionalProvider<
+        AsyncValue<
+            ({
+              int alive,
+              int total,
+            })>,
+        ({
+          int alive,
+          int total,
+        }),
+        FutureOr<
+            ({
+              int alive,
+              int total,
+            })>>
+    with
+        $FutureModifier<
+            ({
+              int alive,
+              int total,
+            })>,
+        $FutureProvider<
+            ({
+              int alive,
+              int total,
+            })> {
+  /// Survival of the species' plants: every non-deleted plant counts towards
+  /// [total], and all but the dead ones towards [alive] (donated and archived
+  /// plants survived, they just left the collection).
+  SpeciesSurvivalProvider._(
+      {required SpeciesSurvivalFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'speciesSurvivalProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$speciesSurvivalHash();
+
+  @override
+  String toString() {
+    return r'speciesSurvivalProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<
+      ({
+        int alive,
+        int total,
+      })> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<
+      ({
+        int alive,
+        int total,
+      })> create(Ref ref) {
+    final argument = this.argument as String;
+    return speciesSurvival(
+      ref,
+      argument,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SpeciesSurvivalProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$speciesSurvivalHash() => r'a9e45f88c19bf25dc9ac0fc8de56f4e0f6f0cd4b';
+
+/// Survival of the species' plants: every non-deleted plant counts towards
+/// [total], and all but the dead ones towards [alive] (donated and archived
+/// plants survived, they just left the collection).
+
+final class SpeciesSurvivalFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+            FutureOr<
+                ({
+                  int alive,
+                  int total,
+                })>,
+            String> {
+  SpeciesSurvivalFamily._()
+      : super(
+          retry: null,
+          name: r'speciesSurvivalProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// Survival of the species' plants: every non-deleted plant counts towards
+  /// [total], and all but the dead ones towards [alive] (donated and archived
+  /// plants survived, they just left the collection).
+
+  SpeciesSurvivalProvider call(
+    String speciesId,
+  ) =>
+      SpeciesSurvivalProvider._(argument: speciesId, from: this);
+
+  @override
+  String toString() => r'speciesSurvivalProvider';
+}
