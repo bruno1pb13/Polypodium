@@ -407,6 +407,77 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get remindersSectionTitle => 'Lembretes';
+
+  @override
+  String get remindersEmpty =>
+      'Nenhum lembrete recorrente. Adicione um para adubação, poda ou uma observação periódica.';
+
+  @override
+  String get addReminder => 'Adicionar lembrete';
+
+  @override
+  String get editReminder => 'Editar lembrete';
+
+  @override
+  String get reminderTypeLabel => 'Cuidado';
+
+  @override
+  String get reminderIntervalLabel => 'A cada quantos dias';
+
+  @override
+  String get reminderIntervalInvalid =>
+      'Informe um número de dias entre 1 e 365';
+
+  @override
+  String get reminderEnabledLabel => 'Ativo';
+
+  @override
+  String get reminderPaused => 'Pausado';
+
+  @override
+  String reminderEvery(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'A cada $days dias',
+      one: 'Todo dia',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderNextDate(String date) {
+    return 'Próxima: $date';
+  }
+
+  @override
+  String reminderOverdue(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Atrasado há $days dias',
+      one: 'Atrasado há $days dia',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderLastDone(String date) {
+    return 'Última: $date';
+  }
+
+  @override
+  String get reminderNeverDone => 'Sem registro ainda';
+
+  @override
+  String get deleteReminderTitle => 'Excluir lembrete?';
+
+  @override
+  String get deleteReminderBody =>
+      'As entradas do diário são mantidas; só o lembrete é removido.';
+
+  @override
   String get historyPlantAdded => 'Planta adicionada ao sistema:';
 
   @override
