@@ -5,6 +5,8 @@ import 'package:drift/drift.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/enums.dart';
 import '../../../core/notifications/notification_service.dart';
+import '../../reminders/data/reminders_repository.dart';
+import '../../reminders/domain/reminder_model.dart';
 import '../../species/data/species_repository.dart';
 import '../domain/plant_model.dart';
 import 'plants_dao.dart';
@@ -114,13 +116,14 @@ class PlantsRepository {
 
   // ---------------------------------------------------------------------------
 
-  /// Rebuilds the whole irrigation reminder schedule from the active plants.
-  /// Called after every local mutation and after a sync pull — the pull
-  /// writes plants/entries straight into the database, so a plant watered,
-  /// archived or deleted on another device must have its stale local
-  /// reminder replaced here rather than left pending.
+  /// Rebuilds the whole reminder schedule (irrigation, pesticide and the
+  /// recurring care reminders) from the active plants. Called after every
+  /// local mutation and after a sync pull — the pull writes plants/entries
+  /// straight into the database, so a plant watered, archived or deleted on
+  /// another device must have its stale local reminder replaced here rather
+  /// than left pending.
   Future<void> rescheduleNotifications() async {
-    final plants = (await getAll()).where((p) => p.isActive);
+    final plants = (await getAll()).where((p) => p.isActive).toList();
     final species = await _speciesRepo.getAll();
     final speciesById = {for (final s in species) s.id: s};
 
@@ -136,7 +139,15 @@ class PlantsRepository {
       }
       items.add(PlantWithSpecies(plant: plant, species: plantSpecies));
     }
-    await _notifications.rescheduleAll(items);
+
+    final plantsById = {for (final plant in plants) plant.id: plant};
+    final reminders = [
+      for (final status in await RemindersRepository(_db).getAllStatuses())
+        if (status.reminder.enabled)
+          if (plantsById[status.reminder.plantId] case final plant?)
+            PlantReminder(plant: plant, status: status),
+    ];
+    await _notifications.rescheduleAll(items, reminders: reminders);
   }
 
   static PlantModel _fromRow(PlantsTableData row) => PlantModel(

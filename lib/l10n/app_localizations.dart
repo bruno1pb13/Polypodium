@@ -722,6 +722,42 @@ abstract class AppLocalizations {
   /// **'Remind in 3 h'**
   String get notificationActionSnooze;
 
+  /// No description provided for @careChannelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Other reminders'**
+  String get careChannelName;
+
+  /// No description provided for @careChannelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring fertilizing, pruning and other care reminders'**
+  String get careChannelDescription;
+
+  /// No description provided for @careNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder: {type} {emoji}'**
+  String careNotificationTitle(String type, String emoji);
+
+  /// No description provided for @careNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today for {nickname}.'**
+  String careNotificationBody(String nickname);
+
+  /// No description provided for @careNotificationBodyMany.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today for {count} plants: {names}.'**
+  String careNotificationBodyMany(int count, String names);
+
+  /// No description provided for @careNotificationBodyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today for {count} plants.'**
+  String careNotificationBodyCount(int count);
+
   /// No description provided for @historyPlantAdded.
   ///
   /// In en, this message translates to:

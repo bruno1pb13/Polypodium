@@ -380,6 +380,33 @@ class AppLocalizationsPt extends AppLocalizations {
   String get notificationActionSnooze => 'Lembrar em 3 h';
 
   @override
+  String get careChannelName => 'Outros lembretes';
+
+  @override
+  String get careChannelDescription =>
+      'Lembretes recorrentes de adubação, poda e outros cuidados';
+
+  @override
+  String careNotificationTitle(String type, String emoji) {
+    return 'Lembrete: $type $emoji';
+  }
+
+  @override
+  String careNotificationBody(String nickname) {
+    return 'Prevista para hoje: $nickname.';
+  }
+
+  @override
+  String careNotificationBodyMany(int count, String names) {
+    return 'Prevista para hoje em $count plantas: $names.';
+  }
+
+  @override
+  String careNotificationBodyCount(int count) {
+    return 'Prevista para hoje em $count plantas.';
+  }
+
+  @override
   String get historyPlantAdded => 'Planta adicionada ao sistema:';
 
   @override
