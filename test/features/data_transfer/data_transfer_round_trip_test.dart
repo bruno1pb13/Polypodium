@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:archive/archive.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -187,6 +188,59 @@ void main() {
     final plant = await target.plantsDao.getById('plant1');
     expect(plant!.status, PlantStatus.active);
     expect(plant.statusChangedAt, isNull);
+  });
+
+  test('reminders survive the round trip', () async {
+    await seedSpecies(source, 'Ficus lyrata', t0);
+    await source.plantsDao.upsert(PlantsTableCompanion.insert(
+      id: 'plant1',
+      speciesId: 'species1',
+      nickname: 'Minha planta',
+      soilType: 'loamy',
+      acquisitionDate: t0,
+      createdAt: t0,
+      updatedAt: t0,
+      localRev: const Value(2),
+    ));
+    await source.remindersDao.upsert(RemindersTableCompanion.insert(
+      id: 'rem1',
+      plantId: 'plant1',
+      entryType: EntryType.fertilizer,
+      intervalDays: 30,
+      enabled: const Value(false),
+      createdAt: t0,
+      updatedAt: t1,
+      localRev: const Value(3),
+    ));
+
+    final bytes = await DataExportService(source).buildArchiveBytes();
+    await DataImportService(target, FakePhotoStorage())
+        .importFromBytes(bytes);
+
+    final reminder = await target.remindersDao.getById('rem1');
+    expect(reminder, isNotNull);
+    expect(reminder!.plantId, 'plant1');
+    expect(reminder.entryType, EntryType.fertilizer);
+    expect(reminder.intervalDays, 30);
+    expect(reminder.enabled, isFalse);
+    expect(reminder.updatedAt, t1);
+    expect(reminder.localRev, greaterThan(0));
+  });
+
+  test('a backup without reminders imports fine', () async {
+    await seedSpecies(source, 'Ficus lyrata', t0);
+    final bytes = await DataExportService(source).buildArchiveBytes();
+    final archive = ZipDecoder().decodeBytes(bytes);
+    final data = jsonDecode(utf8.decode(archive
+            .findFile(DataExportService.dataFileName)!
+            .content as List<int>)) as Map<String, dynamic>;
+    (data['entities'] as Map<String, dynamic>).remove('reminders');
+
+    final summary = await DataImportService(target, FakePhotoStorage())
+        .importFromBytes(Uint8List.fromList(utf8.encode(jsonEncode(data))));
+
+    expect(summary.applied, greaterThanOrEqualTo(1));
+    expect(await target.remindersDao.getAll(), isEmpty);
   });
 
   test('rejects files that are not a Polypodium backup', () async {

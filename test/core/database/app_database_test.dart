@@ -75,4 +75,52 @@ void main() {
         await db.customSelect('PRAGMA user_version').getSingle();
     expect(version.read<int>('user_version'), db.schemaVersion);
   });
+
+  test('migration from v12 creates the reminders table', () async {
+    await db.close();
+    // A v12 database: plants already carry status, no reminders table yet.
+    // Only the table the new reminders reference is needed.
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE plants (
+          id TEXT NOT NULL PRIMARY KEY,
+          species_id TEXT NOT NULL,
+          nickname TEXT NOT NULL,
+          soil_type TEXT NOT NULL,
+          irrigation_frequency_days INTEGER NULL,
+          acquisition_date INTEGER NOT NULL,
+          location TEXT NULL,
+          location_id TEXT NULL,
+          last_irrigated_at INTEGER NULL,
+          last_pesticide_applied_at INTEGER NULL,
+          pesticide_reapplication_days INTEGER NULL,
+          status TEXT NOT NULL DEFAULT 'active',
+          status_changed_at INTEGER NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          deleted_at INTEGER NULL,
+          local_rev INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      raw.execute('PRAGMA user_version = 12');
+    }));
+
+    await db.remindersDao.upsert(RemindersTableCompanion.insert(
+      id: 'r1',
+      plantId: 'p1',
+      entryType: EntryType.fertilizer,
+      intervalDays: 30,
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    ));
+
+    final reminder = await db.remindersDao.getById('r1');
+    expect(reminder?.entryType, EntryType.fertilizer);
+    expect(reminder?.enabled, isTrue);
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), 13);
+  });
 }
+

@@ -103,6 +103,9 @@ class PlantsRepository {
       final entryRev = await _db.syncMetaDao.nextRev();
       await _db.entriesDao
           .softDeleteByPlant(id, deletedAt: now, rev: entryRev);
+      final reminderRev = await _db.syncMetaDao.nextRev();
+      await _db.remindersDao
+          .softDeleteByPlant(id, deletedAt: now, rev: reminderRev);
       final plantRev = await _db.syncMetaDao.nextRev();
       await _dao.softDelete(id, deletedAt: now, rev: plantRev);
     });
