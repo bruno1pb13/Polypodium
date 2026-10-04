@@ -40,6 +40,16 @@ class StringListConverter extends TypeConverter<List<String>, String> {
   String toSql(List<String> value) => jsonEncode(value);
 }
 
+class PlantStatusConverter extends TypeConverter<PlantStatus, String> {
+  const PlantStatusConverter();
+
+  @override
+  PlantStatus fromSql(String fromDb) => PlantStatus.fromName(fromDb);
+
+  @override
+  String toSql(PlantStatus value) => value.name;
+}
+
 class EntryTypeConverter extends TypeConverter<EntryType, String> {
   const EntryTypeConverter();
 

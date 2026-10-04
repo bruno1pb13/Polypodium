@@ -1592,6 +1592,19 @@ class $PlantsTableTable extends PlantsTable
   late final GeneratedColumn<int> pesticideReapplicationDays =
       GeneratedColumn<int>('pesticide_reapplication_days', aliasedName, true,
           type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  late final GeneratedColumnWithTypeConverter<PlantStatus, String> status =
+      GeneratedColumn<String>('status', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('active'))
+          .withConverter<PlantStatus>($PlantsTableTable.$converterstatus);
+  static const VerificationMeta _statusChangedAtMeta =
+      const VerificationMeta('statusChangedAt');
+  @override
+  late final GeneratedColumn<DateTime> statusChangedAt =
+      GeneratedColumn<DateTime>('status_changed_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -1631,6 +1644,8 @@ class $PlantsTableTable extends PlantsTable
         lastIrrigatedAt,
         lastPesticideAppliedAt,
         pesticideReapplicationDays,
+        status,
+        statusChangedAt,
         createdAt,
         updatedAt,
         deletedAt,
@@ -1713,6 +1728,12 @@ class $PlantsTableTable extends PlantsTable
               data['pesticide_reapplication_days']!,
               _pesticideReapplicationDaysMeta));
     }
+    if (data.containsKey('status_changed_at')) {
+      context.handle(
+          _statusChangedAtMeta,
+          statusChangedAt.isAcceptableOrUnknown(
+              data['status_changed_at']!, _statusChangedAtMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -1767,6 +1788,11 @@ class $PlantsTableTable extends PlantsTable
       pesticideReapplicationDays: attachedDatabase.typeMapping.read(
           DriftSqlType.int,
           data['${effectivePrefix}pesticide_reapplication_days']),
+      status: $PlantsTableTable.$converterstatus.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!),
+      statusChangedAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}status_changed_at']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -1782,6 +1808,9 @@ class $PlantsTableTable extends PlantsTable
   $PlantsTableTable createAlias(String alias) {
     return $PlantsTableTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<PlantStatus, String> $converterstatus =
+      const PlantStatusConverter();
 }
 
 class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
@@ -1804,6 +1833,11 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
   /// Recurrence (in days) set on the most recent 'pesticide' entry, or null
   /// if that entry didn't request a reminder.
   final int? pesticideReapplicationDays;
+
+  /// Lifecycle status — only `active` plants get reminders and show up in
+  /// the default lists; the others keep their diary as history.
+  final PlantStatus status;
+  final DateTime? statusChangedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -1820,6 +1854,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       this.lastIrrigatedAt,
       this.lastPesticideAppliedAt,
       this.pesticideReapplicationDays,
+      required this.status,
+      this.statusChangedAt,
       required this.createdAt,
       required this.updatedAt,
       this.deletedAt,
@@ -1851,6 +1887,13 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
     if (!nullToAbsent || pesticideReapplicationDays != null) {
       map['pesticide_reapplication_days'] =
           Variable<int>(pesticideReapplicationDays);
+    }
+    {
+      map['status'] =
+          Variable<String>($PlantsTableTable.$converterstatus.toSql(status));
+    }
+    if (!nullToAbsent || statusChangedAt != null) {
+      map['status_changed_at'] = Variable<DateTime>(statusChangedAt);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -1887,6 +1930,10 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           pesticideReapplicationDays == null && nullToAbsent
               ? const Value.absent()
               : Value(pesticideReapplicationDays),
+      status: Value(status),
+      statusChangedAt: statusChangedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(statusChangedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -1914,6 +1961,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           serializer.fromJson<DateTime?>(json['lastPesticideAppliedAt']),
       pesticideReapplicationDays:
           serializer.fromJson<int?>(json['pesticideReapplicationDays']),
+      status: serializer.fromJson<PlantStatus>(json['status']),
+      statusChangedAt: serializer.fromJson<DateTime?>(json['statusChangedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -1938,6 +1987,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           serializer.toJson<DateTime?>(lastPesticideAppliedAt),
       'pesticideReapplicationDays':
           serializer.toJson<int?>(pesticideReapplicationDays),
+      'status': serializer.toJson<PlantStatus>(status),
+      'statusChangedAt': serializer.toJson<DateTime?>(statusChangedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -1957,6 +2008,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           Value<DateTime?> lastIrrigatedAt = const Value.absent(),
           Value<DateTime?> lastPesticideAppliedAt = const Value.absent(),
           Value<int?> pesticideReapplicationDays = const Value.absent(),
+          PlantStatus? status,
+          Value<DateTime?> statusChangedAt = const Value.absent(),
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
@@ -1981,6 +2034,10 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
         pesticideReapplicationDays: pesticideReapplicationDays.present
             ? pesticideReapplicationDays.value
             : this.pesticideReapplicationDays,
+        status: status ?? this.status,
+        statusChangedAt: statusChangedAt.present
+            ? statusChangedAt.value
+            : this.statusChangedAt,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -2010,6 +2067,10 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       pesticideReapplicationDays: data.pesticideReapplicationDays.present
           ? data.pesticideReapplicationDays.value
           : this.pesticideReapplicationDays,
+      status: data.status.present ? data.status.value : this.status,
+      statusChangedAt: data.statusChangedAt.present
+          ? data.statusChangedAt.value
+          : this.statusChangedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -2031,6 +2092,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ..write('lastIrrigatedAt: $lastIrrigatedAt, ')
           ..write('lastPesticideAppliedAt: $lastPesticideAppliedAt, ')
           ..write('pesticideReapplicationDays: $pesticideReapplicationDays, ')
+          ..write('status: $status, ')
+          ..write('statusChangedAt: $statusChangedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -2052,6 +2115,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       lastIrrigatedAt,
       lastPesticideAppliedAt,
       pesticideReapplicationDays,
+      status,
+      statusChangedAt,
       createdAt,
       updatedAt,
       deletedAt,
@@ -2071,6 +2136,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           other.lastIrrigatedAt == this.lastIrrigatedAt &&
           other.lastPesticideAppliedAt == this.lastPesticideAppliedAt &&
           other.pesticideReapplicationDays == this.pesticideReapplicationDays &&
+          other.status == this.status &&
+          other.statusChangedAt == this.statusChangedAt &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -2089,6 +2156,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
   final Value<DateTime?> lastIrrigatedAt;
   final Value<DateTime?> lastPesticideAppliedAt;
   final Value<int?> pesticideReapplicationDays;
+  final Value<PlantStatus> status;
+  final Value<DateTime?> statusChangedAt;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -2106,6 +2175,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.lastIrrigatedAt = const Value.absent(),
     this.lastPesticideAppliedAt = const Value.absent(),
     this.pesticideReapplicationDays = const Value.absent(),
+    this.status = const Value.absent(),
+    this.statusChangedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -2124,6 +2195,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.lastIrrigatedAt = const Value.absent(),
     this.lastPesticideAppliedAt = const Value.absent(),
     this.pesticideReapplicationDays = const Value.absent(),
+    this.status = const Value.absent(),
+    this.statusChangedAt = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -2148,6 +2221,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     Expression<DateTime>? lastIrrigatedAt,
     Expression<DateTime>? lastPesticideAppliedAt,
     Expression<int>? pesticideReapplicationDays,
+    Expression<String>? status,
+    Expression<DateTime>? statusChangedAt,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -2169,6 +2244,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
         'last_pesticide_applied_at': lastPesticideAppliedAt,
       if (pesticideReapplicationDays != null)
         'pesticide_reapplication_days': pesticideReapplicationDays,
+      if (status != null) 'status': status,
+      if (statusChangedAt != null) 'status_changed_at': statusChangedAt,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -2189,6 +2266,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       Value<DateTime?>? lastIrrigatedAt,
       Value<DateTime?>? lastPesticideAppliedAt,
       Value<int?>? pesticideReapplicationDays,
+      Value<PlantStatus>? status,
+      Value<DateTime?>? statusChangedAt,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
@@ -2209,6 +2288,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
           lastPesticideAppliedAt ?? this.lastPesticideAppliedAt,
       pesticideReapplicationDays:
           pesticideReapplicationDays ?? this.pesticideReapplicationDays,
+      status: status ?? this.status,
+      statusChangedAt: statusChangedAt ?? this.statusChangedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -2256,6 +2337,13 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       map['pesticide_reapplication_days'] =
           Variable<int>(pesticideReapplicationDays.value);
     }
+    if (status.present) {
+      map['status'] = Variable<String>(
+          $PlantsTableTable.$converterstatus.toSql(status.value));
+    }
+    if (statusChangedAt.present) {
+      map['status_changed_at'] = Variable<DateTime>(statusChangedAt.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -2288,6 +2376,8 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
           ..write('lastIrrigatedAt: $lastIrrigatedAt, ')
           ..write('lastPesticideAppliedAt: $lastPesticideAppliedAt, ')
           ..write('pesticideReapplicationDays: $pesticideReapplicationDays, ')
+          ..write('status: $status, ')
+          ..write('statusChangedAt: $statusChangedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -4956,6 +5046,8 @@ typedef $$PlantsTableTableCreateCompanionBuilder = PlantsTableCompanion
   Value<DateTime?> lastIrrigatedAt,
   Value<DateTime?> lastPesticideAppliedAt,
   Value<int?> pesticideReapplicationDays,
+  Value<PlantStatus> status,
+  Value<DateTime?> statusChangedAt,
   required DateTime createdAt,
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
@@ -4975,6 +5067,8 @@ typedef $$PlantsTableTableUpdateCompanionBuilder = PlantsTableCompanion
   Value<DateTime?> lastIrrigatedAt,
   Value<DateTime?> lastPesticideAppliedAt,
   Value<int?> pesticideReapplicationDays,
+  Value<PlantStatus> status,
+  Value<DateTime?> statusChangedAt,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
@@ -5079,6 +5173,15 @@ class $$PlantsTableTableFilterComposer
 
   ColumnFilters<int> get pesticideReapplicationDays => $composableBuilder(
       column: $table.pesticideReapplicationDays,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<PlantStatus, PlantStatus, String> get status =>
+      $composableBuilder(
+          column: $table.status,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<DateTime> get statusChangedAt => $composableBuilder(
+      column: $table.statusChangedAt,
       builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
@@ -5213,6 +5316,13 @@ class $$PlantsTableTableOrderingComposer
       column: $table.pesticideReapplicationDays,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get statusChangedAt => $composableBuilder(
+      column: $table.statusChangedAt,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -5318,6 +5428,12 @@ class $$PlantsTableTableAnnotationComposer
 
   GeneratedColumn<int> get pesticideReapplicationDays => $composableBuilder(
       column: $table.pesticideReapplicationDays, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PlantStatus, String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get statusChangedAt => $composableBuilder(
+      column: $table.statusChangedAt, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -5451,6 +5567,8 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<DateTime?> lastIrrigatedAt = const Value.absent(),
             Value<DateTime?> lastPesticideAppliedAt = const Value.absent(),
             Value<int?> pesticideReapplicationDays = const Value.absent(),
+            Value<PlantStatus> status = const Value.absent(),
+            Value<DateTime?> statusChangedAt = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -5469,6 +5587,8 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             lastIrrigatedAt: lastIrrigatedAt,
             lastPesticideAppliedAt: lastPesticideAppliedAt,
             pesticideReapplicationDays: pesticideReapplicationDays,
+            status: status,
+            statusChangedAt: statusChangedAt,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -5487,6 +5607,8 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<DateTime?> lastIrrigatedAt = const Value.absent(),
             Value<DateTime?> lastPesticideAppliedAt = const Value.absent(),
             Value<int?> pesticideReapplicationDays = const Value.absent(),
+            Value<PlantStatus> status = const Value.absent(),
+            Value<DateTime?> statusChangedAt = const Value.absent(),
             required DateTime createdAt,
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -5505,6 +5627,8 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             lastIrrigatedAt: lastIrrigatedAt,
             lastPesticideAppliedAt: lastPesticideAppliedAt,
             pesticideReapplicationDays: pesticideReapplicationDays,
+            status: status,
+            statusChangedAt: statusChangedAt,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
