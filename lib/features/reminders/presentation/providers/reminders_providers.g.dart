@@ -146,6 +146,49 @@ final class PlantRemindersFamily extends $Family
   String toString() => r'plantRemindersProvider';
 }
 
+/// Every active reminder across all plants (enabled or not), for the agenda.
+
+@ProviderFor(allReminders)
+final allRemindersProvider = AllRemindersProvider._();
+
+/// Every active reminder across all plants (enabled or not), for the agenda.
+
+final class AllRemindersProvider extends $FunctionalProvider<
+        AsyncValue<List<ReminderStatus>>,
+        List<ReminderStatus>,
+        Stream<List<ReminderStatus>>>
+    with
+        $FutureModifier<List<ReminderStatus>>,
+        $StreamProvider<List<ReminderStatus>> {
+  /// Every active reminder across all plants (enabled or not), for the agenda.
+  AllRemindersProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'allRemindersProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$allRemindersHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<ReminderStatus>> $createElement(
+          $ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<ReminderStatus>> create(Ref ref) {
+    return allReminders(ref);
+  }
+}
+
+String _$allRemindersHash() => r'8a6fadc744103bd3c4e6f9badb1e3bd2728569b0';
+
 @ProviderFor(reminderMutations)
 final reminderMutationsProvider = ReminderMutationsProvider._();
 

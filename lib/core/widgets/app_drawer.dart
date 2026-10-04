@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../l10n/l10n.dart';
+import '../../features/agenda/presentation/screens/agenda_screen.dart';
+import '../../features/agenda/presentation/widgets/agenda_badge.dart';
 import '../../features/plants/presentation/screens/home_screen.dart';
 import '../../features/species/presentation/screens/species_list_screen.dart';
 import '../../features/locations/presentation/screens/locations_list_screen.dart';
@@ -92,6 +94,18 @@ class AppDrawer extends StatelessWidget {
                   },
                 ),
                 _DrawerItem(
+                  icon: Icons.event_note_outlined,
+                  label: context.l10n.navAgenda,
+                  trailing: const AgendaBadge(),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AgendaScreen()),
+                    );
+                  },
+                ),
+                _DrawerItem(
                   icon: Icons.eco_outlined,
                   label: context.l10n.navSpecies,
                   onTap: () {
@@ -175,11 +189,13 @@ class _DrawerItem extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.trailing,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -207,6 +223,7 @@ class _DrawerItem extends StatelessWidget {
                     fontWeight: FontWeight.w400,
                   ),
                 ),
+                if (trailing != null) ...[const Spacer(), trailing!],
               ],
             ),
           ),

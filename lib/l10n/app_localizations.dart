@@ -104,6 +104,12 @@ abstract class AppLocalizations {
   /// **'My Plants'**
   String get navMyPlants;
 
+  /// No description provided for @navAgenda.
+  ///
+  /// In en, this message translates to:
+  /// **'Agenda'**
+  String get navAgenda;
+
   /// No description provided for @navSpecies.
   ///
   /// In en, this message translates to:
@@ -841,6 +847,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not recorded yet'**
   String get reminderNeverDone;
+
+  /// No description provided for @agendaOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get agendaOverdue;
+
+  /// No description provided for @agendaToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get agendaToday;
+
+  /// No description provided for @agendaNextDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Next {days} days'**
+  String agendaNextDays(int days);
+
+  /// No description provided for @agendaTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get agendaTomorrow;
+
+  /// No description provided for @agendaRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Record'**
+  String get agendaRecord;
+
+  /// No description provided for @agendaPesticideTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Pesticide reapplication'**
+  String get agendaPesticideTask;
+
+  /// No description provided for @agendaAllCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up! 🌿'**
+  String get agendaAllCaughtUp;
+
+  /// No description provided for @agendaAllCaughtUpHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No care due in the next {days} days.'**
+  String agendaAllCaughtUpHint(int days);
 
   /// No description provided for @deleteReminderTitle.
   ///
