@@ -404,6 +404,77 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get remindersSectionTitle => 'Reminders';
+
+  @override
+  String get remindersEmpty =>
+      'No recurring reminders. Add one for fertilizing, pruning or a periodic check.';
+
+  @override
+  String get addReminder => 'Add reminder';
+
+  @override
+  String get editReminder => 'Edit reminder';
+
+  @override
+  String get reminderTypeLabel => 'Care';
+
+  @override
+  String get reminderIntervalLabel => 'Every how many days';
+
+  @override
+  String get reminderIntervalInvalid =>
+      'Enter a number of days between 1 and 365';
+
+  @override
+  String get reminderEnabledLabel => 'Enabled';
+
+  @override
+  String get reminderPaused => 'Paused';
+
+  @override
+  String reminderEvery(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Every $days days',
+      one: 'Every day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderNextDate(String date) {
+    return 'Next: $date';
+  }
+
+  @override
+  String reminderOverdue(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Overdue by $days days',
+      one: 'Overdue by $days day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderLastDone(String date) {
+    return 'Last: $date';
+  }
+
+  @override
+  String get reminderNeverDone => 'Not recorded yet';
+
+  @override
+  String get deleteReminderTitle => 'Delete reminder?';
+
+  @override
+  String get deleteReminderBody =>
+      'The diary entries are kept; only the reminder is removed.';
+
+  @override
   String get historyPlantAdded => 'Plant added to the system:';
 
   @override

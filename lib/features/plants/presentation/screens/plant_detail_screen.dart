@@ -17,6 +17,7 @@ import '../../../entries/presentation/providers/entry_filters_provider.dart';
 import '../../../entries/presentation/screens/add_entry_screen.dart';
 import '../../../entries/presentation/widgets/entry_timeline_item.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
+import '../../../reminders/presentation/widgets/plant_reminders_card.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../../soils/presentation/providers/soils_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
@@ -179,6 +180,12 @@ class PlantDetailScreen extends ConsumerWidget {
                     SliverToBoxAdapter(
                       child: _PlantInfoCard(plant: plant, pws: pws, soilName: soil?.name, soilComposition: soil?.composition),
                     ),
+                    // Reminders of plants that are no longer active are
+                    // ignored, so they aren't offered either.
+                    if (plant.isActive)
+                      SliverToBoxAdapter(
+                        child: PlantRemindersCard(plantId: plantId),
+                      ),
                     SliverToBoxAdapter(
                       child: _ViewSelector(plantId: plantId),
                     ),

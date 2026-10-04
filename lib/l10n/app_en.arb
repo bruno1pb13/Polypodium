@@ -214,6 +214,42 @@
       "count": {"type": "int"}
     }
   },
+  "remindersSectionTitle": "Reminders",
+  "remindersEmpty": "No recurring reminders. Add one for fertilizing, pruning or a periodic check.",
+  "addReminder": "Add reminder",
+  "editReminder": "Edit reminder",
+  "reminderTypeLabel": "Care",
+  "reminderIntervalLabel": "Every how many days",
+  "reminderIntervalInvalid": "Enter a number of days between 1 and 365",
+  "reminderEnabledLabel": "Enabled",
+  "reminderPaused": "Paused",
+  "reminderEvery": "{days, plural, one{Every day} other{Every {days} days}}",
+  "@reminderEvery": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "reminderNextDate": "Next: {date}",
+  "@reminderNextDate": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "reminderOverdue": "{days, plural, one{Overdue by {days} day} other{Overdue by {days} days}}",
+  "@reminderOverdue": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "reminderLastDone": "Last: {date}",
+  "@reminderLastDone": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "reminderNeverDone": "Not recorded yet",
+  "deleteReminderTitle": "Delete reminder?",
+  "deleteReminderBody": "The diary entries are kept; only the reminder is removed.",
 
   "historyPlantAdded": "Plant added to the system:",
   "historyFieldNickname": "Nickname",
