@@ -371,6 +371,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get notificationActionWatered => 'Watered';
+
+  @override
+  String get notificationActionSnooze => 'Remind in 3 h';
+
+  @override
   String get historyPlantAdded => 'Plant added to the system:';
 
   @override

@@ -184,6 +184,8 @@
       "count": {"type": "int"}
     }
   },
+  "notificationActionWatered": "Watered",
+  "notificationActionSnooze": "Remind in 3 h",
 
   "historyPlantAdded": "Plant added to the system:",
   "historyFieldNickname": "Nickname",

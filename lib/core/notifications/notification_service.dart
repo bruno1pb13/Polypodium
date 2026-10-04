@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' show DartPluginRegistrant;
 
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart';
@@ -9,12 +10,28 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:uuid/uuid.dart';
 
 import '../database/app_database.dart';
+import '../enums.dart';
+import '../storage/photo_storage.dart';
+import '../../features/entries/data/entries_repository.dart';
+import '../../features/entries/domain/entry_model.dart';
 import '../../features/plants/data/plants_repository.dart';
 import '../../features/plants/domain/plant_model.dart';
 import '../../features/workspaces/data/workspace_repository.dart';
+import '../../features/workspaces/domain/workspace_model.dart';
+import '../../features/workspaces/domain/workspace_paths.dart';
 import '../l10n/l10n.dart';
+import 'reminder_payload.dart';
+
+/// Runs in a background isolate when a notification action button that
+/// doesn't open the app ("Watered", "Remind in 3 h") is tapped — the plugin
+/// starts a headless engine for it, even if the app is in the foreground.
+@pragma('vm:entry-point')
+void onBackgroundNotificationResponse(NotificationResponse response) {
+  NotificationService._handleBackgroundResponse(response);
+}
 
 abstract interface class INotificationService {
   /// Rebuilds the whole irrigation reminder schedule from [plants] — the
@@ -40,6 +57,14 @@ class NotificationService implements INotificationService {
   /// calendar date never collide/overwrite each other.
   static const _pesticideIdOffset = 1000000000;
 
+  /// Snoozed reminders get sequential ids above every date-based id (still
+  /// below 2^31, the platform limit).
+  static const _snoozeIdOffset = 1500000000;
+
+  /// Darwin category ids, which select the action buttons shown on iOS/macOS.
+  static const _irrigationCategoryId = 'irrigation';
+  static const _pesticideCategoryId = 'pesticide';
+
   /// SharedPreferences keys — shared with SettingsRepository, which cannot be
   /// imported here (it depends on this service).
   static const _enabledKey = 'notifications_enabled';
@@ -52,24 +77,14 @@ class NotificationService implements INotificationService {
   /// built from background isolates, where no [BuildContext] exists.
   static AppLocalizations get _l10n => systemL10n();
 
-  static Future<void> initialize() async {
+  /// [onResponse] handles notification taps (and action buttons that open
+  /// the app) in the UI isolate; the other actions go to
+  /// [onBackgroundNotificationResponse].
+  static Future<void> initialize({
+    DidReceiveNotificationResponseCallback? onResponse,
+  }) async {
     await _initTimezone();
-
-    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
-    // Permissions are NOT requested here — the user opts in from the
-    // onboarding or the settings screen (see [requestPermissions]).
-    const iOS = DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
-    );
-    const linux = LinuxInitializationSettings(
-      defaultActionName: 'Open',
-    );
-
-    await _plugin.initialize(
-      const InitializationSettings(android: android, iOS: iOS, linux: linux),
-    );
+    await _initializePlugin(onResponse: onResponse);
 
     if (Platform.isAndroid) {
       final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
@@ -88,6 +103,53 @@ class NotificationService implements INotificationService {
           importance: Importance.defaultImportance,
         ),
       );
+    }
+  }
+
+  static Future<void> _initializePlugin({
+    DidReceiveNotificationResponseCallback? onResponse,
+  }) async {
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    final l10n = _l10n;
+    final watered = DarwinNotificationAction.plain(
+        ReminderAction.water, l10n.notificationActionWatered);
+    final snooze = DarwinNotificationAction.plain(
+        ReminderAction.snooze, l10n.notificationActionSnooze);
+    // Permissions are NOT requested here — the user opts in from the
+    // onboarding or the settings screen (see [requestPermissions]).
+    final darwin = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+      notificationCategories: [
+        DarwinNotificationCategory(_irrigationCategoryId,
+            actions: [watered, snooze]),
+        DarwinNotificationCategory(_pesticideCategoryId, actions: [snooze]),
+      ],
+    );
+    const linux = LinuxInitializationSettings(
+      defaultActionName: 'Open',
+    );
+
+    await _plugin.initialize(
+      InitializationSettings(
+          android: android, iOS: darwin, macOS: darwin, linux: linux),
+      onDidReceiveNotificationResponse: onResponse,
+      onDidReceiveBackgroundNotificationResponse:
+          onBackgroundNotificationResponse,
+    );
+  }
+
+  /// The tap that launched the app from a terminated state, if any — it
+  /// never reaches the onResponse callback given to [initialize].
+  static Future<NotificationResponse?> launchResponse() async {
+    try {
+      final details = await _plugin.getNotificationAppLaunchDetails();
+      if (details == null || !details.didNotificationLaunchApp) return null;
+      return details.notificationResponse;
+    } catch (_) {
+      // Not implemented on every desktop platform.
+      return null;
     }
   }
 
@@ -164,6 +226,9 @@ class NotificationService implements INotificationService {
     if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) return;
 
     final prefs = await SharedPreferences.getInstance();
+    // SharedPreferences caches per isolate, and snoozes are written from the
+    // notification-action isolate.
+    await prefs.reload();
     final isEnabled = enabled ?? (prefs.getBool(_enabledKey) ?? true);
 
     await _plugin.cancelAll();
@@ -180,78 +245,122 @@ class NotificationService implements INotificationService {
         plants, now.toLocal(),
         hour: hour, minute: minute);
 
-    final l10n = _l10n;
     for (final entry in groups.entries) {
       final date = entry.key;
-      final nicknames = entry.value;
-      // Up to 2 plants the names fit comfortably; beyond that just the count.
-      final body = switch (nicknames.length) {
-        1 => l10n.irrigationNotificationBody(nicknames.single),
-        2 => l10n.irrigationNotificationBodyMany(
-            nicknames.length, nicknames.join(', ')),
-        _ => l10n.irrigationNotificationBodyCount(nicknames.length),
-      };
-
-      await _plugin.zonedSchedule(
+      await _schedule(
+        ReminderKind.irrigation,
         _dateNotificationId(date),
-        l10n.irrigationNotificationTitle,
-        body,
         tz.TZDateTime(tz.local, date.year, date.month, date.day, hour, minute),
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-            _channelId,
-            l10n.irrigationChannelName,
-            channelDescription: l10n.irrigationChannelDescription,
-            importance: Importance.defaultImportance,
-            priority: Priority.defaultPriority,
-            groupKey: _groupKey,
-            // Long plant lists stay readable when the user expands the card.
-            styleInformation: BigTextStyleInformation(body),
-          ),
-          iOS: const DarwinNotificationDetails(threadIdentifier: _channelId),
-        ),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        // No matchDateTimeComponents — one-shot; the schedule is rebuilt after
-        // every irrigation/save/delete/sync pull and by the 12 h background
-        // check.
+        entry.value,
       );
     }
 
     for (final entry in pesticideGroups.entries) {
       final date = entry.key;
-      final nicknames = entry.value;
-      final body = switch (nicknames.length) {
-        1 => l10n.pesticideNotificationBody(nicknames.single),
-        2 => l10n.pesticideNotificationBodyMany(
-            nicknames.length, nicknames.join(', ')),
-        _ => l10n.pesticideNotificationBodyCount(nicknames.length),
-      };
-
-      await _plugin.zonedSchedule(
+      await _schedule(
+        ReminderKind.pesticide,
         _dateNotificationId(date, kindOffset: _pesticideIdOffset),
-        l10n.pesticideNotificationTitle,
-        body,
         tz.TZDateTime(tz.local, date.year, date.month, date.day, hour, minute),
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-            _pesticideChannelId,
-            l10n.pesticideChannelName,
-            channelDescription: l10n.pesticideChannelDescription,
-            importance: Importance.defaultImportance,
-            priority: Priority.defaultPriority,
-            groupKey: _pesticideGroupKey,
-            styleInformation: BigTextStyleInformation(body),
-          ),
-          iOS: const DarwinNotificationDetails(
-              threadIdentifier: _pesticideChannelId),
-        ),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
+        entry.value,
       );
     }
+
+    // Snoozed reminders, narrowed to the plants that still need it — one
+    // watered (or deleted) meanwhile drops out, and an empty one is skipped.
+    final snoozes = await ReminderSnoozeStore(prefs).loadPending(now.toLocal());
+    final byId = {for (final item in plants) item.plant.id: item};
+    for (final (index, snooze) in snoozes.indexed) {
+      final due = [
+        for (final id in snooze.plantIds)
+          if (byId[id] case final item?)
+            if (switch (snooze.kind) {
+              ReminderKind.irrigation => item.needsWatering,
+              ReminderKind.pesticide => item.needsPesticideReapplication,
+            })
+              item.plant,
+      ];
+      if (due.isEmpty) continue;
+      await _schedule(snooze.kind, _snoozeIdOffset + index,
+          tz.TZDateTime.from(snooze.at, tz.local), due);
+    }
+  }
+
+  /// Schedules one reminder of [kind] listing [plants], with the action
+  /// buttons of that kind and a payload naming the plants.
+  static Future<void> _schedule(
+    ReminderKind kind,
+    int id,
+    tz.TZDateTime when,
+    List<PlantModel> plants,
+  ) async {
+    final l10n = _l10n;
+    final nicknames = [for (final plant in plants) plant.nickname];
+    final isIrrigation = kind == ReminderKind.irrigation;
+    // Up to 2 plants the names fit comfortably; beyond that just the count.
+    final body = switch (nicknames.length) {
+      1 => isIrrigation
+          ? l10n.irrigationNotificationBody(nicknames.single)
+          : l10n.pesticideNotificationBody(nicknames.single),
+      2 => isIrrigation
+          ? l10n.irrigationNotificationBodyMany(
+              nicknames.length, nicknames.join(', '))
+          : l10n.pesticideNotificationBodyMany(
+              nicknames.length, nicknames.join(', ')),
+      _ => isIrrigation
+          ? l10n.irrigationNotificationBodyCount(nicknames.length)
+          : l10n.pesticideNotificationBodyCount(nicknames.length),
+    };
+
+    // Neither action opens the app: they run in
+    // onBackgroundNotificationResponse.
+    final snooze = AndroidNotificationAction(
+        ReminderAction.snooze, l10n.notificationActionSnooze,
+        showsUserInterface: false, cancelNotification: true);
+    final actions = [
+      if (isIrrigation)
+        AndroidNotificationAction(
+            ReminderAction.water, l10n.notificationActionWatered,
+            showsUserInterface: false, cancelNotification: true),
+      snooze,
+    ];
+
+    final channelId = isIrrigation ? _channelId : _pesticideChannelId;
+    await _plugin.zonedSchedule(
+      id,
+      isIrrigation
+          ? l10n.irrigationNotificationTitle
+          : l10n.pesticideNotificationTitle,
+      body,
+      when,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          channelId,
+          isIrrigation ? l10n.irrigationChannelName : l10n.pesticideChannelName,
+          channelDescription: isIrrigation
+              ? l10n.irrigationChannelDescription
+              : l10n.pesticideChannelDescription,
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+          groupKey: isIrrigation ? _groupKey : _pesticideGroupKey,
+          // Long plant lists stay readable when the user expands the card.
+          styleInformation: BigTextStyleInformation(body),
+          actions: actions,
+        ),
+        iOS: DarwinNotificationDetails(
+          threadIdentifier: channelId,
+          categoryIdentifier:
+              isIrrigation ? _irrigationCategoryId : _pesticideCategoryId,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      payload: ReminderPayload(kind, [for (final plant in plants) plant.id])
+          .encode(),
+      // No matchDateTimeComponents — one-shot; the schedule is rebuilt after
+      // every irrigation/save/delete/sync pull and by the 12 h background
+      // check.
+    );
   }
 
   /// Called from the WorkManager background isolate every 12 h to recover
@@ -262,36 +371,112 @@ class NotificationService implements INotificationService {
     print('[NotificationService] Background check triggered');
 
     await _initTimezone();
-
     // Re-initialise the plugin inside the background isolate
-    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iOS = DarwinInitializationSettings();
-    await _plugin
-        .initialize(const InitializationSettings(android: android, iOS: iOS));
+    await _initializePlugin();
 
-    final db = await _openActiveDatabase();
-    if (db == null) return;
+    final active = await _openActiveDatabase();
+    if (active == null) return;
     try {
-      await PlantsRepository(db, const NotificationService())
+      await PlantsRepository(active.db, const NotificationService())
           .rescheduleNotifications();
     } finally {
-      await db.close();
+      await active.db.close();
     }
+  }
+
+  /// Handles "Watered" / "Remind in 3 h" from a background isolate, with no
+  /// Riverpod: writes go straight to the active workspace's database. The
+  /// UI isolate's Drift streams don't see them; the app refreshes its
+  /// queries when resumed. Synced on the next regular sync pass.
+  static Future<void> _handleBackgroundResponse(
+      NotificationResponse response) async {
+    final action = response.actionId;
+    final payload = ReminderPayload.decode(response.payload);
+    if (payload == null || payload.plantIds.isEmpty) return;
+    if (action != ReminderAction.water && action != ReminderAction.snooze) {
+      return;
+    }
+
+    try {
+      DartPluginRegistrant.ensureInitialized();
+      await _initTimezone();
+      // iOS keeps the plugin's state from the UI engine; re-initialising
+      // there would only re-register the categories.
+      if (Platform.isAndroid) await _initializePlugin();
+
+      final active = await _openActiveDatabase();
+      if (active == null) return;
+      try {
+        final plantsRepo =
+            PlantsRepository(active.db, const NotificationService());
+        if (action == ReminderAction.water) {
+          final ws = active.workspace;
+          final entriesRepo = EntriesRepository(
+            active.db,
+            ws == null
+                ? PhotoStorage()
+                : PhotoStorage(baseDirName: photoDirNameFor(ws)),
+          );
+          // Skip plants deleted since the notification was scheduled.
+          final existing = {
+            for (final plant in await plantsRepo.getAll()) plant.id
+          };
+          final now = DateTime.now();
+          for (final plantId in payload.plantIds.where(existing.contains)) {
+            await entriesRepo.create(EntryModel(
+              id: const Uuid().v4(),
+              plantId: plantId,
+              date: now,
+              type: EntryType.irrigation,
+              createdAt: now,
+            ));
+            await plantsRepo.refreshPlantStatus(plantId, reschedule: false);
+          }
+        } else {
+          await snoozeReminder(payload);
+        }
+        await plantsRepo.rescheduleNotifications();
+      } finally {
+        await active.db.close();
+      }
+    } catch (e, st) {
+      // ignore: avoid_print
+      print(
+          '[NotificationService] Notification action $action failed: $e\n$st');
+    }
+  }
+
+  /// Persists a snooze of [payload]'s reminder; it is scheduled by the next
+  /// [rescheduleAllNotifications], which the caller must trigger.
+  static Future<void> snoozeReminder(ReminderPayload payload) async {
+    final prefs = await SharedPreferences.getInstance();
+    // Don't overwrite snoozes saved by another isolate with a stale cache.
+    await prefs.reload();
+    await ReminderSnoozeStore(prefs).add(ReminderSnooze(
+      payload.kind,
+      payload.plantIds,
+      DateTime.now().add(ReminderSnoozeStore.snoozeDuration),
+    ));
   }
 
   /// Opens the active workspace's database from an isolate without Riverpod
   /// (WorkManager, notification actions). Null when that file doesn't exist
   /// yet: opening it would create an empty database, and rescheduling from
   /// it would cancel every pending reminder.
-  static Future<AppDatabase?> _openActiveDatabase() async {
+  static Future<({AppDatabase db, Workspace? workspace})?>
+      _openActiveDatabase() async {
     final prefs = await SharedPreferences.getInstance();
     // The cache may predate a workspace switch made in the UI isolate.
     await prefs.reload();
-    final fileName = WorkspaceRepository(prefs).activeDbFileName();
+    final repo = WorkspaceRepository(prefs);
     final dir = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, fileName));
+    final file = File(p.join(dir.path, repo.activeDbFileName()));
     if (!file.existsSync()) return null;
-    return AppDatabase.forTesting(NativeDatabase(file));
+    // The UI isolate may hold the same file open: wait for its locks
+    // instead of failing with SQLITE_BUSY.
+    final db = AppDatabase.forTesting(NativeDatabase(file,
+        setup: (raw) => raw.execute('PRAGMA busy_timeout = 5000;')));
+    return (db: db, workspace: repo.loadActiveWorkspace());
   }
 
   // ---------------------------------------------------------------------------
@@ -327,16 +512,16 @@ class NotificationService implements INotificationService {
   }
 
   /// Groups the plants due on the same date into a single reminder: date
-  /// (at midnight) → nicknames of every plant due that day. Plants without
+  /// (at midnight) → every plant due that day. Plants without
   /// an irrigation frequency (own or species default) are skipped.
   @visibleForTesting
-  static Map<DateTime, List<String>> groupPlantsByDueDate(
+  static Map<DateTime, List<PlantModel>> groupPlantsByDueDate(
     List<PlantWithSpecies> plants,
     DateTime now, {
     int hour = 9,
     int minute = 0,
   }) {
-    final groups = <DateTime, List<String>>{};
+    final groups = <DateTime, List<PlantModel>>{};
     for (final item in plants) {
       final frequencyDays = item.effectiveFrequencyDays;
       if (frequencyDays == null) continue;
@@ -345,7 +530,7 @@ class NotificationService implements INotificationService {
           item.plant.lastIrrigatedAt, frequencyDays, now,
           hour: hour, minute: minute);
       final date = DateTime(scheduled.year, scheduled.month, scheduled.day);
-      groups.putIfAbsent(date, () => []).add(item.plant.nickname);
+      groups.putIfAbsent(date, () => []).add(item.plant);
     }
     return groups;
   }
@@ -355,13 +540,13 @@ class NotificationService implements INotificationService {
   /// reminder (no recurrence set on their most recent 'pesticide' entry) are
   /// skipped.
   @visibleForTesting
-  static Map<DateTime, List<String>> groupPlantsByPesticideDueDate(
+  static Map<DateTime, List<PlantModel>> groupPlantsByPesticideDueDate(
     List<PlantWithSpecies> plants,
     DateTime now, {
     int hour = 9,
     int minute = 0,
   }) {
-    final groups = <DateTime, List<String>>{};
+    final groups = <DateTime, List<PlantModel>>{};
     for (final item in plants) {
       final frequencyDays = item.plant.pesticideReapplicationDays;
       final lastApplied = item.plant.lastPesticideAppliedAt;
@@ -371,7 +556,7 @@ class NotificationService implements INotificationService {
           lastApplied, frequencyDays, now,
           hour: hour, minute: minute);
       final date = DateTime(scheduled.year, scheduled.month, scheduled.day);
-      groups.putIfAbsent(date, () => []).add(item.plant.nickname);
+      groups.putIfAbsent(date, () => []).add(item.plant);
     }
     return groups;
   }

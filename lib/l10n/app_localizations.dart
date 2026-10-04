@@ -710,6 +710,18 @@ abstract class AppLocalizations {
   /// **'{count} plants need reapplication today.'**
   String pesticideNotificationBodyCount(int count);
 
+  /// No description provided for @notificationActionWatered.
+  ///
+  /// In en, this message translates to:
+  /// **'Watered'**
+  String get notificationActionWatered;
+
+  /// No description provided for @notificationActionSnooze.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind in 3 h'**
+  String get notificationActionSnooze;
+
   /// No description provided for @historyPlantAdded.
   ///
   /// In en, this message translates to:

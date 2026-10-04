@@ -5,6 +5,11 @@ import 'package:polypodium/features/species/domain/species_model.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
+/// The grouping helpers return the plants themselves (their ids go in the
+/// notification payload); the expectations read better as nicknames.
+List<String>? nicknames(List<PlantModel>? plants) =>
+    plants?.map((p) => p.nickname).toList();
+
 void main() {
   setUpAll(() {
     tz_data.initializeTimeZones();
@@ -153,7 +158,7 @@ void main() {
       );
 
       expect(groups, hasLength(1));
-      expect(groups[DateTime(2026, 5, 25)], ['Basil', 'Fern']);
+      expect(nicknames(groups[DateTime(2026, 5, 25)]), ['Basil', 'Fern']);
     });
 
     test('plants due on different days get separate groups', () {
@@ -168,8 +173,8 @@ void main() {
       );
 
       expect(groups, hasLength(2));
-      expect(groups[DateTime(2026, 5, 25)], ['Basil']);
-      expect(groups[DateTime(2026, 5, 30)], ['Cactus']);
+      expect(nicknames(groups[DateTime(2026, 5, 25)]), ['Basil']);
+      expect(nicknames(groups[DateTime(2026, 5, 30)]), ['Cactus']);
     });
 
     test('falls back to the species default frequency', () {
@@ -178,7 +183,7 @@ void main() {
         now,
       );
 
-      expect(groups[DateTime(2026, 5, 27)], ['Basil']);
+      expect(nicknames(groups[DateTime(2026, 5, 27)]), ['Basil']);
     });
 
     test('skips plants without any irrigation frequency', () {
@@ -223,7 +228,7 @@ void main() {
       );
 
       expect(groups, hasLength(1));
-      expect(groups[DateTime(2026, 5, 21)], ['Basil', 'Fern']);
+      expect(nicknames(groups[DateTime(2026, 5, 21)]), ['Basil', 'Fern']);
     });
   });
 
@@ -269,7 +274,7 @@ void main() {
       );
 
       expect(groups, hasLength(1));
-      expect(groups[DateTime(2026, 5, 25)], ['Basil', 'Fern']);
+      expect(nicknames(groups[DateTime(2026, 5, 25)]), ['Basil', 'Fern']);
     });
 
     test('skips plants without an active pesticide reminder', () {

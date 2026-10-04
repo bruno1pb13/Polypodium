@@ -114,6 +114,8 @@
   "pesticideNotificationBody": "{nickname} precisa de reaplicação de defensivo hoje.",
   "pesticideNotificationBodyMany": "{count} plantas precisam de reaplicação hoje: {names}.",
   "pesticideNotificationBodyCount": "{count} plantas precisam de reaplicação hoje.",
+  "notificationActionWatered": "Reguei",
+  "notificationActionSnooze": "Lembrar em 3 h",
 
   "historyPlantAdded": "Planta adicionada ao sistema:",
   "historyFieldNickname": "Apelido",

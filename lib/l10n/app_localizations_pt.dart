@@ -374,6 +374,12 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get notificationActionWatered => 'Reguei';
+
+  @override
+  String get notificationActionSnooze => 'Lembrar em 3 h';
+
+  @override
   String get historyPlantAdded => 'Planta adicionada ao sistema:';
 
   @override
