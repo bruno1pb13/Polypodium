@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n.dart';
+import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../entries/presentation/screens/add_entry_screen.dart';
 import '../../domain/plant_model.dart';
 import '../providers/plants_providers.dart';
@@ -53,6 +54,14 @@ class PlantGroupScreen extends ConsumerWidget {
             shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
           ),
         ),
+        actions: [
+          if (plants.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.water_drop_outlined),
+              tooltip: context.l10n.waterAll,
+              onPressed: () => _waterAll(context, ref, plants),
+            ),
+        ],
       ),
       body: Stack(
         children: [
@@ -126,6 +135,26 @@ class PlantGroupScreen extends ConsumerWidget {
               label: Text(context.l10n.bulkEntryButton),
             ),
     );
+  }
+}
+
+Future<void> _waterAll(
+    BuildContext context, WidgetRef ref, List<PlantWithSpecies> plants) async {
+  final messenger = ScaffoldMessenger.of(context);
+  final l10n = context.l10n;
+  try {
+    await ref
+        .read(entryMutationsProvider)
+        .recordIrrigation(plants.map((p) => p.plant.id));
+    messenger.showSnackBar(SnackBar(
+      content: Text(l10n.irrigationRecordedForPlants(plants.length)),
+      duration: const Duration(seconds: 2),
+    ));
+  } catch (e) {
+    messenger.showSnackBar(SnackBar(
+      content: Text(l10n.irrigationRecordError('$e')),
+      backgroundColor: Colors.red,
+    ));
   }
 }
 

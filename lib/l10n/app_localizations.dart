@@ -944,6 +944,30 @@ abstract class AppLocalizations {
   /// **'Bulk entry'**
   String get bulkEntryButton;
 
+  /// No description provided for @waterSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Water selected'**
+  String get waterSelected;
+
+  /// No description provided for @bulkEntrySelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Add entry for selected'**
+  String get bulkEntrySelected;
+
+  /// No description provided for @waterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Water all'**
+  String get waterAll;
+
+  /// No description provided for @irrigationRecordedForPlants.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Watering recorded for {count} plant} other{Watering recorded for {count} plants}}'**
+  String irrigationRecordedForPlants(int count);
+
   /// No description provided for @noPlantsAtLocation.
   ///
   /// In en, this message translates to:

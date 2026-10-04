@@ -508,6 +508,26 @@ class AppLocalizationsPt extends AppLocalizations {
   String get bulkEntryButton => 'Registro em massa';
 
   @override
+  String get waterSelected => 'Regar selecionadas';
+
+  @override
+  String get bulkEntrySelected => 'Registrar nas selecionadas';
+
+  @override
+  String get waterAll => 'Regar todas';
+
+  @override
+  String irrigationRecordedForPlants(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rega registrada em $count plantas',
+      one: 'Rega registrada em $count planta',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get noPlantsAtLocation => 'Nenhuma planta nesta localização';
 
   @override

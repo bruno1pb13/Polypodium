@@ -157,6 +157,10 @@
   "deleteSelected": "Excluir selecionadas",
 
   "bulkEntryButton": "Registro em massa",
+  "waterSelected": "Regar selecionadas",
+  "bulkEntrySelected": "Registrar nas selecionadas",
+  "waterAll": "Regar todas",
+  "irrigationRecordedForPlants": "{count, plural, one{Rega registrada em {count} planta} other{Rega registrada em {count} plantas}}",
   "noPlantsAtLocation": "Nenhuma planta nesta localização",
   "plantsAtLocationHint": "Defina esta localização em uma planta para vê-la aqui.",
   "noPlantsOfSpecies": "Nenhuma planta desta espécie",

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
@@ -93,18 +94,44 @@ class EntryMutations {
 
   final Ref _ref;
 
-  Future<void> create(EntryModel entry) async {
-    await _ref.read(entriesRepositoryProvider).create(entry);
-    if (entry.type == EntryType.irrigation) {
-      await _ref
-          .read(plantsRepositoryProvider)
-          .refreshPlantStatus(entry.plantId);
-    } else if (entry.type == EntryType.pesticide) {
-      await _ref
-          .read(plantsRepositoryProvider)
-          .refreshPesticideStatus(entry.plantId);
+  Future<void> create(EntryModel entry) => createMany([entry]);
+
+  /// Creates [entries] (typically one per plant, for bulk actions) and
+  /// refreshes the affected plants' status, rescheduling notifications and
+  /// triggering sync once for the whole batch instead of once per entry.
+  Future<void> createMany(List<EntryModel> entries) async {
+    if (entries.isEmpty) return;
+    final entriesRepo = _ref.read(entriesRepositoryProvider);
+    final plantsRepo = _ref.read(plantsRepositoryProvider);
+    var needsReschedule = false;
+    for (final entry in entries) {
+      await entriesRepo.create(entry);
+      if (entry.type == EntryType.irrigation) {
+        await plantsRepo.refreshPlantStatus(entry.plantId, reschedule: false);
+        needsReschedule = true;
+      } else if (entry.type == EntryType.pesticide) {
+        await plantsRepo.refreshPesticideStatus(entry.plantId,
+            reschedule: false);
+        needsReschedule = true;
+      }
     }
+    if (needsReschedule) await plantsRepo.rescheduleNotifications();
     _triggerSync();
+  }
+
+  /// Records a plain irrigation entry, dated now, for each of [plantIds].
+  Future<void> recordIrrigation(Iterable<String> plantIds) {
+    final now = DateTime.now();
+    return createMany([
+      for (final plantId in plantIds)
+        EntryModel(
+          id: const Uuid().v4(),
+          plantId: plantId,
+          date: now,
+          type: EntryType.irrigation,
+          createdAt: now,
+        ),
+    ]);
   }
 
   Future<void> delete(String id) async {

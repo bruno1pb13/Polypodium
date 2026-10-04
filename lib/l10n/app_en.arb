@@ -247,6 +247,15 @@
   "deleteSelected": "Delete selected",
 
   "bulkEntryButton": "Bulk entry",
+  "waterSelected": "Water selected",
+  "bulkEntrySelected": "Add entry for selected",
+  "waterAll": "Water all",
+  "irrigationRecordedForPlants": "{count, plural, one{Watering recorded for {count} plant} other{Watering recorded for {count} plants}}",
+  "@irrigationRecordedForPlants": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "noPlantsAtLocation": "No plants at this location",
   "plantsAtLocationHint": "Assign this location to a plant to see it here.",
   "noPlantsOfSpecies": "No plants of this species",
