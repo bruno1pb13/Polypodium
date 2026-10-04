@@ -229,6 +229,8 @@
   },
   "noPlantsFound": "No plants found",
   "noPlantsRegistered": "No plants registered",
+  "allPlantsArchived": "All plants are archived",
+  "allPlantsArchivedHint": "Turn on \"Show archived\" in the menu to see them, or tap + to add a new plant.",
   "tapToAddFirstPlant": "Tap + to add your first plant.",
   "deletePlantsTitle": "{count, plural, one{Delete {count} plant?} other{Delete {count} plants?}}",
   "@deletePlantsTitle": {
