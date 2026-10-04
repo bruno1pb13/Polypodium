@@ -902,6 +902,18 @@ abstract class AppLocalizations {
   /// **'No plants registered'**
   String get noPlantsRegistered;
 
+  /// No description provided for @allPlantsArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'All plants are archived'**
+  String get allPlantsArchived;
+
+  /// No description provided for @allPlantsArchivedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on \"Show archived\" in the menu to see them, or tap + to add a new plant.'**
+  String get allPlantsArchivedHint;
+
   /// No description provided for @tapToAddFirstPlant.
   ///
   /// In en, this message translates to:
