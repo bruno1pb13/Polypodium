@@ -758,6 +758,102 @@ abstract class AppLocalizations {
   /// **'Due today for {count} plants.'**
   String careNotificationBodyCount(int count);
 
+  /// No description provided for @remindersSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get remindersSectionTitle;
+
+  /// No description provided for @remindersEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring reminders. Add one for fertilizing, pruning or a periodic check.'**
+  String get remindersEmpty;
+
+  /// No description provided for @addReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add reminder'**
+  String get addReminder;
+
+  /// No description provided for @editReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit reminder'**
+  String get editReminder;
+
+  /// No description provided for @reminderTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Care'**
+  String get reminderTypeLabel;
+
+  /// No description provided for @reminderIntervalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Every how many days'**
+  String get reminderIntervalLabel;
+
+  /// No description provided for @reminderIntervalInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number of days between 1 and 365'**
+  String get reminderIntervalInvalid;
+
+  /// No description provided for @reminderEnabledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get reminderEnabledLabel;
+
+  /// No description provided for @reminderPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get reminderPaused;
+
+  /// No description provided for @reminderEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, one{Every day} other{Every {days} days}}'**
+  String reminderEvery(int days);
+
+  /// No description provided for @reminderNextDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {date}'**
+  String reminderNextDate(String date);
+
+  /// No description provided for @reminderOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, one{Overdue by {days} day} other{Overdue by {days} days}}'**
+  String reminderOverdue(int days);
+
+  /// No description provided for @reminderLastDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Last: {date}'**
+  String reminderLastDone(String date);
+
+  /// No description provided for @reminderNeverDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not recorded yet'**
+  String get reminderNeverDone;
+
+  /// No description provided for @deleteReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete reminder?'**
+  String get deleteReminderTitle;
+
+  /// No description provided for @deleteReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The diary entries are kept; only the reminder is removed.'**
+  String get deleteReminderBody;
+
   /// No description provided for @historyPlantAdded.
   ///
   /// In en, this message translates to:
