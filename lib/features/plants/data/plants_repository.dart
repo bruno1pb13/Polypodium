@@ -61,21 +61,25 @@ class PlantsRepository {
   }
 
   /// Recalculates lastIrrigatedAt based on the most recent irrigation entry.
-  Future<void> refreshPlantStatus(String plantId) async {
+  /// Pass `reschedule: false` when refreshing several plants in a row and
+  /// call [rescheduleNotifications] once at the end.
+  Future<void> refreshPlantStatus(String plantId,
+      {bool reschedule = true}) async {
     final lastDate = await _db.entriesDao.getLastIrrigationDate(plantId);
     await _db.transaction(() async {
       final rev = await _db.syncMetaDao.nextRev();
       await _dao.updateLastIrrigated(plantId, lastDate,
           updatedAt: DateTime.now(), rev: rev);
     });
-    await rescheduleNotifications();
+    if (reschedule) await rescheduleNotifications();
   }
 
   /// Recalculates lastPesticideAppliedAt/pesticideReapplicationDays from the
   /// most recent 'pesticide' entry — the reminder always tracks that single
   /// latest application, so a newer entry without a recurrence value clears
   /// any pending reminder.
-  Future<void> refreshPesticideStatus(String plantId) async {
+  Future<void> refreshPesticideStatus(String plantId,
+      {bool reschedule = true}) async {
     final last = await _db.entriesDao.getLastEntryOfType(
         plantId, EntryType.pesticide);
     final recurrenceDays = last == null
@@ -88,7 +92,7 @@ class PlantsRepository {
           plantId, last?.date, recurrenceDays,
           updatedAt: DateTime.now(), rev: rev);
     });
-    await rescheduleNotifications();
+    if (reschedule) await rescheduleNotifications();
   }
 
   Future<void> delete(String id) async {

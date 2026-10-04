@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'core/database/database_provider.dart';
+import 'core/notifications/notification_response_handler.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/sync/auto_sync_controller.dart';
 import 'l10n/app_localizations.dart';
@@ -31,7 +33,13 @@ void callbackDispatcher() {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await NotificationService.initialize();
+  // Created up front (instead of by ProviderScope) so notification taps and
+  // actions can reach the providers outside the widget tree.
+  final container = ProviderContainer();
+  final notificationResponses =
+      NotificationResponseHandler(container, GlobalKey<NavigatorState>());
+  await NotificationService.initialize(
+      onResponse: notificationResponses.handle);
 
   final prefs = await SharedPreferences.getInstance();
   await WorkspaceRepository(prefs).ensureBootstrapped();
@@ -47,14 +55,30 @@ Future<void> main() async {
     );
   }
 
-  runApp(ProviderScope(child: PolypodiumApp(showIntro: showIntro)));
+  runApp(UncontrolledProviderScope(
+    container: container,
+    child: PolypodiumApp(
+      showIntro: showIntro,
+      navigatorKey: notificationResponses.navigatorKey,
+    ),
+  ));
+
+  // A tap that launched the app never reaches the response callback. On the
+  // first launch (intro) there is no reminder worth opening yet.
+  final launchResponse = await NotificationService.launchResponse();
+  if (launchResponse != null && !showIntro) {
+    await notificationResponses.handle(launchResponse);
+  }
 }
 
 class PolypodiumApp extends ConsumerWidget {
-  const PolypodiumApp({super.key, this.showIntro = false});
+  const PolypodiumApp({super.key, this.showIntro = false, this.navigatorKey});
 
   /// Whether to show the first-launch introduction instead of the app shell.
   final bool showIntro;
+
+  /// Lets notification taps navigate from outside the widget tree.
+  final GlobalKey<NavigatorState>? navigatorKey;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -67,6 +91,7 @@ class PolypodiumApp extends ConsumerWidget {
     };
 
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Polypodium',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
@@ -111,7 +136,13 @@ class _AutoSyncScopeState extends ConsumerState<_AutoSyncScope>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _triggerSync();
+    if (state == AppLifecycleState.resumed) {
+      // Notification actions ("Watered") write to the database from another
+      // isolate, invisible to this isolate's Drift streams: re-run them.
+      final db = ref.read(appDatabaseProvider);
+      db.markTablesUpdated(db.allTables);
+      _triggerSync();
+    }
   }
 
   void _triggerSync() {

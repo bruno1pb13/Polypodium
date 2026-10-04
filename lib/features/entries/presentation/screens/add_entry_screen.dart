@@ -1009,6 +1009,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
       final note =
           _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim();
       final mutations = ref.read(entryMutationsProvider);
+      final entries = <EntryModel>[];
       for (var i = 0; i < widget.plantIds.length; i++) {
         final plantId = widget.plantIds[i];
         // Each entry owns its photo file (deleting an entry deletes the
@@ -1027,8 +1028,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           extraData: _extraData,
           createdAt: now,
         );
-        await mutations.create(entry);
+        entries.add(entry);
       }
+      await mutations.createMany(entries);
       _submitted = true;
       if (mounted) Navigator.pop(context);
     } finally {

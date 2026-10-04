@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/utils/date_utils.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/plant_model.dart';
@@ -145,7 +146,7 @@ class PlantInsightsView extends ConsumerWidget {
     final ivs = <({DateTime date, int days})>[];
     for (var i = 1; i < waterings.length; i++) {
       final days =
-          waterings[i].date.difference(waterings[i - 1].date).inDays;
+          calendarDaysBetween(waterings[i - 1].date, waterings[i].date);
       if (days > 0) ivs.add((date: waterings[i].date, days: days));
     }
     return ivs.length > 15 ? ivs.sublist(ivs.length - 15) : ivs;

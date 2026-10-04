@@ -710,6 +710,18 @@ abstract class AppLocalizations {
   /// **'{count} plants need reapplication today.'**
   String pesticideNotificationBodyCount(int count);
 
+  /// No description provided for @notificationActionWatered.
+  ///
+  /// In en, this message translates to:
+  /// **'Watered'**
+  String get notificationActionWatered;
+
+  /// No description provided for @notificationActionSnooze.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind in 3 h'**
+  String get notificationActionSnooze;
+
   /// No description provided for @historyPlantAdded.
   ///
   /// In en, this message translates to:
@@ -943,6 +955,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bulk entry'**
   String get bulkEntryButton;
+
+  /// No description provided for @waterSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Water selected'**
+  String get waterSelected;
+
+  /// No description provided for @bulkEntrySelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Add entry for selected'**
+  String get bulkEntrySelected;
+
+  /// No description provided for @waterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Water all'**
+  String get waterAll;
+
+  /// No description provided for @irrigationRecordedForPlants.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Watering recorded for {count} plant} other{Watering recorded for {count} plants}}'**
+  String irrigationRecordedForPlants(int count);
 
   /// No description provided for @noPlantsAtLocation.
   ///

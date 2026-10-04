@@ -371,6 +371,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get notificationActionWatered => 'Watered';
+
+  @override
+  String get notificationActionSnooze => 'Remind in 3 h';
+
+  @override
   String get historyPlantAdded => 'Plant added to the system:';
 
   @override
@@ -500,6 +506,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bulkEntryButton => 'Bulk entry';
+
+  @override
+  String get waterSelected => 'Water selected';
+
+  @override
+  String get bulkEntrySelected => 'Add entry for selected';
+
+  @override
+  String get waterAll => 'Water all';
+
+  @override
+  String irrigationRecordedForPlants(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Watering recorded for $count plants',
+      one: 'Watering recorded for $count plant',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get noPlantsAtLocation => 'No plants at this location';

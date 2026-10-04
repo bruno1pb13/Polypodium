@@ -1,3 +1,4 @@
+import '../../../core/utils/date_utils.dart';
 import '../../locations/domain/location_model.dart';
 import '../../species/domain/species_model.dart';
 
@@ -117,7 +118,7 @@ class PlantWithSpecies {
     if (plant.lastIrrigatedAt == null) {
       return effectiveFrequencyDays ?? 0;
     }
-    return DateTime.now().difference(plant.lastIrrigatedAt!).inDays;
+    return calendarDaysBetween(plant.lastIrrigatedAt!);
   }
 
   /// Positive = days overdue, negative = days until due
@@ -142,7 +143,7 @@ class PlantWithSpecies {
     final freq = plant.pesticideReapplicationDays;
     final lastApplied = plant.lastPesticideAppliedAt;
     if (freq == null || lastApplied == null) return null;
-    final daysSinceApplied = DateTime.now().difference(lastApplied).inDays;
+    final daysSinceApplied = calendarDaysBetween(lastApplied);
     return daysSinceApplied - freq;
   }
 
@@ -172,7 +173,7 @@ class PlantWithSpecies {
   bool get pesticideUnderActiveControl {
     final lastApplied = plant.lastPesticideAppliedAt;
     if (lastApplied == null) return false;
-    final daysSince = DateTime.now().difference(lastApplied).inDays;
+    final daysSince = calendarDaysBetween(lastApplied);
     return daysSince < pesticideActiveControlWindowDays;
   }
 }

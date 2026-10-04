@@ -8,6 +8,8 @@ import '../../../locations/presentation/screens/locations_list_screen.dart';
 import '../../../../core/sync/auto_sync_controller.dart';
 import '../../../../core/sync/sync_providers.dart';
 import '../../../../core/widgets/app_search_bar.dart';
+import '../../../entries/presentation/providers/entries_providers.dart';
+import '../../../entries/presentation/screens/add_entry_screen.dart';
 import '../../../workspaces/presentation/providers/workspace_providers.dart';
 import '../providers/plant_search_providers.dart';
 import '../providers/plant_selection_provider.dart';
@@ -77,6 +79,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  Future<void> _waterSelected(Set<String> plantIds) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    try {
+      await ref.read(entryMutationsProvider).recordIrrigation(plantIds);
+      ref.read(plantSelectionProvider.notifier).state = {};
+      messenger.showSnackBar(SnackBar(
+        content: Text(l10n.irrigationRecordedForPlants(plantIds.length)),
+        duration: const Duration(seconds: 2),
+      ));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(
+        content: Text(l10n.irrigationRecordError('$e')),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
+  Future<void> _bulkEntryForSelected(Set<String> plantIds) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddEntryScreen.bulk(plantIds: plantIds.toList()),
+      ),
+    );
+    if (mounted) ref.read(plantSelectionProvider.notifier).state = {};
+  }
+
   Future<void> _manualSync() async {
     await ref.read(syncNotifierProvider.notifier).sync();
     if (!mounted) return;
@@ -118,6 +148,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 style: const TextStyle(color: Colors.white),
               ),
               actions: [
+                IconButton(
+                  icon: const Icon(Icons.water_drop_outlined),
+                  tooltip: context.l10n.waterSelected,
+                  onPressed: () => _waterSelected(selectedIds),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.playlist_add),
+                  tooltip: context.l10n.bulkEntrySelected,
+                  onPressed: () => _bulkEntryForSelected(selectedIds),
+                ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
                   tooltip: context.l10n.deleteSelected,
