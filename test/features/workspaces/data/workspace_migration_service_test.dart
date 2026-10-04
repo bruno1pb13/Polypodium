@@ -173,6 +173,53 @@ void main() {
       expect(entry, isNotNull);
     });
 
+    test('migrates reminders and skips deleted ones', () async {
+      await source.speciesDao.upsert(SpeciesTableCompanion.insert(
+        id: 'species1',
+        scientificName: 'Sci',
+        popularName: 'Pop',
+        recommendedSoilTypes: const [],
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      ));
+      await source.plantsDao.upsert(PlantsTableCompanion.insert(
+        id: 'plant1',
+        speciesId: 'species1',
+        nickname: 'Planta',
+        soilType: 'sandy',
+        acquisitionDate: DateTime(2026, 1, 1),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      ));
+      for (final (id, deletedAt) in [
+        ('rem1', null),
+        ('rem2', DateTime(2026, 1, 5)),
+      ]) {
+        await source.remindersDao.upsert(RemindersTableCompanion.insert(
+          id: id,
+          plantId: 'plant1',
+          entryType: EntryType.pruning,
+          intervalDays: 60,
+          createdAt: DateTime(2026, 1, 1),
+          updatedAt: DateTime(2026, 1, 1),
+          deletedAt: Value(deletedAt),
+        ));
+      }
+      expect(await service.hasPendingData(source), isTrue);
+
+      await service.migrateData(
+        sourceDb: source,
+        targetDb: target,
+        targetPhotos: FakePhotoStorage(await Directory.systemTemp.createTemp()),
+      );
+
+      final migrated = await target.remindersDao.getById('rem1');
+      expect(migrated?.entryType, EntryType.pruning);
+      expect(migrated?.intervalDays, 60);
+      expect(migrated!.localRev, greaterThan(0));
+      expect(await target.remindersDao.getById('rem2'), isNull);
+    });
+
     test('copies an entry photo file and rewrites photoPath to the new '
         'workspace storage', () async {
       final sourcePhotoDir = await Directory.systemTemp.createTemp();

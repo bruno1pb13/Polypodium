@@ -3605,6 +3605,483 @@ class DefensivosTableCompanion extends UpdateCompanion<DefensivosTableData> {
   }
 }
 
+class $RemindersTableTable extends RemindersTable
+    with TableInfo<$RemindersTableTable, RemindersTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RemindersTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _plantIdMeta =
+      const VerificationMeta('plantId');
+  @override
+  late final GeneratedColumn<String> plantId = GeneratedColumn<String>(
+      'plant_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES plants (id) ON DELETE CASCADE'));
+  @override
+  late final GeneratedColumnWithTypeConverter<EntryType, String> entryType =
+      GeneratedColumn<String>('entry_type', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<EntryType>($RemindersTableTable.$converterentryType);
+  static const VerificationMeta _intervalDaysMeta =
+      const VerificationMeta('intervalDays');
+  @override
+  late final GeneratedColumn<int> intervalDays = GeneratedColumn<int>(
+      'interval_days', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _enabledMeta =
+      const VerificationMeta('enabled');
+  @override
+  late final GeneratedColumn<bool> enabled = GeneratedColumn<bool>(
+      'enabled', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("enabled" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _localRevMeta =
+      const VerificationMeta('localRev');
+  @override
+  late final GeneratedColumn<int> localRev = GeneratedColumn<int>(
+      'local_rev', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        plantId,
+        entryType,
+        intervalDays,
+        enabled,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        localRev
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'reminders';
+  @override
+  VerificationContext validateIntegrity(Insertable<RemindersTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('plant_id')) {
+      context.handle(_plantIdMeta,
+          plantId.isAcceptableOrUnknown(data['plant_id']!, _plantIdMeta));
+    } else if (isInserting) {
+      context.missing(_plantIdMeta);
+    }
+    if (data.containsKey('interval_days')) {
+      context.handle(
+          _intervalDaysMeta,
+          intervalDays.isAcceptableOrUnknown(
+              data['interval_days']!, _intervalDaysMeta));
+    } else if (isInserting) {
+      context.missing(_intervalDaysMeta);
+    }
+    if (data.containsKey('enabled')) {
+      context.handle(_enabledMeta,
+          enabled.isAcceptableOrUnknown(data['enabled']!, _enabledMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    if (data.containsKey('local_rev')) {
+      context.handle(_localRevMeta,
+          localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RemindersTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RemindersTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      plantId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}plant_id'])!,
+      entryType: $RemindersTableTable.$converterentryType.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}entry_type'])!),
+      intervalDays: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}interval_days'])!,
+      enabled: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}enabled'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      localRev: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
+    );
+  }
+
+  @override
+  $RemindersTableTable createAlias(String alias) {
+    return $RemindersTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<EntryType, String> $converterentryType =
+      const EntryTypeConverter();
+}
+
+class RemindersTableData extends DataClass
+    implements Insertable<RemindersTableData> {
+  final String id;
+  final String plantId;
+  final EntryType entryType;
+  final int intervalDays;
+  final bool enabled;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int localRev;
+  const RemindersTableData(
+      {required this.id,
+      required this.plantId,
+      required this.entryType,
+      required this.intervalDays,
+      required this.enabled,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt,
+      required this.localRev});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['plant_id'] = Variable<String>(plantId);
+    {
+      map['entry_type'] = Variable<String>(
+          $RemindersTableTable.$converterentryType.toSql(entryType));
+    }
+    map['interval_days'] = Variable<int>(intervalDays);
+    map['enabled'] = Variable<bool>(enabled);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['local_rev'] = Variable<int>(localRev);
+    return map;
+  }
+
+  RemindersTableCompanion toCompanion(bool nullToAbsent) {
+    return RemindersTableCompanion(
+      id: Value(id),
+      plantId: Value(plantId),
+      entryType: Value(entryType),
+      intervalDays: Value(intervalDays),
+      enabled: Value(enabled),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      localRev: Value(localRev),
+    );
+  }
+
+  factory RemindersTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RemindersTableData(
+      id: serializer.fromJson<String>(json['id']),
+      plantId: serializer.fromJson<String>(json['plantId']),
+      entryType: serializer.fromJson<EntryType>(json['entryType']),
+      intervalDays: serializer.fromJson<int>(json['intervalDays']),
+      enabled: serializer.fromJson<bool>(json['enabled']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      localRev: serializer.fromJson<int>(json['localRev']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'plantId': serializer.toJson<String>(plantId),
+      'entryType': serializer.toJson<EntryType>(entryType),
+      'intervalDays': serializer.toJson<int>(intervalDays),
+      'enabled': serializer.toJson<bool>(enabled),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'localRev': serializer.toJson<int>(localRev),
+    };
+  }
+
+  RemindersTableData copyWith(
+          {String? id,
+          String? plantId,
+          EntryType? entryType,
+          int? intervalDays,
+          bool? enabled,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent(),
+          int? localRev}) =>
+      RemindersTableData(
+        id: id ?? this.id,
+        plantId: plantId ?? this.plantId,
+        entryType: entryType ?? this.entryType,
+        intervalDays: intervalDays ?? this.intervalDays,
+        enabled: enabled ?? this.enabled,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        localRev: localRev ?? this.localRev,
+      );
+  RemindersTableData copyWithCompanion(RemindersTableCompanion data) {
+    return RemindersTableData(
+      id: data.id.present ? data.id.value : this.id,
+      plantId: data.plantId.present ? data.plantId.value : this.plantId,
+      entryType: data.entryType.present ? data.entryType.value : this.entryType,
+      intervalDays: data.intervalDays.present
+          ? data.intervalDays.value
+          : this.intervalDays,
+      enabled: data.enabled.present ? data.enabled.value : this.enabled,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      localRev: data.localRev.present ? data.localRev.value : this.localRev,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RemindersTableData(')
+          ..write('id: $id, ')
+          ..write('plantId: $plantId, ')
+          ..write('entryType: $entryType, ')
+          ..write('intervalDays: $intervalDays, ')
+          ..write('enabled: $enabled, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, plantId, entryType, intervalDays, enabled,
+      createdAt, updatedAt, deletedAt, localRev);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RemindersTableData &&
+          other.id == this.id &&
+          other.plantId == this.plantId &&
+          other.entryType == this.entryType &&
+          other.intervalDays == this.intervalDays &&
+          other.enabled == this.enabled &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.localRev == this.localRev);
+}
+
+class RemindersTableCompanion extends UpdateCompanion<RemindersTableData> {
+  final Value<String> id;
+  final Value<String> plantId;
+  final Value<EntryType> entryType;
+  final Value<int> intervalDays;
+  final Value<bool> enabled;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> localRev;
+  final Value<int> rowid;
+  const RemindersTableCompanion({
+    this.id = const Value.absent(),
+    this.plantId = const Value.absent(),
+    this.entryType = const Value.absent(),
+    this.intervalDays = const Value.absent(),
+    this.enabled = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RemindersTableCompanion.insert({
+    required String id,
+    required String plantId,
+    required EntryType entryType,
+    required int intervalDays,
+    this.enabled = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        plantId = Value(plantId),
+        entryType = Value(entryType),
+        intervalDays = Value(intervalDays),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<RemindersTableData> custom({
+    Expression<String>? id,
+    Expression<String>? plantId,
+    Expression<String>? entryType,
+    Expression<int>? intervalDays,
+    Expression<bool>? enabled,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? localRev,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (plantId != null) 'plant_id': plantId,
+      if (entryType != null) 'entry_type': entryType,
+      if (intervalDays != null) 'interval_days': intervalDays,
+      if (enabled != null) 'enabled': enabled,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (localRev != null) 'local_rev': localRev,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RemindersTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? plantId,
+      Value<EntryType>? entryType,
+      Value<int>? intervalDays,
+      Value<bool>? enabled,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? localRev,
+      Value<int>? rowid}) {
+    return RemindersTableCompanion(
+      id: id ?? this.id,
+      plantId: plantId ?? this.plantId,
+      entryType: entryType ?? this.entryType,
+      intervalDays: intervalDays ?? this.intervalDays,
+      enabled: enabled ?? this.enabled,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      localRev: localRev ?? this.localRev,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (plantId.present) {
+      map['plant_id'] = Variable<String>(plantId.value);
+    }
+    if (entryType.present) {
+      map['entry_type'] = Variable<String>(
+          $RemindersTableTable.$converterentryType.toSql(entryType.value));
+    }
+    if (intervalDays.present) {
+      map['interval_days'] = Variable<int>(intervalDays.value);
+    }
+    if (enabled.present) {
+      map['enabled'] = Variable<bool>(enabled.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (localRev.present) {
+      map['local_rev'] = Variable<int>(localRev.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RemindersTableCompanion(')
+          ..write('id: $id, ')
+          ..write('plantId: $plantId, ')
+          ..write('entryType: $entryType, ')
+          ..write('intervalDays: $intervalDays, ')
+          ..write('enabled: $enabled, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncMetaTableTable extends SyncMetaTable
     with TableInfo<$SyncMetaTableTable, SyncMetaTableData> {
   @override
@@ -4029,6 +4506,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $EntriesTableTable entriesTable = $EntriesTableTable(this);
   late final $DefensivosTableTable defensivosTable =
       $DefensivosTableTable(this);
+  late final $RemindersTableTable remindersTable = $RemindersTableTable(this);
   late final $SyncMetaTableTable syncMetaTable = $SyncMetaTableTable(this);
   late final $SyncCursorsTableTable syncCursorsTable =
       $SyncCursorsTableTable(this);
@@ -4043,6 +4521,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         plantsTable,
         entriesTable,
         defensivosTable,
+        remindersTable,
         syncMetaTable,
         syncCursorsTable
       ];
@@ -4061,6 +4540,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('entries', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('plants',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('reminders', kind: UpdateKind.delete),
             ],
           ),
         ],
@@ -5135,6 +5621,20 @@ final class $$PlantsTableTableReferences
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
+
+  static MultiTypedResultKey<$RemindersTableTable, List<RemindersTableData>>
+      _remindersTableRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.remindersTable,
+              aliasName: 'plants__id__reminders__plant_id');
+
+  $$RemindersTableTableProcessedTableManager get remindersTableRefs {
+    final manager = $$RemindersTableTableTableManager($_db, $_db.remindersTable)
+        .filter((f) => f.plantId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_remindersTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$PlantsTableTableFilterComposer
@@ -5269,6 +5769,27 @@ class $$PlantsTableTableFilterComposer
             $$EntriesTableTableFilterComposer(
               $db: $db,
               $table: $db.entriesTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> remindersTableRefs(
+      Expression<bool> Function($$RemindersTableTableFilterComposer f) f) {
+    final $$RemindersTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.remindersTable,
+        getReferencedColumn: (t) => t.plantId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RemindersTableTableFilterComposer(
+              $db: $db,
+              $table: $db.remindersTable,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -5527,6 +6048,27 @@ class $$PlantsTableTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> remindersTableRefs<T extends Object>(
+      Expression<T> Function($$RemindersTableTableAnnotationComposer a) f) {
+    final $$RemindersTableTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.remindersTable,
+        getReferencedColumn: (t) => t.plantId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RemindersTableTableAnnotationComposer(
+              $db: $db,
+              $table: $db.remindersTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$PlantsTableTableTableManager extends RootTableManager<
@@ -5544,7 +6086,8 @@ class $$PlantsTableTableTableManager extends RootTableManager<
         {bool speciesId,
         bool soilType,
         bool locationId,
-        bool entriesTableRefs})> {
+        bool entriesTableRefs,
+        bool remindersTableRefs})> {
   $$PlantsTableTableTableManager(_$AppDatabase db, $PlantsTableTable table)
       : super(TableManagerState(
           db: db,
@@ -5645,10 +6188,14 @@ class $$PlantsTableTableTableManager extends RootTableManager<
               {speciesId = false,
               soilType = false,
               locationId = false,
-              entriesTableRefs = false}) {
+              entriesTableRefs = false,
+              remindersTableRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [if (entriesTableRefs) db.entriesTable],
+              explicitlyWatchedTables: [
+                if (entriesTableRefs) db.entriesTable,
+                if (remindersTableRefs) db.remindersTable
+              ],
               addJoins: <
                   T extends TableManagerState<
                       dynamic,
@@ -5709,6 +6256,19 @@ class $$PlantsTableTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem: (item,
                                 referencedItems) =>
                             referencedItems.where((e) => e.plantId == item.id),
+                        typedResults: items),
+                  if (remindersTableRefs)
+                    await $_getPrefetchedData<PlantsTableData,
+                            $PlantsTableTable, RemindersTableData>(
+                        currentTable: table,
+                        referencedTable: $$PlantsTableTableReferences
+                            ._remindersTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$PlantsTableTableReferences(db, table, p0)
+                                .remindersTableRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.plantId == item.id),
                         typedResults: items)
                 ];
               },
@@ -5732,7 +6292,8 @@ typedef $$PlantsTableTableProcessedTableManager = ProcessedTableManager<
         {bool speciesId,
         bool soilType,
         bool locationId,
-        bool entriesTableRefs})>;
+        bool entriesTableRefs,
+        bool remindersTableRefs})>;
 typedef $$EntriesTableTableCreateCompanionBuilder = EntriesTableCompanion
     Function({
   required String id,
@@ -6397,6 +6958,345 @@ typedef $$DefensivosTableTableProcessedTableManager = ProcessedTableManager<
     ),
     DefensivosTableData,
     PrefetchHooks Function()>;
+typedef $$RemindersTableTableCreateCompanionBuilder = RemindersTableCompanion
+    Function({
+  required String id,
+  required String plantId,
+  required EntryType entryType,
+  required int intervalDays,
+  Value<bool> enabled,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
+  Value<int> rowid,
+});
+typedef $$RemindersTableTableUpdateCompanionBuilder = RemindersTableCompanion
+    Function({
+  Value<String> id,
+  Value<String> plantId,
+  Value<EntryType> entryType,
+  Value<int> intervalDays,
+  Value<bool> enabled,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
+  Value<int> rowid,
+});
+
+final class $$RemindersTableTableReferences extends BaseReferences<
+    _$AppDatabase, $RemindersTableTable, RemindersTableData> {
+  $$RemindersTableTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $PlantsTableTable _plantIdTable(_$AppDatabase db) =>
+      db.plantsTable.createAlias('reminders__plant_id__plants__id');
+
+  $$PlantsTableTableProcessedTableManager get plantId {
+    final $_column = $_itemColumn<String>('plant_id')!;
+
+    final manager = $$PlantsTableTableTableManager($_db, $_db.plantsTable)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_plantIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$RemindersTableTableFilterComposer
+    extends Composer<_$AppDatabase, $RemindersTableTable> {
+  $$RemindersTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<EntryType, EntryType, String> get entryType =>
+      $composableBuilder(
+          column: $table.entryType,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<int> get intervalDays => $composableBuilder(
+      column: $table.intervalDays, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get enabled => $composableBuilder(
+      column: $table.enabled, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnFilters(column));
+
+  $$PlantsTableTableFilterComposer get plantId {
+    final $$PlantsTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.plantId,
+        referencedTable: $db.plantsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PlantsTableTableFilterComposer(
+              $db: $db,
+              $table: $db.plantsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$RemindersTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $RemindersTableTable> {
+  $$RemindersTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get entryType => $composableBuilder(
+      column: $table.entryType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get intervalDays => $composableBuilder(
+      column: $table.intervalDays,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get enabled => $composableBuilder(
+      column: $table.enabled, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnOrderings(column));
+
+  $$PlantsTableTableOrderingComposer get plantId {
+    final $$PlantsTableTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.plantId,
+        referencedTable: $db.plantsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PlantsTableTableOrderingComposer(
+              $db: $db,
+              $table: $db.plantsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$RemindersTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RemindersTableTable> {
+  $$RemindersTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<EntryType, String> get entryType =>
+      $composableBuilder(column: $table.entryType, builder: (column) => column);
+
+  GeneratedColumn<int> get intervalDays => $composableBuilder(
+      column: $table.intervalDays, builder: (column) => column);
+
+  GeneratedColumn<bool> get enabled =>
+      $composableBuilder(column: $table.enabled, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get localRev =>
+      $composableBuilder(column: $table.localRev, builder: (column) => column);
+
+  $$PlantsTableTableAnnotationComposer get plantId {
+    final $$PlantsTableTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.plantId,
+        referencedTable: $db.plantsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PlantsTableTableAnnotationComposer(
+              $db: $db,
+              $table: $db.plantsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$RemindersTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $RemindersTableTable,
+    RemindersTableData,
+    $$RemindersTableTableFilterComposer,
+    $$RemindersTableTableOrderingComposer,
+    $$RemindersTableTableAnnotationComposer,
+    $$RemindersTableTableCreateCompanionBuilder,
+    $$RemindersTableTableUpdateCompanionBuilder,
+    (RemindersTableData, $$RemindersTableTableReferences),
+    RemindersTableData,
+    PrefetchHooks Function({bool plantId})> {
+  $$RemindersTableTableTableManager(
+      _$AppDatabase db, $RemindersTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RemindersTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RemindersTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RemindersTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> plantId = const Value.absent(),
+            Value<EntryType> entryType = const Value.absent(),
+            Value<int> intervalDays = const Value.absent(),
+            Value<bool> enabled = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RemindersTableCompanion(
+            id: id,
+            plantId: plantId,
+            entryType: entryType,
+            intervalDays: intervalDays,
+            enabled: enabled,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String plantId,
+            required EntryType entryType,
+            required int intervalDays,
+            Value<bool> enabled = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RemindersTableCompanion.insert(
+            id: id,
+            plantId: plantId,
+            entryType: entryType,
+            intervalDays: intervalDays,
+            enabled: enabled,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$RemindersTableTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({plantId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (plantId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.plantId,
+                    referencedTable:
+                        $$RemindersTableTableReferences._plantIdTable(db),
+                    referencedColumn:
+                        $$RemindersTableTableReferences._plantIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$RemindersTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $RemindersTableTable,
+    RemindersTableData,
+    $$RemindersTableTableFilterComposer,
+    $$RemindersTableTableOrderingComposer,
+    $$RemindersTableTableAnnotationComposer,
+    $$RemindersTableTableCreateCompanionBuilder,
+    $$RemindersTableTableUpdateCompanionBuilder,
+    (RemindersTableData, $$RemindersTableTableReferences),
+    RemindersTableData,
+    PrefetchHooks Function({bool plantId})>;
 typedef $$SyncMetaTableTableCreateCompanionBuilder = SyncMetaTableCompanion
     Function({
   Value<int> id,
@@ -6682,6 +7582,8 @@ class $AppDatabaseManager {
       $$EntriesTableTableTableManager(_db, _db.entriesTable);
   $$DefensivosTableTableTableManager get defensivosTable =>
       $$DefensivosTableTableTableManager(_db, _db.defensivosTable);
+  $$RemindersTableTableTableManager get remindersTable =>
+      $$RemindersTableTableTableManager(_db, _db.remindersTable);
   $$SyncMetaTableTableTableManager get syncMetaTable =>
       $$SyncMetaTableTableTableManager(_db, _db.syncMetaTable);
   $$SyncCursorsTableTableTableManager get syncCursorsTable =>

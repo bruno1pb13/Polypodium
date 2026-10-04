@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/enums.dart';
 import '../../../core/storage/photo_storage.dart';
+import '../../reminders/domain/reminder_model.dart';
 import '../domain/entry_model.dart';
 import 'entries_dao.dart';
 
@@ -58,10 +59,19 @@ class EntriesRepository {
   // ---------------------------------------------------------------------------
 
   /// Soft-deletes entries beyond [_retentionLimit] (oldest first) and cleans
-  /// orphaned photo files from disk.
+  /// orphaned photo files from disk. The latest entry of each type a
+  /// recurring reminder can track is always kept: the reminder derives when
+  /// the care was last done from it.
   Future<void> _enforceRetentionPolicy(String plantId) async {
     final overflow =
         await _dao.getOverRetentionLimit(plantId, keepCount: _retentionLimit);
+    final keep = <String>{};
+    for (final type in {for (final row in overflow) row.type}) {
+      if (!reminderEntryTypes.contains(type)) continue;
+      final last = await _dao.getLastEntryOfType(plantId, type);
+      if (last != null) keep.add(last.id);
+    }
+    overflow.removeWhere((row) => keep.contains(row.id));
     if (overflow.isEmpty) {
       return;
     }
