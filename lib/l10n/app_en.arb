@@ -279,16 +279,9 @@
   "plantNotFound": "Plant not found",
   "soilLabel": "Soil",
   "needsWater": "Needs water!",
-  "wateringUpToDate": "Watering up to date",
   "lastWateringNotRecorded": "Last watering not recorded",
   "daysOverdue": "{days, plural, one{{days} day overdue} other{{days} days overdue}}",
   "@daysOverdue": {
-    "placeholders": {
-      "days": {"type": "int"}
-    }
-  },
-  "nextWateringInDays": "{days, plural, one{Next watering in {days} day} other{Next watering in {days} days}}",
-  "@nextWateringInDays": {
     "placeholders": {
       "days": {"type": "int"}
     }
@@ -312,6 +305,9 @@
   "severityActive": "Active",
   "pestBadge": "Pest",
   "pesticideActiveControlBadge": "Pest control",
+  "pesticideReapplyBadge": "Reapply",
+  "waterBadge": "Water",
+  "dueToday": "Due today",
   "nextPesticideApplication": "Next application: {date}",
   "@nextPesticideApplication": {
     "placeholders": {

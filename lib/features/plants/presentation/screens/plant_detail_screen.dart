@@ -25,6 +25,7 @@ import '../providers/plant_detail_view_provider.dart';
 import '../providers/plants_providers.dart';
 import '../widgets/plant_insights_view.dart';
 import '../widgets/plant_photos_sliver.dart';
+import '../widgets/plant_status.dart';
 import 'add_edit_plant_screen.dart';
 
 class PlantDetailScreen extends ConsumerWidget {
@@ -152,17 +153,13 @@ class PlantDetailScreen extends ConsumerWidget {
                     SliverToBoxAdapter(
                       child: _HeaderSection(plant: plant, pws: pws),
                     ),
+                    if (pws != null)
+                      SliverToBoxAdapter(
+                        child: _CareAlerts(pws: pws),
+                      ),
                     SliverToBoxAdapter(
                       child: _PlantInfoCard(plant: plant, pws: pws, soilName: soil?.name, soilComposition: soil?.composition),
                     ),
-                    if (pws != null)
-                      SliverToBoxAdapter(
-                        child: _IrrigationStatusCard(pws: pws),
-                      ),
-                    if (pws != null)
-                      SliverToBoxAdapter(
-                        child: _PesticideStatusCard(pws: pws),
-                      ),
                     SliverToBoxAdapter(
                       child: _ViewSelector(plantId: plantId),
                     ),
@@ -488,8 +485,8 @@ class _PlantInfoCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
-    final alertStatus = ref.watch(plantAlertStatusProvider(plant.id)).value
-        ?? (hasActiveChlorosis: false, chlorosisSeverity: null, hasActivePest: false, pestSeverity: null);
+    final alertStatus =
+        ref.watch(plantAlertStatusProvider(plant.id)).value ?? noPlantAlerts;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -569,25 +566,51 @@ class _PlantInfoCard extends ConsumerWidget {
                     transparencyEnabled,
                   ),
                 ],
-                if (alertStatus.hasActiveChlorosis) ...[
+                if (alertStatus.hasActivePest) ...[
                   const Divider(color: Colors.white10, height: 16),
-                  _alertRow(
+                  _statusRow(
                     context,
-                    '🟡',
-                    context.l10n.entryTypeChlorosis,
-                    _severityLabel(context, alertStatus.chlorosisSeverity),
-                    const Color(0xFFEAB308),
+                    EntryType.pest,
+                    context.l10n.pestBadge,
+                    PlantStatusChip(
+                      label: _severityLabel(context, alertStatus.pestSeverity),
+                      tone: StatusTone.forSeverity(alertStatus.pestSeverity),
+                    ),
                     transparencyEnabled,
                   ),
                 ],
-                if (alertStatus.hasActivePest) ...[
+                if (alertStatus.hasActiveChlorosis) ...[
                   const Divider(color: Colors.white10, height: 16),
-                  _alertRow(
+                  _statusRow(
                     context,
-                    '🐛',
-                    context.l10n.pestBadge,
-                    _severityLabel(context, alertStatus.pestSeverity),
-                    const Color(0xFFF97316),
+                    EntryType.chlorosis,
+                    context.l10n.entryTypeChlorosis,
+                    PlantStatusChip(
+                      label: _severityLabel(
+                          context, alertStatus.chlorosisSeverity),
+                      tone: StatusTone.forSeverity(
+                          alertStatus.chlorosisSeverity),
+                    ),
+                    transparencyEnabled,
+                  ),
+                ],
+                if (pws != null &&
+                    (pws!.pesticideUnderActiveControl ||
+                        pws!.needsPesticideReapplication)) ...[
+                  const Divider(color: Colors.white10, height: 16),
+                  _statusRow(
+                    context,
+                    EntryType.pesticide,
+                    context.l10n.entryTypePesticide,
+                    pws!.needsPesticideReapplication
+                        ? PlantStatusChip(
+                            label: context.l10n.pesticideReapplyBadge,
+                            tone: StatusTone.danger,
+                          )
+                        : PlantStatusChip(
+                            label: context.l10n.pesticideActiveControlBadge,
+                            tone: StatusTone.positive,
+                          ),
                     transparencyEnabled,
                   ),
                 ],
@@ -628,200 +651,77 @@ class _PlantInfoCard extends ConsumerWidget {
         _ => context.l10n.severityActive,
       };
 
-  Widget _alertRow(
+  Widget _statusRow(
     BuildContext context,
-    String emoji,
+    EntryType type,
     String label,
-    String badgeLabel,
-    Color alertColor,
+    Widget chip,
     bool transparencyEnabled,
   ) =>
       Row(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 18)),
-          const SizedBox(width: 10),
+          SizedBox(
+            width: 20,
+            child: Text(
+              type.emoji,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 15),
+            ),
+          ),
+          const SizedBox(width: 12),
           Text(label,
               style: TextStyle(
                   color: transparencyEnabled ? Colors.white70 : null)),
           const Spacer(),
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-            decoration: BoxDecoration(
-              color: alertColor.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: alertColor.withValues(alpha: 0.5)),
-            ),
-            child: Text(
-              badgeLabel,
-              style: TextStyle(
-                color: alertColor,
-                fontWeight: FontWeight.w700,
-                fontSize: 12,
-              ),
-            ),
-          ),
+          chip,
         ],
       );
 }
 
-class _IrrigationStatusCard extends ConsumerWidget {
+class _CareAlerts extends StatelessWidget {
   final PlantWithSpecies pws;
 
-  const _IrrigationStatusCard({required this.pws});
+  const _CareAlerts({required this.pws});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-    final overdue = pws.needsWatering;
-    final days = pws.daysRelativeToSchedule;
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final wateringDays = pws.daysRelativeToSchedule;
+    final pesticideDays = pws.pesticideDaysRelative;
 
-    // Only worth a card once it's due (today) or overdue; while there's
-    // still time left, the card stays hidden.
-    if (days == null || !overdue) return const SizedBox.shrink();
+    String overdueText(int days) =>
+        days == 0 ? l10n.dueToday : l10n.daysOverdue(days);
 
-    final cardColor = transparencyEnabled
-        ? colorScheme.errorContainer.withValues(alpha: 0.8)
-        : colorScheme.errorContainer;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: transparencyEnabled
-              ? ImageFilter.blur(sigmaX: 10, sigmaY: 10)
-              : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.water_drop, color: colorScheme.error),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.l10n.needsWater,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: colorScheme.onErrorContainer,
-                        ),
-                      ),
-                      Text(
-                        pws.plant.lastIrrigatedAt == null
-                            ? context.l10n.lastWateringNotRecorded
-                            : context.l10n.daysOverdue(days),
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: colorScheme.onErrorContainer,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+    final banners = [
+      if (pws.needsWatering && wateringDays != null)
+        PlantStatusBanner(
+          emoji: EntryType.irrigation.emoji,
+          title: l10n.needsWater,
+          subtitle: pws.plant.lastIrrigatedAt == null
+              ? l10n.lastWateringNotRecorded
+              : overdueText(wateringDays),
+          tone: StatusTone.danger,
         ),
-      ),
-    );
-  }
-}
-
-/// Pesticide reapplication status, mirroring [_IrrigationStatusCard]. Unlike
-/// irrigation, this card only appears when there's actually something to
-/// flag — overdue or approaching within
-/// [PlantWithSpecies.pesticideApproachingWindowDays] — and stays hidden the
-/// rest of the time, since a healthy reminder that's still far out isn't
-/// worth a permanent card.
-class _PesticideStatusCard extends ConsumerWidget {
-  final PlantWithSpecies pws;
-
-  const _PesticideStatusCard({required this.pws});
-
-  static const _approachingContainer = Color(0xFFFEF3C7);
-  static const _approachingAccent = Color(0xFFD97706);
-  static const _approachingOnContainer = Color(0xFF78350F);
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-    final overdue = pws.needsPesticideReapplication;
-    final approaching = pws.pesticideReapplicationApproaching;
-    final days = pws.pesticideDaysRelative;
-
-    if (!overdue && !approaching || days == null) {
-      return const SizedBox.shrink();
-    }
-
-    final cardColor = overdue
-        ? (transparencyEnabled
-            ? colorScheme.errorContainer.withValues(alpha: 0.8)
-            : colorScheme.errorContainer)
-        : (transparencyEnabled
-            ? _approachingContainer.withValues(alpha: 0.6)
-            : _approachingContainer);
-
-    final iconColor = overdue ? colorScheme.error : _approachingAccent;
-    final textColor =
-        overdue ? colorScheme.onErrorContainer : _approachingOnContainer;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: transparencyEnabled
-              ? ImageFilter.blur(sigmaX: 10, sigmaY: 10)
-              : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  overdue ? Icons.science : Icons.science_outlined,
-                  color: iconColor,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        overdue
-                            ? context.l10n.needsPesticideApplication
-                            : context.l10n.pesticideApproachingTitle,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: textColor,
-                        ),
-                      ),
-                      Text(
-                        overdue
-                            ? context.l10n.daysOverdue(days)
-                            : context.l10n.nextPesticideInDays(-days),
-                        style: TextStyle(fontSize: 13, color: textColor),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+      if (pws.needsPesticideReapplication && pesticideDays != null)
+        PlantStatusBanner(
+          emoji: EntryType.pesticide.emoji,
+          title: l10n.needsPesticideApplication,
+          subtitle: overdueText(pesticideDays),
+          tone: StatusTone.danger,
+        )
+      else if (pws.pesticideReapplicationApproaching && pesticideDays != null)
+        PlantStatusBanner(
+          emoji: EntryType.pesticide.emoji,
+          title: l10n.pesticideApproachingTitle,
+          subtitle: l10n.nextPesticideInDays(-pesticideDays),
+          tone: StatusTone.warning,
         ),
-      ),
+    ];
+
+    if (banners.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Column(children: banners),
     );
   }
 }

@@ -1,3 +1,4 @@
+#!/usr/bin/env xdg-open
 [Desktop Entry]
 Name=Polypodium
 Comment=Acompanhamento de plantas — offline-first
