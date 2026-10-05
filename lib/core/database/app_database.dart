@@ -50,6 +50,7 @@ part 'app_database.g.dart';
     RemindersTable,
     SyncMetaTable,
     SyncCursorsTable,
+    SyncEntryTypesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -66,7 +67,7 @@ class AppDatabase extends _$AppDatabase {
   final String? deviceId;
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -217,6 +218,9 @@ class AppDatabase extends _$AppDatabase {
                 !columns.contains(plantsTable.parentPlantId.name)) {
               await m.addColumn(plantsTable, plantsTable.parentPlantId);
             }
+          }
+          if (from < 18) {
+            await m.createTable(syncEntryTypesTable);
           }
         },
       );

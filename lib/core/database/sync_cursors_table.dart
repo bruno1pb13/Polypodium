@@ -18,3 +18,18 @@ class SyncCursorsTable extends Table {
   @override
   Set<Column> get primaryKey => {peerId, direction};
 }
+
+/// Entry types this device has already declared to a peer on pull (see
+/// SyncOrchestrator's backfill). Lives next to the pull cursor because it
+/// qualifies it: rows of an undeclared type were withheld from everything
+/// behind that cursor.
+class SyncEntryTypesTable extends Table {
+  @override
+  String get tableName => 'sync_entry_types';
+
+  TextColumn get peerId => text()();
+  TextColumn get entryType => text()();
+
+  @override
+  Set<Column> get primaryKey => {peerId, entryType};
+}

@@ -1,10 +1,27 @@
 import 'package:polypodium_core/polypodium_core.dart';
 
 import '../database/sync_cursors_dao.dart' show syncServerPeerId;
+import '../enums.dart';
 import 'i_sync_cursor_store.dart';
 import 'i_sync_storage_adapter.dart';
 import 'photo_sync_client.dart';
 import 'sync_http_client.dart';
+
+/// Entry types a device is assumed to have declared before it recorded any:
+/// what releases without the `X-Polypodium-Entry-Types` header understood.
+/// Mirrors `legacyEntryTypes` in Polypodium_server's sync_repository.dart.
+const legacyEntryTypes = {
+  'irrigation',
+  'fertilizer',
+  'pruning',
+  'observation',
+  'height',
+  'chlorosis',
+  'pest',
+  'pesticide',
+  'other',
+  'history',
+};
 
 class SyncResult {
   final int pulled;
@@ -41,10 +58,16 @@ class SyncOrchestrator {
     required String token,
     required String deviceId,
   }) async {
-    final pulled = await _pull(
+    // Before the pull, which moves the cursor the first record depends on.
+    final newEntryTypes = await _undeclaredEntryTypes();
+    var pulled = await _pull(
         serverUrl: serverUrl, token: token, deviceId: deviceId);
     final pushed = await _push(
         serverUrl: serverUrl, token: token, deviceId: deviceId);
+    if (newEntryTypes.isNotEmpty) {
+      pulled += await _backfill(
+          serverUrl: serverUrl, token: token, entryTypes: newEntryTypes);
+    }
     return SyncResult(pulled: pulled, pushed: pushed);
   }
 
@@ -55,12 +78,94 @@ class SyncOrchestrator {
     required String token,
     required String deviceId,
   }) async {
+    final result = await _pullPages(
+      serverUrl: serverUrl,
+      token: token,
+      since: await _cursors.getPullCursor(_serverPeerId),
+      onApplied: (cursor) async {
+        await _cursors.setPullCursor(_serverPeerId, cursor);
+        // Best-effort bookkeeping only -- failures here don't affect
+        // correctness (see SyncHttpClient.ack).
+        await _http
+            .ack(
+                serverUrl: serverUrl,
+                token: token,
+                deviceId: deviceId,
+                cursor: cursor)
+            .catchError((_) {});
+      },
+    );
+    return result.applied;
+  }
+
+  // -- backfill: entries of types this build learned since its last
+  //    declaration were withheld from everything behind the pull cursor, so
+  //    they're fetched once from rev 0 -- entries only, those types only, on
+  //    a cursor of their own. Runs after push: it can only bring the server's
+  //    current version of each row, which LWW applies or ignores like any
+  //    other pulled change. ------------------------------------------------
+
+  /// Entry types this build knows that weren't declared to the server yet.
+  /// With nothing recorded, a device that already pulled is assumed to have
+  /// declared the legacy set, and a fresh one has nothing to catch up on.
+  Future<Set<String>> _undeclaredEntryTypes() async {
+    final current = {for (final t in EntryType.values) t.name};
+    var declared = await _cursors.getDeclaredEntryTypes(_serverPeerId);
+    if (declared == null) {
+      declared = await _cursors.getPullCursor(_serverPeerId) > 0
+          ? legacyEntryTypes
+          : current;
+      await _cursors.addDeclaredEntryTypes(_serverPeerId, declared);
+    }
+    return current.difference(declared);
+  }
+
+  Future<int> _backfill({
+    required String serverUrl,
+    required String token,
+    required Set<String> entryTypes,
+  }) async {
+    const entities = {'entry'};
+    final (:applied, :completed) = await _pullPages(
+      serverUrl: serverUrl,
+      token: token,
+      since: await _cursors.getBackfillCursor(_serverPeerId, entryTypes),
+      entryTypes: entryTypes,
+      entities: entities,
+      onApplied: (cursor) =>
+          _cursors.setBackfillCursor(_serverPeerId, entryTypes, cursor),
+    );
+    // Also reached, with nothing applied, when the server ignored the
+    // restriction: it predates it, and re-pulling every entity from rev 0
+    // on each sync would cost far more than the few rows it might recover.
+    if (completed) await _cursors.completeBackfill(_serverPeerId, entryTypes);
+    return applied;
+  }
+
+  /// Pulls pages from [since], applying each change and reporting the rev
+  /// of the last one applied per page to [onApplied]. Not [completed] when
+  /// cut short by a failed photo download.
+  Future<({int applied, bool completed})> _pullPages({
+    required String serverUrl,
+    required String token,
+    required int since,
+    required Future<void> Function(int cursor) onApplied,
+    Set<String>? entryTypes,
+    Set<String>? entities,
+  }) async {
     var total = 0;
-    var since = await _cursors.getPullCursor(_serverPeerId);
 
     while (true) {
       final page = await _http.fetchChanges(
-          serverUrl: serverUrl, token: token, since: since, limit: _pageSize);
+          serverUrl: serverUrl,
+          token: token,
+          since: since,
+          limit: _pageSize,
+          entryTypes: entryTypes,
+          entities: entities);
+      if (entities != null && page.entities == null) {
+        return (applied: total, completed: true);
+      }
 
       var appliedCount = 0;
       for (final change in page.changes) {
@@ -73,25 +178,15 @@ class SyncOrchestrator {
       total += appliedCount;
 
       if (appliedCount > 0) {
-        final newCursor = page.changes[appliedCount - 1].rev;
-        await _cursors.setPullCursor(_serverPeerId, newCursor);
-        since = newCursor;
-        // Best-effort bookkeeping only -- failures here don't affect
-        // correctness (see SyncHttpClient.ack).
-        await _http
-            .ack(
-                serverUrl: serverUrl,
-                token: token,
-                deviceId: deviceId,
-                cursor: newCursor)
-            .catchError((_) {});
+        since = page.changes[appliedCount - 1].rev;
+        await onApplied(since);
       }
 
-      if (appliedCount < page.changes.length) break;
-      if (!page.hasMore) break;
+      if (appliedCount < page.changes.length) {
+        return (applied: total, completed: false);
+      }
+      if (!page.hasMore) return (applied: total, completed: true);
     }
-
-    return total;
   }
 
   // -- push: the client-server equivalent of a peer initiating a push,

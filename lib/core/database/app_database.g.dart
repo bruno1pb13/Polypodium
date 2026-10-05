@@ -5001,6 +5001,203 @@ class SyncCursorsTableCompanion extends UpdateCompanion<SyncCursorsTableData> {
   }
 }
 
+class $SyncEntryTypesTableTable extends SyncEntryTypesTable
+    with TableInfo<$SyncEntryTypesTableTable, SyncEntryTypesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncEntryTypesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _peerIdMeta = const VerificationMeta('peerId');
+  @override
+  late final GeneratedColumn<String> peerId = GeneratedColumn<String>(
+      'peer_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _entryTypeMeta =
+      const VerificationMeta('entryType');
+  @override
+  late final GeneratedColumn<String> entryType = GeneratedColumn<String>(
+      'entry_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [peerId, entryType];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_entry_types';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<SyncEntryTypesTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('peer_id')) {
+      context.handle(_peerIdMeta,
+          peerId.isAcceptableOrUnknown(data['peer_id']!, _peerIdMeta));
+    } else if (isInserting) {
+      context.missing(_peerIdMeta);
+    }
+    if (data.containsKey('entry_type')) {
+      context.handle(_entryTypeMeta,
+          entryType.isAcceptableOrUnknown(data['entry_type']!, _entryTypeMeta));
+    } else if (isInserting) {
+      context.missing(_entryTypeMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {peerId, entryType};
+  @override
+  SyncEntryTypesTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncEntryTypesTableData(
+      peerId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}peer_id'])!,
+      entryType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}entry_type'])!,
+    );
+  }
+
+  @override
+  $SyncEntryTypesTableTable createAlias(String alias) {
+    return $SyncEntryTypesTableTable(attachedDatabase, alias);
+  }
+}
+
+class SyncEntryTypesTableData extends DataClass
+    implements Insertable<SyncEntryTypesTableData> {
+  final String peerId;
+  final String entryType;
+  const SyncEntryTypesTableData(
+      {required this.peerId, required this.entryType});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['peer_id'] = Variable<String>(peerId);
+    map['entry_type'] = Variable<String>(entryType);
+    return map;
+  }
+
+  SyncEntryTypesTableCompanion toCompanion(bool nullToAbsent) {
+    return SyncEntryTypesTableCompanion(
+      peerId: Value(peerId),
+      entryType: Value(entryType),
+    );
+  }
+
+  factory SyncEntryTypesTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncEntryTypesTableData(
+      peerId: serializer.fromJson<String>(json['peerId']),
+      entryType: serializer.fromJson<String>(json['entryType']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'peerId': serializer.toJson<String>(peerId),
+      'entryType': serializer.toJson<String>(entryType),
+    };
+  }
+
+  SyncEntryTypesTableData copyWith({String? peerId, String? entryType}) =>
+      SyncEntryTypesTableData(
+        peerId: peerId ?? this.peerId,
+        entryType: entryType ?? this.entryType,
+      );
+  SyncEntryTypesTableData copyWithCompanion(SyncEntryTypesTableCompanion data) {
+    return SyncEntryTypesTableData(
+      peerId: data.peerId.present ? data.peerId.value : this.peerId,
+      entryType: data.entryType.present ? data.entryType.value : this.entryType,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncEntryTypesTableData(')
+          ..write('peerId: $peerId, ')
+          ..write('entryType: $entryType')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(peerId, entryType);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncEntryTypesTableData &&
+          other.peerId == this.peerId &&
+          other.entryType == this.entryType);
+}
+
+class SyncEntryTypesTableCompanion
+    extends UpdateCompanion<SyncEntryTypesTableData> {
+  final Value<String> peerId;
+  final Value<String> entryType;
+  final Value<int> rowid;
+  const SyncEntryTypesTableCompanion({
+    this.peerId = const Value.absent(),
+    this.entryType = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncEntryTypesTableCompanion.insert({
+    required String peerId,
+    required String entryType,
+    this.rowid = const Value.absent(),
+  })  : peerId = Value(peerId),
+        entryType = Value(entryType);
+  static Insertable<SyncEntryTypesTableData> custom({
+    Expression<String>? peerId,
+    Expression<String>? entryType,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (peerId != null) 'peer_id': peerId,
+      if (entryType != null) 'entry_type': entryType,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncEntryTypesTableCompanion copyWith(
+      {Value<String>? peerId, Value<String>? entryType, Value<int>? rowid}) {
+    return SyncEntryTypesTableCompanion(
+      peerId: peerId ?? this.peerId,
+      entryType: entryType ?? this.entryType,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (peerId.present) {
+      map['peer_id'] = Variable<String>(peerId.value);
+    }
+    if (entryType.present) {
+      map['entry_type'] = Variable<String>(entryType.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncEntryTypesTableCompanion(')
+          ..write('peerId: $peerId, ')
+          ..write('entryType: $entryType, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5015,6 +5212,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SyncMetaTableTable syncMetaTable = $SyncMetaTableTable(this);
   late final $SyncCursorsTableTable syncCursorsTable =
       $SyncCursorsTableTable(this);
+  late final $SyncEntryTypesTableTable syncEntryTypesTable =
+      $SyncEntryTypesTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5028,7 +5227,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         defensivosTable,
         remindersTable,
         syncMetaTable,
-        syncCursorsTable
+        syncCursorsTable,
+        syncEntryTypesTable
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -8347,6 +8547,139 @@ typedef $$SyncCursorsTableTableProcessedTableManager = ProcessedTableManager<
     ),
     SyncCursorsTableData,
     PrefetchHooks Function()>;
+typedef $$SyncEntryTypesTableTableCreateCompanionBuilder
+    = SyncEntryTypesTableCompanion Function({
+  required String peerId,
+  required String entryType,
+  Value<int> rowid,
+});
+typedef $$SyncEntryTypesTableTableUpdateCompanionBuilder
+    = SyncEntryTypesTableCompanion Function({
+  Value<String> peerId,
+  Value<String> entryType,
+  Value<int> rowid,
+});
+
+class $$SyncEntryTypesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncEntryTypesTableTable> {
+  $$SyncEntryTypesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get peerId => $composableBuilder(
+      column: $table.peerId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get entryType => $composableBuilder(
+      column: $table.entryType, builder: (column) => ColumnFilters(column));
+}
+
+class $$SyncEntryTypesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncEntryTypesTableTable> {
+  $$SyncEntryTypesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get peerId => $composableBuilder(
+      column: $table.peerId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get entryType => $composableBuilder(
+      column: $table.entryType, builder: (column) => ColumnOrderings(column));
+}
+
+class $$SyncEntryTypesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncEntryTypesTableTable> {
+  $$SyncEntryTypesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get peerId =>
+      $composableBuilder(column: $table.peerId, builder: (column) => column);
+
+  GeneratedColumn<String> get entryType =>
+      $composableBuilder(column: $table.entryType, builder: (column) => column);
+}
+
+class $$SyncEntryTypesTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $SyncEntryTypesTableTable,
+    SyncEntryTypesTableData,
+    $$SyncEntryTypesTableTableFilterComposer,
+    $$SyncEntryTypesTableTableOrderingComposer,
+    $$SyncEntryTypesTableTableAnnotationComposer,
+    $$SyncEntryTypesTableTableCreateCompanionBuilder,
+    $$SyncEntryTypesTableTableUpdateCompanionBuilder,
+    (
+      SyncEntryTypesTableData,
+      BaseReferences<_$AppDatabase, $SyncEntryTypesTableTable,
+          SyncEntryTypesTableData>
+    ),
+    SyncEntryTypesTableData,
+    PrefetchHooks Function()> {
+  $$SyncEntryTypesTableTableTableManager(
+      _$AppDatabase db, $SyncEntryTypesTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncEntryTypesTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncEntryTypesTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncEntryTypesTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> peerId = const Value.absent(),
+            Value<String> entryType = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SyncEntryTypesTableCompanion(
+            peerId: peerId,
+            entryType: entryType,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String peerId,
+            required String entryType,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SyncEntryTypesTableCompanion.insert(
+            peerId: peerId,
+            entryType: entryType,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$SyncEntryTypesTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $SyncEntryTypesTableTable,
+    SyncEntryTypesTableData,
+    $$SyncEntryTypesTableTableFilterComposer,
+    $$SyncEntryTypesTableTableOrderingComposer,
+    $$SyncEntryTypesTableTableAnnotationComposer,
+    $$SyncEntryTypesTableTableCreateCompanionBuilder,
+    $$SyncEntryTypesTableTableUpdateCompanionBuilder,
+    (
+      SyncEntryTypesTableData,
+      BaseReferences<_$AppDatabase, $SyncEntryTypesTableTable,
+          SyncEntryTypesTableData>
+    ),
+    SyncEntryTypesTableData,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8369,4 +8702,6 @@ class $AppDatabaseManager {
       $$SyncMetaTableTableTableManager(_db, _db.syncMetaTable);
   $$SyncCursorsTableTableTableManager get syncCursorsTable =>
       $$SyncCursorsTableTableTableManager(_db, _db.syncCursorsTable);
+  $$SyncEntryTypesTableTableTableManager get syncEntryTypesTable =>
+      $$SyncEntryTypesTableTableTableManager(_db, _db.syncEntryTypesTable);
 }

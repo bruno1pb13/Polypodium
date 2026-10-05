@@ -497,6 +497,36 @@ void main() {
     expect(version.read<int>('user_version'), db.schemaVersion);
   });
 
+  test('migration from v17 creates the declared entry types table, keeping '
+      'the cursors', () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE sync_cursors (
+          peer_id TEXT NOT NULL,
+          direction TEXT NOT NULL,
+          cursor INTEGER NOT NULL DEFAULT 0,
+          PRIMARY KEY (peer_id, direction)
+        )
+      ''');
+      raw.execute(
+          "INSERT INTO sync_cursors VALUES ('server', 'pull', 42)");
+      raw.execute('PRAGMA user_version = 17');
+    }));
+
+    final dao = db.syncCursorsDao;
+    expect(await dao.getCursor('server', 'pull'), 42);
+    expect(await dao.getDeclaredEntryTypes('server'), isNull);
+
+    await dao.addDeclaredEntryTypes('server', ['irrigation', 'repotting']);
+    expect(await dao.getDeclaredEntryTypes('server'),
+        {'irrigation', 'repotting'});
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
   test('migrating from before v14 rebuilds plants with the parent column',
       () async {
     await db.close();

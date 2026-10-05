@@ -6,6 +6,8 @@ part of 'sync_cursors_dao.dart';
 mixin _$SyncCursorsDaoMixin on DatabaseAccessor<AppDatabase> {
   $SyncCursorsTableTable get syncCursorsTable =>
       attachedDatabase.syncCursorsTable;
+  $SyncEntryTypesTableTable get syncEntryTypesTable =>
+      attachedDatabase.syncEntryTypesTable;
   SyncCursorsDaoManager get managers => SyncCursorsDaoManager(this);
 }
 
@@ -15,4 +17,7 @@ class SyncCursorsDaoManager {
   $$SyncCursorsTableTableTableManager get syncCursorsTable =>
       $$SyncCursorsTableTableTableManager(
           _db.attachedDatabase, _db.syncCursorsTable);
+  $$SyncEntryTypesTableTableTableManager get syncEntryTypesTable =>
+      $$SyncEntryTypesTableTableTableManager(
+          _db.attachedDatabase, _db.syncEntryTypesTable);
 }

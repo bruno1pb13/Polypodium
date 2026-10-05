@@ -6,17 +6,25 @@ import 'package:polypodium_core/polypodium_core.dart';
 import '../enums.dart';
 import 'sync_exceptions.dart';
 
-/// Declares every [EntryType] this build can parse, so the server withholds
-/// the ones it can't. Without it the server assumes a pre-header release and
-/// only sends the original types (see Polypodium_server's docs/api.md).
+/// Declares every [EntryType] this build can parse (unless a backfill pull
+/// narrows it), so the server withholds the ones it can't. Without it the
+/// server assumes a pre-header release and only sends the original types
+/// (see Polypodium_server's docs/api.md).
 const entryTypesHeader = 'X-Polypodium-Entry-Types';
 
 class ChangesPage {
   final List<SyncChange> changes;
   final int nextCursor;
   final bool hasMore;
+
+  /// The entity restriction as echoed by the server; null when none was
+  /// asked for, or the server predates it and sent every entity.
+  final Set<String>? entities;
   const ChangesPage(
-      {required this.changes, required this.nextCursor, required this.hasMore});
+      {required this.changes,
+      required this.nextCursor,
+      required this.hasMore,
+      this.entities});
 }
 
 /// Pure HTTP transport for the sync protocol -- no storage or merge logic,
@@ -31,13 +39,18 @@ class SyncHttpClient {
     required String token,
     required int since,
     int limit = 100,
+    Set<String>? entryTypes,
+    Set<String>? entities,
   }) async {
+    final query = 'since=$since&limit=$limit'
+        '${entities == null ? '' : '&entities=${entities.join(',')}'}';
     final response = await http
         .get(
-          Uri.parse('$serverUrl/api/v1/sync/changes?since=$since&limit=$limit'),
+          Uri.parse('$serverUrl/api/v1/sync/changes?$query'),
           headers: {
             ..._authHeaders(token),
-            entryTypesHeader: EntryType.values.map((t) => t.name).join(','),
+            entryTypesHeader:
+                (entryTypes ?? EntryType.values.map((t) => t.name)).join(','),
           },
         )
         .timeout(const Duration(seconds: 30));
@@ -58,6 +71,7 @@ class SyncHttpClient {
       changes: changes,
       nextCursor: data['nextCursor'] as int,
       hasMore: data['hasMore'] as bool? ?? false,
+      entities: (data['entities'] as List<dynamic>?)?.cast<String>().toSet(),
     );
   }
 
