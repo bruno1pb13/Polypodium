@@ -5,59 +5,91 @@ import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/core/l10n/l10n.dart';
 import 'package:polypodium/features/entries/domain/entry_model.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
+import 'package:polypodium/features/locations/data/locations_repository.dart';
 import 'package:polypodium/features/locations/domain/location_model.dart';
 import 'package:polypodium/features/locations/presentation/providers/locations_providers.dart';
 import 'package:polypodium/features/plants/data/plants_repository.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/plants/presentation/providers/plants_providers.dart';
 import 'package:polypodium/features/plants/presentation/screens/add_edit_plant_screen.dart';
+import 'package:polypodium/features/soils/data/soils_repository.dart';
 import 'package:polypodium/features/soils/domain/soil_model.dart';
 import 'package:polypodium/features/soils/presentation/providers/soils_providers.dart';
 import 'package:polypodium/features/soils/presentation/widgets/soil_selection_field.dart';
 import 'package:polypodium/features/species/data/external_species_repository.dart';
+import 'package:polypodium/features/species/data/species_repository.dart';
 import 'package:polypodium/features/species/domain/species_model.dart';
 import 'package:polypodium/features/species/presentation/providers/species_providers.dart';
 import 'package:polypodium/features/species/presentation/widgets/species_autocomplete.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+final _species = [
+  SpeciesModel(
+    id: 's1',
+    popularName: 'Samambaia',
+    scientificName: 'Polypodium vulgare',
+    defaultIrrigationFrequencyDays: 3,
+    recommendedSoilIds: const ['loamy'],
+    createdAt: DateTime(2024, 1, 1),
+  ),
+  SpeciesModel(
+    id: 's2',
+    popularName: 'Jiboia',
+    scientificName: 'Epipremnum aureum',
+    defaultIrrigationFrequencyDays: null,
+    recommendedSoilIds: const [],
+    createdAt: DateTime(2024, 1, 1),
+  ),
+];
+
+final _locations = [
+  LocationModel(id: 'l1', name: 'Varanda', createdAt: DateTime(2024, 1, 1)),
+  LocationModel(id: 'l2', name: 'Sala', createdAt: DateTime(2024, 1, 1)),
+];
+
+final _soils = [
+  SoilModel(id: 'loamy', name: 'Franco', createdAt: DateTime(2024, 1, 1)),
+  SoilModel(id: 'sandy', name: 'Arenoso', createdAt: DateTime(2024, 1, 1)),
+];
+
 class _FakeSpeciesNotifier extends SpeciesNotifier {
   @override
-  Stream<List<SpeciesModel>> build() => Stream.value([
-        SpeciesModel(
-          id: 's1',
-          popularName: 'Samambaia',
-          scientificName: 'Polypodium vulgare',
-          defaultIrrigationFrequencyDays: 3,
-          recommendedSoilIds: const ['loamy'],
-          createdAt: DateTime(2024, 1, 1),
-        ),
-        SpeciesModel(
-          id: 's2',
-          popularName: 'Jiboia',
-          scientificName: 'Epipremnum aureum',
-          defaultIrrigationFrequencyDays: null,
-          recommendedSoilIds: const [],
-          createdAt: DateTime(2024, 1, 1),
-        ),
-      ]);
+  Stream<List<SpeciesModel>> build() => Stream.value(_species);
 }
 
 class _FakeLocationsNotifier extends LocationsNotifier {
   @override
-  Stream<List<LocationModel>> build() => Stream.value([
-        LocationModel(
-            id: 'l1', name: 'Varanda', createdAt: DateTime(2024, 1, 1)),
-        LocationModel(id: 'l2', name: 'Sala', createdAt: DateTime(2024, 1, 1)),
-      ]);
+  Stream<List<LocationModel>> build() => Stream.value(_locations);
 }
 
 class _FakeSoilsNotifier extends SoilsNotifier {
   @override
-  Stream<List<SoilModel>> build() => Stream.value([
-        SoilModel(id: 'loamy', name: 'Franco', createdAt: DateTime(2024, 1, 1)),
-        SoilModel(
-            id: 'sandy', name: 'Arenoso', createdAt: DateTime(2024, 1, 1)),
-      ]);
+  Stream<List<SoilModel>> build() => Stream.value(_soils);
+}
+
+// The history note written on save looks the names up in the repositories.
+class _FakeSpeciesRepository implements SpeciesRepository {
+  @override
+  Future<List<SpeciesModel>> getAll() async => _species;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeLocationsRepository implements LocationsRepository {
+  @override
+  Future<List<LocationModel>> getAll() async => _locations;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeSoilsRepository implements SoilsRepository {
+  @override
+  Future<List<SoilModel>> getAll() async => _soils;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _FakeExternalSpeciesRepository extends ExternalSpeciesRepository {
@@ -75,6 +107,10 @@ class _FakePlantsRepository implements PlantsRepository {
 
   @override
   Stream<List<PlantModel>> watchAll() => Stream.value(plants);
+
+  @override
+  Future<PlantModel?> getById(String id) async =>
+      plants.where((p) => p.id == id).firstOrNull;
 
   @override
   Future<void> save(PlantModel plant) async => saved.add(plant);
@@ -100,8 +136,8 @@ void main() {
   late _FakeEntryMutations mutations;
 
   // Pushes the screen over a launcher route so the Navigator.pop on save has
-  // somewhere to go back to. The launcher watches the plants, as the Home
-  // does in the app, so the notifier stays alive while saving.
+  // somewhere to go back to. The launcher deliberately doesn't watch the
+  // plants: saving must not depend on the list being alive.
   Future<void> pump(WidgetTester tester, {PlantModel? plant}) async {
     tester.view.physicalSize = const Size(800, 2400);
     tester.view.devicePixelRatio = 1;
@@ -116,6 +152,10 @@ void main() {
         speciesNotifierProvider.overrideWith(_FakeSpeciesNotifier.new),
         locationsNotifierProvider.overrideWith(_FakeLocationsNotifier.new),
         soilsNotifierProvider.overrideWith(_FakeSoilsNotifier.new),
+        speciesRepositoryProvider.overrideWithValue(_FakeSpeciesRepository()),
+        locationsRepositoryProvider
+            .overrideWithValue(_FakeLocationsRepository()),
+        soilsRepositoryProvider.overrideWithValue(_FakeSoilsRepository()),
         externalSpeciesRepositoryProvider
             .overrideWith(_FakeExternalSpeciesRepository.new),
       ],
@@ -123,20 +163,17 @@ void main() {
         locale: const Locale('pt'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: Consumer(
-          builder: (context, ref, _) {
-            ref.watch(plantsNotifierProvider);
-            return Scaffold(
-              body: TextButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => AddEditPlantScreen(plant: plant)),
-                ),
-                child: const Text('open'),
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => AddEditPlantScreen(plant: plant)),
               ),
-            );
-          },
+              child: const Text('open'),
+            ),
+          ),
         ),
       ),
     ));
