@@ -58,7 +58,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -141,6 +141,30 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 13) {
             await m.createTable(remindersTable);
+          }
+          // Below v10 the plants table was just recreated without the column.
+          if (from >= 10 && from < 14) {
+            // Link any leftover free-text location to a locations row, then
+            // drop the legacy column. Stamped as local writes so the links
+            // reach the server on the next sync.
+            final legacy = await customSelect(
+              'SELECT id, location FROM plants WHERE location IS NOT NULL '
+              'AND location_id IS NULL AND deleted_at IS NULL',
+            ).get();
+            for (final row in legacy) {
+              final locationId = await locationsDao
+                  .resolveLegacyName(row.read<String>('location'));
+              if (locationId == null) continue;
+              final rev = await syncMetaDao.nextRev();
+              await (update(plantsTable)
+                    ..where((t) => t.id.equals(row.read<String>('id'))))
+                  .write(PlantsTableCompanion(
+                locationId: Value(locationId),
+                updatedAt: Value(DateTime.now()),
+                localRev: Value(rev),
+              ));
+            }
+            await m.alterTable(TableMigration(plantsTable));
           }
         },
       );

@@ -127,7 +127,6 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'soilId': r.soilType,
           'irrigationFrequencyDays': r.irrigationFrequencyDays,
           'acquisitionDate': r.acquisitionDate.toIso8601String(),
-          'location': r.location,
           'locationId': r.locationId,
           'lastIrrigatedAt': r.lastIrrigatedAt?.toIso8601String(),
           'lastPesticideAppliedAt':
@@ -259,15 +258,30 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       return;
     }
     final p = change.payload;
-    await _db.plantsDao.upsert(PlantsTableCompanion.insert(
+    await _db.transaction(() async {
+      // Clients from before schema v14 may still send the legacy free-text
+      // location without a locationId. The resolved location is a local
+      // write that gets pushed; the plant itself stays as received, and other
+      // devices resolve the same text to the same location id.
+      final locationId = p['locationId'] as String? ??
+          (change.deletedAt == null
+              ? await _db.locationsDao
+                  .resolveLegacyName(p['location'] as String?)
+              : null);
+      await _upsertPlant(change, locationId);
+    });
+  }
+
+  Future<void> _upsertPlant(SyncChange change, String? locationId) {
+    final p = change.payload;
+    return _db.plantsDao.upsert(PlantsTableCompanion.insert(
       id: change.entityId,
       speciesId: p['speciesId'] as String,
       nickname: p['nickname'] as String,
       soilType: (p['soilId'] ?? p['soilType']) as String,
       irrigationFrequencyDays: Value(p['irrigationFrequencyDays'] as int?),
       acquisitionDate: DateTime.parse(p['acquisitionDate'] as String),
-      location: Value(p['location'] as String?),
-      locationId: Value(p['locationId'] as String?),
+      locationId: Value(locationId),
       lastIrrigatedAt: Value(p['lastIrrigatedAt'] != null
           ? DateTime.parse(p['lastIrrigatedAt'] as String)
           : null),

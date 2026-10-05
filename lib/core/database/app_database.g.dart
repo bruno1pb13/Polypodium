@@ -1559,12 +1559,6 @@ class $PlantsTableTable extends PlantsTable
   late final GeneratedColumn<DateTime> acquisitionDate =
       GeneratedColumn<DateTime>('acquisition_date', aliasedName, false,
           type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  static const VerificationMeta _locationMeta =
-      const VerificationMeta('location');
-  @override
-  late final GeneratedColumn<String> location = GeneratedColumn<String>(
-      'location', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _locationIdMeta =
       const VerificationMeta('locationId');
   @override
@@ -1639,7 +1633,6 @@ class $PlantsTableTable extends PlantsTable
         soilType,
         irrigationFrequencyDays,
         acquisitionDate,
-        location,
         locationId,
         lastIrrigatedAt,
         lastPesticideAppliedAt,
@@ -1698,10 +1691,6 @@ class $PlantsTableTable extends PlantsTable
               data['acquisition_date']!, _acquisitionDateMeta));
     } else if (isInserting) {
       context.missing(_acquisitionDateMeta);
-    }
-    if (data.containsKey('location')) {
-      context.handle(_locationMeta,
-          location.isAcceptableOrUnknown(data['location']!, _locationMeta));
     }
     if (data.containsKey('location_id')) {
       context.handle(
@@ -1776,8 +1765,6 @@ class $PlantsTableTable extends PlantsTable
           data['${effectivePrefix}irrigation_frequency_days']),
       acquisitionDate: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}acquisition_date'])!,
-      location: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}location']),
       locationId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}location_id']),
       lastIrrigatedAt: attachedDatabase.typeMapping.read(
@@ -1822,7 +1809,6 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
   /// Null means: inherit from species.defaultIrrigationFrequencyDays
   final int? irrigationFrequencyDays;
   final DateTime acquisitionDate;
-  final String? location;
   final String? locationId;
   final DateTime? lastIrrigatedAt;
 
@@ -1849,7 +1835,6 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       required this.soilType,
       this.irrigationFrequencyDays,
       required this.acquisitionDate,
-      this.location,
       this.locationId,
       this.lastIrrigatedAt,
       this.lastPesticideAppliedAt,
@@ -1871,9 +1856,6 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       map['irrigation_frequency_days'] = Variable<int>(irrigationFrequencyDays);
     }
     map['acquisition_date'] = Variable<DateTime>(acquisitionDate);
-    if (!nullToAbsent || location != null) {
-      map['location'] = Variable<String>(location);
-    }
     if (!nullToAbsent || locationId != null) {
       map['location_id'] = Variable<String>(locationId);
     }
@@ -1914,9 +1896,6 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ? const Value.absent()
           : Value(irrigationFrequencyDays),
       acquisitionDate: Value(acquisitionDate),
-      location: location == null && nullToAbsent
-          ? const Value.absent()
-          : Value(location),
       locationId: locationId == null && nullToAbsent
           ? const Value.absent()
           : Value(locationId),
@@ -1954,7 +1933,6 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       irrigationFrequencyDays:
           serializer.fromJson<int?>(json['irrigationFrequencyDays']),
       acquisitionDate: serializer.fromJson<DateTime>(json['acquisitionDate']),
-      location: serializer.fromJson<String?>(json['location']),
       locationId: serializer.fromJson<String?>(json['locationId']),
       lastIrrigatedAt: serializer.fromJson<DateTime?>(json['lastIrrigatedAt']),
       lastPesticideAppliedAt:
@@ -1980,7 +1958,6 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       'irrigationFrequencyDays':
           serializer.toJson<int?>(irrigationFrequencyDays),
       'acquisitionDate': serializer.toJson<DateTime>(acquisitionDate),
-      'location': serializer.toJson<String?>(location),
       'locationId': serializer.toJson<String?>(locationId),
       'lastIrrigatedAt': serializer.toJson<DateTime?>(lastIrrigatedAt),
       'lastPesticideAppliedAt':
@@ -2003,7 +1980,6 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           String? soilType,
           Value<int?> irrigationFrequencyDays = const Value.absent(),
           DateTime? acquisitionDate,
-          Value<String?> location = const Value.absent(),
           Value<String?> locationId = const Value.absent(),
           Value<DateTime?> lastIrrigatedAt = const Value.absent(),
           Value<DateTime?> lastPesticideAppliedAt = const Value.absent(),
@@ -2023,7 +1999,6 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
             ? irrigationFrequencyDays.value
             : this.irrigationFrequencyDays,
         acquisitionDate: acquisitionDate ?? this.acquisitionDate,
-        location: location.present ? location.value : this.location,
         locationId: locationId.present ? locationId.value : this.locationId,
         lastIrrigatedAt: lastIrrigatedAt.present
             ? lastIrrigatedAt.value
@@ -2055,7 +2030,6 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       acquisitionDate: data.acquisitionDate.present
           ? data.acquisitionDate.value
           : this.acquisitionDate,
-      location: data.location.present ? data.location.value : this.location,
       locationId:
           data.locationId.present ? data.locationId.value : this.locationId,
       lastIrrigatedAt: data.lastIrrigatedAt.present
@@ -2087,7 +2061,6 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ..write('soilType: $soilType, ')
           ..write('irrigationFrequencyDays: $irrigationFrequencyDays, ')
           ..write('acquisitionDate: $acquisitionDate, ')
-          ..write('location: $location, ')
           ..write('locationId: $locationId, ')
           ..write('lastIrrigatedAt: $lastIrrigatedAt, ')
           ..write('lastPesticideAppliedAt: $lastPesticideAppliedAt, ')
@@ -2110,7 +2083,6 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       soilType,
       irrigationFrequencyDays,
       acquisitionDate,
-      location,
       locationId,
       lastIrrigatedAt,
       lastPesticideAppliedAt,
@@ -2131,7 +2103,6 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           other.soilType == this.soilType &&
           other.irrigationFrequencyDays == this.irrigationFrequencyDays &&
           other.acquisitionDate == this.acquisitionDate &&
-          other.location == this.location &&
           other.locationId == this.locationId &&
           other.lastIrrigatedAt == this.lastIrrigatedAt &&
           other.lastPesticideAppliedAt == this.lastPesticideAppliedAt &&
@@ -2151,7 +2122,6 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
   final Value<String> soilType;
   final Value<int?> irrigationFrequencyDays;
   final Value<DateTime> acquisitionDate;
-  final Value<String?> location;
   final Value<String?> locationId;
   final Value<DateTime?> lastIrrigatedAt;
   final Value<DateTime?> lastPesticideAppliedAt;
@@ -2170,7 +2140,6 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.soilType = const Value.absent(),
     this.irrigationFrequencyDays = const Value.absent(),
     this.acquisitionDate = const Value.absent(),
-    this.location = const Value.absent(),
     this.locationId = const Value.absent(),
     this.lastIrrigatedAt = const Value.absent(),
     this.lastPesticideAppliedAt = const Value.absent(),
@@ -2190,7 +2159,6 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     required String soilType,
     this.irrigationFrequencyDays = const Value.absent(),
     required DateTime acquisitionDate,
-    this.location = const Value.absent(),
     this.locationId = const Value.absent(),
     this.lastIrrigatedAt = const Value.absent(),
     this.lastPesticideAppliedAt = const Value.absent(),
@@ -2216,7 +2184,6 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     Expression<String>? soilType,
     Expression<int>? irrigationFrequencyDays,
     Expression<DateTime>? acquisitionDate,
-    Expression<String>? location,
     Expression<String>? locationId,
     Expression<DateTime>? lastIrrigatedAt,
     Expression<DateTime>? lastPesticideAppliedAt,
@@ -2237,7 +2204,6 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       if (irrigationFrequencyDays != null)
         'irrigation_frequency_days': irrigationFrequencyDays,
       if (acquisitionDate != null) 'acquisition_date': acquisitionDate,
-      if (location != null) 'location': location,
       if (locationId != null) 'location_id': locationId,
       if (lastIrrigatedAt != null) 'last_irrigated_at': lastIrrigatedAt,
       if (lastPesticideAppliedAt != null)
@@ -2261,7 +2227,6 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       Value<String>? soilType,
       Value<int?>? irrigationFrequencyDays,
       Value<DateTime>? acquisitionDate,
-      Value<String?>? location,
       Value<String?>? locationId,
       Value<DateTime?>? lastIrrigatedAt,
       Value<DateTime?>? lastPesticideAppliedAt,
@@ -2281,7 +2246,6 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       irrigationFrequencyDays:
           irrigationFrequencyDays ?? this.irrigationFrequencyDays,
       acquisitionDate: acquisitionDate ?? this.acquisitionDate,
-      location: location ?? this.location,
       locationId: locationId ?? this.locationId,
       lastIrrigatedAt: lastIrrigatedAt ?? this.lastIrrigatedAt,
       lastPesticideAppliedAt:
@@ -2319,9 +2283,6 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     }
     if (acquisitionDate.present) {
       map['acquisition_date'] = Variable<DateTime>(acquisitionDate.value);
-    }
-    if (location.present) {
-      map['location'] = Variable<String>(location.value);
     }
     if (locationId.present) {
       map['location_id'] = Variable<String>(locationId.value);
@@ -2371,7 +2332,6 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
           ..write('soilType: $soilType, ')
           ..write('irrigationFrequencyDays: $irrigationFrequencyDays, ')
           ..write('acquisitionDate: $acquisitionDate, ')
-          ..write('location: $location, ')
           ..write('locationId: $locationId, ')
           ..write('lastIrrigatedAt: $lastIrrigatedAt, ')
           ..write('lastPesticideAppliedAt: $lastPesticideAppliedAt, ')
@@ -5527,7 +5487,6 @@ typedef $$PlantsTableTableCreateCompanionBuilder = PlantsTableCompanion
   required String soilType,
   Value<int?> irrigationFrequencyDays,
   required DateTime acquisitionDate,
-  Value<String?> location,
   Value<String?> locationId,
   Value<DateTime?> lastIrrigatedAt,
   Value<DateTime?> lastPesticideAppliedAt,
@@ -5548,7 +5507,6 @@ typedef $$PlantsTableTableUpdateCompanionBuilder = PlantsTableCompanion
   Value<String> soilType,
   Value<int?> irrigationFrequencyDays,
   Value<DateTime> acquisitionDate,
-  Value<String?> location,
   Value<String?> locationId,
   Value<DateTime?> lastIrrigatedAt,
   Value<DateTime?> lastPesticideAppliedAt,
@@ -5659,9 +5617,6 @@ class $$PlantsTableTableFilterComposer
   ColumnFilters<DateTime> get acquisitionDate => $composableBuilder(
       column: $table.acquisitionDate,
       builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get location => $composableBuilder(
-      column: $table.location, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get lastIrrigatedAt => $composableBuilder(
       column: $table.lastIrrigatedAt,
@@ -5822,9 +5777,6 @@ class $$PlantsTableTableOrderingComposer
       column: $table.acquisitionDate,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get location => $composableBuilder(
-      column: $table.location, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<DateTime> get lastIrrigatedAt => $composableBuilder(
       column: $table.lastIrrigatedAt,
       builder: (column) => ColumnOrderings(column));
@@ -5937,9 +5889,6 @@ class $$PlantsTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get acquisitionDate => $composableBuilder(
       column: $table.acquisitionDate, builder: (column) => column);
-
-  GeneratedColumn<String> get location =>
-      $composableBuilder(column: $table.location, builder: (column) => column);
 
   GeneratedColumn<DateTime> get lastIrrigatedAt => $composableBuilder(
       column: $table.lastIrrigatedAt, builder: (column) => column);
@@ -6105,7 +6054,6 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<String> soilType = const Value.absent(),
             Value<int?> irrigationFrequencyDays = const Value.absent(),
             Value<DateTime> acquisitionDate = const Value.absent(),
-            Value<String?> location = const Value.absent(),
             Value<String?> locationId = const Value.absent(),
             Value<DateTime?> lastIrrigatedAt = const Value.absent(),
             Value<DateTime?> lastPesticideAppliedAt = const Value.absent(),
@@ -6125,7 +6073,6 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             soilType: soilType,
             irrigationFrequencyDays: irrigationFrequencyDays,
             acquisitionDate: acquisitionDate,
-            location: location,
             locationId: locationId,
             lastIrrigatedAt: lastIrrigatedAt,
             lastPesticideAppliedAt: lastPesticideAppliedAt,
@@ -6145,7 +6092,6 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             required String soilType,
             Value<int?> irrigationFrequencyDays = const Value.absent(),
             required DateTime acquisitionDate,
-            Value<String?> location = const Value.absent(),
             Value<String?> locationId = const Value.absent(),
             Value<DateTime?> lastIrrigatedAt = const Value.absent(),
             Value<DateTime?> lastPesticideAppliedAt = const Value.absent(),
@@ -6165,7 +6111,6 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             soilType: soilType,
             irrigationFrequencyDays: irrigationFrequencyDays,
             acquisitionDate: acquisitionDate,
-            location: location,
             locationId: locationId,
             lastIrrigatedAt: lastIrrigatedAt,
             lastPesticideAppliedAt: lastPesticideAppliedAt,

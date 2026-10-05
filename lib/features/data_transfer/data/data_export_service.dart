@@ -131,7 +131,6 @@ class DataExportService {
               'soilId': r.soilType,
               'irrigationFrequencyDays': r.irrigationFrequencyDays,
               'acquisitionDate': r.acquisitionDate.toIso8601String(),
-              'location': r.location,
               'locationId': r.locationId,
               'lastIrrigatedAt': r.lastIrrigatedAt?.toIso8601String(),
               'lastPesticideAppliedAt':

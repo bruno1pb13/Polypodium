@@ -86,9 +86,7 @@ class PlantInfoCard extends ConsumerWidget {
                   context,
                   Icons.location_on_outlined,
                   context.l10n.locationLabel,
-                  pws?.location?.name ??
-                      plant.location ??
-                      context.l10n.notInformed,
+                  pws?.location?.name ?? context.l10n.notInformed,
                   transparencyEnabled,
                 ),
                 const Divider(color: Colors.white10, height: 16),

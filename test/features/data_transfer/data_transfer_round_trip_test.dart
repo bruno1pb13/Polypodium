@@ -190,6 +190,66 @@ void main() {
     expect(plant.statusChangedAt, isNull);
   });
 
+  test('legacy location text in a backup is linked to a location',
+      () async {
+    Map<String, dynamic> plant(String id, String? location) => {
+          'id': id,
+          'speciesId': 'species1',
+          'nickname': 'Antiga',
+          'soilId': 'loamy',
+          'acquisitionDate': t0.toIso8601String(),
+          'location': location,
+          'locationId': null,
+          'createdAt': t0.toIso8601String(),
+          'updatedAt': t0.toIso8601String(),
+          'deletedAt': null,
+        };
+    final backup = {
+      'format': DataExportService.formatName,
+      'version': DataExportService.formatVersion,
+      'exportedAt': t1.toIso8601String(),
+      'entities': {
+        'locations': [
+          {
+            'id': 'loc1',
+            'name': 'Varanda',
+            'createdAt': t0.toIso8601String(),
+            'updatedAt': t0.toIso8601String(),
+            'deletedAt': null,
+          }
+        ],
+        'plants': [
+          plant('plant1', 'VARANDA'),
+          plant('plant2', 'Sala'),
+          plant('plant3', 'sala'),
+          plant('plant4', ''),
+        ],
+      },
+    };
+
+    await DataImportService(target, FakePhotoStorage())
+        .importFromBytes(Uint8List.fromList(utf8.encode(jsonEncode(backup))));
+
+    expect((await target.plantsDao.getById('plant1'))!.locationId, 'loc1');
+    final plant2 = await target.plantsDao.getById('plant2');
+    expect(plant2!.locationId, isNotNull);
+    expect((await target.plantsDao.getById('plant3'))!.locationId,
+        plant2.locationId);
+    expect((await target.plantsDao.getById('plant4'))!.locationId, isNull);
+    expect((await target.locationsDao.getAll()).map((l) => l.name),
+        ['Sala', 'Varanda']);
+
+    final archive = ZipDecoder()
+        .decodeBytes(await DataExportService(target).buildArchiveBytes());
+    final exported = jsonDecode(utf8.decode(archive
+        .findFile(DataExportService.dataFileName)!
+        .content as List<int>)) as Map<String, dynamic>;
+    final plants = (exported['entities'] as Map<String, dynamic>)['plants']
+        as List<dynamic>;
+    expect((plants.first as Map<String, dynamic>).containsKey('location'),
+        isFalse);
+  });
+
   test('reminders survive the round trip', () async {
     await seedSpecies(source, 'Ficus lyrata', t0);
     await source.plantsDao.upsert(PlantsTableCompanion.insert(

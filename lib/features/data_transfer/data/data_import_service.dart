@@ -326,6 +326,12 @@ class DataImportService {
         localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: updatedAt)) {
       return false;
     }
+    // Backups made before schema v14 may hold a legacy free-text location.
+    final locationId = row['locationId'] as String? ??
+        (row['deletedAt'] == null
+            ? await _db.locationsDao
+                .resolveLegacyName(row['location'] as String?)
+            : null);
     final rev = await _db.syncMetaDao.nextRev();
     await _db.plantsDao.upsert(PlantsTableCompanion.insert(
       id: row['id'] as String,
@@ -334,8 +340,7 @@ class DataImportService {
       soilType: row['soilId'] as String,
       irrigationFrequencyDays: Value(row['irrigationFrequencyDays'] as int?),
       acquisitionDate: DateTime.parse(row['acquisitionDate'] as String),
-      location: Value(row['location'] as String?),
-      locationId: Value(row['locationId'] as String?),
+      locationId: Value(locationId),
       lastIrrigatedAt: Value(row['lastIrrigatedAt'] != null
           ? DateTime.parse(row['lastIrrigatedAt'] as String)
           : null),

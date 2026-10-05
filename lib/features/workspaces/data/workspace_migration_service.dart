@@ -168,7 +168,6 @@ class WorkspaceMigrationService {
           soilType: row.soilType,
           irrigationFrequencyDays: Value(row.irrigationFrequencyDays),
           acquisitionDate: row.acquisitionDate,
-          location: Value(row.location),
           locationId: Value(row.locationId),
           lastIrrigatedAt: Value(row.lastIrrigatedAt),
           lastPesticideAppliedAt: Value(row.lastPesticideAppliedAt),

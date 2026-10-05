@@ -19,7 +19,6 @@ class PlantsTable extends Table {
   IntColumn get irrigationFrequencyDays => integer().nullable()();
 
   DateTimeColumn get acquisitionDate => dateTime()();
-  TextColumn get location => text().nullable()();
   TextColumn get locationId => text()
       .nullable()
       .references(LocationsTable, #id, onDelete: KeyAction.setNull)();
