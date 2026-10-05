@@ -109,7 +109,7 @@ class EntriesRepository {
         localRev: row.localRev,
       );
 
-  static EntriesTableCompanion _toCompanion(EntryModel m,
+  EntriesTableCompanion _toCompanion(EntryModel m,
           {required DateTime updatedAt, required int rev}) =>
       EntriesTableCompanion.insert(
         id: m.id,
@@ -123,5 +123,6 @@ class EntriesRepository {
         createdAt: m.createdAt,
         updatedAt: updatedAt,
         localRev: Value(rev),
+        deviceId: Value(_db.deviceId),
       );
 }

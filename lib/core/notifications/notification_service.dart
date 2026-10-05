@@ -508,30 +508,7 @@ class NotificationService implements INotificationService {
         final plantsRepo =
             PlantsRepository(active.db, const NotificationService());
         if (action == ReminderAction.water) {
-          final ws = active.workspace;
-          final entriesRepo = EntriesRepository(
-            active.db,
-            ws == null
-                ? PhotoStorage()
-                : PhotoStorage(baseDirName: photoDirNameFor(ws)),
-          );
-          // Skip plants deleted or archived since the notification was
-          // scheduled.
-          final existing = {
-            for (final plant in await plantsRepo.getAll())
-              if (plant.isActive) plant.id
-          };
-          final now = DateTime.now();
-          for (final plantId in payload.plantIds.where(existing.contains)) {
-            await entriesRepo.create(EntryModel(
-              id: const Uuid().v4(),
-              plantId: plantId,
-              date: now,
-              type: EntryType.irrigation,
-              createdAt: now,
-            ));
-            await plantsRepo.refreshPlantStatus(plantId, reschedule: false);
-          }
+          await recordWatered(active.db, active.workspace, payload.plantIds);
         } else {
           await snoozeReminder(payload);
         }
@@ -543,6 +520,36 @@ class NotificationService implements INotificationService {
       // ignore: avoid_print
       print(
           '[NotificationService] Notification action $action failed: $e\n$st');
+    }
+  }
+
+  /// The "Watered" action's writes: an irrigation entry per plant still
+  /// active, refreshing each plant's irrigation status.
+  @visibleForTesting
+  static Future<void> recordWatered(
+      AppDatabase db, Workspace? workspace, List<String> plantIds) async {
+    final plantsRepo = PlantsRepository(db, const NotificationService());
+    final entriesRepo = EntriesRepository(
+      db,
+      workspace == null
+          ? PhotoStorage()
+          : PhotoStorage(baseDirName: photoDirNameFor(workspace)),
+    );
+    // Skip plants deleted or archived since the notification was scheduled.
+    final existing = {
+      for (final plant in await plantsRepo.getAll())
+        if (plant.isActive) plant.id
+    };
+    final now = DateTime.now();
+    for (final plantId in plantIds.where(existing.contains)) {
+      await entriesRepo.create(EntryModel(
+        id: const Uuid().v4(),
+        plantId: plantId,
+        date: now,
+        type: EntryType.irrigation,
+        createdAt: now,
+      ));
+      await plantsRepo.refreshPlantStatus(plantId, reschedule: false);
     }
   }
 
@@ -573,11 +580,20 @@ class NotificationService implements INotificationService {
     final dir = await getApplicationDocumentsDirectory();
     final file = File(p.join(dir.path, repo.activeDbFileName()));
     if (!file.existsSync()) return null;
+    final workspace = repo.loadActiveWorkspace();
+    return (db: openIsolateDatabase(file, workspace), workspace: workspace);
+  }
+
+  /// Opens [workspace]'s database [file] for writes stamped with its
+  /// deviceId, like the UI isolate's.
+  @visibleForTesting
+  static AppDatabase openIsolateDatabase(File file, Workspace? workspace) {
     // The UI isolate may hold the same file open: wait for its locks
     // instead of failing with SQLITE_BUSY.
-    final db = AppDatabase.forTesting(NativeDatabase(file,
-        setup: (raw) => raw.execute('PRAGMA busy_timeout = 5000;')));
-    return (db: db, workspace: repo.loadActiveWorkspace());
+    return AppDatabase.forTesting(
+        NativeDatabase(file,
+            setup: (raw) => raw.execute('PRAGMA busy_timeout = 5000;')),
+        deviceId: workspace?.deviceId);
   }
 
   // ---------------------------------------------------------------------------

@@ -26,6 +26,7 @@ class SoilsDao extends DatabaseAccessor<AppDatabase> with _$SoilsDaoMixin {
           deletedAt: Value(deletedAt),
           updatedAt: Value(deletedAt),
           localRev: Value(rev),
+          deviceId: Value(attachedDatabase.deviceId),
         ),
       );
 

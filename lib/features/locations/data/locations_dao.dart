@@ -33,6 +33,7 @@ class LocationsDao extends DatabaseAccessor<AppDatabase>
           deletedAt: Value(deletedAt),
           updatedAt: Value(deletedAt),
           localRev: Value(rev),
+          deviceId: Value(attachedDatabase.deviceId),
         ),
       );
 
@@ -61,6 +62,7 @@ class LocationsDao extends DatabaseAccessor<AppDatabase>
       // Revives the derived row if it was soft-deleted in the meantime.
       deletedAt: const Value(null),
       localRev: Value(rev),
+      deviceId: Value(attachedDatabase.deviceId),
     ));
     return id;
   }

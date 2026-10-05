@@ -31,6 +31,7 @@ class PlantsDao extends DatabaseAccessor<AppDatabase> with _$PlantsDaoMixin {
           lastIrrigatedAt: Value(when),
           updatedAt: Value(updatedAt),
           localRev: Value(rev),
+          deviceId: Value(attachedDatabase.deviceId),
         ),
       );
 
@@ -43,6 +44,7 @@ class PlantsDao extends DatabaseAccessor<AppDatabase> with _$PlantsDaoMixin {
           pesticideReapplicationDays: Value(reapplicationDays),
           updatedAt: Value(updatedAt),
           localRev: Value(rev),
+          deviceId: Value(attachedDatabase.deviceId),
         ),
       );
 
@@ -53,6 +55,7 @@ class PlantsDao extends DatabaseAccessor<AppDatabase> with _$PlantsDaoMixin {
           deletedAt: Value(deletedAt),
           updatedAt: Value(deletedAt),
           localRev: Value(rev),
+          deviceId: Value(attachedDatabase.deviceId),
         ),
       );
 
@@ -97,6 +100,7 @@ class PlantsDao extends DatabaseAccessor<AppDatabase> with _$PlantsDaoMixin {
       locationId: const Value(null),
       updatedAt: Value(updatedAt),
       localRev: Value(rev),
+      deviceId: Value(attachedDatabase.deviceId),
     ));
     return rows.map((r) => r.id).toList();
   }

@@ -91,6 +91,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
         ));
       });
     }
@@ -110,6 +111,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
           isSeeded: const Value(false),
         ));
       });
@@ -130,6 +132,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
         ));
       });
     }
@@ -152,6 +155,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
         ));
       });
     }
@@ -177,6 +181,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
         ));
       });
     }
@@ -213,6 +218,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
         ));
       });
     }
@@ -231,6 +237,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
         ));
       });
     }

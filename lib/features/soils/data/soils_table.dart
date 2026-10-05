@@ -13,6 +13,7 @@ class SoilsTable extends Table {
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();
   IntColumn get localRev => integer().withDefault(const Constant(0))();
+  TextColumn get deviceId => text().nullable()();
 
   /// True for the default soils seeded on database creation/upgrade (see
   /// app_database.dart), false for soils the user created. Distinguishes

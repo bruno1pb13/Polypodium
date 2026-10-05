@@ -62,7 +62,7 @@ class RemindersRepository {
         localRev: row.localRev,
       );
 
-  static RemindersTableCompanion _toCompanion(ReminderModel m,
+  RemindersTableCompanion _toCompanion(ReminderModel m,
           {required DateTime updatedAt, required int rev}) =>
       RemindersTableCompanion.insert(
         id: m.id,
@@ -73,5 +73,6 @@ class RemindersRepository {
         createdAt: m.createdAt,
         updatedAt: updatedAt,
         localRev: Value(rev),
+        deviceId: Value(_db.deviceId),
       );
 }

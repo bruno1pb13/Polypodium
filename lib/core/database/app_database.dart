@@ -53,12 +53,20 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase({String fileName = 'polypodium.db'})
+  AppDatabase({String fileName = 'polypodium.db', this.deviceId})
       : super(_openConnection(fileName));
-  AppDatabase.forTesting(super.executor);
+  AppDatabase.forTesting(super.executor, {this.deviceId});
+
+  /// This device's id in the workspace owning this database (null for the
+  /// local workspace). Every local write stamps it on the row's `deviceId`
+  /// next to the new `localRev`, while a pulled row keeps its sender's id,
+  /// so each row records who wrote its current version: the LWW tiebreak
+  /// (`incomingWins`) needs it to resolve exact `updatedAt` ties the same
+  /// way the server does.
+  final String? deviceId;
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -139,6 +147,29 @@ class AppDatabase extends _$AppDatabase {
           if (from < 13) {
             await m.createTable(remindersTable);
           }
+          if (from < 15) {
+            // Ahead of the v14 step, whose data fix writes device-stamped
+            // rows. Tables created by the steps above already have the
+            // column; an empty column list means a missing table.
+            for (final table in <TableInfo>[
+              speciesTable,
+              plantsTable,
+              entriesTable,
+              locationsTable,
+              soilsTable,
+              defensivosTable,
+              remindersTable,
+            ]) {
+              final columns = await customSelect(
+                      'SELECT name FROM pragma_table_info(?)',
+                      variables: [Variable(table.actualTableName)])
+                  .map((row) => row.read<String>('name'))
+                  .get();
+              if (columns.isNotEmpty && !columns.contains('device_id')) {
+                await m.addColumn(table, table.columnsByName['device_id']!);
+              }
+            }
+          }
           if (from < 14) {
             // Link any leftover free-text location to a locations row, then
             // drop the legacy column. Stamped as local writes so the links
@@ -158,6 +189,7 @@ class AppDatabase extends _$AppDatabase {
                 locationId: Value(locationId),
                 updatedAt: Value(DateTime.now()),
                 localRev: Value(rev),
+                deviceId: Value(deviceId),
               ));
             }
             await m.alterTable(TableMigration(plantsTable));

@@ -246,6 +246,19 @@ class DataImportService {
   DateTime _updatedAt(Map<String, dynamic> row) =>
       DateTime.parse(row['updatedAt'] as String);
 
+  /// The sync LWW rule, with the backup row as the incoming change. Backups
+  /// made before rows carried a deviceId compare as an unknown writer. An
+  /// applied row is a fresh local write (new localRev, pushed as this
+  /// device), so it is stamped with this device's id, not the backup's.
+  bool _incomingWins(Map<String, dynamic> row, DateTime updatedAt,
+          DateTime? localUpdatedAt, String? localDeviceId) =>
+      incomingWins(
+        incomingUpdatedAt: updatedAt,
+        incomingDeviceId: row['deviceId'] as String?,
+        currentUpdatedAt: localUpdatedAt,
+        currentDeviceId: localDeviceId,
+      );
+
   DateTime? _deletedAt(Map<String, dynamic> row) => row['deletedAt'] != null
       ? DateTime.parse(row['deletedAt'] as String)
       : null;
@@ -253,8 +266,8 @@ class DataImportService {
   Future<bool> _applySpecies(Map<String, dynamic> row) async {
     final existing = await _db.speciesDao.getById(row['id'] as String);
     final updatedAt = _updatedAt(row);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: updatedAt)) {
+    if (!_incomingWins(
+        row, updatedAt, existing?.updatedAt, existing?.deviceId)) {
       return false;
     }
     final rev = await _db.syncMetaDao.nextRev();
@@ -270,6 +283,7 @@ class DataImportService {
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),
       localRev: Value(rev),
+      deviceId: Value(_db.deviceId),
     ));
     return true;
   }
@@ -277,8 +291,8 @@ class DataImportService {
   Future<bool> _applySoil(Map<String, dynamic> row) async {
     final existing = await _db.soilsDao.getSoilById(row['id'] as String);
     final updatedAt = _updatedAt(row);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: updatedAt)) {
+    if (!_incomingWins(
+        row, updatedAt, existing?.updatedAt, existing?.deviceId)) {
       return false;
     }
     final rev = await _db.syncMetaDao.nextRev();
@@ -293,6 +307,7 @@ class DataImportService {
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),
       localRev: Value(rev),
+      deviceId: Value(_db.deviceId),
     ));
     return true;
   }
@@ -300,8 +315,8 @@ class DataImportService {
   Future<bool> _applyLocation(Map<String, dynamic> row) async {
     final existing = await _db.locationsDao.getById(row['id'] as String);
     final updatedAt = _updatedAt(row);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: updatedAt)) {
+    if (!_incomingWins(
+        row, updatedAt, existing?.updatedAt, existing?.deviceId)) {
       return false;
     }
     final rev = await _db.syncMetaDao.nextRev();
@@ -315,6 +330,7 @@ class DataImportService {
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),
       localRev: Value(rev),
+      deviceId: Value(_db.deviceId),
     ));
     return true;
   }
@@ -322,8 +338,8 @@ class DataImportService {
   Future<bool> _applyPlant(Map<String, dynamic> row) async {
     final existing = await _db.plantsDao.getById(row['id'] as String);
     final updatedAt = _updatedAt(row);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: updatedAt)) {
+    if (!_incomingWins(
+        row, updatedAt, existing?.updatedAt, existing?.deviceId)) {
       return false;
     }
     // Backups made before schema v14 may hold a legacy free-text location.
@@ -358,6 +374,7 @@ class DataImportService {
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),
       localRev: Value(rev),
+      deviceId: Value(_db.deviceId),
     ));
     return true;
   }
@@ -366,8 +383,8 @@ class DataImportService {
       Map<String, dynamic> row, Map<String, String> photoPaths) async {
     final existing = await _db.entriesDao.getById(row['id'] as String);
     final updatedAt = _updatedAt(row);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: updatedAt)) {
+    if (!_incomingWins(
+        row, updatedAt, existing?.updatedAt, existing?.deviceId)) {
       return false;
     }
     // Prefer the photo restored from the archive; fall back to the exported
@@ -390,6 +407,7 @@ class DataImportService {
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),
       localRev: Value(rev),
+      deviceId: Value(_db.deviceId),
     ));
     return true;
   }
@@ -397,8 +415,8 @@ class DataImportService {
   Future<bool> _applyDefensivo(Map<String, dynamic> row) async {
     final existing = await _db.defensivosDao.getDefensivoById(row['id'] as String);
     final updatedAt = _updatedAt(row);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: updatedAt)) {
+    if (!_incomingWins(
+        row, updatedAt, existing?.updatedAt, existing?.deviceId)) {
       return false;
     }
     final rev = await _db.syncMetaDao.nextRev();
@@ -415,6 +433,7 @@ class DataImportService {
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),
       localRev: Value(rev),
+      deviceId: Value(_db.deviceId),
     ));
     return true;
   }
@@ -425,8 +444,8 @@ class DataImportService {
     if (entryType == null) return false;
     final existing = await _db.remindersDao.getById(row['id'] as String);
     final updatedAt = _updatedAt(row);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: updatedAt)) {
+    if (!_incomingWins(
+        row, updatedAt, existing?.updatedAt, existing?.deviceId)) {
       return false;
     }
     final rev = await _db.syncMetaDao.nextRev();
@@ -440,6 +459,7 @@ class DataImportService {
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),
       localRev: Value(rev),
+      deviceId: Value(_db.deviceId),
     ));
     return true;
   }

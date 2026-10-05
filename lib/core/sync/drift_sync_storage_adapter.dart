@@ -229,10 +229,20 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
 
   // -- apply side ------------------------------------------------------------
 
+  /// The server's LWW rule, against the local row's `updatedAt` and the
+  /// device that wrote it; the applied row then records [change]'s sender.
+  bool _incomingWins(
+          SyncChange change, DateTime? localUpdatedAt, String? localDeviceId) =>
+      incomingWins(
+        incomingUpdatedAt: change.updatedAt,
+        incomingDeviceId: change.deviceId,
+        currentUpdatedAt: localUpdatedAt,
+        currentDeviceId: localDeviceId,
+      );
+
   Future<void> _applySpecies(SyncChange change) async {
     final existing = await _db.speciesDao.getById(change.entityId);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
+    if (!_incomingWins(change, existing?.updatedAt, existing?.deviceId)) {
       return;
     }
     final p = change.payload;
@@ -248,13 +258,13 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),
       localRev: const Value(0),
+      deviceId: Value(change.deviceId),
     ));
   }
 
   Future<void> _applyPlant(SyncChange change) async {
     final existing = await _db.plantsDao.getById(change.entityId);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
+    if (!_incomingWins(change, existing?.updatedAt, existing?.deviceId)) {
       return;
     }
     final p = change.payload;
@@ -299,13 +309,13 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),
       localRev: const Value(0),
+      deviceId: Value(change.deviceId),
     ));
   }
 
   Future<void> _applyEntry(SyncChange change) async {
     final existing = await _db.entriesDao.getById(change.entityId);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
+    if (!_incomingWins(change, existing?.updatedAt, existing?.deviceId)) {
       return;
     }
     final p = change.payload;
@@ -322,6 +332,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),
       localRev: const Value(0),
+      deviceId: Value(change.deviceId),
     ));
 
     final entryType = EntryType.values.byName(p['type'] as String);
@@ -358,8 +369,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
 
   Future<void> _applyLocation(SyncChange change) async {
     final existing = await _db.locationsDao.getById(change.entityId);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
+    if (!_incomingWins(change, existing?.updatedAt, existing?.deviceId)) {
       return;
     }
     final p = change.payload;
@@ -373,13 +383,13 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),
       localRev: const Value(0),
+      deviceId: Value(change.deviceId),
     ));
   }
 
   Future<void> _applySoil(SyncChange change) async {
     final existing = await _db.soilsDao.getSoilById(change.entityId);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
+    if (!_incomingWins(change, existing?.updatedAt, existing?.deviceId)) {
       return;
     }
     final p = change.payload;
@@ -393,6 +403,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),
       localRev: const Value(0),
+      deviceId: Value(change.deviceId),
       // A soil arriving via sync is never a fresh local seed.
       isSeeded: const Value(false),
     ));
@@ -400,8 +411,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
 
   Future<void> _applyDefensivo(SyncChange change) async {
     final existing = await _db.defensivosDao.getDefensivoById(change.entityId);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
+    if (!_incomingWins(change, existing?.updatedAt, existing?.deviceId)) {
       return;
     }
     final p = change.payload;
@@ -418,6 +428,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),
       localRev: const Value(0),
+      deviceId: Value(change.deviceId),
     ));
   }
 
@@ -428,8 +439,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
     final entryType = EntryType.values.asNameMap()[p['entryType']];
     if (entryType == null) return;
     final existing = await _db.remindersDao.getById(change.entityId);
-    if (!shouldApplyRemote(
-        localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
+    if (!_incomingWins(change, existing?.updatedAt, existing?.deviceId)) {
       return;
     }
     await _db.remindersDao.upsert(RemindersTableCompanion.insert(
@@ -442,6 +452,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),
       localRev: const Value(0),
+      deviceId: Value(change.deviceId),
     ));
   }
 }

@@ -310,4 +310,86 @@ void main() {
       throwsA(isA<InvalidBackupException>()),
     );
   });
+
+  group('deviceId', () {
+    const low = '1b4e28ba-2fa1-41d2-883f-0016d3cca427';
+    const high = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+
+    Future<void> seedTie(AppDatabase db, String name, String? deviceId) =>
+        db.speciesDao.upsert(SpeciesTableCompanion.insert(
+          id: 'species1',
+          scientificName: name,
+          popularName: 'Popular',
+          recommendedSoilTypes: const [],
+          createdAt: t0,
+          updatedAt: t1,
+          localRev: const Value(1),
+          deviceId: Value(deviceId),
+        ));
+
+    Future<Map<String, dynamic>> exportedSpecies(AppDatabase db) async {
+      final archive = ZipDecoder()
+          .decodeBytes(await DataExportService(db).buildArchiveBytes());
+      final data = jsonDecode(utf8.decode(archive
+          .findFile(DataExportService.dataFileName)!
+          .content as List<int>)) as Map<String, dynamic>;
+      return ((data['entities'] as Map<String, dynamic>)['species']
+              as List<dynamic>)
+          .single as Map<String, dynamic>;
+    }
+
+    test('is exported and decides exact-timestamp ties on import', () async {
+      await seedTie(source, 'Do backup', high);
+      expect((await exportedSpecies(source))['deviceId'], high);
+      final bytes = await DataExportService(source).buildArchiveBytes();
+
+      final importer = AppDatabase.forTesting(NativeDatabase.memory(),
+          deviceId: 'importing-device');
+      addTearDown(importer.close);
+      await seedTie(importer, 'Local', low);
+      await DataImportService(importer, FakePhotoStorage())
+          .importFromBytes(bytes);
+
+      final species = await importer.speciesDao.getById('species1');
+      expect(species!.scientificName, 'Do backup');
+      // Applied as a fresh local write, pushed as this device.
+      expect(species.deviceId, 'importing-device');
+      expect((await exportedSpecies(importer))['deviceId'],
+          'importing-device');
+    });
+
+    test('a tie against a greater local deviceId keeps the local row',
+        () async {
+      await seedTie(source, 'Do backup', low);
+      final bytes = await DataExportService(source).buildArchiveBytes();
+
+      await seedTie(target, 'Local', high);
+      await DataImportService(target, FakePhotoStorage())
+          .importFromBytes(bytes);
+
+      expect((await target.speciesDao.getById('species1'))!.scientificName,
+          'Local');
+    });
+
+    test('rows from a backup without deviceId lose ties', () async {
+      await seedTie(source, 'Do backup', high);
+      final archive = ZipDecoder()
+          .decodeBytes(await DataExportService(source).buildArchiveBytes());
+      final data = jsonDecode(utf8.decode(archive
+          .findFile(DataExportService.dataFileName)!
+          .content as List<int>)) as Map<String, dynamic>;
+      for (final rows in (data['entities'] as Map<String, dynamic>).values) {
+        for (final row in rows as List<dynamic>) {
+          (row as Map<String, dynamic>).remove('deviceId');
+        }
+      }
+
+      await seedTie(target, 'Local', low);
+      await DataImportService(target, FakePhotoStorage())
+          .importFromBytes(Uint8List.fromList(utf8.encode(jsonEncode(data))));
+
+      expect((await target.speciesDao.getById('species1'))!.scientificName,
+          'Local');
+    });
+  });
 }

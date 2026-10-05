@@ -12,8 +12,8 @@ import '../../../core/database/app_database.dart';
 /// database) plus the entry photo files into a single zip archive.
 ///
 /// Row JSON mirrors the sync wire payloads in DriftSyncStorageAdapter, with
-/// `updatedAt`/`deletedAt` flattened in, so DataImportService can merge a
-/// backup with the same LWW rule sync uses.
+/// `updatedAt`/`deletedAt`/`deviceId` flattened in, so DataImportService can
+/// merge a backup with the same LWW rule sync uses.
 class DataExportService {
   DataExportService(this._db);
 
@@ -73,6 +73,7 @@ class DataExportService {
         'createdAt': r.createdAt.toIso8601String(),
         'updatedAt': r.updatedAt.toIso8601String(),
         'deletedAt': r.deletedAt?.toIso8601String(),
+        'deviceId': r.deviceId,
       });
     }
 
@@ -93,6 +94,7 @@ class DataExportService {
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),
+              'deviceId': r.deviceId,
             }
         ],
         'soils': [
@@ -107,6 +109,7 @@ class DataExportService {
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),
+              'deviceId': r.deviceId,
             }
         ],
         'locations': [
@@ -120,6 +123,7 @@ class DataExportService {
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),
+              'deviceId': r.deviceId,
             }
         ],
         'plants': [
@@ -141,6 +145,7 @@ class DataExportService {
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),
+              'deviceId': r.deviceId,
             }
         ],
         'entries': entryMaps,
@@ -158,6 +163,7 @@ class DataExportService {
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),
+              'deviceId': r.deviceId,
             }
         ],
         'reminders': [
@@ -171,6 +177,7 @@ class DataExportService {
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),
+              'deviceId': r.deviceId,
             }
         ],
       },

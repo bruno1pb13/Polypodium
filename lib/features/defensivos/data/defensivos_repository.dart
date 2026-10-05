@@ -34,6 +34,7 @@ class DefensivosRepository {
         createdAt: model.createdAt,
         updatedAt: DateTime.now(),
         localRev: Value(rev),
+        deviceId: Value(_db.deviceId),
       );
       await _db.defensivosDao.insertDefensivo(companion);
     });

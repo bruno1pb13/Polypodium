@@ -167,7 +167,7 @@ class PlantsRepository {
         localRev: row.localRev,
       );
 
-  static PlantsTableCompanion _toCompanion(PlantModel m,
+  PlantsTableCompanion _toCompanion(PlantModel m,
           {required DateTime updatedAt, required int rev}) =>
       PlantsTableCompanion.insert(
         id: m.id,
@@ -185,5 +185,6 @@ class PlantsRepository {
         createdAt: m.createdAt,
         updatedAt: updatedAt,
         localRev: Value(rev),
+        deviceId: Value(_db.deviceId),
       );
 }

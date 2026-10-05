@@ -271,5 +271,129 @@ void main() {
     expect(columns.map((c) => c.read<String>('name')),
         contains('location_id'));
   });
-}
 
+  test('migration from v14 adds a null deviceId to every synced table',
+      () async {
+    await db.close();
+    // A v14 database: plants and locations without device_id. Only the
+    // tables touched by the test are needed.
+    db = AppDatabase.forTesting(
+        NativeDatabase.memory(setup: (raw) {
+          raw.execute('''
+            CREATE TABLE locations (
+              id TEXT NOT NULL PRIMARY KEY,
+              name TEXT NOT NULL,
+              description TEXT NULL,
+              latitude REAL NULL,
+              longitude REAL NULL,
+              created_at INTEGER NOT NULL,
+              updated_at INTEGER NOT NULL,
+              deleted_at INTEGER NULL,
+              local_rev INTEGER NOT NULL DEFAULT 0
+            )
+          ''');
+          raw.execute('''
+            CREATE TABLE plants (
+              id TEXT NOT NULL PRIMARY KEY,
+              species_id TEXT NOT NULL,
+              nickname TEXT NOT NULL,
+              soil_type TEXT NOT NULL,
+              irrigation_frequency_days INTEGER NULL,
+              acquisition_date INTEGER NOT NULL,
+              location_id TEXT NULL,
+              last_irrigated_at INTEGER NULL,
+              last_pesticide_applied_at INTEGER NULL,
+              pesticide_reapplication_days INTEGER NULL,
+              status TEXT NOT NULL DEFAULT 'active',
+              status_changed_at INTEGER NULL,
+              created_at INTEGER NOT NULL,
+              updated_at INTEGER NOT NULL,
+              deleted_at INTEGER NULL,
+              local_rev INTEGER NOT NULL DEFAULT 0
+            )
+          ''');
+          raw.execute('''
+            INSERT INTO plants (id, species_id, nickname, soil_type,
+              acquisition_date, created_at, updated_at, local_rev)
+            VALUES ('p1', 's1', 'Old plant', 'loamy', 0, 0, 0, 3)
+          ''');
+          raw.execute('PRAGMA user_version = 14');
+        }),
+        deviceId: 'device-a');
+
+    // Existing rows keep an unknown writer.
+    final plant = await db.plantsDao.getById('p1');
+    expect(plant!.deviceId, isNull);
+    expect(plant.localRev, 3);
+
+    for (final table in ['plants', 'locations']) {
+      final columns =
+          await db.customSelect('PRAGMA table_info($table)').get();
+      expect(columns.map((c) => c.read<String>('name')), contains('device_id'),
+          reason: table);
+    }
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), 15);
+  });
+
+  test('the v14 location fix stamps the deviceId on its writes', () async {
+    await db.close();
+    db = AppDatabase.forTesting(
+        NativeDatabase.memory(setup: (raw) {
+          raw.execute('''
+            CREATE TABLE locations (
+              id TEXT NOT NULL PRIMARY KEY,
+              name TEXT NOT NULL,
+              description TEXT NULL,
+              latitude REAL NULL,
+              longitude REAL NULL,
+              created_at INTEGER NOT NULL,
+              updated_at INTEGER NOT NULL,
+              deleted_at INTEGER NULL,
+              local_rev INTEGER NOT NULL DEFAULT 0
+            )
+          ''');
+          raw.execute('''
+            CREATE TABLE plants (
+              id TEXT NOT NULL PRIMARY KEY,
+              species_id TEXT NOT NULL,
+              nickname TEXT NOT NULL,
+              soil_type TEXT NOT NULL,
+              irrigation_frequency_days INTEGER NULL,
+              acquisition_date INTEGER NOT NULL,
+              location TEXT NULL,
+              location_id TEXT NULL,
+              last_irrigated_at INTEGER NULL,
+              last_pesticide_applied_at INTEGER NULL,
+              pesticide_reapplication_days INTEGER NULL,
+              status TEXT NOT NULL DEFAULT 'active',
+              status_changed_at INTEGER NULL,
+              created_at INTEGER NOT NULL,
+              updated_at INTEGER NOT NULL,
+              deleted_at INTEGER NULL,
+              local_rev INTEGER NOT NULL DEFAULT 0
+            )
+          ''');
+          raw.execute('''
+            CREATE TABLE sync_meta (
+              id INTEGER NOT NULL PRIMARY KEY,
+              next_local_rev INTEGER NOT NULL DEFAULT 1
+            )
+          ''');
+          raw.execute('''
+            INSERT INTO plants (id, species_id, nickname, soil_type,
+              acquisition_date, location, created_at, updated_at, local_rev)
+            VALUES ('p1', 's1', 'A', 'loamy', 0, 'Sala', 0, 0, 2)
+          ''');
+          raw.execute('PRAGMA user_version = 13');
+        }),
+        deviceId: 'device-a');
+
+    final plant = await db.plantsDao.getById('p1');
+    expect(plant!.deviceId, 'device-a');
+    final location = await db.locationsDao.getById(plant.locationId!);
+    expect(location!.deviceId, 'device-a');
+  });
+}

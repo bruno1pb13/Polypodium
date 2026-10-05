@@ -66,6 +66,12 @@ class $SpeciesTableTable extends SpeciesTable
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _deviceIdMeta =
+      const VerificationMeta('deviceId');
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+      'device_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -76,7 +82,8 @@ class $SpeciesTableTable extends SpeciesTable
         createdAt,
         updatedAt,
         deletedAt,
-        localRev
+        localRev,
+        deviceId
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -136,6 +143,10 @@ class $SpeciesTableTable extends SpeciesTable
       context.handle(_localRevMeta,
           localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
     }
+    if (data.containsKey('device_id')) {
+      context.handle(_deviceIdMeta,
+          deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta));
+    }
     return context;
   }
 
@@ -165,6 +176,8 @@ class $SpeciesTableTable extends SpeciesTable
           .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
       localRev: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
+      deviceId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}device_id']),
     );
   }
 
@@ -190,6 +203,7 @@ class SpeciesTableData extends DataClass
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final int localRev;
+  final String? deviceId;
   const SpeciesTableData(
       {required this.id,
       required this.scientificName,
@@ -199,7 +213,8 @@ class SpeciesTableData extends DataClass
       required this.createdAt,
       required this.updatedAt,
       this.deletedAt,
-      required this.localRev});
+      required this.localRev,
+      this.deviceId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -221,6 +236,9 @@ class SpeciesTableData extends DataClass
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['local_rev'] = Variable<int>(localRev);
+    if (!nullToAbsent || deviceId != null) {
+      map['device_id'] = Variable<String>(deviceId);
+    }
     return map;
   }
 
@@ -240,6 +258,9 @@ class SpeciesTableData extends DataClass
           ? const Value.absent()
           : Value(deletedAt),
       localRev: Value(localRev),
+      deviceId: deviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deviceId),
     );
   }
 
@@ -258,6 +279,7 @@ class SpeciesTableData extends DataClass
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       localRev: serializer.fromJson<int>(json['localRev']),
+      deviceId: serializer.fromJson<String?>(json['deviceId']),
     );
   }
   @override
@@ -275,6 +297,7 @@ class SpeciesTableData extends DataClass
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'localRev': serializer.toJson<int>(localRev),
+      'deviceId': serializer.toJson<String?>(deviceId),
     };
   }
 
@@ -287,7 +310,8 @@ class SpeciesTableData extends DataClass
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
-          int? localRev}) =>
+          int? localRev,
+          Value<String?> deviceId = const Value.absent()}) =>
       SpeciesTableData(
         id: id ?? this.id,
         scientificName: scientificName ?? this.scientificName,
@@ -300,6 +324,7 @@ class SpeciesTableData extends DataClass
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         localRev: localRev ?? this.localRev,
+        deviceId: deviceId.present ? deviceId.value : this.deviceId,
       );
   SpeciesTableData copyWithCompanion(SpeciesTableCompanion data) {
     return SpeciesTableData(
@@ -320,6 +345,7 @@ class SpeciesTableData extends DataClass
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       localRev: data.localRev.present ? data.localRev.value : this.localRev,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
     );
   }
 
@@ -335,7 +361,8 @@ class SpeciesTableData extends DataClass
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('localRev: $localRev')
+          ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId')
           ..write(')'))
         .toString();
   }
@@ -350,7 +377,8 @@ class SpeciesTableData extends DataClass
       createdAt,
       updatedAt,
       deletedAt,
-      localRev);
+      localRev,
+      deviceId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -364,7 +392,8 @@ class SpeciesTableData extends DataClass
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
-          other.localRev == this.localRev);
+          other.localRev == this.localRev &&
+          other.deviceId == this.deviceId);
 }
 
 class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
@@ -377,6 +406,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<int> localRev;
+  final Value<String?> deviceId;
   final Value<int> rowid;
   const SpeciesTableCompanion({
     this.id = const Value.absent(),
@@ -388,6 +418,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SpeciesTableCompanion.insert({
@@ -400,6 +431,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         scientificName = Value(scientificName),
@@ -417,6 +449,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<int>? localRev,
+    Expression<String>? deviceId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -431,6 +464,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (localRev != null) 'local_rev': localRev,
+      if (deviceId != null) 'device_id': deviceId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -445,6 +479,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
       Value<int>? localRev,
+      Value<String?>? deviceId,
       Value<int>? rowid}) {
     return SpeciesTableCompanion(
       id: id ?? this.id,
@@ -457,6 +492,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       localRev: localRev ?? this.localRev,
+      deviceId: deviceId ?? this.deviceId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -494,6 +530,9 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
     if (localRev.present) {
       map['local_rev'] = Variable<int>(localRev.value);
     }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -513,6 +552,7 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -579,6 +619,12 @@ class $SoilsTableTable extends SoilsTable
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _deviceIdMeta =
+      const VerificationMeta('deviceId');
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+      'device_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _isSeededMeta =
       const VerificationMeta('isSeeded');
   @override
@@ -600,6 +646,7 @@ class $SoilsTableTable extends SoilsTable
         updatedAt,
         deletedAt,
         localRev,
+        deviceId,
         isSeeded
       ];
   @override
@@ -659,6 +706,10 @@ class $SoilsTableTable extends SoilsTable
       context.handle(_localRevMeta,
           localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
     }
+    if (data.containsKey('device_id')) {
+      context.handle(_deviceIdMeta,
+          deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta));
+    }
     if (data.containsKey('is_seeded')) {
       context.handle(_isSeededMeta,
           isSeeded.isAcceptableOrUnknown(data['is_seeded']!, _isSeededMeta));
@@ -690,6 +741,8 @@ class $SoilsTableTable extends SoilsTable
           .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
       localRev: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
+      deviceId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}device_id']),
       isSeeded: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_seeded'])!,
     );
@@ -711,6 +764,7 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final int localRev;
+  final String? deviceId;
 
   /// True for the default soils seeded on database creation/upgrade (see
   /// app_database.dart), false for soils the user created. Distinguishes
@@ -728,6 +782,7 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       required this.updatedAt,
       this.deletedAt,
       required this.localRev,
+      this.deviceId,
       required this.isSeeded});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -749,6 +804,9 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['local_rev'] = Variable<int>(localRev);
+    if (!nullToAbsent || deviceId != null) {
+      map['device_id'] = Variable<String>(deviceId);
+    }
     map['is_seeded'] = Variable<bool>(isSeeded);
     return map;
   }
@@ -772,6 +830,9 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
           ? const Value.absent()
           : Value(deletedAt),
       localRev: Value(localRev),
+      deviceId: deviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deviceId),
       isSeeded: Value(isSeeded),
     );
   }
@@ -789,6 +850,7 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       localRev: serializer.fromJson<int>(json['localRev']),
+      deviceId: serializer.fromJson<String?>(json['deviceId']),
       isSeeded: serializer.fromJson<bool>(json['isSeeded']),
     );
   }
@@ -805,6 +867,7 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'localRev': serializer.toJson<int>(localRev),
+      'deviceId': serializer.toJson<String?>(deviceId),
       'isSeeded': serializer.toJson<bool>(isSeeded),
     };
   }
@@ -819,6 +882,7 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
           int? localRev,
+          Value<String?> deviceId = const Value.absent(),
           bool? isSeeded}) =>
       SoilsTableData(
         id: id ?? this.id,
@@ -830,6 +894,7 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         localRev: localRev ?? this.localRev,
+        deviceId: deviceId.present ? deviceId.value : this.deviceId,
         isSeeded: isSeeded ?? this.isSeeded,
       );
   SoilsTableData copyWithCompanion(SoilsTableCompanion data) {
@@ -845,6 +910,7 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       localRev: data.localRev.present ? data.localRev.value : this.localRev,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
       isSeeded: data.isSeeded.present ? data.isSeeded.value : this.isSeeded,
     );
   }
@@ -861,6 +927,7 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId, ')
           ..write('isSeeded: $isSeeded')
           ..write(')'))
         .toString();
@@ -868,7 +935,7 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
 
   @override
   int get hashCode => Object.hash(id, name, composition, imagePath, imageSource,
-      createdAt, updatedAt, deletedAt, localRev, isSeeded);
+      createdAt, updatedAt, deletedAt, localRev, deviceId, isSeeded);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -882,6 +949,7 @@ class SoilsTableData extends DataClass implements Insertable<SoilsTableData> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.localRev == this.localRev &&
+          other.deviceId == this.deviceId &&
           other.isSeeded == this.isSeeded);
 }
 
@@ -895,6 +963,7 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<int> localRev;
+  final Value<String?> deviceId;
   final Value<bool> isSeeded;
   final Value<int> rowid;
   const SoilsTableCompanion({
@@ -907,6 +976,7 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.isSeeded = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -920,6 +990,7 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.isSeeded = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -936,6 +1007,7 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<int>? localRev,
+    Expression<String>? deviceId,
     Expression<bool>? isSeeded,
     Expression<int>? rowid,
   }) {
@@ -949,6 +1021,7 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (localRev != null) 'local_rev': localRev,
+      if (deviceId != null) 'device_id': deviceId,
       if (isSeeded != null) 'is_seeded': isSeeded,
       if (rowid != null) 'rowid': rowid,
     });
@@ -964,6 +1037,7 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
       Value<int>? localRev,
+      Value<String?>? deviceId,
       Value<bool>? isSeeded,
       Value<int>? rowid}) {
     return SoilsTableCompanion(
@@ -976,6 +1050,7 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       localRev: localRev ?? this.localRev,
+      deviceId: deviceId ?? this.deviceId,
       isSeeded: isSeeded ?? this.isSeeded,
       rowid: rowid ?? this.rowid,
     );
@@ -1011,6 +1086,9 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
     if (localRev.present) {
       map['local_rev'] = Variable<int>(localRev.value);
     }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
     if (isSeeded.present) {
       map['is_seeded'] = Variable<bool>(isSeeded.value);
     }
@@ -1032,6 +1110,7 @@ class SoilsTableCompanion extends UpdateCompanion<SoilsTableData> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId, ')
           ..write('isSeeded: $isSeeded, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -1099,6 +1178,12 @@ class $LocationsTableTable extends LocationsTable
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _deviceIdMeta =
+      const VerificationMeta('deviceId');
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+      'device_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1109,7 +1194,8 @@ class $LocationsTableTable extends LocationsTable
         createdAt,
         updatedAt,
         deletedAt,
-        localRev
+        localRev,
+        deviceId
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1166,6 +1252,10 @@ class $LocationsTableTable extends LocationsTable
       context.handle(_localRevMeta,
           localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
     }
+    if (data.containsKey('device_id')) {
+      context.handle(_deviceIdMeta,
+          deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta));
+    }
     return context;
   }
 
@@ -1193,6 +1283,8 @@ class $LocationsTableTable extends LocationsTable
           .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
       localRev: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
+      deviceId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}device_id']),
     );
   }
 
@@ -1213,6 +1305,7 @@ class LocationsTableData extends DataClass
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final int localRev;
+  final String? deviceId;
   const LocationsTableData(
       {required this.id,
       required this.name,
@@ -1222,7 +1315,8 @@ class LocationsTableData extends DataClass
       required this.createdAt,
       required this.updatedAt,
       this.deletedAt,
-      required this.localRev});
+      required this.localRev,
+      this.deviceId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1243,6 +1337,9 @@ class LocationsTableData extends DataClass
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['local_rev'] = Variable<int>(localRev);
+    if (!nullToAbsent || deviceId != null) {
+      map['device_id'] = Variable<String>(deviceId);
+    }
     return map;
   }
 
@@ -1265,6 +1362,9 @@ class LocationsTableData extends DataClass
           ? const Value.absent()
           : Value(deletedAt),
       localRev: Value(localRev),
+      deviceId: deviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deviceId),
     );
   }
 
@@ -1281,6 +1381,7 @@ class LocationsTableData extends DataClass
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       localRev: serializer.fromJson<int>(json['localRev']),
+      deviceId: serializer.fromJson<String?>(json['deviceId']),
     );
   }
   @override
@@ -1296,6 +1397,7 @@ class LocationsTableData extends DataClass
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'localRev': serializer.toJson<int>(localRev),
+      'deviceId': serializer.toJson<String?>(deviceId),
     };
   }
 
@@ -1308,7 +1410,8 @@ class LocationsTableData extends DataClass
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
-          int? localRev}) =>
+          int? localRev,
+          Value<String?> deviceId = const Value.absent()}) =>
       LocationsTableData(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -1319,6 +1422,7 @@ class LocationsTableData extends DataClass
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         localRev: localRev ?? this.localRev,
+        deviceId: deviceId.present ? deviceId.value : this.deviceId,
       );
   LocationsTableData copyWithCompanion(LocationsTableCompanion data) {
     return LocationsTableData(
@@ -1332,6 +1436,7 @@ class LocationsTableData extends DataClass
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       localRev: data.localRev.present ? data.localRev.value : this.localRev,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
     );
   }
 
@@ -1346,14 +1451,15 @@ class LocationsTableData extends DataClass
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('localRev: $localRev')
+          ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, name, description, latitude, longitude,
-      createdAt, updatedAt, deletedAt, localRev);
+      createdAt, updatedAt, deletedAt, localRev, deviceId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1366,7 +1472,8 @@ class LocationsTableData extends DataClass
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
-          other.localRev == this.localRev);
+          other.localRev == this.localRev &&
+          other.deviceId == this.deviceId);
 }
 
 class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
@@ -1379,6 +1486,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<int> localRev;
+  final Value<String?> deviceId;
   final Value<int> rowid;
   const LocationsTableCompanion({
     this.id = const Value.absent(),
@@ -1390,6 +1498,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LocationsTableCompanion.insert({
@@ -1402,6 +1511,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
@@ -1417,6 +1527,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<int>? localRev,
+    Expression<String>? deviceId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1429,6 +1540,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (localRev != null) 'local_rev': localRev,
+      if (deviceId != null) 'device_id': deviceId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1443,6 +1555,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
       Value<int>? localRev,
+      Value<String?>? deviceId,
       Value<int>? rowid}) {
     return LocationsTableCompanion(
       id: id ?? this.id,
@@ -1454,6 +1567,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       localRev: localRev ?? this.localRev,
+      deviceId: deviceId ?? this.deviceId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1488,6 +1602,9 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     if (localRev.present) {
       map['local_rev'] = Variable<int>(localRev.value);
     }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1506,6 +1623,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1625,6 +1743,12 @@ class $PlantsTableTable extends PlantsTable
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _deviceIdMeta =
+      const VerificationMeta('deviceId');
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+      'device_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1642,7 +1766,8 @@ class $PlantsTableTable extends PlantsTable
         createdAt,
         updatedAt,
         deletedAt,
-        localRev
+        localRev,
+        deviceId
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1743,6 +1868,10 @@ class $PlantsTableTable extends PlantsTable
       context.handle(_localRevMeta,
           localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
     }
+    if (data.containsKey('device_id')) {
+      context.handle(_deviceIdMeta,
+          deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta));
+    }
     return context;
   }
 
@@ -1788,6 +1917,8 @@ class $PlantsTableTable extends PlantsTable
           .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
       localRev: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
+      deviceId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}device_id']),
     );
   }
 
@@ -1828,6 +1959,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final int localRev;
+  final String? deviceId;
   const PlantsTableData(
       {required this.id,
       required this.speciesId,
@@ -1844,7 +1976,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       required this.createdAt,
       required this.updatedAt,
       this.deletedAt,
-      required this.localRev});
+      required this.localRev,
+      this.deviceId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1883,6 +2016,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['local_rev'] = Variable<int>(localRev);
+    if (!nullToAbsent || deviceId != null) {
+      map['device_id'] = Variable<String>(deviceId);
+    }
     return map;
   }
 
@@ -1919,6 +2055,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ? const Value.absent()
           : Value(deletedAt),
       localRev: Value(localRev),
+      deviceId: deviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deviceId),
     );
   }
 
@@ -1945,6 +2084,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       localRev: serializer.fromJson<int>(json['localRev']),
+      deviceId: serializer.fromJson<String?>(json['deviceId']),
     );
   }
   @override
@@ -1970,6 +2110,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'localRev': serializer.toJson<int>(localRev),
+      'deviceId': serializer.toJson<String?>(deviceId),
     };
   }
 
@@ -1989,7 +2130,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
-          int? localRev}) =>
+          int? localRev,
+          Value<String?> deviceId = const Value.absent()}) =>
       PlantsTableData(
         id: id ?? this.id,
         speciesId: speciesId ?? this.speciesId,
@@ -2017,6 +2159,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         localRev: localRev ?? this.localRev,
+        deviceId: deviceId.present ? deviceId.value : this.deviceId,
       );
   PlantsTableData copyWithCompanion(PlantsTableCompanion data) {
     return PlantsTableData(
@@ -2049,6 +2192,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       localRev: data.localRev.present ? data.localRev.value : this.localRev,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
     );
   }
 
@@ -2070,7 +2214,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('localRev: $localRev')
+          ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId')
           ..write(')'))
         .toString();
   }
@@ -2092,7 +2237,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       createdAt,
       updatedAt,
       deletedAt,
-      localRev);
+      localRev,
+      deviceId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2112,7 +2258,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
-          other.localRev == this.localRev);
+          other.localRev == this.localRev &&
+          other.deviceId == this.deviceId);
 }
 
 class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
@@ -2132,6 +2279,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<int> localRev;
+  final Value<String?> deviceId;
   final Value<int> rowid;
   const PlantsTableCompanion({
     this.id = const Value.absent(),
@@ -2150,6 +2298,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PlantsTableCompanion.insert({
@@ -2169,6 +2318,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         speciesId = Value(speciesId),
@@ -2194,6 +2344,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<int>? localRev,
+    Expression<String>? deviceId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2216,6 +2367,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (localRev != null) 'local_rev': localRev,
+      if (deviceId != null) 'device_id': deviceId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2237,6 +2389,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
       Value<int>? localRev,
+      Value<String?>? deviceId,
       Value<int>? rowid}) {
     return PlantsTableCompanion(
       id: id ?? this.id,
@@ -2258,6 +2411,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       localRev: localRev ?? this.localRev,
+      deviceId: deviceId ?? this.deviceId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2317,6 +2471,9 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     if (localRev.present) {
       map['local_rev'] = Variable<int>(localRev.value);
     }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2342,6 +2499,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2427,6 +2585,12 @@ class $EntriesTableTable extends EntriesTable
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _deviceIdMeta =
+      const VerificationMeta('deviceId');
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+      'device_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -2440,7 +2604,8 @@ class $EntriesTableTable extends EntriesTable
         createdAt,
         updatedAt,
         deletedAt,
-        localRev
+        localRev,
+        deviceId
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2507,6 +2672,10 @@ class $EntriesTableTable extends EntriesTable
       context.handle(_localRevMeta,
           localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
     }
+    if (data.containsKey('device_id')) {
+      context.handle(_deviceIdMeta,
+          deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta));
+    }
     return context;
   }
 
@@ -2541,6 +2710,8 @@ class $EntriesTableTable extends EntriesTable
           .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
       localRev: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
+      deviceId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}device_id']),
     );
   }
 
@@ -2567,6 +2738,7 @@ class EntriesTableData extends DataClass
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final int localRev;
+  final String? deviceId;
   const EntriesTableData(
       {required this.id,
       required this.plantId,
@@ -2579,7 +2751,8 @@ class EntriesTableData extends DataClass
       required this.createdAt,
       required this.updatedAt,
       this.deletedAt,
-      required this.localRev});
+      required this.localRev,
+      this.deviceId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2608,6 +2781,9 @@ class EntriesTableData extends DataClass
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['local_rev'] = Variable<int>(localRev);
+    if (!nullToAbsent || deviceId != null) {
+      map['device_id'] = Variable<String>(deviceId);
+    }
     return map;
   }
 
@@ -2633,6 +2809,9 @@ class EntriesTableData extends DataClass
           ? const Value.absent()
           : Value(deletedAt),
       localRev: Value(localRev),
+      deviceId: deviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deviceId),
     );
   }
 
@@ -2652,6 +2831,7 @@ class EntriesTableData extends DataClass
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       localRev: serializer.fromJson<int>(json['localRev']),
+      deviceId: serializer.fromJson<String?>(json['deviceId']),
     );
   }
   @override
@@ -2670,6 +2850,7 @@ class EntriesTableData extends DataClass
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'localRev': serializer.toJson<int>(localRev),
+      'deviceId': serializer.toJson<String?>(deviceId),
     };
   }
 
@@ -2685,7 +2866,8 @@ class EntriesTableData extends DataClass
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
-          int? localRev}) =>
+          int? localRev,
+          Value<String?> deviceId = const Value.absent()}) =>
       EntriesTableData(
         id: id ?? this.id,
         plantId: plantId ?? this.plantId,
@@ -2700,6 +2882,7 @@ class EntriesTableData extends DataClass
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         localRev: localRev ?? this.localRev,
+        deviceId: deviceId.present ? deviceId.value : this.deviceId,
       );
   EntriesTableData copyWithCompanion(EntriesTableCompanion data) {
     return EntriesTableData(
@@ -2717,6 +2900,7 @@ class EntriesTableData extends DataClass
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       localRev: data.localRev.present ? data.localRev.value : this.localRev,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
     );
   }
 
@@ -2734,14 +2918,27 @@ class EntriesTableData extends DataClass
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('localRev: $localRev')
+          ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, plantId, date, photoPath, note, type,
-      numericValue, extraData, createdAt, updatedAt, deletedAt, localRev);
+  int get hashCode => Object.hash(
+      id,
+      plantId,
+      date,
+      photoPath,
+      note,
+      type,
+      numericValue,
+      extraData,
+      createdAt,
+      updatedAt,
+      deletedAt,
+      localRev,
+      deviceId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2757,7 +2954,8 @@ class EntriesTableData extends DataClass
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
-          other.localRev == this.localRev);
+          other.localRev == this.localRev &&
+          other.deviceId == this.deviceId);
 }
 
 class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
@@ -2773,6 +2971,7 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<int> localRev;
+  final Value<String?> deviceId;
   final Value<int> rowid;
   const EntriesTableCompanion({
     this.id = const Value.absent(),
@@ -2787,6 +2986,7 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   EntriesTableCompanion.insert({
@@ -2802,6 +3002,7 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         plantId = Value(plantId),
@@ -2822,6 +3023,7 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<int>? localRev,
+    Expression<String>? deviceId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2837,6 +3039,7 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (localRev != null) 'local_rev': localRev,
+      if (deviceId != null) 'device_id': deviceId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2854,6 +3057,7 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
       Value<int>? localRev,
+      Value<String?>? deviceId,
       Value<int>? rowid}) {
     return EntriesTableCompanion(
       id: id ?? this.id,
@@ -2868,6 +3072,7 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       localRev: localRev ?? this.localRev,
+      deviceId: deviceId ?? this.deviceId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2912,6 +3117,9 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
     if (localRev.present) {
       map['local_rev'] = Variable<int>(localRev.value);
     }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2933,6 +3141,7 @@ class EntriesTableCompanion extends UpdateCompanion<EntriesTableData> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3017,6 +3226,12 @@ class $DefensivosTableTable extends DefensivosTable
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _deviceIdMeta =
+      const VerificationMeta('deviceId');
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+      'device_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -3030,7 +3245,8 @@ class $DefensivosTableTable extends DefensivosTable
         createdAt,
         updatedAt,
         deletedAt,
-        localRev
+        localRev,
+        deviceId
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3106,6 +3322,10 @@ class $DefensivosTableTable extends DefensivosTable
       context.handle(_localRevMeta,
           localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
     }
+    if (data.containsKey('device_id')) {
+      context.handle(_deviceIdMeta,
+          deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta));
+    }
     return context;
   }
 
@@ -3139,6 +3359,8 @@ class $DefensivosTableTable extends DefensivosTable
           .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
       localRev: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
+      deviceId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}device_id']),
     );
   }
 
@@ -3169,6 +3391,7 @@ class DefensivosTableData extends DataClass
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final int localRev;
+  final String? deviceId;
   const DefensivosTableData(
       {required this.id,
       required this.name,
@@ -3181,7 +3404,8 @@ class DefensivosTableData extends DataClass
       required this.createdAt,
       required this.updatedAt,
       this.deletedAt,
-      required this.localRev});
+      required this.localRev,
+      this.deviceId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -3211,6 +3435,9 @@ class DefensivosTableData extends DataClass
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['local_rev'] = Variable<int>(localRev);
+    if (!nullToAbsent || deviceId != null) {
+      map['device_id'] = Variable<String>(deviceId);
+    }
     return map;
   }
 
@@ -3242,6 +3469,9 @@ class DefensivosTableData extends DataClass
           ? const Value.absent()
           : Value(deletedAt),
       localRev: Value(localRev),
+      deviceId: deviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deviceId),
     );
   }
 
@@ -3262,6 +3492,7 @@ class DefensivosTableData extends DataClass
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       localRev: serializer.fromJson<int>(json['localRev']),
+      deviceId: serializer.fromJson<String?>(json['deviceId']),
     );
   }
   @override
@@ -3280,6 +3511,7 @@ class DefensivosTableData extends DataClass
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'localRev': serializer.toJson<int>(localRev),
+      'deviceId': serializer.toJson<String?>(deviceId),
     };
   }
 
@@ -3295,7 +3527,8 @@ class DefensivosTableData extends DataClass
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
-          int? localRev}) =>
+          int? localRev,
+          Value<String?> deviceId = const Value.absent()}) =>
       DefensivosTableData(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -3312,6 +3545,7 @@ class DefensivosTableData extends DataClass
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         localRev: localRev ?? this.localRev,
+        deviceId: deviceId.present ? deviceId.value : this.deviceId,
       );
   DefensivosTableData copyWithCompanion(DefensivosTableCompanion data) {
     return DefensivosTableData(
@@ -3333,6 +3567,7 @@ class DefensivosTableData extends DataClass
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       localRev: data.localRev.present ? data.localRev.value : this.localRev,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
     );
   }
 
@@ -3350,7 +3585,8 @@ class DefensivosTableData extends DataClass
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('localRev: $localRev')
+          ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId')
           ..write(')'))
         .toString();
   }
@@ -3368,7 +3604,8 @@ class DefensivosTableData extends DataClass
       createdAt,
       updatedAt,
       deletedAt,
-      localRev);
+      localRev,
+      deviceId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3384,7 +3621,8 @@ class DefensivosTableData extends DataClass
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
-          other.localRev == this.localRev);
+          other.localRev == this.localRev &&
+          other.deviceId == this.deviceId);
 }
 
 class DefensivosTableCompanion extends UpdateCompanion<DefensivosTableData> {
@@ -3400,6 +3638,7 @@ class DefensivosTableCompanion extends UpdateCompanion<DefensivosTableData> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<int> localRev;
+  final Value<String?> deviceId;
   final Value<int> rowid;
   const DefensivosTableCompanion({
     this.id = const Value.absent(),
@@ -3414,6 +3653,7 @@ class DefensivosTableCompanion extends UpdateCompanion<DefensivosTableData> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DefensivosTableCompanion.insert({
@@ -3429,6 +3669,7 @@ class DefensivosTableCompanion extends UpdateCompanion<DefensivosTableData> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
@@ -3447,6 +3688,7 @@ class DefensivosTableCompanion extends UpdateCompanion<DefensivosTableData> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<int>? localRev,
+    Expression<String>? deviceId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3463,6 +3705,7 @@ class DefensivosTableCompanion extends UpdateCompanion<DefensivosTableData> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (localRev != null) 'local_rev': localRev,
+      if (deviceId != null) 'device_id': deviceId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3480,6 +3723,7 @@ class DefensivosTableCompanion extends UpdateCompanion<DefensivosTableData> {
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
       Value<int>? localRev,
+      Value<String?>? deviceId,
       Value<int>? rowid}) {
     return DefensivosTableCompanion(
       id: id ?? this.id,
@@ -3494,6 +3738,7 @@ class DefensivosTableCompanion extends UpdateCompanion<DefensivosTableData> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       localRev: localRev ?? this.localRev,
+      deviceId: deviceId ?? this.deviceId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3538,6 +3783,9 @@ class DefensivosTableCompanion extends UpdateCompanion<DefensivosTableData> {
     if (localRev.present) {
       map['local_rev'] = Variable<int>(localRev.value);
     }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3559,6 +3807,7 @@ class DefensivosTableCompanion extends UpdateCompanion<DefensivosTableData> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3632,6 +3881,12 @@ class $RemindersTableTable extends RemindersTable
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _deviceIdMeta =
+      const VerificationMeta('deviceId');
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+      'device_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -3642,7 +3897,8 @@ class $RemindersTableTable extends RemindersTable
         createdAt,
         updatedAt,
         deletedAt,
-        localRev
+        localRev,
+        deviceId
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3697,6 +3953,10 @@ class $RemindersTableTable extends RemindersTable
       context.handle(_localRevMeta,
           localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
     }
+    if (data.containsKey('device_id')) {
+      context.handle(_deviceIdMeta,
+          deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta));
+    }
     return context;
   }
 
@@ -3725,6 +3985,8 @@ class $RemindersTableTable extends RemindersTable
           .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
       localRev: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
+      deviceId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}device_id']),
     );
   }
 
@@ -3748,6 +4010,7 @@ class RemindersTableData extends DataClass
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final int localRev;
+  final String? deviceId;
   const RemindersTableData(
       {required this.id,
       required this.plantId,
@@ -3757,7 +4020,8 @@ class RemindersTableData extends DataClass
       required this.createdAt,
       required this.updatedAt,
       this.deletedAt,
-      required this.localRev});
+      required this.localRev,
+      this.deviceId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -3775,6 +4039,9 @@ class RemindersTableData extends DataClass
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['local_rev'] = Variable<int>(localRev);
+    if (!nullToAbsent || deviceId != null) {
+      map['device_id'] = Variable<String>(deviceId);
+    }
     return map;
   }
 
@@ -3791,6 +4058,9 @@ class RemindersTableData extends DataClass
           ? const Value.absent()
           : Value(deletedAt),
       localRev: Value(localRev),
+      deviceId: deviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deviceId),
     );
   }
 
@@ -3807,6 +4077,7 @@ class RemindersTableData extends DataClass
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       localRev: serializer.fromJson<int>(json['localRev']),
+      deviceId: serializer.fromJson<String?>(json['deviceId']),
     );
   }
   @override
@@ -3822,6 +4093,7 @@ class RemindersTableData extends DataClass
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'localRev': serializer.toJson<int>(localRev),
+      'deviceId': serializer.toJson<String?>(deviceId),
     };
   }
 
@@ -3834,7 +4106,8 @@ class RemindersTableData extends DataClass
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
-          int? localRev}) =>
+          int? localRev,
+          Value<String?> deviceId = const Value.absent()}) =>
       RemindersTableData(
         id: id ?? this.id,
         plantId: plantId ?? this.plantId,
@@ -3845,6 +4118,7 @@ class RemindersTableData extends DataClass
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         localRev: localRev ?? this.localRev,
+        deviceId: deviceId.present ? deviceId.value : this.deviceId,
       );
   RemindersTableData copyWithCompanion(RemindersTableCompanion data) {
     return RemindersTableData(
@@ -3859,6 +4133,7 @@ class RemindersTableData extends DataClass
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       localRev: data.localRev.present ? data.localRev.value : this.localRev,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
     );
   }
 
@@ -3873,14 +4148,15 @@ class RemindersTableData extends DataClass
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('localRev: $localRev')
+          ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, plantId, entryType, intervalDays, enabled,
-      createdAt, updatedAt, deletedAt, localRev);
+      createdAt, updatedAt, deletedAt, localRev, deviceId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3893,7 +4169,8 @@ class RemindersTableData extends DataClass
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
-          other.localRev == this.localRev);
+          other.localRev == this.localRev &&
+          other.deviceId == this.deviceId);
 }
 
 class RemindersTableCompanion extends UpdateCompanion<RemindersTableData> {
@@ -3906,6 +4183,7 @@ class RemindersTableCompanion extends UpdateCompanion<RemindersTableData> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<int> localRev;
+  final Value<String?> deviceId;
   final Value<int> rowid;
   const RemindersTableCompanion({
     this.id = const Value.absent(),
@@ -3917,6 +4195,7 @@ class RemindersTableCompanion extends UpdateCompanion<RemindersTableData> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RemindersTableCompanion.insert({
@@ -3929,6 +4208,7 @@ class RemindersTableCompanion extends UpdateCompanion<RemindersTableData> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         plantId = Value(plantId),
@@ -3946,6 +4226,7 @@ class RemindersTableCompanion extends UpdateCompanion<RemindersTableData> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<int>? localRev,
+    Expression<String>? deviceId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3958,6 +4239,7 @@ class RemindersTableCompanion extends UpdateCompanion<RemindersTableData> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (localRev != null) 'local_rev': localRev,
+      if (deviceId != null) 'device_id': deviceId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3972,6 +4254,7 @@ class RemindersTableCompanion extends UpdateCompanion<RemindersTableData> {
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
       Value<int>? localRev,
+      Value<String?>? deviceId,
       Value<int>? rowid}) {
     return RemindersTableCompanion(
       id: id ?? this.id,
@@ -3983,6 +4266,7 @@ class RemindersTableCompanion extends UpdateCompanion<RemindersTableData> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       localRev: localRev ?? this.localRev,
+      deviceId: deviceId ?? this.deviceId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4018,6 +4302,9 @@ class RemindersTableCompanion extends UpdateCompanion<RemindersTableData> {
     if (localRev.present) {
       map['local_rev'] = Variable<int>(localRev.value);
     }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -4036,6 +4323,7 @@ class RemindersTableCompanion extends UpdateCompanion<RemindersTableData> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4524,6 +4812,7 @@ typedef $$SpeciesTableTableCreateCompanionBuilder = SpeciesTableCompanion
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<int> rowid,
 });
 typedef $$SpeciesTableTableUpdateCompanionBuilder = SpeciesTableCompanion
@@ -4537,6 +4826,7 @@ typedef $$SpeciesTableTableUpdateCompanionBuilder = SpeciesTableCompanion
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<int> rowid,
 });
 
@@ -4599,6 +4889,9 @@ class $$SpeciesTableTableFilterComposer
   ColumnFilters<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnFilters(column));
+
   Expression<bool> plantsTableRefs(
       Expression<bool> Function($$PlantsTableTableFilterComposer f) f) {
     final $$PlantsTableTableFilterComposer composer = $composerBuilder(
@@ -4659,6 +4952,9 @@ class $$SpeciesTableTableOrderingComposer
 
   ColumnOrderings<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnOrderings(column));
 }
 
 class $$SpeciesTableTableAnnotationComposer
@@ -4698,6 +4994,9 @@ class $$SpeciesTableTableAnnotationComposer
 
   GeneratedColumn<int> get localRev =>
       $composableBuilder(column: $table.localRev, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
 
   Expression<T> plantsTableRefs<T extends Object>(
       Expression<T> Function($$PlantsTableTableAnnotationComposer a) f) {
@@ -4753,6 +5052,7 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               SpeciesTableCompanion(
@@ -4765,6 +5065,7 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -4777,6 +5078,7 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               SpeciesTableCompanion.insert(
@@ -4789,6 +5091,7 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -4846,6 +5149,7 @@ typedef $$SoilsTableTableCreateCompanionBuilder = SoilsTableCompanion Function({
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<bool> isSeeded,
   Value<int> rowid,
 });
@@ -4859,6 +5163,7 @@ typedef $$SoilsTableTableUpdateCompanionBuilder = SoilsTableCompanion Function({
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<bool> isSeeded,
   Value<int> rowid,
 });
@@ -4917,6 +5222,9 @@ class $$SoilsTableTableFilterComposer
 
   ColumnFilters<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get isSeeded => $composableBuilder(
       column: $table.isSeeded, builder: (column) => ColumnFilters(column));
@@ -4979,6 +5287,9 @@ class $$SoilsTableTableOrderingComposer
   ColumnOrderings<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<bool> get isSeeded => $composableBuilder(
       column: $table.isSeeded, builder: (column) => ColumnOrderings(column));
 }
@@ -5018,6 +5329,9 @@ class $$SoilsTableTableAnnotationComposer
 
   GeneratedColumn<int> get localRev =>
       $composableBuilder(column: $table.localRev, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
 
   GeneratedColumn<bool> get isSeeded =>
       $composableBuilder(column: $table.isSeeded, builder: (column) => column);
@@ -5076,6 +5390,7 @@ class $$SoilsTableTableTableManager extends RootTableManager<
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<bool> isSeeded = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -5089,6 +5404,7 @@ class $$SoilsTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             isSeeded: isSeeded,
             rowid: rowid,
           ),
@@ -5102,6 +5418,7 @@ class $$SoilsTableTableTableManager extends RootTableManager<
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<bool> isSeeded = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -5115,6 +5432,7 @@ class $$SoilsTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             isSeeded: isSeeded,
             rowid: rowid,
           ),
@@ -5174,6 +5492,7 @@ typedef $$LocationsTableTableCreateCompanionBuilder = LocationsTableCompanion
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<int> rowid,
 });
 typedef $$LocationsTableTableUpdateCompanionBuilder = LocationsTableCompanion
@@ -5187,6 +5506,7 @@ typedef $$LocationsTableTableUpdateCompanionBuilder = LocationsTableCompanion
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<int> rowid,
 });
 
@@ -5246,6 +5566,9 @@ class $$LocationsTableTableFilterComposer
   ColumnFilters<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnFilters(column));
+
   Expression<bool> plantsTableRefs(
       Expression<bool> Function($$PlantsTableTableFilterComposer f) f) {
     final $$PlantsTableTableFilterComposer composer = $composerBuilder(
@@ -5303,6 +5626,9 @@ class $$LocationsTableTableOrderingComposer
 
   ColumnOrderings<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnOrderings(column));
 }
 
 class $$LocationsTableTableAnnotationComposer
@@ -5340,6 +5666,9 @@ class $$LocationsTableTableAnnotationComposer
 
   GeneratedColumn<int> get localRev =>
       $composableBuilder(column: $table.localRev, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
 
   Expression<T> plantsTableRefs<T extends Object>(
       Expression<T> Function($$PlantsTableTableAnnotationComposer a) f) {
@@ -5396,6 +5725,7 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               LocationsTableCompanion(
@@ -5408,6 +5738,7 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -5420,6 +5751,7 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               LocationsTableCompanion.insert(
@@ -5432,6 +5764,7 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -5497,6 +5830,7 @@ typedef $$PlantsTableTableCreateCompanionBuilder = PlantsTableCompanion
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<int> rowid,
 });
 typedef $$PlantsTableTableUpdateCompanionBuilder = PlantsTableCompanion
@@ -5517,6 +5851,7 @@ typedef $$PlantsTableTableUpdateCompanionBuilder = PlantsTableCompanion
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<int> rowid,
 });
 
@@ -5650,6 +5985,9 @@ class $$PlantsTableTableFilterComposer
 
   ColumnFilters<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnFilters(column));
 
   $$SpeciesTableTableFilterComposer get speciesId {
     final $$SpeciesTableTableFilterComposer composer = $composerBuilder(
@@ -5808,6 +6146,9 @@ class $$PlantsTableTableOrderingComposer
   ColumnOrderings<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnOrderings(column));
+
   $$SpeciesTableTableOrderingComposer get speciesId {
     final $$SpeciesTableTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -5916,6 +6257,9 @@ class $$PlantsTableTableAnnotationComposer
 
   GeneratedColumn<int> get localRev =>
       $composableBuilder(column: $table.localRev, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
 
   $$SpeciesTableTableAnnotationComposer get speciesId {
     final $$SpeciesTableTableAnnotationComposer composer = $composerBuilder(
@@ -6064,6 +6408,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               PlantsTableCompanion(
@@ -6083,6 +6428,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -6102,6 +6448,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               PlantsTableCompanion.insert(
@@ -6121,6 +6468,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -6253,6 +6601,7 @@ typedef $$EntriesTableTableCreateCompanionBuilder = EntriesTableCompanion
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<int> rowid,
 });
 typedef $$EntriesTableTableUpdateCompanionBuilder = EntriesTableCompanion
@@ -6269,6 +6618,7 @@ typedef $$EntriesTableTableUpdateCompanionBuilder = EntriesTableCompanion
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<int> rowid,
 });
 
@@ -6335,6 +6685,9 @@ class $$EntriesTableTableFilterComposer
   ColumnFilters<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnFilters(column));
+
   $$PlantsTableTableFilterComposer get plantId {
     final $$PlantsTableTableFilterComposer composer = $composerBuilder(
         composer: this,
@@ -6399,6 +6752,9 @@ class $$EntriesTableTableOrderingComposer
   ColumnOrderings<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnOrderings(column));
+
   $$PlantsTableTableOrderingComposer get plantId {
     final $$PlantsTableTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -6462,6 +6818,9 @@ class $$EntriesTableTableAnnotationComposer
   GeneratedColumn<int> get localRev =>
       $composableBuilder(column: $table.localRev, builder: (column) => column);
 
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
   $$PlantsTableTableAnnotationComposer get plantId {
     final $$PlantsTableTableAnnotationComposer composer = $composerBuilder(
         composer: this,
@@ -6518,6 +6877,7 @@ class $$EntriesTableTableTableManager extends RootTableManager<
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               EntriesTableCompanion(
@@ -6533,6 +6893,7 @@ class $$EntriesTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -6548,6 +6909,7 @@ class $$EntriesTableTableTableManager extends RootTableManager<
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               EntriesTableCompanion.insert(
@@ -6563,6 +6925,7 @@ class $$EntriesTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -6635,6 +6998,7 @@ typedef $$DefensivosTableTableCreateCompanionBuilder = DefensivosTableCompanion
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<int> rowid,
 });
 typedef $$DefensivosTableTableUpdateCompanionBuilder = DefensivosTableCompanion
@@ -6651,6 +7015,7 @@ typedef $$DefensivosTableTableUpdateCompanionBuilder = DefensivosTableCompanion
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<int> rowid,
 });
 
@@ -6699,6 +7064,9 @@ class $$DefensivosTableTableFilterComposer
 
   ColumnFilters<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnFilters(column));
 }
 
 class $$DefensivosTableTableOrderingComposer
@@ -6747,6 +7115,9 @@ class $$DefensivosTableTableOrderingComposer
 
   ColumnOrderings<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnOrderings(column));
 }
 
 class $$DefensivosTableTableAnnotationComposer
@@ -6793,6 +7164,9 @@ class $$DefensivosTableTableAnnotationComposer
 
   GeneratedColumn<int> get localRev =>
       $composableBuilder(column: $table.localRev, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
 }
 
 class $$DefensivosTableTableTableManager extends RootTableManager<
@@ -6834,6 +7208,7 @@ class $$DefensivosTableTableTableManager extends RootTableManager<
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               DefensivosTableCompanion(
@@ -6849,6 +7224,7 @@ class $$DefensivosTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -6864,6 +7240,7 @@ class $$DefensivosTableTableTableManager extends RootTableManager<
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               DefensivosTableCompanion.insert(
@@ -6879,6 +7256,7 @@ class $$DefensivosTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -6914,6 +7292,7 @@ typedef $$RemindersTableTableCreateCompanionBuilder = RemindersTableCompanion
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<int> rowid,
 });
 typedef $$RemindersTableTableUpdateCompanionBuilder = RemindersTableCompanion
@@ -6927,6 +7306,7 @@ typedef $$RemindersTableTableUpdateCompanionBuilder = RemindersTableCompanion
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> localRev,
+  Value<String?> deviceId,
   Value<int> rowid,
 });
 
@@ -6985,6 +7365,9 @@ class $$RemindersTableTableFilterComposer
   ColumnFilters<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnFilters(column));
+
   $$PlantsTableTableFilterComposer get plantId {
     final $$PlantsTableTableFilterComposer composer = $composerBuilder(
         composer: this,
@@ -7040,6 +7423,9 @@ class $$RemindersTableTableOrderingComposer
   ColumnOrderings<int> get localRev => $composableBuilder(
       column: $table.localRev, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnOrderings(column));
+
   $$PlantsTableTableOrderingComposer get plantId {
     final $$PlantsTableTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -7093,6 +7479,9 @@ class $$RemindersTableTableAnnotationComposer
 
   GeneratedColumn<int> get localRev =>
       $composableBuilder(column: $table.localRev, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
 
   $$PlantsTableTableAnnotationComposer get plantId {
     final $$PlantsTableTableAnnotationComposer composer = $composerBuilder(
@@ -7148,6 +7537,7 @@ class $$RemindersTableTableTableManager extends RootTableManager<
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RemindersTableCompanion(
@@ -7160,6 +7550,7 @@ class $$RemindersTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -7172,6 +7563,7 @@ class $$RemindersTableTableTableManager extends RootTableManager<
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RemindersTableCompanion.insert(
@@ -7184,6 +7576,7 @@ class $$RemindersTableTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             localRev: localRev,
+            deviceId: deviceId,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
