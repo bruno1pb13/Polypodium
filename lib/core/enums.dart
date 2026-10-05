@@ -55,6 +55,36 @@ enum PlantStatus {
       PlantStatus.values.asNameMap()[name] ?? PlantStatus.active;
 }
 
+enum LightRequirement {
+  fullSun,
+  partialShade,
+  indirectBright,
+  shade;
+
+  /// Missing or unknown values (older clients, newer servers) mean "not
+  /// informed".
+  static LightRequirement? fromName(String? name) =>
+      LightRequirement.values.asNameMap()[name];
+}
+
+enum HumidityLevel {
+  low,
+  medium,
+  high;
+
+  static HumidityLevel? fromName(String? name) =>
+      HumidityLevel.values.asNameMap()[name];
+}
+
+enum PetToxicity {
+  unknown,
+  nonToxic,
+  toxic;
+
+  static PetToxicity fromName(String? name) =>
+      PetToxicity.values.asNameMap()[name] ?? PetToxicity.unknown;
+}
+
 enum PlantSortOption {
   wateringNeeds,
   nameAZ,
@@ -122,6 +152,50 @@ extension PlantStatusX on PlantStatus {
         PlantStatus.dead => '🥀',
         PlantStatus.donated => '🎁',
         PlantStatus.archived => '📦',
+      };
+}
+
+extension LightRequirementX on LightRequirement {
+  String label(AppLocalizations l10n) => switch (this) {
+        LightRequirement.fullSun => l10n.lightFullSun,
+        LightRequirement.partialShade => l10n.lightPartialShade,
+        LightRequirement.indirectBright => l10n.lightIndirectBright,
+        LightRequirement.shade => l10n.lightShade,
+      };
+
+  String get emoji => switch (this) {
+        LightRequirement.fullSun => '☀️',
+        LightRequirement.partialShade => '⛅',
+        LightRequirement.indirectBright => '🌤️',
+        LightRequirement.shade => '☁️',
+      };
+}
+
+extension HumidityLevelX on HumidityLevel {
+  String label(AppLocalizations l10n) => switch (this) {
+        HumidityLevel.low => l10n.humidityLow,
+        HumidityLevel.medium => l10n.humidityMedium,
+        HumidityLevel.high => l10n.humidityHigh,
+      };
+
+  String get emoji => switch (this) {
+        HumidityLevel.low => '🏜️',
+        HumidityLevel.medium => '💧',
+        HumidityLevel.high => '🌧️',
+      };
+}
+
+extension PetToxicityX on PetToxicity {
+  String label(AppLocalizations l10n) => switch (this) {
+        PetToxicity.unknown => l10n.petToxicityUnknown,
+        PetToxicity.nonToxic => l10n.petToxicityNonToxic,
+        PetToxicity.toxic => l10n.petToxicityToxic,
+      };
+
+  String get emoji => switch (this) {
+        PetToxicity.unknown => '❔',
+        PetToxicity.nonToxic => '🐾',
+        PetToxicity.toxic => '⚠️',
       };
 }
 

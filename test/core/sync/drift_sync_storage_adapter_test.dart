@@ -206,6 +206,92 @@ void main() {
     });
   });
 
+  group('species care sheet', () {
+    Map<String, dynamic> speciesPayload() => {
+          'id': 'species1',
+          'scientificName': 'Ficus lyrata',
+          'popularName': 'Figueira',
+          'defaultIrrigationFrequencyDays': 7,
+          'recommendedSoilIds': ['loamy'],
+          'createdAt': DateTime(2026, 1, 1).toIso8601String(),
+        };
+
+    SyncChange speciesChange(Map<String, dynamic> payload) => SyncChange(
+          entityType: 'species',
+          entityId: 'species1',
+          payload: payload,
+          updatedAt: DateTime(2026, 2, 1),
+          deviceId: 'device-2',
+          rev: 1,
+        );
+
+    test('round-trips through localChangesSince/applyRemoteChange',
+        () async {
+      await db.speciesDao.upsert(SpeciesTableCompanion.insert(
+        id: 'species1',
+        scientificName: 'Ficus lyrata',
+        popularName: 'Figueira',
+        recommendedSoilTypes: const ['loamy'],
+        light: const Value(LightRequirement.indirectBright),
+        humidity: const Value(HumidityLevel.medium),
+        petToxicity: const Value(PetToxicity.toxic),
+        floweringMonths: const Value({11, 2, 3}),
+        careNotes: const Value('Girar o vaso'),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+        localRev: const Value(1),
+      ));
+
+      final change = (await adapter.localChangesSince(0,
+              limit: 100, deviceId: 'device-1'))
+          .single;
+      expect(change.payload['light'], 'indirectBright');
+      expect(change.payload['humidity'], 'medium');
+      expect(change.payload['petToxicity'], 'toxic');
+      expect(change.payload['floweringMonths'], [2, 3, 11]);
+      expect(change.payload['careNotes'], 'Girar o vaso');
+
+      final peer = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(peer.close);
+      await DriftSyncStorageAdapter(peer).applyRemoteChange(change);
+
+      final row = await peer.speciesDao.getById('species1');
+      expect(row!.light, LightRequirement.indirectBright);
+      expect(row.humidity, HumidityLevel.medium);
+      expect(row.petToxicity, PetToxicity.toxic);
+      expect(row.floweringMonths, {2, 3, 11});
+      expect(row.careNotes, 'Girar o vaso');
+    });
+
+    test('is left empty when an older client omits it', () async {
+      await adapter.applyRemoteChange(speciesChange(speciesPayload()));
+
+      final row = await db.speciesDao.getById('species1');
+      expect(row!.scientificName, 'Ficus lyrata');
+      expect(row.light, isNull);
+      expect(row.humidity, isNull);
+      expect(row.petToxicity, PetToxicity.unknown);
+      expect(row.floweringMonths, isEmpty);
+      expect(row.careNotes, isNull);
+    });
+
+    test('ignores unknown values and invalid months', () async {
+      await adapter.applyRemoteChange(speciesChange({
+        ...speciesPayload(),
+        'light': 'moonlight',
+        'humidity': 'soggy',
+        'petToxicity': 'mildlyToxic',
+        'floweringMonths': [0, 4, 13, '5', 4],
+      }));
+
+      final row = await db.speciesDao.getById('species1');
+      expect(row!.light, isNull);
+      expect(row.humidity, isNull);
+      expect(row.petToxicity, PetToxicity.unknown);
+      expect(row.floweringMonths, {4});
+    });
+  });
+
   test('reminders round-trip through localChangesSince/applyRemoteChange',
       () async {
     await db.remindersDao.upsert(RemindersTableCompanion.insert(

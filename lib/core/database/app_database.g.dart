@@ -40,6 +40,37 @@ class $SpeciesTableTable extends SpeciesTable
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>(
               $SpeciesTableTable.$converterrecommendedSoilTypes);
+  @override
+  late final GeneratedColumnWithTypeConverter<LightRequirement?, String> light =
+      GeneratedColumn<String>('light', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<LightRequirement?>($SpeciesTableTable.$converterlight);
+  @override
+  late final GeneratedColumnWithTypeConverter<HumidityLevel?, String> humidity =
+      GeneratedColumn<String>('humidity', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<HumidityLevel?>($SpeciesTableTable.$converterhumidity);
+  @override
+  late final GeneratedColumnWithTypeConverter<PetToxicity, String> petToxicity =
+      GeneratedColumn<String>('pet_toxicity', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('unknown'))
+          .withConverter<PetToxicity>($SpeciesTableTable.$converterpetToxicity);
+  @override
+  late final GeneratedColumnWithTypeConverter<Set<int>, int> floweringMonths =
+      GeneratedColumn<int>('flowering_months', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: false,
+              defaultValue: const Constant(0))
+          .withConverter<Set<int>>(
+              $SpeciesTableTable.$converterfloweringMonths);
+  static const VerificationMeta _careNotesMeta =
+      const VerificationMeta('careNotes');
+  @override
+  late final GeneratedColumn<String> careNotes = GeneratedColumn<String>(
+      'care_notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -79,6 +110,11 @@ class $SpeciesTableTable extends SpeciesTable
         popularName,
         defaultIrrigationFrequencyDays,
         recommendedSoilTypes,
+        light,
+        humidity,
+        petToxicity,
+        floweringMonths,
+        careNotes,
         createdAt,
         updatedAt,
         deletedAt,
@@ -122,6 +158,10 @@ class $SpeciesTableTable extends SpeciesTable
           defaultIrrigationFrequencyDays.isAcceptableOrUnknown(
               data['default_irrigation_frequency_days']!,
               _defaultIrrigationFrequencyDaysMeta));
+    }
+    if (data.containsKey('care_notes')) {
+      context.handle(_careNotesMeta,
+          careNotes.isAcceptableOrUnknown(data['care_notes']!, _careNotesMeta));
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -168,6 +208,20 @@ class $SpeciesTableTable extends SpeciesTable
       recommendedSoilTypes: $SpeciesTableTable.$converterrecommendedSoilTypes
           .fromSql(attachedDatabase.typeMapping.read(DriftSqlType.string,
               data['${effectivePrefix}recommended_soil_types'])!),
+      light: $SpeciesTableTable.$converterlight.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}light'])),
+      humidity: $SpeciesTableTable.$converterhumidity.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}humidity'])),
+      petToxicity: $SpeciesTableTable.$converterpetToxicity.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}pet_toxicity'])!),
+      floweringMonths: $SpeciesTableTable.$converterfloweringMonths.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.int, data['${effectivePrefix}flowering_months'])!),
+      careNotes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}care_notes']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -188,6 +242,14 @@ class $SpeciesTableTable extends SpeciesTable
 
   static TypeConverter<List<String>, String> $converterrecommendedSoilTypes =
       const StringListConverter();
+  static TypeConverter<LightRequirement?, String?> $converterlight =
+      const LightRequirementConverter();
+  static TypeConverter<HumidityLevel?, String?> $converterhumidity =
+      const HumidityLevelConverter();
+  static TypeConverter<PetToxicity, String> $converterpetToxicity =
+      const PetToxicityConverter();
+  static TypeConverter<Set<int>, int> $converterfloweringMonths =
+      const MonthSetConverter();
 }
 
 class SpeciesTableData extends DataClass
@@ -199,6 +261,13 @@ class SpeciesTableData extends DataClass
 
   /// JSON-encoded list of soil IDs
   final List<String> recommendedSoilTypes;
+  final LightRequirement? light;
+  final HumidityLevel? humidity;
+  final PetToxicity petToxicity;
+
+  /// Bitmask of flowering months, see [MonthSetConverter].
+  final Set<int> floweringMonths;
+  final String? careNotes;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -210,6 +279,11 @@ class SpeciesTableData extends DataClass
       required this.popularName,
       this.defaultIrrigationFrequencyDays,
       required this.recommendedSoilTypes,
+      this.light,
+      this.humidity,
+      required this.petToxicity,
+      required this.floweringMonths,
+      this.careNotes,
       required this.createdAt,
       required this.updatedAt,
       this.deletedAt,
@@ -229,6 +303,25 @@ class SpeciesTableData extends DataClass
       map['recommended_soil_types'] = Variable<String>($SpeciesTableTable
           .$converterrecommendedSoilTypes
           .toSql(recommendedSoilTypes));
+    }
+    if (!nullToAbsent || light != null) {
+      map['light'] =
+          Variable<String>($SpeciesTableTable.$converterlight.toSql(light));
+    }
+    if (!nullToAbsent || humidity != null) {
+      map['humidity'] = Variable<String>(
+          $SpeciesTableTable.$converterhumidity.toSql(humidity));
+    }
+    {
+      map['pet_toxicity'] = Variable<String>(
+          $SpeciesTableTable.$converterpetToxicity.toSql(petToxicity));
+    }
+    {
+      map['flowering_months'] = Variable<int>(
+          $SpeciesTableTable.$converterfloweringMonths.toSql(floweringMonths));
+    }
+    if (!nullToAbsent || careNotes != null) {
+      map['care_notes'] = Variable<String>(careNotes);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -252,6 +345,16 @@ class SpeciesTableData extends DataClass
               ? const Value.absent()
               : Value(defaultIrrigationFrequencyDays),
       recommendedSoilTypes: Value(recommendedSoilTypes),
+      light:
+          light == null && nullToAbsent ? const Value.absent() : Value(light),
+      humidity: humidity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(humidity),
+      petToxicity: Value(petToxicity),
+      floweringMonths: Value(floweringMonths),
+      careNotes: careNotes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(careNotes),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -275,6 +378,11 @@ class SpeciesTableData extends DataClass
           serializer.fromJson<int?>(json['defaultIrrigationFrequencyDays']),
       recommendedSoilTypes:
           serializer.fromJson<List<String>>(json['recommendedSoilTypes']),
+      light: serializer.fromJson<LightRequirement?>(json['light']),
+      humidity: serializer.fromJson<HumidityLevel?>(json['humidity']),
+      petToxicity: serializer.fromJson<PetToxicity>(json['petToxicity']),
+      floweringMonths: serializer.fromJson<Set<int>>(json['floweringMonths']),
+      careNotes: serializer.fromJson<String?>(json['careNotes']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -293,6 +401,11 @@ class SpeciesTableData extends DataClass
           serializer.toJson<int?>(defaultIrrigationFrequencyDays),
       'recommendedSoilTypes':
           serializer.toJson<List<String>>(recommendedSoilTypes),
+      'light': serializer.toJson<LightRequirement?>(light),
+      'humidity': serializer.toJson<HumidityLevel?>(humidity),
+      'petToxicity': serializer.toJson<PetToxicity>(petToxicity),
+      'floweringMonths': serializer.toJson<Set<int>>(floweringMonths),
+      'careNotes': serializer.toJson<String?>(careNotes),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -307,6 +420,11 @@ class SpeciesTableData extends DataClass
           String? popularName,
           Value<int?> defaultIrrigationFrequencyDays = const Value.absent(),
           List<String>? recommendedSoilTypes,
+          Value<LightRequirement?> light = const Value.absent(),
+          Value<HumidityLevel?> humidity = const Value.absent(),
+          PetToxicity? petToxicity,
+          Set<int>? floweringMonths,
+          Value<String?> careNotes = const Value.absent(),
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
@@ -320,6 +438,11 @@ class SpeciesTableData extends DataClass
             ? defaultIrrigationFrequencyDays.value
             : this.defaultIrrigationFrequencyDays,
         recommendedSoilTypes: recommendedSoilTypes ?? this.recommendedSoilTypes,
+        light: light.present ? light.value : this.light,
+        humidity: humidity.present ? humidity.value : this.humidity,
+        petToxicity: petToxicity ?? this.petToxicity,
+        floweringMonths: floweringMonths ?? this.floweringMonths,
+        careNotes: careNotes.present ? careNotes.value : this.careNotes,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -341,6 +464,14 @@ class SpeciesTableData extends DataClass
       recommendedSoilTypes: data.recommendedSoilTypes.present
           ? data.recommendedSoilTypes.value
           : this.recommendedSoilTypes,
+      light: data.light.present ? data.light.value : this.light,
+      humidity: data.humidity.present ? data.humidity.value : this.humidity,
+      petToxicity:
+          data.petToxicity.present ? data.petToxicity.value : this.petToxicity,
+      floweringMonths: data.floweringMonths.present
+          ? data.floweringMonths.value
+          : this.floweringMonths,
+      careNotes: data.careNotes.present ? data.careNotes.value : this.careNotes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -358,6 +489,11 @@ class SpeciesTableData extends DataClass
           ..write(
               'defaultIrrigationFrequencyDays: $defaultIrrigationFrequencyDays, ')
           ..write('recommendedSoilTypes: $recommendedSoilTypes, ')
+          ..write('light: $light, ')
+          ..write('humidity: $humidity, ')
+          ..write('petToxicity: $petToxicity, ')
+          ..write('floweringMonths: $floweringMonths, ')
+          ..write('careNotes: $careNotes, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -374,6 +510,11 @@ class SpeciesTableData extends DataClass
       popularName,
       defaultIrrigationFrequencyDays,
       recommendedSoilTypes,
+      light,
+      humidity,
+      petToxicity,
+      floweringMonths,
+      careNotes,
       createdAt,
       updatedAt,
       deletedAt,
@@ -389,6 +530,11 @@ class SpeciesTableData extends DataClass
           other.defaultIrrigationFrequencyDays ==
               this.defaultIrrigationFrequencyDays &&
           other.recommendedSoilTypes == this.recommendedSoilTypes &&
+          other.light == this.light &&
+          other.humidity == this.humidity &&
+          other.petToxicity == this.petToxicity &&
+          other.floweringMonths == this.floweringMonths &&
+          other.careNotes == this.careNotes &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -402,6 +548,11 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
   final Value<String> popularName;
   final Value<int?> defaultIrrigationFrequencyDays;
   final Value<List<String>> recommendedSoilTypes;
+  final Value<LightRequirement?> light;
+  final Value<HumidityLevel?> humidity;
+  final Value<PetToxicity> petToxicity;
+  final Value<Set<int>> floweringMonths;
+  final Value<String?> careNotes;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -414,6 +565,11 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
     this.popularName = const Value.absent(),
     this.defaultIrrigationFrequencyDays = const Value.absent(),
     this.recommendedSoilTypes = const Value.absent(),
+    this.light = const Value.absent(),
+    this.humidity = const Value.absent(),
+    this.petToxicity = const Value.absent(),
+    this.floweringMonths = const Value.absent(),
+    this.careNotes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -427,6 +583,11 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
     required String popularName,
     this.defaultIrrigationFrequencyDays = const Value.absent(),
     required List<String> recommendedSoilTypes,
+    this.light = const Value.absent(),
+    this.humidity = const Value.absent(),
+    this.petToxicity = const Value.absent(),
+    this.floweringMonths = const Value.absent(),
+    this.careNotes = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -445,6 +606,11 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
     Expression<String>? popularName,
     Expression<int>? defaultIrrigationFrequencyDays,
     Expression<String>? recommendedSoilTypes,
+    Expression<String>? light,
+    Expression<String>? humidity,
+    Expression<String>? petToxicity,
+    Expression<int>? floweringMonths,
+    Expression<String>? careNotes,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -460,6 +626,11 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
         'default_irrigation_frequency_days': defaultIrrigationFrequencyDays,
       if (recommendedSoilTypes != null)
         'recommended_soil_types': recommendedSoilTypes,
+      if (light != null) 'light': light,
+      if (humidity != null) 'humidity': humidity,
+      if (petToxicity != null) 'pet_toxicity': petToxicity,
+      if (floweringMonths != null) 'flowering_months': floweringMonths,
+      if (careNotes != null) 'care_notes': careNotes,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -475,6 +646,11 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
       Value<String>? popularName,
       Value<int?>? defaultIrrigationFrequencyDays,
       Value<List<String>>? recommendedSoilTypes,
+      Value<LightRequirement?>? light,
+      Value<HumidityLevel?>? humidity,
+      Value<PetToxicity>? petToxicity,
+      Value<Set<int>>? floweringMonths,
+      Value<String?>? careNotes,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
@@ -488,6 +664,11 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
       defaultIrrigationFrequencyDays:
           defaultIrrigationFrequencyDays ?? this.defaultIrrigationFrequencyDays,
       recommendedSoilTypes: recommendedSoilTypes ?? this.recommendedSoilTypes,
+      light: light ?? this.light,
+      humidity: humidity ?? this.humidity,
+      petToxicity: petToxicity ?? this.petToxicity,
+      floweringMonths: floweringMonths ?? this.floweringMonths,
+      careNotes: careNotes ?? this.careNotes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -517,6 +698,26 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
       map['recommended_soil_types'] = Variable<String>($SpeciesTableTable
           .$converterrecommendedSoilTypes
           .toSql(recommendedSoilTypes.value));
+    }
+    if (light.present) {
+      map['light'] = Variable<String>(
+          $SpeciesTableTable.$converterlight.toSql(light.value));
+    }
+    if (humidity.present) {
+      map['humidity'] = Variable<String>(
+          $SpeciesTableTable.$converterhumidity.toSql(humidity.value));
+    }
+    if (petToxicity.present) {
+      map['pet_toxicity'] = Variable<String>(
+          $SpeciesTableTable.$converterpetToxicity.toSql(petToxicity.value));
+    }
+    if (floweringMonths.present) {
+      map['flowering_months'] = Variable<int>($SpeciesTableTable
+          .$converterfloweringMonths
+          .toSql(floweringMonths.value));
+    }
+    if (careNotes.present) {
+      map['care_notes'] = Variable<String>(careNotes.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -548,6 +749,11 @@ class SpeciesTableCompanion extends UpdateCompanion<SpeciesTableData> {
           ..write(
               'defaultIrrigationFrequencyDays: $defaultIrrigationFrequencyDays, ')
           ..write('recommendedSoilTypes: $recommendedSoilTypes, ')
+          ..write('light: $light, ')
+          ..write('humidity: $humidity, ')
+          ..write('petToxicity: $petToxicity, ')
+          ..write('floweringMonths: $floweringMonths, ')
+          ..write('careNotes: $careNotes, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -4808,6 +5014,11 @@ typedef $$SpeciesTableTableCreateCompanionBuilder = SpeciesTableCompanion
   required String popularName,
   Value<int?> defaultIrrigationFrequencyDays,
   required List<String> recommendedSoilTypes,
+  Value<LightRequirement?> light,
+  Value<HumidityLevel?> humidity,
+  Value<PetToxicity> petToxicity,
+  Value<Set<int>> floweringMonths,
+  Value<String?> careNotes,
   required DateTime createdAt,
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
@@ -4822,6 +5033,11 @@ typedef $$SpeciesTableTableUpdateCompanionBuilder = SpeciesTableCompanion
   Value<String> popularName,
   Value<int?> defaultIrrigationFrequencyDays,
   Value<List<String>> recommendedSoilTypes,
+  Value<LightRequirement?> light,
+  Value<HumidityLevel?> humidity,
+  Value<PetToxicity> petToxicity,
+  Value<Set<int>> floweringMonths,
+  Value<String?> careNotes,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
@@ -4876,6 +5092,29 @@ class $$SpeciesTableTableFilterComposer
       get recommendedSoilTypes => $composableBuilder(
           column: $table.recommendedSoilTypes,
           builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<LightRequirement?, LightRequirement, String>
+      get light => $composableBuilder(
+          column: $table.light,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<HumidityLevel?, HumidityLevel, String>
+      get humidity => $composableBuilder(
+          column: $table.humidity,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<PetToxicity, PetToxicity, String>
+      get petToxicity => $composableBuilder(
+          column: $table.petToxicity,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<Set<int>, Set<int>, int> get floweringMonths =>
+      $composableBuilder(
+          column: $table.floweringMonths,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get careNotes => $composableBuilder(
+      column: $table.careNotes, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -4941,6 +5180,22 @@ class $$SpeciesTableTableOrderingComposer
       column: $table.recommendedSoilTypes,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get light => $composableBuilder(
+      column: $table.light, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get humidity => $composableBuilder(
+      column: $table.humidity, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get petToxicity => $composableBuilder(
+      column: $table.petToxicity, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get floweringMonths => $composableBuilder(
+      column: $table.floweringMonths,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get careNotes => $composableBuilder(
+      column: $table.careNotes, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -4982,6 +5237,23 @@ class $$SpeciesTableTableAnnotationComposer
   GeneratedColumnWithTypeConverter<List<String>, String>
       get recommendedSoilTypes => $composableBuilder(
           column: $table.recommendedSoilTypes, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<LightRequirement?, String> get light =>
+      $composableBuilder(column: $table.light, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<HumidityLevel?, String> get humidity =>
+      $composableBuilder(column: $table.humidity, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PetToxicity, String> get petToxicity =>
+      $composableBuilder(
+          column: $table.petToxicity, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Set<int>, int> get floweringMonths =>
+      $composableBuilder(
+          column: $table.floweringMonths, builder: (column) => column);
+
+  GeneratedColumn<String> get careNotes =>
+      $composableBuilder(column: $table.careNotes, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -5048,6 +5320,11 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             Value<String> popularName = const Value.absent(),
             Value<int?> defaultIrrigationFrequencyDays = const Value.absent(),
             Value<List<String>> recommendedSoilTypes = const Value.absent(),
+            Value<LightRequirement?> light = const Value.absent(),
+            Value<HumidityLevel?> humidity = const Value.absent(),
+            Value<PetToxicity> petToxicity = const Value.absent(),
+            Value<Set<int>> floweringMonths = const Value.absent(),
+            Value<String?> careNotes = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -5061,6 +5338,11 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             popularName: popularName,
             defaultIrrigationFrequencyDays: defaultIrrigationFrequencyDays,
             recommendedSoilTypes: recommendedSoilTypes,
+            light: light,
+            humidity: humidity,
+            petToxicity: petToxicity,
+            floweringMonths: floweringMonths,
+            careNotes: careNotes,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -5074,6 +5356,11 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             required String popularName,
             Value<int?> defaultIrrigationFrequencyDays = const Value.absent(),
             required List<String> recommendedSoilTypes,
+            Value<LightRequirement?> light = const Value.absent(),
+            Value<HumidityLevel?> humidity = const Value.absent(),
+            Value<PetToxicity> petToxicity = const Value.absent(),
+            Value<Set<int>> floweringMonths = const Value.absent(),
+            Value<String?> careNotes = const Value.absent(),
             required DateTime createdAt,
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -5087,6 +5374,11 @@ class $$SpeciesTableTableTableManager extends RootTableManager<
             popularName: popularName,
             defaultIrrigationFrequencyDays: defaultIrrigationFrequencyDays,
             recommendedSoilTypes: recommendedSoilTypes,
+            light: light,
+            humidity: humidity,
+            petToxicity: petToxicity,
+            floweringMonths: floweringMonths,
+            careNotes: careNotes,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../core/database/app_database.dart';
+import '../../../core/database/converters.dart';
 
 /// Serializes the active workspace's database (including soft-delete
 /// tombstones, so a restored backup can't resurrect deleted rows on a live
@@ -91,6 +92,11 @@ class DataExportService {
               'defaultIrrigationFrequencyDays':
                   r.defaultIrrigationFrequencyDays,
               'recommendedSoilIds': r.recommendedSoilTypes,
+              'light': r.light?.name,
+              'humidity': r.humidity?.name,
+              'petToxicity': r.petToxicity.name,
+              'floweringMonths': MonthSetConverter.toJson(r.floweringMonths),
+              'careNotes': r.careNotes,
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),

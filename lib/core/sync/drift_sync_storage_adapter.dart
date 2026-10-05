@@ -3,6 +3,7 @@ import 'package:polypodium_core/polypodium_core.dart';
 
 import '../../features/entries/domain/entry_details.dart';
 import '../database/app_database.dart';
+import '../database/converters.dart';
 import '../enums.dart';
 import 'i_sync_storage_adapter.dart';
 
@@ -112,6 +113,11 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'popularName': r.popularName,
           'defaultIrrigationFrequencyDays': r.defaultIrrigationFrequencyDays,
           'recommendedSoilIds': r.recommendedSoilTypes,
+          'light': r.light?.name,
+          'humidity': r.humidity?.name,
+          'petToxicity': r.petToxicity.name,
+          'floweringMonths': MonthSetConverter.toJson(r.floweringMonths),
+          'careNotes': r.careNotes,
           'createdAt': r.createdAt.toIso8601String(),
         };
       case 'plant':
@@ -254,6 +260,12 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       defaultIrrigationFrequencyDays:
           Value(p['defaultIrrigationFrequencyDays'] as int?),
       recommendedSoilTypes: soilIds,
+      // Older clients don't send the care sheet: it stays empty.
+      light: Value(LightRequirement.fromName(p['light'] as String?)),
+      humidity: Value(HumidityLevel.fromName(p['humidity'] as String?)),
+      petToxicity: Value(PetToxicity.fromName(p['petToxicity'] as String?)),
+      floweringMonths: Value(MonthSetConverter.fromJson(p['floweringMonths'])),
+      careNotes: Value(p['careNotes'] as String?),
       createdAt: DateTime.parse(p['createdAt'] as String),
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),

@@ -154,6 +154,67 @@ void main() {
     expect(plant.statusChangedAt, t1);
   });
 
+  test('the species care sheet survives the round trip', () async {
+    await source.speciesDao.upsert(SpeciesTableCompanion.insert(
+      id: 'species1',
+      scientificName: 'Dieffenbachia seguine',
+      popularName: 'Comigo-ninguém-pode',
+      recommendedSoilTypes: const [],
+      light: const Value(LightRequirement.partialShade),
+      humidity: const Value(HumidityLevel.high),
+      petToxicity: const Value(PetToxicity.toxic),
+      floweringMonths: const Value({9, 10}),
+      careNotes: const Value('Seiva irritante'),
+      createdAt: t0,
+      updatedAt: t0,
+      localRev: const Value(1),
+    ));
+
+    final bytes = await DataExportService(source).buildArchiveBytes();
+    await DataImportService(target, FakePhotoStorage()).importFromBytes(bytes);
+
+    final species = await target.speciesDao.getById('species1');
+    expect(species!.light, LightRequirement.partialShade);
+    expect(species.humidity, HumidityLevel.high);
+    expect(species.petToxicity, PetToxicity.toxic);
+    expect(species.floweringMonths, {9, 10});
+    expect(species.careNotes, 'Seiva irritante');
+  });
+
+  test('species from a backup without a care sheet import with it empty',
+      () async {
+    final backup = {
+      'format': DataExportService.formatName,
+      'version': DataExportService.formatVersion,
+      'exportedAt': t1.toIso8601String(),
+      'entities': {
+        'species': [
+          {
+            'id': 'species1',
+            'scientificName': 'Ficus lyrata',
+            'popularName': 'Figueira',
+            'defaultIrrigationFrequencyDays': null,
+            'recommendedSoilIds': ['loamy'],
+            'createdAt': t0.toIso8601String(),
+            'updatedAt': t0.toIso8601String(),
+            'deletedAt': null,
+          }
+        ],
+      },
+    };
+
+    await DataImportService(target, FakePhotoStorage())
+        .importFromBytes(Uint8List.fromList(utf8.encode(jsonEncode(backup))));
+
+    final species = await target.speciesDao.getById('species1');
+    expect(species!.scientificName, 'Ficus lyrata');
+    expect(species.light, isNull);
+    expect(species.humidity, isNull);
+    expect(species.petToxicity, PetToxicity.unknown);
+    expect(species.floweringMonths, isEmpty);
+    expect(species.careNotes, isNull);
+  });
+
   test('plants from a backup without status are imported as active',
       () async {
     final backup = {

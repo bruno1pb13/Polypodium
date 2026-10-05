@@ -66,7 +66,7 @@ class AppDatabase extends _$AppDatabase {
   final String? deviceId;
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -160,11 +160,7 @@ class AppDatabase extends _$AppDatabase {
               defensivosTable,
               remindersTable,
             ]) {
-              final columns = await customSelect(
-                      'SELECT name FROM pragma_table_info(?)',
-                      variables: [Variable(table.actualTableName)])
-                  .map((row) => row.read<String>('name'))
-                  .get();
+              final columns = await _columnNames(table);
               if (columns.isNotEmpty && !columns.contains('device_id')) {
                 await m.addColumn(table, table.columnsByName['device_id']!);
               }
@@ -194,8 +190,31 @@ class AppDatabase extends _$AppDatabase {
             }
             await m.alterTable(TableMigration(plantsTable));
           }
+          if (from < 16) {
+            // Species care sheet. Same missing-table guard as the v15 step.
+            final columns = await _columnNames(speciesTable);
+            if (columns.isNotEmpty) {
+              for (final column in <GeneratedColumn>[
+                speciesTable.light,
+                speciesTable.humidity,
+                speciesTable.petToxicity,
+                speciesTable.floweringMonths,
+                speciesTable.careNotes,
+              ]) {
+                if (!columns.contains(column.name)) {
+                  await m.addColumn(speciesTable, column);
+                }
+              }
+            }
+          }
         },
       );
+
+  Future<List<String>> _columnNames(TableInfo table) =>
+      customSelect('SELECT name FROM pragma_table_info(?)',
+              variables: [Variable(table.actualTableName)])
+          .map((row) => row.read<String>('name'))
+          .get();
 
   static LazyDatabase _openConnection(String fileName) {
     return LazyDatabase(() async {

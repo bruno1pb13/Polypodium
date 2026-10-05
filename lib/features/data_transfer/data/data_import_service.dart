@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:polypodium_core/polypodium_core.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/database/converters.dart';
 import '../../../core/enums.dart';
 import '../../../core/storage/photo_storage.dart';
 import '../../entries/domain/entry_details.dart';
@@ -279,6 +280,13 @@ class DataImportService {
           Value(row['defaultIrrigationFrequencyDays'] as int?),
       recommendedSoilTypes:
           (row['recommendedSoilIds'] as List<dynamic>?)?.cast<String>() ?? [],
+      // Backups from before schema v16 have no care sheet.
+      light: Value(LightRequirement.fromName(row['light'] as String?)),
+      humidity: Value(HumidityLevel.fromName(row['humidity'] as String?)),
+      petToxicity: Value(PetToxicity.fromName(row['petToxicity'] as String?)),
+      floweringMonths:
+          Value(MonthSetConverter.fromJson(row['floweringMonths'])),
+      careNotes: Value(row['careNotes'] as String?),
       createdAt: DateTime.parse(row['createdAt'] as String),
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),

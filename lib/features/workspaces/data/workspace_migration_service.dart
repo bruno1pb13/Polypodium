@@ -88,6 +88,11 @@ class WorkspaceMigrationService {
           defaultIrrigationFrequencyDays:
               Value(row.defaultIrrigationFrequencyDays),
           recommendedSoilTypes: row.recommendedSoilTypes,
+          light: Value(row.light),
+          humidity: Value(row.humidity),
+          petToxicity: Value(row.petToxicity),
+          floweringMonths: Value(row.floweringMonths),
+          careNotes: Value(row.careNotes),
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),

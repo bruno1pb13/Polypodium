@@ -335,7 +335,7 @@ void main() {
 
     final version =
         await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.read<int>('user_version'), 15);
+    expect(version.read<int>('user_version'), db.schemaVersion);
   });
 
   test('the v14 location fix stamps the deviceId on its writes', () async {
@@ -395,5 +395,75 @@ void main() {
     expect(plant!.deviceId, 'device-a');
     final location = await db.locationsDao.getById(plant.locationId!);
     expect(location!.deviceId, 'device-a');
+  });
+
+  test('migration from v15 adds an empty care sheet to species', () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE species (
+          id TEXT NOT NULL PRIMARY KEY,
+          scientific_name TEXT NOT NULL,
+          popular_name TEXT NOT NULL,
+          default_irrigation_frequency_days INTEGER NULL,
+          recommended_soil_types TEXT NOT NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          deleted_at INTEGER NULL,
+          local_rev INTEGER NOT NULL DEFAULT 0,
+          device_id TEXT NULL
+        )
+      ''');
+      raw.execute('''
+        INSERT INTO species (id, scientific_name, popular_name,
+          recommended_soil_types, created_at, updated_at, local_rev)
+        VALUES ('s1', 'Ficus lyrata', 'Figueira', '["loamy"]', 0, 0, 4)
+      ''');
+      raw.execute('PRAGMA user_version = 15');
+    }));
+
+    final species = await db.speciesDao.getById('s1');
+    expect(species!.scientificName, 'Ficus lyrata');
+    expect(species.recommendedSoilTypes, ['loamy']);
+    expect(species.light, isNull);
+    expect(species.humidity, isNull);
+    expect(species.petToxicity, PetToxicity.unknown);
+    expect(species.floweringMonths, isEmpty);
+    expect(species.careNotes, isNull);
+    // Not a local write: nothing to push.
+    expect(species.localRev, 4);
+
+    await db.speciesDao.upsert(species
+        .toCompanion(false)
+        .copyWith(
+          light: const Value(LightRequirement.shade),
+          petToxicity: const Value(PetToxicity.toxic),
+          floweringMonths: const Value({1, 12}),
+        ));
+    final updated = await db.speciesDao.getById('s1');
+    expect(updated!.light, LightRequirement.shade);
+    expect(updated.petToxicity, PetToxicity.toxic);
+    expect(updated.floweringMonths, {1, 12});
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
+  test('flowering months are stored as a bitmask', () async {
+    await db.into(db.speciesTable).insert(SpeciesTableCompanion.insert(
+          id: 's1',
+          scientificName: 'Sci',
+          popularName: 'Pop',
+          recommendedSoilTypes: const [],
+          floweringMonths: const Value({1, 3, 12}),
+          createdAt: DateTime(2026, 1, 1),
+          updatedAt: DateTime(2026, 1, 1),
+        ));
+
+    final raw = await db
+        .customSelect("SELECT flowering_months FROM species WHERE id = 's1'")
+        .getSingle();
+    expect(raw.read<int>('flowering_months'), 1 | 1 << 2 | 1 << 11);
   });
 }

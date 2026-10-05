@@ -2288,6 +2288,114 @@ abstract class AppLocalizations {
   /// **'Error updating: {error}'**
   String datasetUpdateError(String error);
 
+  /// No description provided for @speciesCareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Species care'**
+  String get speciesCareTitle;
+
+  /// No description provided for @lightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get lightLabel;
+
+  /// No description provided for @lightFullSun.
+  ///
+  /// In en, this message translates to:
+  /// **'Full sun'**
+  String get lightFullSun;
+
+  /// No description provided for @lightPartialShade.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial shade'**
+  String get lightPartialShade;
+
+  /// No description provided for @lightIndirectBright.
+  ///
+  /// In en, this message translates to:
+  /// **'Bright indirect light'**
+  String get lightIndirectBright;
+
+  /// No description provided for @lightShade.
+  ///
+  /// In en, this message translates to:
+  /// **'Shade'**
+  String get lightShade;
+
+  /// No description provided for @humidityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Humidity'**
+  String get humidityLabel;
+
+  /// No description provided for @humidityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get humidityLow;
+
+  /// No description provided for @humidityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get humidityMedium;
+
+  /// No description provided for @humidityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get humidityHigh;
+
+  /// No description provided for @petToxicityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet toxicity'**
+  String get petToxicityLabel;
+
+  /// No description provided for @petToxicityUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get petToxicityUnknown;
+
+  /// No description provided for @petToxicityNonToxic.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-toxic'**
+  String get petToxicityNonToxic;
+
+  /// No description provided for @petToxicityToxic.
+  ///
+  /// In en, this message translates to:
+  /// **'Toxic'**
+  String get petToxicityToxic;
+
+  /// No description provided for @toxicToPetsBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Toxic to pets'**
+  String get toxicToPetsBadge;
+
+  /// No description provided for @floweringLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Flowering months'**
+  String get floweringLabel;
+
+  /// No description provided for @floweringIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Flowers in: {months}'**
+  String floweringIn(String months);
+
+  /// No description provided for @careNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Care notes'**
+  String get careNotesLabel;
+
   /// No description provided for @soilSandy.
   ///
   /// In en, this message translates to:

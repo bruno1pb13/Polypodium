@@ -1305,6 +1305,62 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get speciesCareTitle => 'Species care';
+
+  @override
+  String get lightLabel => 'Light';
+
+  @override
+  String get lightFullSun => 'Full sun';
+
+  @override
+  String get lightPartialShade => 'Partial shade';
+
+  @override
+  String get lightIndirectBright => 'Bright indirect light';
+
+  @override
+  String get lightShade => 'Shade';
+
+  @override
+  String get humidityLabel => 'Humidity';
+
+  @override
+  String get humidityLow => 'Low';
+
+  @override
+  String get humidityMedium => 'Medium';
+
+  @override
+  String get humidityHigh => 'High';
+
+  @override
+  String get petToxicityLabel => 'Pet toxicity';
+
+  @override
+  String get petToxicityUnknown => 'Unknown';
+
+  @override
+  String get petToxicityNonToxic => 'Non-toxic';
+
+  @override
+  String get petToxicityToxic => 'Toxic';
+
+  @override
+  String get toxicToPetsBadge => 'Toxic to pets';
+
+  @override
+  String get floweringLabel => 'Flowering months';
+
+  @override
+  String floweringIn(String months) {
+    return 'Flowers in: $months';
+  }
+
+  @override
+  String get careNotesLabel => 'Care notes';
+
+  @override
   String get soilSandy => 'Sandy';
 
   @override

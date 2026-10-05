@@ -150,6 +150,11 @@ void main() {
         scientificName: 'Sci',
         popularName: 'Pop',
         recommendedSoilTypes: const [],
+        light: const Value(LightRequirement.partialShade),
+        humidity: const Value(HumidityLevel.high),
+        petToxicity: const Value(PetToxicity.toxic),
+        floweringMonths: const Value({3, 4}),
+        careNotes: const Value('Borrifar'),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       ));
@@ -184,6 +189,11 @@ void main() {
       final entry = await target.entriesDao.getById('entry1');
 
       expect(species, isNotNull);
+      expect(species!.light, LightRequirement.partialShade);
+      expect(species.humidity, HumidityLevel.high);
+      expect(species.petToxicity, PetToxicity.toxic);
+      expect(species.floweringMonths, {3, 4});
+      expect(species.careNotes, 'Borrifar');
       expect(plant, isNotNull);
       expect(plant!.status, PlantStatus.archived);
       expect(plant.statusChangedAt, DateTime(2026, 1, 3));

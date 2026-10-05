@@ -1309,6 +1309,62 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get speciesCareTitle => 'Cuidados da espécie';
+
+  @override
+  String get lightLabel => 'Luz';
+
+  @override
+  String get lightFullSun => 'Sol pleno';
+
+  @override
+  String get lightPartialShade => 'Meia-sombra';
+
+  @override
+  String get lightIndirectBright => 'Luz indireta';
+
+  @override
+  String get lightShade => 'Sombra';
+
+  @override
+  String get humidityLabel => 'Umidade';
+
+  @override
+  String get humidityLow => 'Baixa';
+
+  @override
+  String get humidityMedium => 'Média';
+
+  @override
+  String get humidityHigh => 'Alta';
+
+  @override
+  String get petToxicityLabel => 'Toxicidade para pets';
+
+  @override
+  String get petToxicityUnknown => 'Não informada';
+
+  @override
+  String get petToxicityNonToxic => 'Não tóxica';
+
+  @override
+  String get petToxicityToxic => 'Tóxica';
+
+  @override
+  String get toxicToPetsBadge => 'Tóxica para pets';
+
+  @override
+  String get floweringLabel => 'Meses de floração';
+
+  @override
+  String floweringIn(String months) {
+    return 'Floresce em: $months';
+  }
+
+  @override
+  String get careNotesLabel => 'Observações de cuidado';
+
+  @override
   String get soilSandy => 'Arenoso';
 
   @override
