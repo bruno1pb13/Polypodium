@@ -4039,6 +4039,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Divider between the photos'**
   String get comparisonDivider;
+
+  /// No description provided for @labelsGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate labels'**
+  String get labelsGenerate;
+
+  /// No description provided for @labelsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 label} other{{count} labels}}'**
+  String labelsTitle(int count);
+
+  /// No description provided for @labelsPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{pages, plural, one{Fits on 1 A4 page} other{Fits on {pages} A4 pages}}'**
+  String labelsPages(int pages);
+
+  /// No description provided for @labelsSheetLayout.
+  ///
+  /// In en, this message translates to:
+  /// **'Sheet layout'**
+  String get labelsSheetLayout;
+
+  /// No description provided for @labelsPresetA4x24.
+  ///
+  /// In en, this message translates to:
+  /// **'24 per sheet · 70 × 37 mm'**
+  String get labelsPresetA4x24;
+
+  /// No description provided for @labelsPresetA4x10.
+  ///
+  /// In en, this message translates to:
+  /// **'10 per sheet · 99 × 57 mm'**
+  String get labelsPresetA4x10;
+
+  /// No description provided for @labelsShowLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Show location'**
+  String get labelsShowLocation;
+
+  /// No description provided for @labelsShowAcquisitionDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Show acquisition date'**
+  String get labelsShowAcquisitionDate;
+
+  /// No description provided for @labelsAcquiredOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Since {date}'**
+  String labelsAcquiredOn(String date);
+
+  /// No description provided for @labelsPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get labelsPrint;
+
+  /// No description provided for @labelsSharePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Share PDF'**
+  String get labelsSharePdf;
+
+  /// No description provided for @labelsSavePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Save PDF'**
+  String get labelsSavePdf;
+
+  /// No description provided for @labelsSavedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Labels saved to {path}'**
+  String labelsSavedTo(String path);
+
+  /// No description provided for @labelsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the labels: {error}'**
+  String labelsError(String error);
+
+  /// No description provided for @labelsPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Label preview'**
+  String get labelsPreview;
+
+  /// No description provided for @labelScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan label'**
+  String get labelScan;
+
+  /// No description provided for @labelScanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point the camera at a plant label'**
+  String get labelScanHint;
+
+  /// No description provided for @labelScanCameraError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the camera'**
+  String get labelScanCameraError;
+
+  /// No description provided for @labelScanInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This code isn\'t a Polypodium label'**
+  String get labelScanInvalid;
+
+  /// No description provided for @labelPlantNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant not found in this space'**
+  String get labelPlantNotFound;
 }
 
 class _AppLocalizationsDelegate

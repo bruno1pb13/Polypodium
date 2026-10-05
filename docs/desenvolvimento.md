@@ -10,6 +10,7 @@
 | `workmanager` | tarefa periódica de verificação de irrigação |
 | `flutter_local_notifications` | notificações locais |
 | `home_widget` | widget de tela inicial (Android) |
+| `pdf` + `printing` + `qr` | etiquetas com QR code (PDF, impressão) |
 | `http` | chamadas HTTP para o servidor de sync |
 | `shared_preferences` | token JWT e cursor de sync |
 | `image_picker` | fotos das plantas |
@@ -47,6 +48,12 @@ O widget mostra as tarefas atrasadas e de hoje da agenda (até 5 linhas) do work
 - depois das ações "Reguei"/"Lembrar em 3 h" das notificações e do botão "Reguei" do próprio widget (que roda em segundo plano, sem abrir o app).
 
 O snapshot guarda o dia em que foi calculado. A atualização periódica do widget (`updatePeriodMillis`, 1 h) compara esse dia com a data do aparelho e, se virou o dia, pede uma vez um snapshot novo ao Dart em segundo plano — então os rótulos "hoje"/"atrasado" ficam no máximo ~1 h desatualizados depois da meia-noite (mais, se o sistema adiar a atualização; abrir o app sempre atualiza). Tocar no widget abre a agenda; tocar numa linha abre a planta.
+
+## Etiquetas com QR code
+
+"Gerar etiquetas" (no detalhe da planta e no modo de seleção da Home) monta um PDF A4 com uma etiqueta por planta — QR code, apelido, nome popular e científico e, opcionalmente, localização e data de aquisição — em dois formatos de folha: 3 × 8 (70 × 37 mm) ou 2 × 5 (99 × 57 mm). O PDF é gerado em Dart puro (`buildLabelsPdf`, pacote `pdf`) com as fontes embutidas do PDF (Helvetica, Latin-1): acentos saem normalmente, emojis e outros alfabetos são omitidos. "Imprimir" abre o diálogo de impressão do sistema (`printing`); o PDF também pode ser compartilhado (Android/iOS) ou salvo (desktop).
+
+O QR code guarda `polypodium://plant/<id da planta>`. Todos os links `polypodium://` (do widget e das etiquetas) passam pelo mesmo parser, `AppLink.parse`.
 
 ## Sincronização
 

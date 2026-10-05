@@ -5,6 +5,7 @@ import 'package:home_widget/home_widget.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/l10n/l10n.dart';
+import '../../../core/links/app_link.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../plants/data/plants_repository.dart';
 import '../../plants/domain/plant_model.dart';
@@ -75,45 +76,16 @@ Future<void> publishHomeWidgetFromDatabase(
       buildHomeWidgetSnapshot(tasks, systemL10n(), now: now ?? DateTime.now()));
 }
 
-/// The links the widget sends: [agenda] and [plant] open the app (launch
-/// intents), [water] and [refresh] run in the background
-/// ([onHomeWidgetInteraction]).
-enum HomeWidgetLinkType { agenda, plant, water, refresh }
-
-class HomeWidgetLink {
-  const HomeWidgetLink(this.type, [this.plantId]);
-
-  final HomeWidgetLinkType type;
-
-  /// Set for [HomeWidgetLinkType.plant] and [HomeWidgetLinkType.water].
-  final String? plantId;
-
-  static const scheme = 'polypodium';
-
-  /// polypodium://agenda, polypodium://plant?id=…, polypodium://water?id=…,
-  /// polypodium://refresh. Null for anything else.
-  static HomeWidgetLink? parse(Uri? uri) {
-    if (uri == null || uri.scheme != scheme) return null;
-    final type = HomeWidgetLinkType.values.asNameMap()[uri.host];
-    if (type == null) return null;
-    final id = uri.queryParameters['id'];
-    final needsPlant =
-        type == HomeWidgetLinkType.plant || type == HomeWidgetLinkType.water;
-    if (needsPlant && (id == null || id.isEmpty)) return null;
-    return HomeWidgetLink(type, needsPlant ? id : null);
-  }
-}
-
 /// Runs in the widget's background isolate (started by the plugin) for the
 /// "Watered" button and the stale-day refresh.
 @pragma('vm:entry-point')
 Future<void> onHomeWidgetInteraction(Uri? uri) async {
-  final link = HomeWidgetLink.parse(uri);
+  final link = AppLink.parse(uri);
   switch (link?.type) {
-    case HomeWidgetLinkType.water:
+    case AppLinkType.water:
       await NotificationService.handleWidgetAction(
           waterPlantIds: [link!.plantId!]);
-    case HomeWidgetLinkType.refresh:
+    case AppLinkType.refresh:
       await NotificationService.handleWidgetAction();
     default:
       break;

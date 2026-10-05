@@ -8,6 +8,7 @@ import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/carencia_providers.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../entries/presentation/screens/add_entry_screen.dart';
+import '../../../labels/presentation/screens/plant_labels_screen.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
 import '../../../reminders/presentation/widgets/plant_reminders_card.dart';
 import '../../../soils/presentation/providers/soils_providers.dart';
@@ -106,6 +107,16 @@ class PlantDetailScreen extends ConsumerWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => AddEditPlantScreen(plant: plant),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.qr_code_2),
+                tooltip: context.l10n.labelsGenerate,
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PlantLabelsScreen(plantIds: [plantId]),
                   ),
                 ),
               ),

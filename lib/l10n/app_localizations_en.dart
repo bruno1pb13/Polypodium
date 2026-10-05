@@ -2343,4 +2343,86 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get comparisonDivider => 'Divider between the photos';
+
+  @override
+  String get labelsGenerate => 'Generate labels';
+
+  @override
+  String labelsTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count labels',
+      one: '1 label',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String labelsPages(int pages) {
+    String _temp0 = intl.Intl.pluralLogic(
+      pages,
+      locale: localeName,
+      other: 'Fits on $pages A4 pages',
+      one: 'Fits on 1 A4 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get labelsSheetLayout => 'Sheet layout';
+
+  @override
+  String get labelsPresetA4x24 => '24 per sheet · 70 × 37 mm';
+
+  @override
+  String get labelsPresetA4x10 => '10 per sheet · 99 × 57 mm';
+
+  @override
+  String get labelsShowLocation => 'Show location';
+
+  @override
+  String get labelsShowAcquisitionDate => 'Show acquisition date';
+
+  @override
+  String labelsAcquiredOn(String date) {
+    return 'Since $date';
+  }
+
+  @override
+  String get labelsPrint => 'Print';
+
+  @override
+  String get labelsSharePdf => 'Share PDF';
+
+  @override
+  String get labelsSavePdf => 'Save PDF';
+
+  @override
+  String labelsSavedTo(String path) {
+    return 'Labels saved to $path';
+  }
+
+  @override
+  String labelsError(String error) {
+    return 'Couldn\'t create the labels: $error';
+  }
+
+  @override
+  String get labelsPreview => 'Label preview';
+
+  @override
+  String get labelScan => 'Scan label';
+
+  @override
+  String get labelScanHint => 'Point the camera at a plant label';
+
+  @override
+  String get labelScanCameraError => 'Couldn\'t open the camera';
+
+  @override
+  String get labelScanInvalid => 'This code isn\'t a Polypodium label';
+
+  @override
+  String get labelPlantNotFound => 'Plant not found in this space';
 }

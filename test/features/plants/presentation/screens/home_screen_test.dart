@@ -6,6 +6,7 @@ import 'package:polypodium/core/theme/app_theme.dart';
 import 'package:polypodium/features/entries/domain/carencia.dart';
 import 'package:polypodium/features/entries/presentation/providers/carencia_providers.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
+import 'package:polypodium/features/labels/presentation/screens/plant_labels_screen.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/plants/presentation/providers/plants_providers.dart';
 import 'package:polypodium/features/plants/presentation/screens/add_edit_plant_screen.dart';
@@ -276,6 +277,26 @@ void main() {
     expect(find.text('Rega registrada em 2 plantas'), findsOneWidget);
     expect(find.text('Polypodium'), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsOneWidget);
+  });
+
+  testWidgets('the selection opens the label generator in list order',
+      (tester) async {
+    await pump(tester, [anturio, samambaia]);
+
+    await tester.longPress(find.text('Antúrio'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Samambaia'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Gerar etiquetas'));
+    await tester.pumpAndSettle();
+
+    final screen =
+        tester.widget<PlantLabelsScreen>(find.byType(PlantLabelsScreen));
+    expect(screen.plantIds, ['p1', 'p2']);
+
+    Navigator.of(tester.element(find.byType(PlantLabelsScreen))).pop();
+    await tester.pumpAndSettle();
+    expect(find.text('Polypodium'), findsOneWidget);
   });
 
   testWidgets('cancelling the selection leaves selection mode', (tester) async {

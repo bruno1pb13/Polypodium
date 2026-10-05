@@ -1189,5 +1189,50 @@
   },
   "comparisonSideBySide": "Side by side",
   "comparisonSlider": "Slider",
-  "comparisonDivider": "Divider between the photos"
+  "comparisonDivider": "Divider between the photos",
+  "labelsGenerate": "Generate labels",
+  "labelsTitle": "{count, plural, one{1 label} other{{count} labels}}",
+  "@labelsTitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "labelsPages": "{pages, plural, one{Fits on 1 A4 page} other{Fits on {pages} A4 pages}}",
+  "@labelsPages": {
+    "placeholders": {
+      "pages": {"type": "int"}
+    }
+  },
+  "labelsSheetLayout": "Sheet layout",
+  "labelsPresetA4x24": "24 per sheet · 70 × 37 mm",
+  "labelsPresetA4x10": "10 per sheet · 99 × 57 mm",
+  "labelsShowLocation": "Show location",
+  "labelsShowAcquisitionDate": "Show acquisition date",
+  "labelsAcquiredOn": "Since {date}",
+  "@labelsAcquiredOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "labelsPrint": "Print",
+  "labelsSharePdf": "Share PDF",
+  "labelsSavePdf": "Save PDF",
+  "labelsSavedTo": "Labels saved to {path}",
+  "@labelsSavedTo": {
+    "placeholders": {
+      "path": {"type": "String"}
+    }
+  },
+  "labelsError": "Couldn't create the labels: {error}",
+  "@labelsError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "labelsPreview": "Label preview",
+  "labelScan": "Scan label",
+  "labelScanHint": "Point the camera at a plant label",
+  "labelScanCameraError": "Couldn't open the camera",
+  "labelScanInvalid": "This code isn't a Polypodium label",
+  "labelPlantNotFound": "Plant not found in this space"
 }

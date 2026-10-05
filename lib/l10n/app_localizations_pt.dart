@@ -2347,4 +2347,86 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get comparisonDivider => 'Divisória entre as fotos';
+
+  @override
+  String get labelsGenerate => 'Gerar etiquetas';
+
+  @override
+  String labelsTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count etiquetas',
+      one: '1 etiqueta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String labelsPages(int pages) {
+    String _temp0 = intl.Intl.pluralLogic(
+      pages,
+      locale: localeName,
+      other: 'Cabe em $pages folhas A4',
+      one: 'Cabe em 1 folha A4',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get labelsSheetLayout => 'Formato da folha';
+
+  @override
+  String get labelsPresetA4x24 => '24 por folha · 70 × 37 mm';
+
+  @override
+  String get labelsPresetA4x10 => '10 por folha · 99 × 57 mm';
+
+  @override
+  String get labelsShowLocation => 'Mostrar localização';
+
+  @override
+  String get labelsShowAcquisitionDate => 'Mostrar data de aquisição';
+
+  @override
+  String labelsAcquiredOn(String date) {
+    return 'Desde $date';
+  }
+
+  @override
+  String get labelsPrint => 'Imprimir';
+
+  @override
+  String get labelsSharePdf => 'Compartilhar PDF';
+
+  @override
+  String get labelsSavePdf => 'Salvar PDF';
+
+  @override
+  String labelsSavedTo(String path) {
+    return 'Etiquetas salvas em $path';
+  }
+
+  @override
+  String labelsError(String error) {
+    return 'Não foi possível gerar as etiquetas: $error';
+  }
+
+  @override
+  String get labelsPreview => 'Prévia da etiqueta';
+
+  @override
+  String get labelScan => 'Escanear etiqueta';
+
+  @override
+  String get labelScanHint => 'Aponte a câmera para a etiqueta de uma planta';
+
+  @override
+  String get labelScanCameraError => 'Não foi possível abrir a câmera';
+
+  @override
+  String get labelScanInvalid => 'Este código não é uma etiqueta do Polypodium';
+
+  @override
+  String get labelPlantNotFound => 'Planta não encontrada neste espaço';
 }

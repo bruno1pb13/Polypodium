@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/links/app_link.dart';
 import '../../plants/presentation/screens/plant_detail_screen.dart';
-import '../data/home_widget_service.dart';
 import 'screens/agenda_screen.dart';
 
 /// Opens what a home-screen widget tap asks for: the agenda (header) or a
@@ -12,12 +12,12 @@ class HomeWidgetLaunchHandler {
   final GlobalKey<NavigatorState> navigatorKey;
 
   void handle(Uri? uri, {bool retry = true}) {
-    final link = HomeWidgetLink.parse(uri);
+    final link = AppLink.parse(uri);
     final Widget screen;
     switch (link?.type) {
-      case HomeWidgetLinkType.agenda:
+      case AppLinkType.agenda:
         screen = const AgendaScreen();
-      case HomeWidgetLinkType.plant:
+      case AppLinkType.plant:
         screen = PlantDetailScreen(plantId: link!.plantId!);
       default:
         return;

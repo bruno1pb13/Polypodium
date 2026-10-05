@@ -11,6 +11,7 @@ import '../../../../core/sync/sync_providers.dart';
 import '../../../../core/widgets/app_search_bar.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../entries/presentation/screens/add_entry_screen.dart';
+import '../../../labels/presentation/screens/plant_labels_screen.dart';
 import '../../../workspaces/presentation/providers/workspace_providers.dart';
 import '../providers/plant_search_providers.dart';
 import '../providers/plant_selection_provider.dart';
@@ -119,6 +120,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (mounted) ref.read(plantSelectionProvider.notifier).state = {};
   }
 
+  /// Labels follow the list's order, not the order of selection.
+  Future<void> _labelsForSelected(Set<String> plantIds) async {
+    final listed = ref.read(filteredSortedPlantsProvider).value ?? const [];
+    final ordered = [
+      for (final p in listed)
+        if (plantIds.contains(p.plant.id)) p.plant.id,
+    ];
+    final rest = plantIds.where((id) => !ordered.contains(id));
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PlantLabelsScreen(plantIds: [...ordered, ...rest]),
+      ),
+    );
+    if (mounted) ref.read(plantSelectionProvider.notifier).state = {};
+  }
+
   Future<void> _manualSync() async {
     await ref.read(syncNotifierProvider.notifier).sync();
     if (!mounted) return;
@@ -173,6 +191,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   icon: const Icon(Icons.playlist_add),
                   tooltip: context.l10n.bulkEntrySelected,
                   onPressed: () => _bulkEntryForSelected(selectedIds),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.qr_code_2),
+                  tooltip: context.l10n.labelsGenerate,
+                  onPressed: () => _labelsForSelected(selectedIds),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline),

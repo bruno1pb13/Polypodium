@@ -103,33 +103,4 @@ void main() {
           gateway.published.single.rows.map((r) => r.plantId), ['due', 'fine']);
     });
   });
-
-  group('HomeWidgetLink.parse', () {
-    test('reads the links the widget sends', () {
-      final agenda = HomeWidgetLink.parse(Uri.parse('polypodium://agenda'))!;
-      expect(agenda.type, HomeWidgetLinkType.agenda);
-      expect(agenda.plantId, isNull);
-
-      final plant =
-          HomeWidgetLink.parse(Uri.parse('polypodium://plant?id=a%20b'))!;
-      expect(plant.type, HomeWidgetLinkType.plant);
-      expect(plant.plantId, 'a b');
-
-      final water =
-          HomeWidgetLink.parse(Uri.parse('polypodium://water?id=p1'))!;
-      expect(water.type, HomeWidgetLinkType.water);
-      expect(water.plantId, 'p1');
-
-      expect(HomeWidgetLink.parse(Uri.parse('polypodium://refresh'))!.type,
-          HomeWidgetLinkType.refresh);
-    });
-
-    test('ignores anything else', () {
-      expect(HomeWidgetLink.parse(null), isNull);
-      expect(HomeWidgetLink.parse(Uri.parse('https://agenda')), isNull);
-      expect(HomeWidgetLink.parse(Uri.parse('polypodium://unknown')), isNull);
-      expect(HomeWidgetLink.parse(Uri.parse('polypodium://plant')), isNull);
-      expect(HomeWidgetLink.parse(Uri.parse('polypodium://water?id=')), isNull);
-    });
-  });
 }
