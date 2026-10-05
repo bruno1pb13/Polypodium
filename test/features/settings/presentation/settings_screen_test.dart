@@ -14,6 +14,8 @@ import 'package:polypodium/features/workspaces/presentation/providers/workspace_
 import 'package:polypodium/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../helpers/accessibility.dart';
+
 class _FakePlantsRepository implements PlantsRepository {
   int reschedules = 0;
 
@@ -38,8 +40,9 @@ void main() {
   late SharedPreferences prefs;
   late _FakePlantsRepository plants;
 
-  Future<void> pump(WidgetTester tester, Workspace workspace) async {
-    tester.view.physicalSize = const Size(800, 2000);
+  Future<void> pump(WidgetTester tester, Workspace workspace,
+      {Size size = const Size(800, 2000)}) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
@@ -133,5 +136,28 @@ void main() {
           .selected,
       {'dark'},
     );
+  });
+
+  group('accessibility', () {
+    testWidgets('meets the tap target and labelling guidelines',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, remote);
+      await expectTapTargetGuidelines(tester);
+      await expectReadableText(tester);
+
+      await pump(tester, Workspace.newLocal());
+      await expectTapTargetGuidelines(tester);
+      semantics.dispose();
+    });
+
+    for (final scale in [1.5, 2.0]) {
+      testWidgets('lays out without overflow at text scale $scale',
+          (tester) async {
+        setTextScale(tester, scale);
+        await pump(tester, remote, size: const Size(400, 4000));
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 }

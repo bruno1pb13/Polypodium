@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polypodium/core/enums.dart';
+import 'package:polypodium/core/theme/app_theme.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/plants/presentation/providers/plants_providers.dart';
@@ -18,6 +19,8 @@ import 'package:polypodium/features/workspaces/domain/workspace_model.dart';
 import 'package:polypodium/features/workspaces/presentation/providers/workspace_providers.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../../helpers/accessibility.dart';
 
 class _FakeTransparencyNotifier extends TransparencyEnabledNotifier {
   @override
@@ -110,7 +113,8 @@ void main() {
   late List<String> plantCalls;
   late _FakeEntryMutations mutations;
 
-  Future<void> pump(WidgetTester tester, List<PlantWithSpecies> plants) async {
+  Future<void> pump(WidgetTester tester, List<PlantWithSpecies> plants,
+      {ThemeData? theme}) async {
     tester.view.physicalSize = const Size(420, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -134,11 +138,12 @@ void main() {
         locationsNotifierProvider.overrideWith(_EmptyLocationsNotifier.new),
         soilsNotifierProvider.overrideWith(_EmptySoilsNotifier.new),
       ],
-      child: const MaterialApp(
-        locale: Locale('pt'),
+      child: MaterialApp(
+        theme: theme,
+        locale: const Locale('pt'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: HomeScreen(),
+        home: const HomeScreen(),
       ),
     ));
     await tester.pumpAndSettle();
@@ -333,5 +338,49 @@ void main() {
     await tester.tap(find.text('Mostrar arquivadas'));
     await tester.pumpAndSettle();
     expect(find.text('Babosa'), findsOneWidget);
+  });
+
+  group('accessibility', () {
+    testWidgets('meets the tap target and labelling guidelines',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, [anturio, samambaia]);
+
+      await expectTapTargetGuidelines(tester);
+      expect(find.byTooltip('Adicionar planta'), findsOneWidget);
+      expect(find.bySemanticsLabel('Selecionar Samambaia'), findsOneWidget);
+      // The status badges are read by their label, not the emoji's name.
+      expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+      semantics.dispose();
+    });
+
+    testWidgets('text is readable over the dark theme surface',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      clearImageCache();
+      await pump(tester, [anturio, samambaia], theme: AppTheme.dark);
+      await expectReadableText(tester);
+      semantics.dispose();
+    });
+
+    testWidgets('selection mode meets the guidelines too', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, [anturio, samambaia]);
+      await tester.longPress(find.text('Samambaia'));
+      await tester.pumpAndSettle();
+
+      await expectTapTargetGuidelines(tester);
+      semantics.dispose();
+    });
+
+    for (final scale in [1.5, 2.0]) {
+      testWidgets('lays out without overflow at text scale $scale',
+          (tester) async {
+        setTextScale(tester, scale);
+        await pump(tester, [anturio, samambaia, babosa]);
+        expect(tester.takeException(), isNull);
+        expect(find.text('Samambaia'), findsOneWidget);
+      });
+    }
   });
 }

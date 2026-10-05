@@ -11,6 +11,8 @@ import 'package:polypodium/features/settings/presentation/providers/settings_pro
 import 'package:polypodium/features/species/domain/species_model.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
 
+import '../../../../helpers/accessibility.dart';
+
 class _FakeTransparencyNotifier extends TransparencyEnabledNotifier {
   _FakeTransparencyNotifier(this.value);
   final bool value;
@@ -199,6 +201,49 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(Image), findsNWidgets(2));
+    });
+  });
+
+  group('accessibility', () {
+    testWidgets('each chart has a spoken summary', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _wrap(PlantInsightsView(entries: richEntries(), pws: _pws())),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.bySemanticsLabel(
+            'Growth chart: 3 height records, from 20 cm to 31 cm'),
+        findsOneWidget,
+      );
+      expect(find.bySemanticsLabel('Health chart: 3 scores, most recent 5/5'),
+          findsOneWidget);
+      expect(
+        find.bySemanticsLabel('Watering chart: 4 intervals between waterings. '
+            'Average: every 4 days · Ideal: every 5 days'),
+        findsOneWidget,
+      );
+      // Event keys and the health stat name the types instead of the emoji.
+      expect(find.bySemanticsLabel('Fertilizing, Pruning'), findsOneWidget);
+      expect(find.bySemanticsLabel('Fertilizing, Pests, Pruning'),
+          findsOneWidget);
+      expect(find.bySemanticsLabel('Health 5/5'), findsOneWidget);
+      expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+      semantics.dispose();
+    });
+
+    testWidgets('lays out without overflow at text scale 2', (tester) async {
+      tester.view.physicalSize = const Size(400, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      setTextScale(tester, 2);
+
+      await tester.pumpWidget(
+        _wrap(PlantInsightsView(entries: richEntries(), pws: _pws())),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
     });
   });
 }

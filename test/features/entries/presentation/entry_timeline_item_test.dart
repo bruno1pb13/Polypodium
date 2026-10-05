@@ -8,13 +8,16 @@ import 'package:polypodium/features/entries/presentation/widgets/entry_timeline_
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
 
+import '../../../helpers/accessibility.dart';
+
 class _FakeTransparencyNotifier extends TransparencyEnabledNotifier {
   @override
   bool build() => false;
 }
 
 void main() {
-  Future<void> pump(WidgetTester tester, EntryModel entry) async {
+  Future<void> pump(WidgetTester tester, EntryModel entry,
+      {VoidCallback? onDelete}) async {
     await tester.pumpWidget(ProviderScope(
       overrides: [
         transparencyEnabledNotifierProvider
@@ -24,7 +27,8 @@ void main() {
         locale: const Locale('pt'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: EntryTimelineItem(entry: entry)),
+        home: Scaffold(
+            body: EntryTimelineItem(entry: entry, onDelete: onDelete)),
       ),
     ));
   }
@@ -96,5 +100,38 @@ void main() {
             extraData: '{"products":[{"defensivoId":"d1","name":"Neem"},'
                 '{"defensivoId":"d2","name":"Calda"}],"recurrenceDays":7}'));
     expect(find.text('🧪 2 produtos'), findsOneWidget);
+  });
+
+  group('accessibility', () {
+    testWidgets('the data badge is read without its emoji', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(
+          tester,
+          entry(EntryType.pest,
+              extraData: '{"pestType":"Cochonilha"}', numericValue: 2));
+
+      expect(find.bySemanticsLabel('Cochonilha · Moderada'), findsOneWidget);
+      expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+      semantics.dispose();
+    });
+
+    testWidgets('the health score badge is read without its emoji',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, entry(EntryType.observation, numericValue: 4));
+
+      expect(find.text('🟢 Saúde 4/5 — Boa'), findsOneWidget);
+      expect(find.bySemanticsLabel('Saúde 4/5 — Boa'), findsOneWidget);
+      semantics.dispose();
+    });
+
+    testWidgets('the delete button is labelled', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, entry(EntryType.observation), onDelete: () {});
+
+      expect(find.byTooltip('Deletar'), findsOneWidget);
+      await expectTapTargetGuidelines(tester);
+      semantics.dispose();
+    });
   });
 }

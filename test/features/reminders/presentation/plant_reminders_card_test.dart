@@ -8,6 +8,8 @@ import 'package:polypodium/features/reminders/presentation/widgets/plant_reminde
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
 
+import '../../../helpers/accessibility.dart';
+
 class _FakeTransparencyNotifier extends TransparencyEnabledNotifier {
   @override
   bool build() => true;
@@ -75,5 +77,33 @@ void main() {
     await tester.tap(find.byTooltip('Adicionar lembrete'));
     await tester.pumpAndSettle();
     expect(find.byType(ReminderDialog), findsOneWidget);
+  });
+
+  group('accessibility', () {
+    List<ReminderStatus> statuses() => [
+          status(EntryType.fertilizer, 30,
+              lastDoneAt: midnight.subtract(const Duration(days: 33))),
+          status(EntryType.pruning, 10, lastDoneAt: midnight),
+        ];
+
+    testWidgets('rows are read by type, not by emoji', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, statuses());
+
+      expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+      expect(find.bySemanticsLabel(RegExp('^Fertilização')), findsOneWidget);
+      await expectTapTargetGuidelines(tester);
+      semantics.dispose();
+    });
+
+    testWidgets('lays out without overflow at text scale 2', (tester) async {
+      tester.view.physicalSize = const Size(400, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      setTextScale(tester, 2);
+
+      await pump(tester, statuses());
+      expect(tester.takeException(), isNull);
+    });
   });
 }

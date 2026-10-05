@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polypodium/core/enums.dart';
+import 'package:polypodium/core/theme/app_theme.dart';
 import 'package:polypodium/features/entries/domain/entry_model.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/locations/domain/location_model.dart';
@@ -18,6 +19,8 @@ import 'package:polypodium/features/species/domain/species_model.dart';
 import 'package:polypodium/features/species/presentation/providers/species_providers.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../../helpers/accessibility.dart';
 
 class _FakeTransparencyNotifier extends TransparencyEnabledNotifier {
   @override
@@ -114,8 +117,9 @@ void main() {
 
   late List<(String, PlantStatus)> statusChanges;
 
-  Future<void> pump(WidgetTester tester, PlantModel plant) async {
-    tester.view.physicalSize = const Size(800, 2400);
+  Future<void> pump(WidgetTester tester, PlantModel plant,
+      {Size size = const Size(800, 2400), ThemeData? theme}) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
@@ -143,11 +147,12 @@ void main() {
         plantRemindersProvider('p1')
             .overrideWith((ref) => Stream.value(const [])),
       ],
-      child: const MaterialApp(
-        locale: Locale('pt'),
+      child: MaterialApp(
+        theme: theme,
+        locale: const Locale('pt'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: PlantDetailScreen(plantId: 'p1'),
+        home: const PlantDetailScreen(plantId: 'p1'),
       ),
     ));
     await tester.pumpAndSettle();
@@ -258,5 +263,65 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Deletar planta?'), findsNothing);
     expect(statusChanges, isEmpty);
+  });
+
+  group('accessibility', () {
+    testWidgets('meets the tap target and labelling guidelines',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, plant());
+
+      await expectTapTargetGuidelines(tester);
+      expect(find.byTooltip('Editar planta'), findsOneWidget);
+      expect(find.byTooltip('Deletar planta'), findsOneWidget);
+      expect(find.byTooltip('Novo Registro'), findsOneWidget);
+      // Alerts, status rows and the diary don't read emoji names out.
+      expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+
+      await tester.tap(find.text('Gráficos'));
+      await tester.pumpAndSettle();
+      await expectTapTargetGuidelines(tester);
+      semantics.dispose();
+    });
+
+    testWidgets('text is readable over the dark theme surface',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      clearImageCache();
+      await pump(tester, plant(), theme: AppTheme.dark);
+      await expectReadableText(tester);
+      semantics.dispose();
+    });
+
+    testWidgets('the view selector reports the selected view',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, plant());
+
+      expect(
+        tester.getSemantics(find.text('Diário')),
+        matchesSemantics(
+          label: 'Diário',
+          isButton: true,
+          isSelected: true,
+          hasSelectedState: true,
+          hasTapAction: true,
+        ),
+      );
+      semantics.dispose();
+    });
+
+    for (final scale in [1.5, 2.0]) {
+      testWidgets('lays out without overflow at text scale $scale',
+          (tester) async {
+        setTextScale(tester, scale);
+        await pump(tester, plant(), size: const Size(400, 2400));
+        expect(tester.takeException(), isNull);
+
+        await tester.tap(find.text('Gráficos'));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 }
