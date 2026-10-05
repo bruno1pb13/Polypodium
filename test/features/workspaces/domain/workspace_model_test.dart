@@ -26,4 +26,47 @@ void main() {
     expect(out.serverUrl, 'https://plantas.example');
     expect(out.deviceId, 'dev-1');
   });
+
+  group('garden', () {
+    final ws = Workspace(
+      id: 'w1',
+      name: 'Horta',
+      type: WorkspaceType.remote,
+      serverUrl: 'https://plantas.example',
+      userEmail: 'a@b.c',
+      token: 'jwt',
+      deviceId: 'dev-1',
+      createdAt: DateTime(2026, 1, 1),
+      gardenId: 'g1',
+      gardenName: 'Horta',
+    );
+
+    test('round-trips through JSON', () {
+      final out = Workspace.fromJson(ws.toJson());
+      expect(out.gardenId, 'g1');
+      expect(out.gardenName, 'Horta');
+    });
+
+    test('a workspace saved before gardens targets the personal garden', () {
+      final json = ws.toJson()
+        ..remove('gardenId')
+        ..remove('gardenName');
+      final out = Workspace.fromJson(json);
+      expect(out.gardenId, isNull);
+      expect(out.gardenName, isNull);
+    });
+
+    test('survives disconnecting, so reconnecting syncs the same garden', () {
+      final out = ws.disconnected();
+      expect(out.gardenId, 'g1');
+      expect(out.gardenName, 'Horta');
+    });
+
+    test('copyWith can clear it', () {
+      final out = ws.copyWith(gardenId: null, gardenName: null);
+      expect(out.gardenId, isNull);
+      expect(out.gardenName, isNull);
+      expect(ws.copyWith(name: 'x').gardenId, 'g1');
+    });
+  });
 }

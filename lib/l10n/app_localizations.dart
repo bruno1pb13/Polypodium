@@ -4159,6 +4159,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plant not found in this space'**
   String get labelPlantNotFound;
+
+  /// No description provided for @gardenMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Garden members'**
+  String get gardenMembers;
+
+  /// No description provided for @gardenPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal garden'**
+  String get gardenPersonal;
+
+  /// No description provided for @gardenOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{email}\'s garden'**
+  String gardenOf(String email);
+
+  /// No description provided for @gardenRoleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get gardenRoleOwner;
+
+  /// No description provided for @gardenRoleMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get gardenRoleMember;
+
+  /// No description provided for @gardenYou.
+  ///
+  /// In en, this message translates to:
+  /// **'{email} (you)'**
+  String gardenYou(String email);
+
+  /// No description provided for @gardenYouAreOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'You own this garden'**
+  String get gardenYouAreOwner;
+
+  /// No description provided for @gardenYouAreMember.
+  ///
+  /// In en, this message translates to:
+  /// **'You are a member of this garden'**
+  String get gardenYouAreMember;
+
+  /// No description provided for @gardenAddMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Add member'**
+  String get gardenAddMember;
+
+  /// No description provided for @gardenAddMemberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The member needs an account on this server, created by its administrator.'**
+  String get gardenAddMemberHint;
+
+  /// No description provided for @gardenMemberAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{email} added.'**
+  String gardenMemberAdded(String email);
+
+  /// No description provided for @gardenRemoveMemberTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {email}'**
+  String gardenRemoveMemberTooltip(String email);
+
+  /// No description provided for @gardenRemoveMemberTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove member?'**
+  String get gardenRemoveMemberTitle;
+
+  /// No description provided for @gardenRemoveMemberBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{email} will no longer sync this garden. What they recorded stays in it.'**
+  String gardenRemoveMemberBody(String email);
+
+  /// No description provided for @gardenRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get gardenRemove;
+
+  /// No description provided for @gardenLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave garden'**
+  String get gardenLeave;
+
+  /// No description provided for @gardenLeaveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This workspace will stop syncing with the garden. Its data stays on this device.'**
+  String get gardenLeaveBody;
+
+  /// No description provided for @gardenLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'You left the garden.'**
+  String get gardenLeft;
+
+  /// No description provided for @newSharedGarden.
+  ///
+  /// In en, this message translates to:
+  /// **'New shared garden'**
+  String get newSharedGarden;
+
+  /// No description provided for @newSharedGardenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Creates an empty garden on this server, in a new workspace. Add members to share it.'**
+  String get newSharedGardenBody;
+
+  /// No description provided for @gardenNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Garden name'**
+  String get gardenNameLabel;
+
+  /// No description provided for @openGarden.
+  ///
+  /// In en, this message translates to:
+  /// **'Open another garden'**
+  String get openGarden;
+
+  /// No description provided for @pickGardenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Which garden?'**
+  String get pickGardenTitle;
+
+  /// No description provided for @pickGardenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This account takes part in shared gardens on this server. Each one syncs in its own workspace.'**
+  String get pickGardenBody;
+
+  /// No description provided for @errorGardenAccessDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'You are no longer a member of this garden.'**
+  String get errorGardenAccessDenied;
+
+  /// No description provided for @errorGardensUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This server doesn\'t support shared gardens yet. Update it to use them.'**
+  String get errorGardensUnsupported;
+
+  /// No description provided for @errorGardenAccountNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No account with this e-mail on this server.'**
+  String get errorGardenAccountNotFound;
+
+  /// No description provided for @errorGardenAlreadyMember.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is already a member.'**
+  String get errorGardenAlreadyMember;
+
+  /// No description provided for @gardenRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get gardenRetry;
 }
 
 class _AppLocalizationsDelegate

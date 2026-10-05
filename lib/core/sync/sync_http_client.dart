@@ -12,6 +12,15 @@ import 'sync_exceptions.dart';
 /// (see Polypodium_server's docs/api.md).
 const entryTypesHeader = 'X-Polypodium-Entry-Types';
 
+/// Selects the server garden a sync or photo request acts on. Sent only for
+/// a workspace that targets a garden other than the account's personal one,
+/// so requests stay exactly as before for every other workspace.
+const gardenHeader = 'X-Polypodium-Garden';
+
+/// The [gardenHeader] entry for [gardenId], or nothing when it is null.
+Map<String, String> gardenHeaders(String? gardenId) =>
+    gardenId == null ? const {} : {gardenHeader: gardenId};
+
 class ChangesPage {
   final List<SyncChange> changes;
   final int nextCursor;
@@ -46,7 +55,10 @@ class ReceiveResult {
 /// `/sync/changes` + `/sync/receive` + `/sync/ack` contract this client
 /// calls; see Polypodium_server's sync_handler.dart.
 class SyncHttpClient {
-  const SyncHttpClient();
+  const SyncHttpClient({this.gardenId});
+
+  /// Garden every request targets; null for the personal garden.
+  final String? gardenId;
 
   Future<ChangesPage> fetchChanges({
     required String serverUrl,
@@ -71,6 +83,9 @@ class SyncHttpClient {
 
     if (response.statusCode == 401) {
       throw const SessionExpiredException();
+    }
+    if (response.statusCode == 403 && gardenId != null) {
+      throw const GardenAccessDeniedException();
     }
     if (response.statusCode != 200) {
       throw const SyncReceiveException();
@@ -110,6 +125,9 @@ class SyncHttpClient {
     if (response.statusCode == 401) {
       throw const SessionExpiredException();
     }
+    if (response.statusCode == 403 && gardenId != null) {
+      throw const GardenAccessDeniedException();
+    }
     if (response.statusCode != 200) {
       throw const SyncSendException();
     }
@@ -141,6 +159,7 @@ class SyncHttpClient {
   Map<String, String> _authHeaders(String token) => {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
+        ...gardenHeaders(gardenId),
       };
 
   static Set<String>? _stringSet(Object? json) =>

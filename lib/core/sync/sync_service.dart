@@ -26,15 +26,19 @@ class SyncService {
     this._store,
     PhotoStorage photoStorage, {
     WorkspaceAuthClient authClient = const WorkspaceAuthClient(),
-    SyncHttpClient httpClient = const SyncHttpClient(),
+    SyncHttpClient? httpClient,
     INotificationService notifications = const NotificationService(),
   })  : _authClient = authClient,
         _plantsRepo = PlantsRepository(db, notifications),
         _orchestrator = SyncOrchestrator(
           storage: DriftSyncStorageAdapter(db),
           cursors: DriftSyncCursorStore(db),
-          httpClient: httpClient,
-          photos: PhotoSyncClient(photoStorage),
+          // A workspace's garden is fixed when it is created, so the clients
+          // can carry it instead of every call.
+          httpClient:
+              httpClient ?? SyncHttpClient(gardenId: _store.current.gardenId),
+          photos: PhotoSyncClient(photoStorage,
+              gardenId: _store.current.gardenId),
         );
 
   final WorkspaceConfigStore _store;

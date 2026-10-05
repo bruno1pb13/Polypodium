@@ -2425,4 +2425,108 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get labelPlantNotFound => 'Plant not found in this space';
+
+  @override
+  String get gardenMembers => 'Garden members';
+
+  @override
+  String get gardenPersonal => 'Personal garden';
+
+  @override
+  String gardenOf(String email) {
+    return '$email\'s garden';
+  }
+
+  @override
+  String get gardenRoleOwner => 'Owner';
+
+  @override
+  String get gardenRoleMember => 'Member';
+
+  @override
+  String gardenYou(String email) {
+    return '$email (you)';
+  }
+
+  @override
+  String get gardenYouAreOwner => 'You own this garden';
+
+  @override
+  String get gardenYouAreMember => 'You are a member of this garden';
+
+  @override
+  String get gardenAddMember => 'Add member';
+
+  @override
+  String get gardenAddMemberHint =>
+      'The member needs an account on this server, created by its administrator.';
+
+  @override
+  String gardenMemberAdded(String email) {
+    return '$email added.';
+  }
+
+  @override
+  String gardenRemoveMemberTooltip(String email) {
+    return 'Remove $email';
+  }
+
+  @override
+  String get gardenRemoveMemberTitle => 'Remove member?';
+
+  @override
+  String gardenRemoveMemberBody(String email) {
+    return '$email will no longer sync this garden. What they recorded stays in it.';
+  }
+
+  @override
+  String get gardenRemove => 'Remove';
+
+  @override
+  String get gardenLeave => 'Leave garden';
+
+  @override
+  String get gardenLeaveBody =>
+      'This workspace will stop syncing with the garden. Its data stays on this device.';
+
+  @override
+  String get gardenLeft => 'You left the garden.';
+
+  @override
+  String get newSharedGarden => 'New shared garden';
+
+  @override
+  String get newSharedGardenBody =>
+      'Creates an empty garden on this server, in a new workspace. Add members to share it.';
+
+  @override
+  String get gardenNameLabel => 'Garden name';
+
+  @override
+  String get openGarden => 'Open another garden';
+
+  @override
+  String get pickGardenTitle => 'Which garden?';
+
+  @override
+  String get pickGardenBody =>
+      'This account takes part in shared gardens on this server. Each one syncs in its own workspace.';
+
+  @override
+  String get errorGardenAccessDenied =>
+      'You are no longer a member of this garden.';
+
+  @override
+  String get errorGardensUnsupported =>
+      'This server doesn\'t support shared gardens yet. Update it to use them.';
+
+  @override
+  String get errorGardenAccountNotFound =>
+      'No account with this e-mail on this server.';
+
+  @override
+  String get errorGardenAlreadyMember => 'This account is already a member.';
+
+  @override
+  String get gardenRetry => 'Try again';
 }

@@ -1234,5 +1234,60 @@
   "labelScanHint": "Point the camera at a plant label",
   "labelScanCameraError": "Couldn't open the camera",
   "labelScanInvalid": "This code isn't a Polypodium label",
-  "labelPlantNotFound": "Plant not found in this space"
+  "labelPlantNotFound": "Plant not found in this space",
+
+  "gardenMembers": "Garden members",
+  "gardenPersonal": "Personal garden",
+  "gardenOf": "{email}'s garden",
+  "@gardenOf": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "gardenRoleOwner": "Owner",
+  "gardenRoleMember": "Member",
+  "gardenYou": "{email} (you)",
+  "@gardenYou": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "gardenYouAreOwner": "You own this garden",
+  "gardenYouAreMember": "You are a member of this garden",
+  "gardenAddMember": "Add member",
+  "gardenAddMemberHint": "The member needs an account on this server, created by its administrator.",
+  "gardenMemberAdded": "{email} added.",
+  "@gardenMemberAdded": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "gardenRemoveMemberTooltip": "Remove {email}",
+  "@gardenRemoveMemberTooltip": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "gardenRemoveMemberTitle": "Remove member?",
+  "gardenRemoveMemberBody": "{email} will no longer sync this garden. What they recorded stays in it.",
+  "@gardenRemoveMemberBody": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "gardenRemove": "Remove",
+  "gardenLeave": "Leave garden",
+  "gardenLeaveBody": "This workspace will stop syncing with the garden. Its data stays on this device.",
+  "gardenLeft": "You left the garden.",
+  "newSharedGarden": "New shared garden",
+  "newSharedGardenBody": "Creates an empty garden on this server, in a new workspace. Add members to share it.",
+  "gardenNameLabel": "Garden name",
+  "openGarden": "Open another garden",
+  "pickGardenTitle": "Which garden?",
+  "pickGardenBody": "This account takes part in shared gardens on this server. Each one syncs in its own workspace.",
+  "errorGardenAccessDenied": "You are no longer a member of this garden.",
+  "errorGardensUnsupported": "This server doesn't support shared gardens yet. Update it to use them.",
+  "errorGardenAccountNotFound": "No account with this e-mail on this server.",
+  "errorGardenAlreadyMember": "This account is already a member.",
+  "gardenRetry": "Try again"
 }
