@@ -21,6 +21,9 @@ class PlantModel {
   final int? pesticideReapplicationDays;
   final PlantStatus status;
   final DateTime? statusChangedAt;
+
+  /// The plant this one is a cutting of. May point at a deleted plant.
+  final String? parentPlantId;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -39,6 +42,7 @@ class PlantModel {
     this.pesticideReapplicationDays,
     this.status = PlantStatus.active,
     this.statusChangedAt,
+    this.parentPlantId,
     required this.createdAt,
     DateTime? updatedAt,
     this.deletedAt,
@@ -60,6 +64,7 @@ class PlantModel {
     Object? pesticideReapplicationDays = _sentinel,
     PlantStatus? status,
     Object? statusChangedAt = _sentinel,
+    Object? parentPlantId = _sentinel,
     DateTime? createdAt,
     DateTime? updatedAt,
     Object? deletedAt = _sentinel,
@@ -89,6 +94,9 @@ class PlantModel {
         statusChangedAt: statusChangedAt == _sentinel
             ? this.statusChangedAt
             : statusChangedAt as DateTime?,
+        parentPlantId: parentPlantId == _sentinel
+            ? this.parentPlantId
+            : parentPlantId as String?,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt == _sentinel ? this.deletedAt : deletedAt as DateTime?,

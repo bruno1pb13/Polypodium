@@ -345,6 +345,7 @@
   "plantInactiveHint": "No reminders while inactive. The diary is kept.",
   "showArchivedPlants": "Show archived",
   "historyFieldStatus": "Status",
+  "historyFieldParent": "Cutting of",
   "speciesSurvivalRate": "{total, plural, one{Survival: {percent}% ({alive} of {total} plant)} other{Survival: {percent}% ({alive} of {total} plants)}}",
   "@speciesSurvivalRate": {
     "placeholders": {
@@ -996,5 +997,16 @@
     "placeholders": {
       "diameter": {"type": "String"}
     }
-  }
+  },
+  "parentPlantLabel": "Cutting of",
+  "parentPlantHelper": "The plant this one was propagated from.",
+  "cuttingsLabel": "Cuttings",
+  "createCutting": "Create cutting",
+  "cuttingNicknameSuggestion": "{name} (cutting)",
+  "@cuttingNicknameSuggestion": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "parentPlantRemoved": "Removed plant"
 }

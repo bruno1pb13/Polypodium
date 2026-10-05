@@ -138,12 +138,16 @@ void main() {
   // Pushes the screen over a launcher route so the Navigator.pop on save has
   // somewhere to go back to. The launcher deliberately doesn't watch the
   // plants: saving must not depend on the list being alive.
-  Future<void> pump(WidgetTester tester, {PlantModel? plant}) async {
+  Future<void> pump(WidgetTester tester,
+      {PlantModel? plant,
+      List<PlantModel> others = const [],
+      PlantModel? cuttingOf}) async {
     tester.view.physicalSize = const Size(800, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    repository = _FakePlantsRepository([if (plant != null) plant]);
+    repository =
+        _FakePlantsRepository([if (plant != null) plant, ...others]);
     mutations = _FakeEntryMutations();
     await tester.pumpWidget(ProviderScope(
       overrides: [
@@ -169,7 +173,9 @@ void main() {
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (_) => AddEditPlantScreen(plant: plant)),
+                    builder: (_) => cuttingOf != null
+                        ? AddEditPlantScreen.cutting(parent: cuttingOf)
+                        : AddEditPlantScreen(plant: plant)),
               ),
               child: const Text('open'),
             ),
@@ -389,5 +395,107 @@ void main() {
     await save(tester, 'Adicionar planta');
     expect(find.text('Selecione um tipo de solo'), findsOneWidget);
     expect(repository.saved, isEmpty);
+  });
+
+  group('lineage', () {
+    PlantModel plantOf(String id, String nickname,
+            {String? parent, PlantStatus status = PlantStatus.active}) =>
+        PlantModel(
+          id: id,
+          speciesId: 's1',
+          nickname: nickname,
+          soilId: 'loamy',
+          locationId: 'l1',
+          irrigationFrequencyDays: 4,
+          acquisitionDate: DateTime(2024, 1, 10),
+          parentPlantId: parent,
+          status: status,
+          createdAt: DateTime(2024, 1, 10),
+        );
+
+    Finder parentDropdown() => find.byType(DropdownButtonFormField<String?>);
+
+    testWidgets('the parent picker leaves out the plant and its descendants',
+        (tester) async {
+      final mother = plantOf('a', 'Mãe');
+      await pump(tester, plant: mother, others: [
+        plantOf('b', 'Filha', parent: 'a'),
+        plantOf('c', 'Neta', parent: 'b'),
+        plantOf('d', 'Vizinha'),
+        plantOf('e', 'Antiga', status: PlantStatus.archived),
+      ]);
+
+      expect(find.text('Muda de'), findsOneWidget);
+      await tester.tap(parentDropdown());
+      await tester.pumpAndSettle();
+      expect(find.text('Vizinha'), findsWidgets);
+      expect(find.text('Antiga · Arquivada'), findsWidgets);
+      expect(find.text('Filha'), findsNothing);
+      expect(find.text('Neta'), findsNothing);
+
+      await tester.tap(find.text('Vizinha').last);
+      await tester.pumpAndSettle();
+      await save(tester, 'Salvar alterações');
+
+      expect(repository.saved.single.parentPlantId, 'd');
+      final l10n = systemL10n();
+      expect(
+        mutations.created.single.note,
+        '${l10n.historyUpdatedHeader}\n'
+        '• ${l10n.historyFieldParent}: ${l10n.none} → Vizinha',
+      );
+    });
+
+    testWidgets('a removed parent is kept and shown as such', (tester) async {
+      await pump(tester,
+          plant: plantOf('b', 'Filha', parent: 'gone'),
+          others: [plantOf('d', 'Vizinha')]);
+
+      expect(find.text('Planta removida'), findsOneWidget);
+      await save(tester, 'Salvar alterações');
+      expect(repository.saved.single.parentPlantId, 'gone');
+      expect(mutations.created, isEmpty);
+    });
+
+    testWidgets('is hidden when there is no other plant', (tester) async {
+      await pump(tester);
+      expect(find.text('Muda de'), findsNothing);
+    });
+
+    testWidgets('creating a cutting prefills it from the parent',
+        (tester) async {
+      final mother = plantOf('a', 'Samambaia');
+      await pump(tester, cuttingOf: mother, others: [mother]);
+
+      expect(find.text('Nova planta'), findsOneWidget);
+      expect(
+          tester
+              .widget<TextFormField>(field('Apelido *'))
+              .controller!
+              .text,
+          'Samambaia (muda)');
+      expect(find.text('Samambaia (Polypodium vulgare)'), findsOneWidget);
+      expect(find.text('Franco'), findsOneWidget);
+      expect(find.text('Varanda'), findsOneWidget);
+      expect(
+          find.descendant(
+              of: parentDropdown(), matching: find.text('Samambaia')),
+          findsOneWidget);
+
+      await save(tester, 'Adicionar planta');
+
+      final cutting = repository.saved.single;
+      expect(cutting.id, isNot('a'));
+      expect(cutting.nickname, 'Samambaia (muda)');
+      expect(cutting.parentPlantId, 'a');
+      expect(cutting.speciesId, 's1');
+      expect(cutting.soilId, 'loamy');
+      expect(cutting.locationId, 'l1');
+      expect(cutting.irrigationFrequencyDays, isNull);
+      expect(cutting.lastIrrigatedAt, isNull);
+      final l10n = systemL10n();
+      expect(mutations.created.single.note,
+          contains('• ${l10n.historyFieldParent}: Samambaia'));
+    });
   });
 }

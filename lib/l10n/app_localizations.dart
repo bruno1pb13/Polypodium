@@ -1220,6 +1220,12 @@ abstract class AppLocalizations {
   /// **'Status'**
   String get historyFieldStatus;
 
+  /// No description provided for @historyFieldParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Cutting of'**
+  String get historyFieldParent;
+
   /// No description provided for @speciesSurvivalRate.
   ///
   /// In en, this message translates to:
@@ -3685,6 +3691,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{diameter} cm pot'**
   String potDiameterSummary(String diameter);
+
+  /// No description provided for @parentPlantLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cutting of'**
+  String get parentPlantLabel;
+
+  /// No description provided for @parentPlantHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'The plant this one was propagated from.'**
+  String get parentPlantHelper;
+
+  /// No description provided for @cuttingsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cuttings'**
+  String get cuttingsLabel;
+
+  /// No description provided for @createCutting.
+  ///
+  /// In en, this message translates to:
+  /// **'Create cutting'**
+  String get createCutting;
+
+  /// No description provided for @cuttingNicknameSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (cutting)'**
+  String cuttingNicknameSuggestion(String name);
+
+  /// No description provided for @parentPlantRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed plant'**
+  String get parentPlantRemoved;
 }
 
 class _AppLocalizationsDelegate

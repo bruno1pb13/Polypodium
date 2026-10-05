@@ -202,6 +202,7 @@
   "plantInactiveHint": "Sem lembretes enquanto inativa. O diário é mantido.",
   "showArchivedPlants": "Mostrar arquivadas",
   "historyFieldStatus": "Status",
+  "historyFieldParent": "Muda de",
   "speciesSurvivalRate": "{total, plural, one{Sobrevivência: {percent}% ({alive} de {total} planta)} other{Sobrevivência: {percent}% ({alive} de {total} plantas)}}",
   "cancelSelection": "Cancelar seleção",
   "selectedCount": "{count} selecionada(s)",
@@ -629,5 +630,11 @@
   "newSoilLabel": "Novo solo",
   "newSoilHint": "Também altera o solo da planta.",
   "keepCurrentSoil": "Manter o solo atual",
-  "potDiameterSummary": "Vaso de {diameter} cm"
+  "potDiameterSummary": "Vaso de {diameter} cm",
+  "parentPlantLabel": "Muda de",
+  "parentPlantHelper": "A planta de onde esta foi propagada.",
+  "cuttingsLabel": "Mudas",
+  "createCutting": "Criar muda",
+  "cuttingNicknameSuggestion": "{name} (muda)",
+  "parentPlantRemoved": "Planta removida"
 }

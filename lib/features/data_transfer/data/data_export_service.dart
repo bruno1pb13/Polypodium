@@ -148,6 +148,7 @@ class DataExportService {
               'pesticideReapplicationDays': r.pesticideReapplicationDays,
               'status': r.status.name,
               'statusChangedAt': r.statusChangedAt?.toIso8601String(),
+              'parentPlantId': r.parentPlantId,
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),

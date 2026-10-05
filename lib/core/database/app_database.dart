@@ -66,7 +66,7 @@ class AppDatabase extends _$AppDatabase {
   final String? deviceId;
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -188,7 +188,10 @@ class AppDatabase extends _$AppDatabase {
                 deviceId: Value(deviceId),
               ));
             }
-            await m.alterTable(TableMigration(plantsTable));
+            // The rebuilt table has the current shape; columns added by
+            // later steps don't exist yet in the old one.
+            await m.alterTable(TableMigration(plantsTable,
+                newColumns: [plantsTable.parentPlantId]));
           }
           if (from < 16) {
             // Species care sheet. Same missing-table guard as the v15 step.
@@ -205,6 +208,14 @@ class AppDatabase extends _$AppDatabase {
                   await m.addColumn(speciesTable, column);
                 }
               }
+            }
+          }
+          if (from < 17) {
+            // Cutting lineage. The v14 rebuild above already creates it.
+            final columns = await _columnNames(plantsTable);
+            if (columns.isNotEmpty &&
+                !columns.contains(plantsTable.parentPlantId.name)) {
+              await m.addColumn(plantsTable, plantsTable.parentPlantId);
             }
           }
         },

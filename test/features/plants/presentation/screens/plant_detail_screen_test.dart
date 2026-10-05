@@ -10,7 +10,9 @@ import 'package:polypodium/features/locations/presentation/providers/locations_p
 import 'package:polypodium/features/plants/data/plants_repository.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/plants/presentation/providers/plants_providers.dart';
+import 'package:polypodium/features/plants/presentation/screens/add_edit_plant_screen.dart';
 import 'package:polypodium/features/plants/presentation/screens/plant_detail_screen.dart';
+import 'package:polypodium/features/plants/presentation/widgets/plant_detail/plant_lineage_card.dart';
 import 'package:polypodium/features/plants/presentation/widgets/plant_status.dart';
 import 'package:polypodium/features/reminders/presentation/providers/reminders_providers.dart';
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
@@ -124,7 +126,8 @@ void main() {
   Future<void> pump(WidgetTester tester, PlantModel plant,
       {Size size = const Size(800, 2400),
       ThemeData? theme,
-      SpeciesModel? species}) async {
+      SpeciesModel? species,
+      List<PlantModel> others = const []}) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -135,7 +138,8 @@ void main() {
         transparencyEnabledNotifierProvider
             .overrideWith(_FakeTransparencyNotifier.new),
         plantsNotifierProvider
-            .overrideWith(() => _FakePlantsNotifier([plant], statusChanges)),
+            .overrideWith(
+                () => _FakePlantsNotifier([plant, ...others], statusChanges)),
         plantsRepositoryProvider
             .overrideWithValue(_FakePlantsRepository(plant)),
         speciesNotifierProvider
@@ -270,6 +274,136 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Deletar planta?'), findsNothing);
     expect(statusChanges, isEmpty);
+  });
+
+  group('lineage', () {
+    PlantModel relative(String id, String nickname,
+            {String? parent, PlantStatus status = PlantStatus.active}) =>
+        PlantModel(
+          id: id,
+          speciesId: 's1',
+          nickname: nickname,
+          soilId: 'loamy',
+          acquisitionDate: DateTime(2024, 1, 1),
+          parentPlantId: parent,
+          status: status,
+          createdAt: DateTime(2024, 1, 1),
+        );
+
+    testWidgets('shows the parent and the cuttings', (tester) async {
+      await pump(tester, plant().copyWith(parentPlantId: 'mae'), others: [
+        relative('mae', 'Samambaia mãe', status: PlantStatus.archived),
+        relative('m1', 'Muda 1', parent: 'p1'),
+        relative('m2', 'Muda 2', parent: 'p1'),
+        relative('x', 'Outra'),
+      ]);
+
+      expect(find.text('Muda de'), findsOneWidget);
+      expect(find.text('Samambaia mãe · Arquivada'), findsOneWidget);
+      expect(find.text('Mudas'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('Muda 1'), findsOneWidget);
+      expect(find.text('Muda 2'), findsOneWidget);
+      expect(find.text('Outra'), findsNothing);
+      expect(find.text('Criar muda'), findsOneWidget);
+    });
+
+    testWidgets('a deleted parent is shown as removed, without a link',
+        (tester) async {
+      await pump(tester, plant().copyWith(parentPlantId: 'gone'));
+
+      expect(find.text('Planta removida'), findsOneWidget);
+      expect(
+          find.descendant(
+              of: find.byType(PlantLineageCard),
+              matching: find.byIcon(Icons.chevron_right)),
+          findsNothing);
+      expect(find.text('Mudas'), findsNothing);
+    });
+
+    testWidgets('"Criar muda" opens the form prefilled from this plant',
+        (tester) async {
+      await pump(tester, plant());
+      await tester.tap(find.text('Criar muda'));
+      await tester.pumpAndSettle();
+
+      final screen =
+          tester.widget<AddEditPlantScreen>(find.byType(AddEditPlantScreen));
+      expect(screen.plant, isNull);
+      expect(screen.cuttingOf?.id, 'p1');
+    });
+
+    testWidgets('rows open the linked plants', (tester) async {
+      final opened = <String>[];
+      var created = 0;
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          transparencyEnabledNotifierProvider
+              .overrideWith(_FakeTransparencyNotifier.new),
+        ],
+        child: MaterialApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: PlantLineageCard(
+              plant: plant().copyWith(parentPlantId: 'mae'),
+              plants: [
+                relative('mae', 'Samambaia mãe'),
+                relative('m1', 'Muda 1', parent: 'p1'),
+              ],
+              onOpenPlant: opened.add,
+              onCreateCutting: () => created++,
+            ),
+          ),
+        ),
+      ));
+
+      await tester.tap(find.text('Samambaia mãe'));
+      await tester.tap(find.text('Muda 1'));
+      await tester.tap(find.text('Criar muda'));
+      expect(opened, ['mae', 'm1']);
+      expect(created, 1);
+    });
+
+    testWidgets('meets the tap target and labelling guidelines',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, plant().copyWith(parentPlantId: 'mae'), others: [
+        relative('mae', 'Samambaia mãe'),
+        relative('m1', 'Muda 1', parent: 'p1'),
+      ]);
+      await expectTapTargetGuidelines(tester);
+      expect(find.bySemanticsLabel(RegExp('Samambaia mãe')), findsWidgets);
+      semantics.dispose();
+    });
+
+    for (final (name, theme) in appThemes) {
+      testWidgets('is readable in the $name theme', (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pump(tester, plant().copyWith(parentPlantId: 'mae'),
+            theme: theme,
+            others: [
+              relative('mae', 'Samambaia mãe'),
+              relative('m1', 'Muda 1', parent: 'p1'),
+            ]);
+        await paintBackground(tester);
+        await expectReadableText(tester);
+        semantics.dispose();
+      });
+    }
+
+    testWidgets('lays out without overflow at text scale 2.0',
+        (tester) async {
+      setTextScale(tester, 2.0);
+      await pump(tester, plant().copyWith(parentPlantId: 'mae'),
+          size: const Size(400, 3200),
+          others: [
+            relative('mae', 'Samambaia mãe com nome comprido'),
+            relative('m1', 'Muda 1', parent: 'p1'),
+          ]);
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('species care card', () {

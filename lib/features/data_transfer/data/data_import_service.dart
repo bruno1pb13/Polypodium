@@ -378,6 +378,8 @@ class DataImportService {
       statusChangedAt: Value(row['statusChangedAt'] != null
           ? DateTime.parse(row['statusChangedAt'] as String)
           : null),
+      // Backups from before schema v17 have no lineage.
+      parentPlantId: Value(row['parentPlantId'] as String?),
       createdAt: DateTime.parse(row['createdAt'] as String),
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),

@@ -183,6 +183,7 @@ class WorkspaceMigrationService {
           pesticideReapplicationDays: Value(row.pesticideReapplicationDays),
           status: Value(row.status),
           statusChangedAt: Value(row.statusChangedAt),
+          parentPlantId: Value(row.parentPlantId),
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),

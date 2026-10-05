@@ -130,6 +130,10 @@ class PlantMutations {
       if (location != null) {
         sb.writeln('• ${l10n.historyFieldLocation}: ${location.name}');
       }
+      if (next.parentPlantId != null) {
+        sb.writeln('• ${l10n.historyFieldParent}: '
+            '${await _plantName(next.parentPlantId, l10n)}');
+      }
       sb.writeln(
           '• ${l10n.historyAcquiredOn}: ${dateFmt.format(next.acquisitionDate)}');
       if (next.irrigationFrequencyDays != null) {
@@ -188,8 +192,21 @@ class PlantMutations {
           '${l10n.historyFieldStatus}: ${old.status.label(l10n)} → ${next.status.label(l10n)}');
     }
 
+    if (old.parentPlantId != next.parentPlantId) {
+      changes.add('${l10n.historyFieldParent}: '
+          '${await _plantName(old.parentPlantId, l10n)} → '
+          '${await _plantName(next.parentPlantId, l10n)}');
+    }
+
     if (changes.isEmpty) return null;
     return '${l10n.historyUpdatedHeader}\n${changes.map((c) => '• $c').join('\n')}';
+  }
+
+  /// Nickname of the plant [id] (deleted ones included), for history notes.
+  Future<String> _plantName(String? id, AppLocalizations l10n) async {
+    if (id == null) return l10n.none;
+    final plant = await _ref.read(plantsRepositoryProvider).getById(id);
+    return plant?.nickname ?? l10n.unknown;
   }
 
   /// Trigger immediate sync if logged in.

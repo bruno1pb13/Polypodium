@@ -1923,6 +1923,15 @@ class $PlantsTableTable extends PlantsTable
   late final GeneratedColumn<DateTime> statusChangedAt =
       GeneratedColumn<DateTime>('status_changed_at', aliasedName, true,
           type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _parentPlantIdMeta =
+      const VerificationMeta('parentPlantId');
+  @override
+  late final GeneratedColumn<String> parentPlantId = GeneratedColumn<String>(
+      'parent_plant_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES plants (id) ON DELETE SET NULL'));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -1969,6 +1978,7 @@ class $PlantsTableTable extends PlantsTable
         pesticideReapplicationDays,
         status,
         statusChangedAt,
+        parentPlantId,
         createdAt,
         updatedAt,
         deletedAt,
@@ -2054,6 +2064,12 @@ class $PlantsTableTable extends PlantsTable
           statusChangedAt.isAcceptableOrUnknown(
               data['status_changed_at']!, _statusChangedAtMeta));
     }
+    if (data.containsKey('parent_plant_id')) {
+      context.handle(
+          _parentPlantIdMeta,
+          parentPlantId.isAcceptableOrUnknown(
+              data['parent_plant_id']!, _parentPlantIdMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -2115,6 +2131,8 @@ class $PlantsTableTable extends PlantsTable
           .read(DriftSqlType.string, data['${effectivePrefix}status'])!),
       statusChangedAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}status_changed_at']),
+      parentPlantId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}parent_plant_id']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -2161,6 +2179,10 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
   /// the default lists; the others keep their diary as history.
   final PlantStatus status;
   final DateTime? statusChangedAt;
+
+  /// The plant this one was propagated from (a cutting/division), if any.
+  /// Plants are only soft-deleted, so a removed parent keeps its id here.
+  final String? parentPlantId;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -2179,6 +2201,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       this.pesticideReapplicationDays,
       required this.status,
       this.statusChangedAt,
+      this.parentPlantId,
       required this.createdAt,
       required this.updatedAt,
       this.deletedAt,
@@ -2215,6 +2238,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
     }
     if (!nullToAbsent || statusChangedAt != null) {
       map['status_changed_at'] = Variable<DateTime>(statusChangedAt);
+    }
+    if (!nullToAbsent || parentPlantId != null) {
+      map['parent_plant_id'] = Variable<String>(parentPlantId);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -2255,6 +2281,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       statusChangedAt: statusChangedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(statusChangedAt),
+      parentPlantId: parentPlantId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentPlantId),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -2286,6 +2315,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           serializer.fromJson<int?>(json['pesticideReapplicationDays']),
       status: serializer.fromJson<PlantStatus>(json['status']),
       statusChangedAt: serializer.fromJson<DateTime?>(json['statusChangedAt']),
+      parentPlantId: serializer.fromJson<String?>(json['parentPlantId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -2312,6 +2342,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           serializer.toJson<int?>(pesticideReapplicationDays),
       'status': serializer.toJson<PlantStatus>(status),
       'statusChangedAt': serializer.toJson<DateTime?>(statusChangedAt),
+      'parentPlantId': serializer.toJson<String?>(parentPlantId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -2333,6 +2364,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           Value<int?> pesticideReapplicationDays = const Value.absent(),
           PlantStatus? status,
           Value<DateTime?> statusChangedAt = const Value.absent(),
+          Value<String?> parentPlantId = const Value.absent(),
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
@@ -2361,6 +2393,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
         statusChangedAt: statusChangedAt.present
             ? statusChangedAt.value
             : this.statusChangedAt,
+        parentPlantId:
+            parentPlantId.present ? parentPlantId.value : this.parentPlantId,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -2394,6 +2428,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       statusChangedAt: data.statusChangedAt.present
           ? data.statusChangedAt.value
           : this.statusChangedAt,
+      parentPlantId: data.parentPlantId.present
+          ? data.parentPlantId.value
+          : this.parentPlantId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -2417,6 +2454,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ..write('pesticideReapplicationDays: $pesticideReapplicationDays, ')
           ..write('status: $status, ')
           ..write('statusChangedAt: $statusChangedAt, ')
+          ..write('parentPlantId: $parentPlantId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -2440,6 +2478,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       pesticideReapplicationDays,
       status,
       statusChangedAt,
+      parentPlantId,
       createdAt,
       updatedAt,
       deletedAt,
@@ -2461,6 +2500,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           other.pesticideReapplicationDays == this.pesticideReapplicationDays &&
           other.status == this.status &&
           other.statusChangedAt == this.statusChangedAt &&
+          other.parentPlantId == this.parentPlantId &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -2481,6 +2521,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
   final Value<int?> pesticideReapplicationDays;
   final Value<PlantStatus> status;
   final Value<DateTime?> statusChangedAt;
+  final Value<String?> parentPlantId;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -2500,6 +2541,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.pesticideReapplicationDays = const Value.absent(),
     this.status = const Value.absent(),
     this.statusChangedAt = const Value.absent(),
+    this.parentPlantId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -2520,6 +2562,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.pesticideReapplicationDays = const Value.absent(),
     this.status = const Value.absent(),
     this.statusChangedAt = const Value.absent(),
+    this.parentPlantId = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -2546,6 +2589,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     Expression<int>? pesticideReapplicationDays,
     Expression<String>? status,
     Expression<DateTime>? statusChangedAt,
+    Expression<String>? parentPlantId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -2569,6 +2613,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
         'pesticide_reapplication_days': pesticideReapplicationDays,
       if (status != null) 'status': status,
       if (statusChangedAt != null) 'status_changed_at': statusChangedAt,
+      if (parentPlantId != null) 'parent_plant_id': parentPlantId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -2591,6 +2636,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       Value<int?>? pesticideReapplicationDays,
       Value<PlantStatus>? status,
       Value<DateTime?>? statusChangedAt,
+      Value<String?>? parentPlantId,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
@@ -2613,6 +2659,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
           pesticideReapplicationDays ?? this.pesticideReapplicationDays,
       status: status ?? this.status,
       statusChangedAt: statusChangedAt ?? this.statusChangedAt,
+      parentPlantId: parentPlantId ?? this.parentPlantId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -2665,6 +2712,9 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     if (statusChangedAt.present) {
       map['status_changed_at'] = Variable<DateTime>(statusChangedAt.value);
     }
+    if (parentPlantId.present) {
+      map['parent_plant_id'] = Variable<String>(parentPlantId.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -2701,6 +2751,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
           ..write('pesticideReapplicationDays: $pesticideReapplicationDays, ')
           ..write('status: $status, ')
           ..write('statusChangedAt: $statusChangedAt, ')
+          ..write('parentPlantId: $parentPlantId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -4993,6 +5044,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
             on: TableUpdateQuery.onTableName('plants',
                 limitUpdateKind: UpdateKind.delete),
             result: [
+              TableUpdate('plants', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('plants',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
               TableUpdate('entries', kind: UpdateKind.delete),
             ],
           ),
@@ -6118,6 +6176,7 @@ typedef $$PlantsTableTableCreateCompanionBuilder = PlantsTableCompanion
   Value<int?> pesticideReapplicationDays,
   Value<PlantStatus> status,
   Value<DateTime?> statusChangedAt,
+  Value<String?> parentPlantId,
   required DateTime createdAt,
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
@@ -6139,6 +6198,7 @@ typedef $$PlantsTableTableUpdateCompanionBuilder = PlantsTableCompanion
   Value<int?> pesticideReapplicationDays,
   Value<PlantStatus> status,
   Value<DateTime?> statusChangedAt,
+  Value<String?> parentPlantId,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
@@ -6188,6 +6248,20 @@ final class $$PlantsTableTableReferences
     final manager = $$LocationsTableTableTableManager($_db, $_db.locationsTable)
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_locationIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $PlantsTableTable _parentPlantIdTable(_$AppDatabase db) =>
+      db.plantsTable.createAlias('plants__parent_plant_id__plants__id');
+
+  $$PlantsTableTableProcessedTableManager? get parentPlantId {
+    final $_column = $_itemColumn<String>('parent_plant_id');
+    if ($_column == null) return null;
+    final manager = $$PlantsTableTableTableManager($_db, $_db.plantsTable)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_parentPlantIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
@@ -6333,6 +6407,26 @@ class $$PlantsTableTableFilterComposer
             $$LocationsTableTableFilterComposer(
               $db: $db,
               $table: $db.locationsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$PlantsTableTableFilterComposer get parentPlantId {
+    final $$PlantsTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.parentPlantId,
+        referencedTable: $db.plantsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PlantsTableTableFilterComposer(
+              $db: $db,
+              $table: $db.plantsTable,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -6500,6 +6594,26 @@ class $$PlantsTableTableOrderingComposer
             ));
     return composer;
   }
+
+  $$PlantsTableTableOrderingComposer get parentPlantId {
+    final $$PlantsTableTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.parentPlantId,
+        referencedTable: $db.plantsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PlantsTableTableOrderingComposer(
+              $db: $db,
+              $table: $db.plantsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$PlantsTableTableAnnotationComposer
@@ -6613,6 +6727,26 @@ class $$PlantsTableTableAnnotationComposer
     return composer;
   }
 
+  $$PlantsTableTableAnnotationComposer get parentPlantId {
+    final $$PlantsTableTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.parentPlantId,
+        referencedTable: $db.plantsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PlantsTableTableAnnotationComposer(
+              $db: $db,
+              $table: $db.plantsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
   Expression<T> entriesTableRefs<T extends Object>(
       Expression<T> Function($$EntriesTableTableAnnotationComposer a) f) {
     final $$EntriesTableTableAnnotationComposer composer = $composerBuilder(
@@ -6671,6 +6805,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
         {bool speciesId,
         bool soilType,
         bool locationId,
+        bool parentPlantId,
         bool entriesTableRefs,
         bool remindersTableRefs})> {
   $$PlantsTableTableTableManager(_$AppDatabase db, $PlantsTableTable table)
@@ -6696,6 +6831,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<int?> pesticideReapplicationDays = const Value.absent(),
             Value<PlantStatus> status = const Value.absent(),
             Value<DateTime?> statusChangedAt = const Value.absent(),
+            Value<String?> parentPlantId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -6716,6 +6852,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             pesticideReapplicationDays: pesticideReapplicationDays,
             status: status,
             statusChangedAt: statusChangedAt,
+            parentPlantId: parentPlantId,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -6736,6 +6873,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<int?> pesticideReapplicationDays = const Value.absent(),
             Value<PlantStatus> status = const Value.absent(),
             Value<DateTime?> statusChangedAt = const Value.absent(),
+            Value<String?> parentPlantId = const Value.absent(),
             required DateTime createdAt,
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -6756,6 +6894,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             pesticideReapplicationDays: pesticideReapplicationDays,
             status: status,
             statusChangedAt: statusChangedAt,
+            parentPlantId: parentPlantId,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -6773,6 +6912,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
               {speciesId = false,
               soilType = false,
               locationId = false,
+              parentPlantId = false,
               entriesTableRefs = false,
               remindersTableRefs = false}) {
             return PrefetchHooks(
@@ -6822,6 +6962,16 @@ class $$PlantsTableTableTableManager extends RootTableManager<
                         $$PlantsTableTableReferences._locationIdTable(db),
                     referencedColumn:
                         $$PlantsTableTableReferences._locationIdTable(db).id,
+                  ) as T;
+                }
+                if (parentPlantId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.parentPlantId,
+                    referencedTable:
+                        $$PlantsTableTableReferences._parentPlantIdTable(db),
+                    referencedColumn:
+                        $$PlantsTableTableReferences._parentPlantIdTable(db).id,
                   ) as T;
                 }
 
@@ -6877,6 +7027,7 @@ typedef $$PlantsTableTableProcessedTableManager = ProcessedTableManager<
         {bool speciesId,
         bool soilType,
         bool locationId,
+        bool parentPlantId,
         bool entriesTableRefs,
         bool remindersTableRefs})>;
 typedef $$EntriesTableTableCreateCompanionBuilder = EntriesTableCompanion

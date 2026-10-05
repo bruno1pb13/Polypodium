@@ -59,7 +59,7 @@ final class EntryFiltersNotifierProvider
 }
 
 String _$entryFiltersNotifierHash() =>
-    r'633506304dacb568faf50cfae400a056f7551868';
+    r'c30da88d226c5e542d7a41694cfaec1ec21039f6';
 
 final class EntryFiltersNotifierFamily extends $Family
     with

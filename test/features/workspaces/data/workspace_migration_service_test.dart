@@ -166,6 +166,7 @@ void main() {
         acquisitionDate: DateTime(2026, 1, 1),
         status: const Value(PlantStatus.archived),
         statusChangedAt: Value(DateTime(2026, 1, 3)),
+        parentPlantId: const Value('mother'),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       ));
@@ -197,6 +198,7 @@ void main() {
       expect(plant, isNotNull);
       expect(plant!.status, PlantStatus.archived);
       expect(plant.statusChangedAt, DateTime(2026, 1, 3));
+      expect(plant.parentPlantId, 'mother');
       expect(entry, isNotNull);
     });
 

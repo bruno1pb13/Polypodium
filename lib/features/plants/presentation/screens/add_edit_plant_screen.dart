@@ -17,6 +17,7 @@ import '../../../soils/domain/soil_model.dart';
 import '../../../soils/presentation/providers/soils_providers.dart';
 import '../../../soils/presentation/widgets/soil_selection_field.dart';
 import '../../../soils/presentation/screens/add_edit_soil_screen.dart';
+import '../../domain/plant_lineage.dart';
 import '../../domain/plant_model.dart';
 import '../providers/plants_providers.dart';
 import '../../../../core/theme/glass_colors.dart';
@@ -24,7 +25,15 @@ import '../../../../core/theme/glass_colors.dart';
 class AddEditPlantScreen extends ConsumerStatefulWidget {
   final PlantModel? plant;
 
-  const AddEditPlantScreen({super.key, this.plant});
+  /// Creates a cutting of this plant: a new plant prefilled with its
+  /// species, soil and location, linked to it as the parent.
+  final PlantModel? cuttingOf;
+
+  const AddEditPlantScreen({super.key, this.plant}) : cuttingOf = null;
+
+  const AddEditPlantScreen.cutting({super.key, required PlantModel parent})
+      : plant = null,
+        cuttingOf = parent;
 
   @override
   ConsumerState<AddEditPlantScreen> createState() => _AddEditPlantScreenState();
@@ -42,18 +51,22 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
 
   String? _selectedLocationId;
   String? _selectedSoilId;
+  String? _parentPlantId;
   DateTime _acquisitionDate = DateTime.now();
 
   bool _isFrequencyAutoFilled = false;
   bool _isSoilAutoFilled = false;
   bool _saving = false;
+  bool _nicknameSuggested = false;
 
   bool get _isEditing => widget.plant != null;
 
   @override
   void initState() {
     super.initState();
-    final p = widget.plant;
+    final parent = widget.cuttingOf;
+    final p = widget.plant ??
+        parent?.copyWith(irrigationFrequencyDays: null, nickname: '');
     _nicknameCtrl = TextEditingController(text: p?.nickname ?? '');
     _speciesSearchCtrl = TextEditingController();
     _frequencyCtrl = TextEditingController(
@@ -62,9 +75,10 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
     _selectedSpeciesId = p?.speciesId;
     _selectedLocationId = p?.locationId;
     _selectedSoilId = p?.soilId;
-    _acquisitionDate = p?.acquisitionDate ?? DateTime.now();
+    _parentPlantId = widget.plant?.parentPlantId ?? parent?.id;
+    _acquisitionDate = widget.plant?.acquisitionDate ?? DateTime.now();
 
-    if (_isEditing && _selectedSpeciesId != null) {
+    if (p != null && _selectedSpeciesId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         final speciesList = await ref.read(speciesNotifierProvider.future);
         final match = speciesList.cast<SpeciesModel?>().firstWhere(
@@ -82,6 +96,18 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Once: it needs the localizations, which initState can't read.
+    final parent = widget.cuttingOf;
+    if (parent != null && !_nicknameSuggested) {
+      _nicknameSuggested = true;
+      _nicknameCtrl.text =
+          context.l10n.cuttingNicknameSuggestion(parent.nickname);
+    }
+  }
+
+  @override
   void dispose() {
     _nicknameCtrl.dispose();
     _speciesSearchCtrl.dispose();
@@ -94,6 +120,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
     final speciesAsync = ref.watch(speciesNotifierProvider);
     final locationsAsync = ref.watch(locationsNotifierProvider);
     final soilsAsync = ref.watch(soilsNotifierProvider);
+    final plants = ref.watch(plantsNotifierProvider).value ?? const [];
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
@@ -389,6 +416,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                                   date: _acquisitionDate,
                                   onTap: _pickDate,
                                 ),
+                                ..._parentField(context, plants),
                               ],
                             ),
                           ),
@@ -433,6 +461,57 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
         ],
       ),
     );
+  }
+
+  /// "Cutting of" picker. Offers every plant but this one and its
+  /// descendants, which would make the lineage a cycle.
+  List<Widget> _parentField(BuildContext context, List<PlantModel> plants) {
+    final l10n = context.l10n;
+    final excluded = lineageExclusions(widget.plant?.id, plants);
+    final candidates =
+        plants.where((p) => !excluded.contains(p.id)).toList();
+    final current = _parentPlantId;
+    if (candidates.isEmpty && current == null) return const [];
+
+    String nameOf(PlantModel p) => p.isActive
+        ? p.nickname
+        : '${p.nickname} · ${p.status.label(l10n)}';
+    // A removed parent (or one the list can't offer) stays selectable as is,
+    // so editing other fields doesn't drop the link.
+    final missingCurrent =
+        current != null && candidates.every((p) => p.id != current);
+    final currentPlant = plants.where((p) => p.id == current).firstOrNull;
+
+    return [
+      const SizedBox(height: 16),
+      DropdownButtonFormField<String?>(
+        // ignore: deprecated_member_use
+        value: current,
+        isExpanded: true,
+        dropdownColor: context.glass.menu,
+        iconEnabledColor: context.glass.fgMuted,
+        style: TextStyle(color: context.glass.fg),
+        decoration: InputDecoration(
+          labelText: l10n.parentPlantLabel,
+          helperText: l10n.parentPlantHelper,
+          helperMaxLines: 2,
+          prefixIcon: const Icon(Icons.call_split),
+        ),
+        items: [
+          DropdownMenuItem<String?>(value: null, child: Text(l10n.none)),
+          if (missingCurrent)
+            DropdownMenuItem<String?>(
+              value: current,
+              child: Text(currentPlant != null
+                  ? nameOf(currentPlant)
+                  : l10n.parentPlantRemoved),
+            ),
+          for (final p in candidates)
+            DropdownMenuItem<String?>(value: p.id, child: Text(nameOf(p))),
+        ],
+        onChanged: (v) => setState(() => _parentPlantId = v),
+      ),
+    ];
   }
 
   void Function(String?, String?, String?) _onSpeciesSelected(
@@ -543,6 +622,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
         pesticideReapplicationDays: widget.plant?.pesticideReapplicationDays,
         status: widget.plant?.status ?? PlantStatus.active,
         statusChangedAt: widget.plant?.statusChangedAt,
+        parentPlantId: _parentPlantId,
         createdAt: widget.plant?.createdAt ?? DateTime.now(),
       );
 

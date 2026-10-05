@@ -686,6 +686,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get historyFieldStatus => 'Status';
 
   @override
+  String get historyFieldParent => 'Muda de';
+
+  @override
   String speciesSurvivalRate(int total, int percent, int alive) {
     String _temp0 = intl.Intl.pluralLogic(
       total,
@@ -2099,4 +2102,24 @@ class AppLocalizationsPt extends AppLocalizations {
   String potDiameterSummary(String diameter) {
     return 'Vaso de $diameter cm';
   }
+
+  @override
+  String get parentPlantLabel => 'Muda de';
+
+  @override
+  String get parentPlantHelper => 'A planta de onde esta foi propagada.';
+
+  @override
+  String get cuttingsLabel => 'Mudas';
+
+  @override
+  String get createCutting => 'Criar muda';
+
+  @override
+  String cuttingNicknameSuggestion(String name) {
+    return '$name (muda)';
+  }
+
+  @override
+  String get parentPlantRemoved => 'Planta removida';
 }

@@ -20,6 +20,7 @@ import '../widgets/plant_detail/plant_detail_view_selector.dart';
 import '../widgets/plant_detail/plant_diary_sliver.dart';
 import '../widgets/plant_detail/plant_entries_header.dart';
 import '../widgets/plant_detail/plant_info_card.dart';
+import '../widgets/plant_detail/plant_lineage_card.dart';
 import '../widgets/plant_detail/plant_status_banners.dart';
 import '../widgets/plant_detail/species_care_card.dart';
 import '../widgets/plant_insights_view.dart';
@@ -169,6 +170,25 @@ class PlantDetailScreen extends ConsumerWidget {
                       ),
                     SliverToBoxAdapter(
                       child: PlantInfoCard(plant: plant, pws: pws, soilName: soil?.name, soilComposition: soil?.composition),
+                    ),
+                    SliverToBoxAdapter(
+                      child: PlantLineageCard(
+                        plant: plant,
+                        plants: plants,
+                        onOpenPlant: (id) => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PlantDetailScreen(plantId: id),
+                          ),
+                        ),
+                        onCreateCutting: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                AddEditPlantScreen.cutting(parent: plant),
+                          ),
+                        ),
+                      ),
                     ),
                     if (species != null && species.hasCareInfo)
                       SliverToBoxAdapter(

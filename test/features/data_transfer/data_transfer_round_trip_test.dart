@@ -140,6 +140,7 @@ void main() {
       acquisitionDate: t0,
       status: const Value(PlantStatus.donated),
       statusChangedAt: Value(t1),
+      parentPlantId: const Value('mother'),
       createdAt: t0,
       updatedAt: t1,
       localRev: const Value(2),
@@ -152,6 +153,7 @@ void main() {
     final plant = await target.plantsDao.getById('plant1');
     expect(plant!.status, PlantStatus.donated);
     expect(plant.statusChangedAt, t1);
+    expect(plant.parentPlantId, 'mother');
   });
 
   test('the species care sheet survives the round trip', () async {

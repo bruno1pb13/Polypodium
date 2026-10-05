@@ -39,6 +39,12 @@ class PlantsTable extends Table {
       .withDefault(const Constant('active'))();
   DateTimeColumn get statusChangedAt => dateTime().nullable()();
 
+  /// The plant this one was propagated from (a cutting/division), if any.
+  /// Plants are only soft-deleted, so a removed parent keeps its id here.
+  TextColumn get parentPlantId => text()
+      .nullable()
+      .references(PlantsTable, #id, onDelete: KeyAction.setNull)();
+
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();

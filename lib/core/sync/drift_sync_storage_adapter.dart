@@ -140,6 +140,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'pesticideReapplicationDays': r.pesticideReapplicationDays,
           'status': r.status.name,
           'statusChangedAt': r.statusChangedAt?.toIso8601String(),
+          'parentPlantId': r.parentPlantId,
           'createdAt': r.createdAt.toIso8601String(),
         };
       case 'entry':
@@ -317,6 +318,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       statusChangedAt: Value(p['statusChangedAt'] != null
           ? DateTime.parse(p['statusChangedAt'] as String)
           : null),
+      // Older clients don't send it: no known parent.
+      parentPlantId: Value(p['parentPlantId'] as String?),
       createdAt: DateTime.parse(p['createdAt'] as String),
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),

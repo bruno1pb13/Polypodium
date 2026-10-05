@@ -197,6 +197,35 @@ void main() {
       expect(row.statusChangedAt, isNull);
     });
 
+    test('the parent plant round-trips; older clients send none', () async {
+      await db.plantsDao.upsert(PlantsTableCompanion.insert(
+        id: 'plant1',
+        speciesId: 'species1',
+        nickname: 'Muda',
+        soilType: 'sandy',
+        acquisitionDate: DateTime(2026, 1, 1),
+        parentPlantId: const Value('mother'),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+        localRev: const Value(1),
+      ));
+      final change = (await adapter.localChangesSince(0,
+              limit: 100, deviceId: 'device-1'))
+          .single;
+      expect(change.payload['parentPlantId'], 'mother');
+
+      final other = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(other.close);
+      final otherAdapter = DriftSyncStorageAdapter(other);
+      await otherAdapter
+          .applyRemoteChange(SyncChange.fromJson(change.toJson()));
+      expect((await other.plantsDao.getById('plant1'))!.parentPlantId,
+          'mother');
+
+      await adapter.applyRemoteChange(plantChange(plantPayload()));
+      expect((await db.plantsDao.getById('plant1'))!.parentPlantId, isNull);
+    });
+
     test('falls back to active for an unknown value', () async {
       await adapter.applyRemoteChange(
           plantChange({...plantPayload(), 'status': 'composted'}));
