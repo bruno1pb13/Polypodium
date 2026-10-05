@@ -1,11 +1,10 @@
 import 'package:drift/drift.dart';
+import 'package:polypodium_core/polypodium_core.dart';
 
 import '../../features/entries/domain/entry_details.dart';
 import '../database/app_database.dart';
 import '../enums.dart';
 import 'i_sync_storage_adapter.dart';
-import 'lww_merge.dart';
-import 'models/entity_change.dart';
 
 /// Drift-backed implementation of the sync storage contract. Absorbs the
 /// per-entity read/apply logic that used to live in SyncService's
@@ -29,12 +28,12 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
   ];
 
   @override
-  Future<List<EntityChange>> localChangesSince(
+  Future<List<SyncChange>> localChangesSince(
     int since, {
     required int limit,
     required String deviceId,
   }) async {
-    final candidates = <EntityChange>[];
+    final candidates = <SyncChange>[];
 
     for (final entityType in _entityTypes) {
       final rows = await _changesSinceFor(entityType, since, limit + 1);
@@ -50,7 +49,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
   }
 
   @override
-  Future<void> applyRemoteChange(EntityChange change) async {
+  Future<void> applyRemoteChange(SyncChange change) async {
     switch (change.entityType) {
       case 'species':
         await _applySpecies(change);
@@ -93,7 +92,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
     }
   }
 
-  EntityChange _toChange(String entityType, dynamic row, String deviceId) {
+  SyncChange _toChange(String entityType, dynamic row, String deviceId) {
     late final Map<String, dynamic> payload;
     late final DateTime updatedAt;
     late final DateTime? deletedAt;
@@ -218,7 +217,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
         throw ArgumentError('Unknown entityType: $entityType');
     }
 
-    return EntityChange(
+    return SyncChange(
       entityType: entityType,
       entityId: entityId,
       payload: payload,
@@ -231,7 +230,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
 
   // -- apply side ------------------------------------------------------------
 
-  Future<void> _applySpecies(EntityChange change) async {
+  Future<void> _applySpecies(SyncChange change) async {
     final existing = await _db.speciesDao.getById(change.entityId);
     if (!shouldApplyRemote(
         localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
@@ -253,7 +252,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
     ));
   }
 
-  Future<void> _applyPlant(EntityChange change) async {
+  Future<void> _applyPlant(SyncChange change) async {
     final existing = await _db.plantsDao.getById(change.entityId);
     if (!shouldApplyRemote(
         localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
@@ -289,7 +288,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
     ));
   }
 
-  Future<void> _applyEntry(EntityChange change) async {
+  Future<void> _applyEntry(SyncChange change) async {
     final existing = await _db.entriesDao.getById(change.entityId);
     if (!shouldApplyRemote(
         localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
@@ -343,7 +342,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
     }
   }
 
-  Future<void> _applyLocation(EntityChange change) async {
+  Future<void> _applyLocation(SyncChange change) async {
     final existing = await _db.locationsDao.getById(change.entityId);
     if (!shouldApplyRemote(
         localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
@@ -363,7 +362,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
     ));
   }
 
-  Future<void> _applySoil(EntityChange change) async {
+  Future<void> _applySoil(SyncChange change) async {
     final existing = await _db.soilsDao.getSoilById(change.entityId);
     if (!shouldApplyRemote(
         localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
@@ -385,7 +384,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
     ));
   }
 
-  Future<void> _applyDefensivo(EntityChange change) async {
+  Future<void> _applyDefensivo(SyncChange change) async {
     final existing = await _db.defensivosDao.getDefensivoById(change.entityId);
     if (!shouldApplyRemote(
         localUpdatedAt: existing?.updatedAt, remoteUpdatedAt: change.updatedAt)) {
@@ -408,7 +407,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
     ));
   }
 
-  Future<void> _applyReminder(EntityChange change) async {
+  Future<void> _applyReminder(SyncChange change) async {
     final p = change.payload;
     // A reminder for an entry type this app version doesn't know (created by
     // a newer client) can't be represented locally; skip it.

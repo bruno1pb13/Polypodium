@@ -1,4 +1,4 @@
-import 'models/entity_change.dart';
+import 'package:polypodium_core/polypodium_core.dart';
 
 /// Storage-side half of the sync contract -- reading/writing local entity
 /// tables. Kept separate from transport (SyncHttpClient) and orchestration
@@ -11,7 +11,7 @@ abstract interface class ISyncStorageAdapter {
   /// at most [limit] returned. [deviceId] stamps who authored these
   /// changes on the wire (the adapter has no notion of device identity
   /// itself).
-  Future<List<EntityChange>> localChangesSince(
+  Future<List<SyncChange>> localChangesSince(
     int since, {
     required int limit,
     required String deviceId,
@@ -22,5 +22,5 @@ abstract interface class ISyncStorageAdapter {
   /// local rev to 0 -- data that just arrived from a peer is inherently
   /// already in sync with that peer, so it must not be redelivered to it
   /// on the next push.
-  Future<void> applyRemoteChange(EntityChange change);
+  Future<void> applyRemoteChange(SyncChange change);
 }

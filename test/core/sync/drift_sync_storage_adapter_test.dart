@@ -1,11 +1,11 @@
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:polypodium_core/polypodium_core.dart';
 
 import 'package:polypodium/core/database/app_database.dart';
 import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/core/sync/drift_sync_storage_adapter.dart';
-import 'package:polypodium/core/sync/models/entity_change.dart';
 
 void main() {
   late AppDatabase db;
@@ -115,7 +115,7 @@ void main() {
     final change = (await adapter.localChangesSince(0,
             limit: 100, deviceId: 'device-2'))
         .single;
-    final olderChange = EntityChange(
+    final olderChange = SyncChange(
       entityType: change.entityType,
       entityId: change.entityId,
       payload: {...change.payload, 'name': 'Older name'},
@@ -146,7 +146,7 @@ void main() {
           'createdAt': DateTime(2026, 1, 1).toIso8601String(),
         };
 
-    EntityChange plantChange(Map<String, dynamic> payload) => EntityChange(
+    SyncChange plantChange(Map<String, dynamic> payload) => SyncChange(
           entityType: 'plant',
           entityId: 'plant1',
           payload: payload,
@@ -229,7 +229,7 @@ void main() {
     final other = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(other.close);
     await DriftSyncStorageAdapter(other)
-        .applyRemoteChange(EntityChange.fromJson(change.toJson()));
+        .applyRemoteChange(SyncChange.fromJson(change.toJson()));
 
     final applied = await other.remindersDao.getById('rem1');
     expect(applied, isNotNull);
@@ -244,7 +244,7 @@ void main() {
   });
 
   test('a reminder for an unknown entry type is skipped', () async {
-    await adapter.applyRemoteChange(EntityChange(
+    await adapter.applyRemoteChange(SyncChange(
       entityType: 'reminder',
       entityId: 'rem1',
       payload: {

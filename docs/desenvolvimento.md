@@ -43,4 +43,4 @@ Em **Configurações → Servidor** informe a URL de um [Polypodium Server](http
 
 Com o app aberto, o `AutoSyncController` sincroniza periodicamente (a cada 5 min; 30 min quando o Android reporta economia de bateria), além do sync ao abrir o app, no pull-to-refresh e pelo botão manual. Não há sync em segundo plano com o app fechado — o WorkManager executa apenas a verificação de notificações de irrigação.
 
-A resolução de conflitos é last-write-wins e o comparador em `lib/core/sync/lww_merge.dart` **precisa permanecer idêntico, termo a termo**, ao do servidor (`sync_repository.dart`) — não há pacote compartilhado, apenas lógica espelhada.
+A resolução de conflitos é last-write-wins. O comparador (`shouldApplyRemote`) e o modelo de mudança do sync (`SyncChange`) vêm do pacote compartilhado [`polypodium_core`](https://github.com/bruno1pb13/polypodium_core), usado também pelo servidor, que roda os mesmos vetores de teste contra o seu `ON CONFLICT`. Mudar a regra é mudar o pacote, gerar uma nova tag e atualizar o `ref` aqui e no servidor.

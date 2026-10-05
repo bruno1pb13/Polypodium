@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:archive/archive.dart';
 import 'package:drift/drift.dart';
+import 'package:polypodium_core/polypodium_core.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/enums.dart';
 import '../../../core/storage/photo_storage.dart';
-import '../../../core/sync/lww_merge.dart';
 import '../../entries/domain/entry_details.dart';
 import 'data_export_service.dart';
 

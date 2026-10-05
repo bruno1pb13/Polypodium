@@ -1,7 +1,8 @@
+import 'package:polypodium_core/polypodium_core.dart';
+
 import '../database/sync_cursors_dao.dart' show syncServerPeerId;
 import 'i_sync_cursor_store.dart';
 import 'i_sync_storage_adapter.dart';
-import 'models/entity_change.dart';
 import 'photo_sync_client.dart';
 import 'sync_http_client.dart';
 
@@ -109,7 +110,7 @@ class SyncOrchestrator {
           limit: _pageSize, deviceId: deviceId);
       if (batch.isEmpty) break;
 
-      final prepared = <EntityChange>[];
+      final prepared = <SyncChange>[];
       for (final change in batch) {
         final ready = await _prepareOutgoingPhoto(serverUrl, token, change);
         if (ready == null) break; // upload failed; retry next sync
@@ -137,8 +138,8 @@ class SyncOrchestrator {
 
   // -- photo side channel ------------------------------------------------
 
-  Future<EntityChange?> _resolveIncomingPhoto(
-      String serverUrl, String token, EntityChange change) async {
+  Future<SyncChange?> _resolveIncomingPhoto(
+      String serverUrl, String token, SyncChange change) async {
     if (change.entityType != 'entry') return change;
     final photoKey = change.payload['photoKey'] as String?;
     if (photoKey == null) return change;
@@ -150,7 +151,7 @@ class SyncOrchestrator {
     final payload = Map<String, dynamic>.from(change.payload)
       ..remove('photoKey')
       ..['photoPath'] = localPath;
-    return EntityChange(
+    return SyncChange(
       entityType: change.entityType,
       entityId: change.entityId,
       payload: payload,
@@ -161,8 +162,8 @@ class SyncOrchestrator {
     );
   }
 
-  Future<EntityChange?> _prepareOutgoingPhoto(
-      String serverUrl, String token, EntityChange change) async {
+  Future<SyncChange?> _prepareOutgoingPhoto(
+      String serverUrl, String token, SyncChange change) async {
     if (change.entityType != 'entry' || change.deletedAt != null) return change;
     final photoPath = change.payload['photoPath'] as String?;
     if (photoPath == null) return change;
@@ -178,7 +179,7 @@ class SyncOrchestrator {
     final payload = Map<String, dynamic>.from(change.payload)
       ..remove('photoPath')
       ..['photoKey'] = photoKey;
-    return EntityChange(
+    return SyncChange(
       entityType: change.entityType,
       entityId: change.entityId,
       payload: payload,
