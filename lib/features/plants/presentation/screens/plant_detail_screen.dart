@@ -21,6 +21,7 @@ import '../widgets/plant_detail/plant_diary_sliver.dart';
 import '../widgets/plant_detail/plant_entries_header.dart';
 import '../widgets/plant_detail/plant_info_card.dart';
 import '../widgets/plant_detail/plant_status_banners.dart';
+import '../widgets/plant_detail/species_care_card.dart';
 import '../widgets/plant_insights_view.dart';
 import '../widgets/plant_photos_sliver.dart';
 import 'add_edit_plant_screen.dart';
@@ -169,6 +170,10 @@ class PlantDetailScreen extends ConsumerWidget {
                     SliverToBoxAdapter(
                       child: PlantInfoCard(plant: plant, pws: pws, soilName: soil?.name, soilComposition: soil?.composition),
                     ),
+                    if (species != null && species.hasCareInfo)
+                      SliverToBoxAdapter(
+                        child: SpeciesCareCard(species: species),
+                      ),
                     // Reminders of plants that are no longer active are
                     // ignored, so they aren't offered either.
                     if (plant.isActive)

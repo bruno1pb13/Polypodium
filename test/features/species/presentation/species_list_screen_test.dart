@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/core/sync/sync_providers.dart';
+import 'package:polypodium/core/widgets/emoji_text.dart';
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
 import 'package:polypodium/features/soils/domain/soil_model.dart';
 import 'package:polypodium/features/soils/presentation/providers/soils_providers.dart';
@@ -12,6 +14,8 @@ import 'package:polypodium/features/species/presentation/screens/add_species_scr
 import 'package:polypodium/features/species/presentation/screens/species_list_screen.dart';
 import 'package:polypodium/features/species/presentation/widgets/species_autocomplete.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
+
+import '../../../helpers/accessibility.dart';
 
 class _FakeTransparencyNotifier extends TransparencyEnabledNotifier {
   @override
@@ -71,6 +75,11 @@ void main() {
       scientificName: 'Polypodium vulgare',
       defaultIrrigationFrequencyDays: 3,
       recommendedSoilIds: const ['loamy'],
+      light: LightRequirement.partialShade,
+      humidity: HumidityLevel.high,
+      petToxicity: PetToxicity.toxic,
+      floweringMonths: const {9, 10},
+      careNotes: 'Borrifar as folhas',
       createdAt: DateTime(2024, 1, 1),
     ),
     SpeciesModel(
@@ -86,7 +95,8 @@ void main() {
   late List<SpeciesModel> saved;
   late List<String> deleted;
 
-  Future<void> pump(WidgetTester tester, List<SpeciesModel> species) async {
+  Future<void> pump(WidgetTester tester, List<SpeciesModel> species,
+      {ThemeData? theme}) async {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -104,11 +114,12 @@ void main() {
             .overrideWith(_FakeExternalSpeciesRepository.new),
         pushCursorToServerProvider.overrideWith((ref) async => null),
       ],
-      child: const MaterialApp(
-        locale: Locale('pt'),
+      child: MaterialApp(
+        theme: theme,
+        locale: const Locale('pt'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: SpeciesListScreen(),
+        home: const SpeciesListScreen(),
       ),
     ));
     await tester.pumpAndSettle();
@@ -122,6 +133,17 @@ void main() {
   }
 
   Finder field(String label) => find.widgetWithText(TextFormField, label);
+
+  /// A care chip, whose visible text is prefixed by an emoji.
+  Finder careChip(String label) =>
+      find.byWidgetPredicate((w) => w is EmojiText && w.text == label);
+
+  Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+    await tester.ensureVisible(finder);
+    await tester.pumpAndSettle();
+    await tester.tap(finder);
+    await tester.pump();
+  }
 
   testWidgets('lists the species and searches them', (tester) async {
     await pump(tester, species);
@@ -220,6 +242,133 @@ void main() {
     expect(edited.defaultIrrigationFrequencyDays, 3);
     expect(edited.recommendedSoilIds, ['sandy']);
     expect(edited.createdAt, DateTime(2024, 1, 1));
+    // The care sheet is kept untouched.
+    expect(edited.light, LightRequirement.partialShade);
+    expect(edited.humidity, HumidityLevel.high);
+    expect(edited.petToxicity, PetToxicity.toxic);
+    expect(edited.floweringMonths, {9, 10});
+    expect(edited.careNotes, 'Borrifar as folhas');
+  });
+
+  testWidgets('shows the light and pet toxicity badges', (tester) async {
+    await pump(tester, species);
+
+    expect(find.text('Meia-sombra'), findsOneWidget);
+    expect(find.text('Tóxica para pets'), findsOneWidget);
+    // Jiboia has no care sheet: only Samambaia's badges show.
+    expect(find.text('Sol pleno'), findsNothing);
+  });
+
+  testWidgets('fills in the care sheet of a new species', (tester) async {
+    await pump(tester, species);
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    expect(find.text('Cuidados'), findsOneWidget);
+
+    await tester.enterText(
+        find.descendant(
+            of: find.byType(SpeciesAutocomplete),
+            matching: find.byType(TextFormField)),
+        'Espada-de-são-jorge');
+    await tester.enterText(field('Nome científico *'), 'Dracaena trifasciata');
+    await tapVisible(tester, careChip('Sol pleno'));
+    await tapVisible(tester, careChip('Baixa'));
+    await tapVisible(tester, careChip('Tóxica'));
+    await tapVisible(tester, find.text('mar.'));
+    await tapVisible(tester, find.text('abr.'));
+    await tapVisible(tester, find.text('nov.'));
+    // Toggling a month again removes it.
+    await tapVisible(tester, find.text('nov.'));
+    await tester.enterText(
+        field('Observações de cuidado'), '  Pouca água no inverno ');
+
+    await tapVisible(tester, find.text('Adicionar espécie'));
+    await tester.pumpAndSettle();
+
+    final created = saved.single;
+    expect(created.popularName, 'Espada-de-são-jorge');
+    expect(created.light, LightRequirement.fullSun);
+    expect(created.humidity, HumidityLevel.low);
+    expect(created.petToxicity, PetToxicity.toxic);
+    expect(created.floweringMonths, {3, 4});
+    expect(created.careNotes, 'Pouca água no inverno');
+  });
+
+  testWidgets('clears the care sheet when editing', (tester) async {
+    await pump(tester, species);
+
+    await tester.tap(find.byIcon(Icons.edit_outlined).last);
+    await tester.pumpAndSettle();
+
+    // Tapping the selected light and humidity deselects them.
+    await tapVisible(tester, careChip('Meia-sombra'));
+    await tapVisible(tester, careChip('Alta'));
+    await tapVisible(tester, careChip('Não informada'));
+    await tapVisible(tester, find.text('set.'));
+    await tapVisible(tester, find.text('out.'));
+    await tester.enterText(field('Observações de cuidado'), ' ');
+    await tapVisible(tester, find.text('Salvar alterações'));
+    await tester.pumpAndSettle();
+
+    final edited = saved.single;
+    expect(edited.light, isNull);
+    expect(edited.humidity, isNull);
+    expect(edited.petToxicity, PetToxicity.unknown);
+    expect(edited.floweringMonths, isEmpty);
+    expect(edited.careNotes, isNull);
+    expect(edited.hasCareInfo, isFalse);
+  });
+
+  group('accessibility', () {
+    testWidgets('the care chips meet the tap target and labelling guidelines',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, species);
+      await tester.tap(find.byIcon(Icons.edit_outlined).last);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Observações de cuidado'));
+      await tester.pumpAndSettle();
+
+      await expectTapTargetGuidelines(tester);
+      // Emojis are not read out; months are read by their full name.
+      expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+      expect(find.bySemanticsLabel('setembro'), findsOneWidget);
+      expect(
+        tester.getSemantics(careChip('Meia-sombra')),
+        matchesSemantics(
+          label: 'Meia-sombra',
+          isSelected: true,
+          hasSelectedState: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          isButton: true,
+          hasTapAction: true,
+          hasFocusAction: true,
+          isFocusable: true,
+        ),
+      );
+      semantics.dispose();
+    });
+
+    testWidgets('the list badges do not read emoji names out',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, species);
+      expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+      semantics.dispose();
+    });
+
+    for (final (name, theme) in appThemes) {
+      testWidgets('the list badges are readable in the $name theme',
+          (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pump(tester, species, theme: theme);
+        await paintBackground(tester);
+        await expectReadableText(tester);
+        semantics.dispose();
+      });
+    }
   });
 
   testWidgets('deletes a species after confirming', (tester) async {

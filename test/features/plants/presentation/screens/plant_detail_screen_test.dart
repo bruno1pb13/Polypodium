@@ -11,6 +11,7 @@ import 'package:polypodium/features/plants/data/plants_repository.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/plants/presentation/providers/plants_providers.dart';
 import 'package:polypodium/features/plants/presentation/screens/plant_detail_screen.dart';
+import 'package:polypodium/features/plants/presentation/widgets/plant_status.dart';
 import 'package:polypodium/features/reminders/presentation/providers/reminders_providers.dart';
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
 import 'package:polypodium/features/soils/domain/soil_model.dart';
@@ -40,18 +41,21 @@ class _FakePlantsNotifier extends PlantsNotifier {
       statusChanges.add((plantId, status));
 }
 
+final _species = SpeciesModel(
+  id: 's1',
+  popularName: 'Samambaia',
+  scientificName: 'Polypodium vulgare',
+  defaultIrrigationFrequencyDays: 3,
+  recommendedSoilIds: const [],
+  createdAt: DateTime(2024, 1, 1),
+);
+
 class _FakeSpeciesNotifier extends SpeciesNotifier {
+  _FakeSpeciesNotifier(this.species);
+  final SpeciesModel species;
+
   @override
-  Stream<List<SpeciesModel>> build() => Stream.value([
-        SpeciesModel(
-          id: 's1',
-          popularName: 'Samambaia',
-          scientificName: 'Polypodium vulgare',
-          defaultIrrigationFrequencyDays: 3,
-          recommendedSoilIds: const [],
-          createdAt: DateTime(2024, 1, 1),
-        ),
-      ]);
+  Stream<List<SpeciesModel>> build() => Stream.value([species]);
 }
 
 class _FakeLocationsNotifier extends LocationsNotifier {
@@ -118,7 +122,9 @@ void main() {
   late List<(String, PlantStatus)> statusChanges;
 
   Future<void> pump(WidgetTester tester, PlantModel plant,
-      {Size size = const Size(800, 2400), ThemeData? theme}) async {
+      {Size size = const Size(800, 2400),
+      ThemeData? theme,
+      SpeciesModel? species}) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -132,7 +138,8 @@ void main() {
             .overrideWith(() => _FakePlantsNotifier([plant], statusChanges)),
         plantsRepositoryProvider
             .overrideWithValue(_FakePlantsRepository(plant)),
-        speciesNotifierProvider.overrideWith(_FakeSpeciesNotifier.new),
+        speciesNotifierProvider
+            .overrideWith(() => _FakeSpeciesNotifier(species ?? _species)),
         locationsNotifierProvider.overrideWith(_FakeLocationsNotifier.new),
         soilsNotifierProvider.overrideWith(_FakeSoilsNotifier.new),
         entriesNotifierProvider('p1').overrideWith(_FakeEntriesNotifier.new),
@@ -263,6 +270,77 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Deletar planta?'), findsNothing);
     expect(statusChanges, isEmpty);
+  });
+
+  group('species care card', () {
+    final careSpecies = _species.copyWith(
+      light: LightRequirement.indirectBright,
+      humidity: HumidityLevel.high,
+      petToxicity: PetToxicity.toxic,
+      floweringMonths: {10, 3, 9},
+      careNotes: 'Borrifar as folhas',
+    );
+
+    testWidgets('is hidden when the species has no care sheet',
+        (tester) async {
+      await pump(tester, plant());
+      expect(find.text('Cuidados da espécie'), findsNothing);
+    });
+
+    testWidgets('shows the care sheet with the toxicity warning',
+        (tester) async {
+      await pump(tester, plant(), species: careSpecies);
+
+      expect(find.text('Cuidados da espécie'), findsOneWidget);
+      expect(find.text('Luz'), findsOneWidget);
+      expect(find.text('Luz indireta'), findsOneWidget);
+      expect(find.text('Umidade'), findsOneWidget);
+      expect(find.text('Alta'), findsOneWidget);
+      expect(find.text('Toxicidade para pets'), findsOneWidget);
+      expect(tester.widget<Text>(find.text('Tóxica')).style?.color,
+          StatusTone.danger.onLight);
+      expect(find.text('Floresce em: mar., set., out.'), findsOneWidget);
+      expect(find.text('Borrifar as folhas'), findsOneWidget);
+    });
+
+    testWidgets('only shows the filled-in fields', (tester) async {
+      await pump(tester, plant(),
+          species: _species.copyWith(
+              petToxicity: PetToxicity.nonToxic, floweringMonths: {1}));
+
+      expect(find.text('Cuidados da espécie'), findsOneWidget);
+      expect(tester.widget<Text>(find.text('Não tóxica')).style?.color,
+          StatusTone.positive.onLight);
+      expect(find.text('Floresce em: jan.'), findsOneWidget);
+      expect(find.text('Luz'), findsNothing);
+      expect(find.text('Umidade'), findsNothing);
+    });
+
+    testWidgets('does not read emoji names out', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, plant(), species: careSpecies);
+      expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+      await expectTapTargetGuidelines(tester);
+      semantics.dispose();
+    });
+
+    for (final (name, theme) in appThemes) {
+      testWidgets('is readable in the $name theme', (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pump(tester, plant(), theme: theme, species: careSpecies);
+        await paintBackground(tester);
+        await expectReadableText(tester);
+        semantics.dispose();
+      });
+    }
+
+    testWidgets('lays out without overflow at text scale 2.0',
+        (tester) async {
+      setTextScale(tester, 2.0);
+      await pump(tester, plant(),
+          size: const Size(400, 3200), species: careSpecies);
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('theme colors', () {
