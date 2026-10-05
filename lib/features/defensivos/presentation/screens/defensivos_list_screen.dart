@@ -63,6 +63,7 @@ class _DefensivosListScreenState extends ConsumerState<DefensivosListScreen> {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(
@@ -171,6 +172,7 @@ class _DefensivosListScreenState extends ConsumerState<DefensivosListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: context.l10n.addDefensivo,
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const AddEditDefensivoScreen()),
@@ -329,6 +331,7 @@ class _DefensivoListItem extends ConsumerWidget {
                       color: transparencyEnabled
                           ? Colors.white70
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.editDefensivo,
                       onPressed: onEdit,
                     ),
                     IconButton(
@@ -336,6 +339,7 @@ class _DefensivoListItem extends ConsumerWidget {
                       color: transparencyEnabled
                           ? Colors.white70
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.delete,
                       onPressed: onDelete,
                     ),
                   ],

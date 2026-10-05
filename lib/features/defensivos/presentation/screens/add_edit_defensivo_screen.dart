@@ -134,6 +134,7 @@ class _AddEditDefensivoScreenState
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(
@@ -163,28 +164,33 @@ class _AddEditDefensivoScreenState
                       child: Column(
                         children: [
                           Center(
-                            child: GestureDetector(
-                              onTap: _pickImage,
-                              child: Container(
-                                width: 160,
-                                height: 160,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.2)),
-                                  image: _imagePath != null
-                                      ? DecorationImage(
-                                          image: FileImage(File(_imagePath!)),
-                                          fit: BoxFit.cover,
-                                        )
+                            child: Semantics(
+                              container: true,
+                              button: true,
+                              label: context.l10n.changeImage,
+                              child: GestureDetector(
+                                onTap: _pickImage,
+                                child: Container(
+                                  width: 160,
+                                  height: 160,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                        color:
+                                            Colors.white.withValues(alpha: 0.2)),
+                                    image: _imagePath != null
+                                        ? DecorationImage(
+                                            image: FileImage(File(_imagePath!)),
+                                            fit: BoxFit.cover,
+                                          )
+                                        : null,
+                                  ),
+                                  child: _imagePath == null
+                                      ? const Icon(Icons.add_a_photo_outlined,
+                                          size: 48, color: Colors.white70)
                                       : null,
                                 ),
-                                child: _imagePath == null
-                                    ? const Icon(Icons.add_a_photo_outlined,
-                                        size: 48, color: Colors.white70)
-                                    : null,
                               ),
                             ),
                           ),
@@ -192,7 +198,7 @@ class _AddEditDefensivoScreenState
                           Text(
                             context.l10n.tapToChangeImage,
                             style: const TextStyle(
-                                fontSize: 12, color: Colors.white60),
+                                fontSize: 12, color: Colors.white70),
                           ),
                         ],
                       ),

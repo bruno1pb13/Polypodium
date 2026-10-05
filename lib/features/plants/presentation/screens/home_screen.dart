@@ -231,6 +231,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           // Gradient overlay for better readability - darkened at top
@@ -376,6 +377,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       floatingActionButton: isSelectionMode
           ? null
           : FloatingActionButton(
+              tooltip: context.l10n.addPlant,
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const AddEditPlantScreen()),

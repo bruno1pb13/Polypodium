@@ -43,6 +43,7 @@ class EntryPhotoSection extends StatelessWidget {
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
+                  semanticLabel: context.l10n.photoTitle,
                 ),
               ),
               Positioned(
@@ -50,6 +51,7 @@ class EntryPhotoSection extends StatelessWidget {
                 right: 8,
                 child: IconButton.filled(
                   onPressed: onRemove,
+                  tooltip: context.l10n.removePhoto,
                   icon: const Icon(Icons.close, size: 20),
                   style: IconButton.styleFrom(
                     backgroundColor: Colors.black54,

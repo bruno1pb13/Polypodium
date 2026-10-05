@@ -33,8 +33,11 @@ class EntryListItem extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
-              child:
-                  Text(entry.type.emoji, style: const TextStyle(fontSize: 18)),
+              // The type label is right next to it.
+              child: ExcludeSemantics(
+                child: Text(entry.type.emoji,
+                    style: const TextStyle(fontSize: 18)),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -44,9 +47,11 @@ class EntryListItem extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        entry.type.label(context.l10n),
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      Flexible(
+                        child: Text(
+                          entry.type.label(context.l10n),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
                       ),
                       Text(
                         DateFormat.yMd(context.l10n.localeName)
@@ -69,6 +74,9 @@ class EntryListItem extends StatelessWidget {
                         height: 120,
                         width: double.infinity,
                         fit: BoxFit.cover,
+                        semanticLabel: context.l10n.entryPhotoLabel(
+                            DateFormat.yMd(context.l10n.localeName)
+                                .format(entry.date)),
                         errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                       ),
                     ),
@@ -80,6 +88,7 @@ class EntryListItem extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.delete_outline),
                 iconSize: 20,
+                tooltip: context.l10n.delete,
                 onPressed: onDelete,
               ),
           ],

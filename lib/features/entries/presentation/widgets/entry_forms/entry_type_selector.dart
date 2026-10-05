@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/enums.dart';
 import '../../../../../core/l10n/l10n.dart';
+import '../../../../../core/widgets/emoji_text.dart';
 
 /// Choice chips of the entry types that can be created by hand.
 class EntryTypeSelector extends StatelessWidget {
@@ -36,7 +37,7 @@ class EntryTypeSelector extends StatelessWidget {
               .map((t) {
             final selected = t == selectedType;
             return ChoiceChip(
-              label: Text('${t.emoji} ${t.label(context.l10n)}'),
+              label: EmojiText(t.emoji, t.label(context.l10n)),
               selected: selected,
               onSelected: (_) => onSelected(t),
               backgroundColor: Colors.black.withValues(alpha: 0.2),

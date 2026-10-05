@@ -79,36 +79,41 @@ class PlantListItem extends ConsumerWidget {
                 padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: handleThumbnailTap,
-                      child: Stack(
-                        children: [
-                          _PlantThumbnail(
-                            photoPath: photoAsync.value,
-                            overdue: overdue,
-                          ),
-                          if (isSelectionMode)
-                            Positioned.fill(
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? Colors.black.withValues(alpha: 0.35)
-                                      : Colors.black.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: Icon(
-                                    isSelected
-                                        ? Icons.check_circle
-                                        : Icons.circle_outlined,
-                                    color: Colors.white,
-                                    size: 26,
+                    Semantics(
+                      container: true,
+                      checked: isSelectionMode ? isSelected : null,
+                      label: context.l10n.selectPlant(pws.plant.nickname),
+                      child: GestureDetector(
+                        onTap: handleThumbnailTap,
+                        child: Stack(
+                          children: [
+                            _PlantThumbnail(
+                              photoPath: photoAsync.value,
+                              overdue: overdue,
+                            ),
+                            if (isSelectionMode)
+                              Positioned.fill(
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? Colors.black.withValues(alpha: 0.35)
+                                        : Colors.black.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Align(
+                                    alignment: Alignment.center,
+                                    child: Icon(
+                                      isSelected
+                                          ? Icons.check_circle
+                                          : Icons.circle_outlined,
+                                      color: Colors.white,
+                                      size: 26,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -232,6 +237,7 @@ class _PlantThumbnail extends StatelessWidget {
               // Decodifica já no tamanho do thumbnail em vez da foto inteira.
               cacheWidth: (_size * devicePixelRatio).round(),
               gaplessPlayback: true,
+              excludeFromSemantics: true,
               frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
                 if (wasSynchronouslyLoaded) return child;
                 return AnimatedOpacity(

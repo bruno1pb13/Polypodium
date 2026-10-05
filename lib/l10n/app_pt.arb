@@ -583,5 +583,18 @@
   "backupCorrupt": "Arquivo de backup inválido.",
   "backupUnrecognized": "Arquivo não reconhecido: esperado um .zip ou .json de backup.",
   "backupNotPolypodium": "Este arquivo não é um backup do Polypodium.",
-  "backupNewerVersion": "Backup gerado por uma versão mais nova do aplicativo. Atualize o Polypodium para importá-lo."
+  "backupNewerVersion": "Backup gerado por uma versão mais nova do aplicativo. Atualize o Polypodium para importá-lo.",
+  "entryPhotoLabel": "Foto de {date}",
+  "plantPhotoLabel": "Foto de {name}",
+  "removeAction": "Remover",
+  "removePhoto": "Remover foto",
+  "selectPlant": "Selecionar {name}",
+  "addSoil": "Adicionar solo",
+  "deletePlant": "Deletar planta",
+  "changeImage": "Alterar imagem",
+  "showPassword": "Mostrar senha",
+  "hidePassword": "Ocultar senha",
+  "chartGrowthSemantics": "Gráfico de crescimento: {count} registros de altura, de {first} cm a {last} cm",
+  "chartHealthSemantics": "Gráfico de saúde: {count} notas, a mais recente {score}/5",
+  "chartWateringSemantics": "Gráfico de regas: {count} intervalos entre regas. {summary}"
 }

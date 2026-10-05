@@ -127,16 +127,21 @@ class PlantStatusChip extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // The label already says what the emoji shows.
           if (emoji != null) ...[
-            Text(emoji!, style: const TextStyle(fontSize: 11)),
+            ExcludeSemantics(
+              child: Text(emoji!, style: const TextStyle(fontSize: 11)),
+            ),
             const SizedBox(width: 4),
           ],
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: fg,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: fg,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -196,7 +201,9 @@ class PlantStatusBanner extends ConsumerWidget {
                     color: tone.base.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: Text(emoji, style: const TextStyle(fontSize: 18)),
+                  child: ExcludeSemantics(
+                    child: Text(emoji, style: const TextStyle(fontSize: 18)),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

@@ -61,48 +61,56 @@ class _PhotoTile extends StatelessWidget {
     final date =
         DateFormat.yMd(context.l10n.localeName).format(entry.date);
 
-    return GestureDetector(
-      onTap: () => showFullscreenImageViewer(context, entry.photoPath!),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.file(
-              File(entry.photoPath!),
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: Colors.white.withValues(alpha: 0.1),
-                child: const Icon(
-                  Icons.broken_image_outlined,
-                  color: Colors.white24,
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(8, 14, 8, 5),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black54],
+    return Semantics(
+      container: true,
+      button: true,
+      image: true,
+      label: context.l10n.entryPhotoLabel(date),
+      child: GestureDetector(
+        onTap: () => showFullscreenImageViewer(context, entry.photoPath!),
+        child: ExcludeSemantics(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.file(
+                  File(entry.photoPath!),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    child: const Icon(
+                      Icons.broken_image_outlined,
+                      color: Colors.white24,
+                    ),
                   ),
                 ),
-                child: Text(
-                  date,
-                  style: const TextStyle(
-                    fontSize: 10.5,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    shadows: [Shadow(color: Colors.black45, blurRadius: 2)],
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(8, 14, 8, 5),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Colors.black54],
+                      ),
+                    ),
+                    child: Text(
+                      date,
+                      style: const TextStyle(
+                        fontSize: 10.5,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        shadows: [Shadow(color: Colors.black45, blurRadius: 2)],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

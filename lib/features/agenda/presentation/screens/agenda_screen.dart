@@ -57,6 +57,7 @@ class AgendaScreen extends ConsumerWidget {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(
@@ -168,13 +169,16 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-      child: Text(
-        '$title ($count)',
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+      child: Semantics(
+        header: true,
+        child: Text(
+          '$title ($count)',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+          ),
         ),
       ),
     );
@@ -278,9 +282,12 @@ class _AgendaTaskItem extends ConsumerWidget {
                             : colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Text(
-                        task.entryType.emoji,
-                        style: const TextStyle(fontSize: 22),
+                      // The task label below already names the type.
+                      child: ExcludeSemantics(
+                        child: Text(
+                          task.entryType.emoji,
+                          style: const TextStyle(fontSize: 22),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -330,26 +337,33 @@ class _AgendaTaskItem extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: transparencyEnabled
-                            ? Colors.white
-                            : colorScheme.primary,
+                    // Capped so large text sizes wrap the label instead of
+                    // squeezing the plant name out.
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.sizeOf(context).width * 0.4,
                       ),
-                      onPressed: isIrrigation
-                          ? () => _water(context, ref)
-                          : () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => AddEntryScreen(
-                                    plantId: pws.plant.id,
-                                    initialType: task.entryType,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: transparencyEnabled
+                              ? Colors.white
+                              : colorScheme.primary,
+                        ),
+                        onPressed: isIrrigation
+                            ? () => _water(context, ref)
+                            : () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => AddEntryScreen(
+                                      plantId: pws.plant.id,
+                                      initialType: task.entryType,
+                                    ),
                                   ),
                                 ),
-                              ),
-                      child: Text(isIrrigation
-                          ? l10n.notificationActionWatered
-                          : l10n.agendaRecord),
+                        child: Text(isIrrigation
+                            ? l10n.notificationActionWatered
+                            : l10n.agendaRecord),
+                      ),
                     ),
                   ],
                 ),

@@ -351,6 +351,9 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
             icon: Icon(_obscurePassword
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined),
+            tooltip: _obscurePassword
+                ? context.l10n.showPassword
+                : context.l10n.hidePassword,
             onPressed: () =>
                 setState(() => _obscurePassword = !_obscurePassword),
           ),
@@ -403,6 +406,9 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
             icon: Icon(_obscurePassword
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined),
+            tooltip: _obscurePassword
+                ? context.l10n.showPassword
+                : context.l10n.hidePassword,
             onPressed: () =>
                 setState(() => _obscurePassword = !_obscurePassword),
           ),

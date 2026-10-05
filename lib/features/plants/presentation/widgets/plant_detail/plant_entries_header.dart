@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/enums.dart';
 import '../../../../../core/l10n/l10n.dart';
+import '../../../../../core/widgets/emoji_text.dart';
 import '../../../../entries/presentation/providers/entry_filters_provider.dart';
 
 /// Title of the diary with its entry type filter and sort menu.
@@ -25,15 +26,16 @@ class PlantEntriesHeader extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 24, 4, 4),
       child: Row(
         children: [
-          Text(
-            context.l10n.entriesTitle,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+          Expanded(
+            child: Text(
+              context.l10n.entriesTitle,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ),
-          const Spacer(),
           Stack(
             clipBehavior: Clip.none,
             children: [
@@ -153,15 +155,16 @@ class _FilterSheet extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(20, 16, 8, 4),
                   child: Row(
                     children: [
-                      Text(
-                        context.l10n.entryTypesTitle,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
+                      Expanded(
+                        child: Text(
+                          context.l10n.entryTypesTitle,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                      const Spacer(),
                       if (!allSelected)
                         TextButton(
                           onPressed: () => ref
@@ -183,8 +186,10 @@ class _FilterSheet extends ConsumerWidget {
                     onChanged: (_) => ref
                         .read(entryFiltersNotifierProvider(plantId).notifier)
                         .toggleFilter(type),
-                    title: Text(
-                      '${type.emoji}  ${type.label(context.l10n)}',
+                    title: EmojiText(
+                      type.emoji,
+                      type.label(context.l10n),
+                      separator: '  ',
                       style: const TextStyle(color: Colors.white),
                     ),
                     checkColor: Colors.white,
@@ -234,15 +239,16 @@ class _FilterDialog extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(20, 16, 8, 4),
                   child: Row(
                     children: [
-                      Text(
-                        context.l10n.entryTypesTitle,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
+                      Expanded(
+                        child: Text(
+                          context.l10n.entryTypesTitle,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                      const Spacer(),
                       if (!allSelected)
                         TextButton(
                           onPressed: () => ref
@@ -257,6 +263,8 @@ class _FilterDialog extends ConsumerWidget {
                       IconButton(
                         icon: const Icon(Icons.close,
                             color: Colors.white54, size: 18),
+                        tooltip: MaterialLocalizations.of(context)
+                            .closeButtonTooltip,
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
@@ -269,8 +277,10 @@ class _FilterDialog extends ConsumerWidget {
                     onChanged: (_) => ref
                         .read(entryFiltersNotifierProvider(plantId).notifier)
                         .toggleFilter(type),
-                    title: Text(
-                      '${type.emoji}  ${type.label(context.l10n)}',
+                    title: EmojiText(
+                      type.emoji,
+                      type.label(context.l10n),
+                      separator: '  ',
                       style: const TextStyle(color: Colors.white),
                     ),
                     checkColor: Colors.white,

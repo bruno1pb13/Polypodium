@@ -152,7 +152,8 @@ class _SideNav extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Image.asset('assets/images/logo.png', width: 40, height: 40),
+                Image.asset('assets/images/logo.png',
+                    width: 40, height: 40, excludeFromSemantics: true),
                 const SizedBox(width: 12),
                 Text(
                   'Polypodium',
@@ -226,15 +227,17 @@ class _NavTile extends StatelessWidget {
                   color: selected ? cs.onSecondaryContainer : cs.onSurfaceVariant,
                 ),
                 const SizedBox(width: 14),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-                    color: selected ? cs.onSecondaryContainer : cs.onSurfaceVariant,
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                      color: selected ? cs.onSecondaryContainer : cs.onSurfaceVariant,
+                    ),
                   ),
                 ),
-                if (trailing != null) ...[const Spacer(), trailing!],
+                if (trailing != null) trailing!,
               ],
             ),
           ),

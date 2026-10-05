@@ -80,6 +80,7 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(

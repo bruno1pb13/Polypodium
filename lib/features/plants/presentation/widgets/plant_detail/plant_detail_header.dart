@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/l10n/l10n.dart';
 import '../../../../../core/widgets/fullscreen_image_viewer.dart';
 import '../../../../entries/presentation/providers/entries_providers.dart';
 import '../../../domain/plant_model.dart';
@@ -23,19 +24,25 @@ class PlantDetailHeader extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _PlantPhoto(photoPath: photoAsync.value),
+          _PlantPhoto(
+            photoPath: photoAsync.value,
+            nickname: plant.nickname,
+          ),
           const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  plant.nickname,
-                  style: const TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    shadows: [Shadow(color: Colors.black38, blurRadius: 4)],
+                Semantics(
+                  header: true,
+                  child: Text(
+                    plant.nickname,
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [Shadow(color: Colors.black38, blurRadius: 4)],
+                    ),
                   ),
                 ),
                 if (pws != null) ...[
@@ -66,8 +73,9 @@ class PlantDetailHeader extends ConsumerWidget {
 
 class _PlantPhoto extends StatelessWidget {
   final String? photoPath;
+  final String nickname;
 
-  const _PlantPhoto({this.photoPath});
+  const _PlantPhoto({this.photoPath, required this.nickname});
 
   @override
   Widget build(BuildContext context) {
@@ -88,12 +96,19 @@ class _PlantPhoto extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: photoPath != null
-            ? GestureDetector(
-                onTap: () => showFullscreenImageViewer(context, photoPath),
-                child: Image.file(
-                  File(photoPath),
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => _PhotoPlaceholder(),
+            ? Semantics(
+                container: true,
+                button: true,
+                image: true,
+                label: context.l10n.plantPhotoLabel(nickname),
+                child: GestureDetector(
+                  onTap: () => showFullscreenImageViewer(context, photoPath),
+                  child: Image.file(
+                    File(photoPath),
+                    fit: BoxFit.cover,
+                    excludeFromSemantics: true,
+                    errorBuilder: (_, __, ___) => _PhotoPlaceholder(),
+                  ),
                 ),
               )
             : _PhotoPlaceholder(),

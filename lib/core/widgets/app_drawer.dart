@@ -27,6 +27,7 @@ class AppDrawer extends StatelessWidget {
               child: Image.asset(
                 'assets/images/background.png',
                 fit: BoxFit.cover,
+                excludeFromSemantics: true,
               ),
             ),
             // Blur + dark overlay — glassmorphism
@@ -59,6 +60,7 @@ class AppDrawer extends StatelessWidget {
                           'assets/images/logo.png',
                           width: 52,
                           height: 52,
+                          excludeFromSemantics: true,
                         ),
                         const SizedBox(width: 14),
                         const Text(
@@ -215,15 +217,17 @@ class _DrawerItem extends StatelessWidget {
               children: [
                 Icon(icon, color: Colors.white70, size: 22),
                 const SizedBox(width: 14),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
+                Expanded(
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 ),
-                if (trailing != null) ...[const Spacer(), trailing!],
+                if (trailing != null) trailing!,
               ],
             ),
           ),

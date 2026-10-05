@@ -3415,6 +3415,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Backup created by a newer version of the app. Update Polypodium to import it.'**
   String get backupNewerVersion;
+
+  /// No description provided for @entryPhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo from {date}'**
+  String entryPhotoLabel(String date);
+
+  /// No description provided for @plantPhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo of {name}'**
+  String plantPhotoLabel(String name);
+
+  /// No description provided for @removeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeAction;
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get removePhoto;
+
+  /// No description provided for @selectPlant.
+  ///
+  /// In en, this message translates to:
+  /// **'Select {name}'**
+  String selectPlant(String name);
+
+  /// No description provided for @addSoil.
+  ///
+  /// In en, this message translates to:
+  /// **'Add soil'**
+  String get addSoil;
+
+  /// No description provided for @deletePlant.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete plant'**
+  String get deletePlant;
+
+  /// No description provided for @changeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Change image'**
+  String get changeImage;
+
+  /// No description provided for @showPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get hidePassword;
+
+  /// No description provided for @chartGrowthSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Growth chart: {count} height records, from {first} cm to {last} cm'**
+  String chartGrowthSemantics(int count, String first, String last);
+
+  /// No description provided for @chartHealthSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Health chart: {count} scores, most recent {score}/5'**
+  String chartHealthSemantics(int count, int score);
+
+  /// No description provided for @chartWateringSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Watering chart: {count} intervals between waterings. {summary}'**
+  String chartWateringSemantics(int count, String summary);
 }
 
 class _AppLocalizationsDelegate

@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../l10n/l10n.dart';
 
 class AppSearchBar<T> extends StatelessWidget {
   final TextEditingController controller;
@@ -70,6 +71,7 @@ class AppSearchBar<T> extends StatelessWidget {
                   ),
                   child: PopupMenuButton<T>(
                     icon: const Icon(Icons.tune, color: Colors.white),
+                    tooltip: context.l10n.sortTooltip,
                     onSelected: onSortSelected,
                     itemBuilder: (context) => sortOptions!,
                   ),

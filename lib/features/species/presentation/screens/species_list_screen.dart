@@ -65,6 +65,7 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(
@@ -189,6 +190,7 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: context.l10n.addSpecies,
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const AddSpeciesScreen()),
@@ -497,6 +499,7 @@ class _SpeciesListItem extends ConsumerWidget {
                       color: transparencyEnabled
                           ? Colors.white70
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.editSpecies,
                       onPressed: onEdit,
                     ),
                     IconButton(
@@ -504,6 +507,7 @@ class _SpeciesListItem extends ConsumerWidget {
                       color: transparencyEnabled
                           ? Colors.white70
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.delete,
                       onPressed: onDelete,
                     ),
                   ],

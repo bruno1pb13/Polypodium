@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../../../../../core/widgets/emoji_text.dart';
 import 'insight_palette.dart';
 
 class InsightHintText extends StatelessWidget {
@@ -25,7 +26,16 @@ class InsightHintText extends StatelessWidget {
 class InsightCard extends StatelessWidget {
   final String title;
   final String? stat;
+  final String? statEmoji;
   final String? caption;
+
+  /// What screen readers announce for [caption], when it differs from the
+  /// visible text (e.g. without emoji markers).
+  final String? captionLabel;
+
+  /// Spoken summary of the chart in [child]; the chart itself draws on a
+  /// canvas that screen readers can't read.
+  final String? chartLabel;
   final Widget child;
   final bool transparent;
   final InsightPalette palette;
@@ -34,7 +44,10 @@ class InsightCard extends StatelessWidget {
     super.key,
     required this.title,
     this.stat,
+    this.statEmoji,
     this.caption,
+    this.captionLabel,
+    this.chartLabel,
     required this.child,
     required this.transparent,
     required this.palette,
@@ -68,35 +81,55 @@ class InsightCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                          color: palette.ink,
+                    Flexible(
+                      child: Semantics(
+                        header: true,
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            color: palette.ink,
+                          ),
                         ),
                       ),
                     ),
-                    if (stat != null)
-                      Text(
-                        stat!,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          color: palette.ink,
+                    if (stat != null) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: EmojiText(
+                          statEmoji ?? '',
+                          stat!,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            color: palette.ink,
+                          ),
                         ),
                       ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 12),
-                child,
+                if (chartLabel != null)
+                  Semantics(
+                    container: true,
+                    label: chartLabel,
+                    child: ExcludeSemantics(child: child),
+                  )
+                else
+                  child,
                 if (caption != null) ...[
                   const SizedBox(height: 8),
-                  Text(
-                    caption!,
-                    style: TextStyle(fontSize: 11.5, color: palette.inkSoft),
+                  Semantics(
+                    label: captionLabel,
+                    excludeSemantics: captionLabel != null,
+                    child: Text(
+                      caption!,
+                      style: TextStyle(fontSize: 11.5, color: palette.inkSoft),
+                    ),
                   ),
                 ],
               ],

@@ -73,6 +73,7 @@ class PlantGroupScreen extends ConsumerWidget {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(

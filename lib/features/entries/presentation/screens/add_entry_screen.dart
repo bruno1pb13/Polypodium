@@ -206,6 +206,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(

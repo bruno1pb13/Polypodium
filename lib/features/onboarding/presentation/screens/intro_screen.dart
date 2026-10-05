@@ -114,6 +114,7 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           // Gradient overlay for better readability - darkened at top
@@ -239,6 +240,7 @@ class _IntroPage extends StatelessWidget {
                         'assets/images/logo.png',
                         width: 96,
                         height: 96,
+                        excludeFromSemantics: true,
                       )
                     else
                       Icon(data.icon, size: 72, color: Colors.white),

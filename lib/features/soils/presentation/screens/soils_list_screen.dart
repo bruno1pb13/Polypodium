@@ -63,6 +63,7 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(
@@ -166,6 +167,7 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: context.l10n.addSoil,
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const AddEditSoilScreen()),
@@ -346,6 +348,7 @@ class _SoilListItem extends ConsumerWidget {
                       color: transparencyEnabled
                           ? Colors.white70
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.editSoil,
                       onPressed: onEdit,
                     ),
                     IconButton(
@@ -353,6 +356,7 @@ class _SoilListItem extends ConsumerWidget {
                       color: transparencyEnabled
                           ? Colors.white70
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.delete,
                       onPressed: onDelete,
                     ),
                   ],

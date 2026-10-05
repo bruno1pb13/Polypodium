@@ -63,6 +63,7 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(
@@ -178,6 +179,7 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: context.l10n.addLocation,
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const AddEditLocationScreen()),
@@ -335,6 +337,7 @@ class _LocationListItem extends ConsumerWidget {
                       color: transparencyEnabled
                           ? Colors.white70
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.editLocation,
                       onPressed: onEdit,
                     ),
                     IconButton(
@@ -342,6 +345,7 @@ class _LocationListItem extends ConsumerWidget {
                       color: transparencyEnabled
                           ? Colors.white70
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.delete,
                       onPressed: onDelete,
                     ),
                   ],

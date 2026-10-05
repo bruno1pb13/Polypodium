@@ -176,14 +176,29 @@ class PlantInfoCard extends ConsumerWidget {
           Icon(icon,
               size: 20, color: transparencyEnabled ? Colors.white60 : null),
           const SizedBox(width: 12),
-          Text(label,
-              style: TextStyle(
-                  color: transparencyEnabled ? Colors.white70 : null)),
-          const Spacer(),
-          Text(value,
-              style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: transparencyEnabled ? Colors.white : null)),
+          Expanded(
+            child: _spaceBetween(
+              Text(label,
+                  style: TextStyle(
+                      color: transparencyEnabled ? Colors.white70 : null)),
+              Text(value,
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: transparencyEnabled ? Colors.white : null)),
+            ),
+          ),
+        ],
+      );
+
+  /// [start] and [end] pushed to opposite edges, both wrapping instead of
+  /// overflowing when they don't fit side by side (large text sizes).
+  Widget _spaceBetween(Widget start, Widget end) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(child: start),
+          const SizedBox(width: 12),
+          Flexible(child: end),
         ],
       );
 
@@ -203,20 +218,26 @@ class PlantInfoCard extends ConsumerWidget {
   ) =>
       Row(
         children: [
+          // The label next to it already names the type.
           SizedBox(
             width: 20,
-            child: Text(
-              type.emoji,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 15),
+            child: ExcludeSemantics(
+              child: Text(
+                type.emoji,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 15),
+              ),
             ),
           ),
           const SizedBox(width: 12),
-          Text(label,
-              style: TextStyle(
-                  color: transparencyEnabled ? Colors.white70 : null)),
-          const Spacer(),
-          chip,
+          Expanded(
+            child: _spaceBetween(
+              Text(label,
+                  style: TextStyle(
+                      color: transparencyEnabled ? Colors.white70 : null)),
+              chip,
+            ),
+          ),
         ],
       );
 }

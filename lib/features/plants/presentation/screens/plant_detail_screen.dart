@@ -91,6 +91,7 @@ class PlantDetailScreen extends ConsumerWidget {
             actions: [
               IconButton(
                 icon: const Icon(Icons.edit_outlined),
+                tooltip: context.l10n.editPlant,
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -101,6 +102,7 @@ class PlantDetailScreen extends ConsumerWidget {
               PlantStatusMenuButton(plant: plant),
               IconButton(
                 icon: const Icon(Icons.delete_outline),
+                tooltip: context.l10n.deletePlant,
                 onPressed: () => confirmDeletePlant(context, ref, plantId),
               ),
             ],
@@ -112,6 +114,7 @@ class PlantDetailScreen extends ConsumerWidget {
                 child: Image.asset(
                   'assets/images/background.png',
                   fit: BoxFit.cover,
+                  excludeFromSemantics: true,
                 ),
               ),
               // Gradient overlay
@@ -214,6 +217,7 @@ class PlantDetailScreen extends ConsumerWidget {
             children: [
               FloatingActionButton.small(
                 heroTag: 'add_entry',
+                tooltip: context.l10n.newEntryTitle,
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(

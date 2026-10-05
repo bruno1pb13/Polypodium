@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/widgets/emoji_text.dart';
 import '../../../plants/presentation/widgets/plant_status.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/reminder_model.dart';
@@ -160,12 +161,15 @@ class _ReminderRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
+            // The type label next to it already names it.
             SizedBox(
               width: 20,
-              child: Text(
-                reminder.entryType.emoji,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 15),
+              child: ExcludeSemantics(
+                child: Text(
+                  reminder.entryType.emoji,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 15),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -185,14 +189,19 @@ class _ReminderRow extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: transparent ? Colors.white60 : null,
+                      color: transparent ? Colors.white70 : null,
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            chip,
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width * 0.4,
+              ),
+              child: chip,
+            ),
           ],
         ),
       ),
@@ -305,7 +314,8 @@ class _ReminderDialogState extends ConsumerState<ReminderDialog> {
                 for (final type in widget.availableTypes)
                   DropdownMenuItem(
                     value: type,
-                    child: Text('${type.emoji}  ${type.label(l10n)}'),
+                    child: EmojiText(type.emoji, type.label(l10n),
+                        separator: '  '),
                   ),
               ],
               onChanged: _isEditing

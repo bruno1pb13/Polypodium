@@ -36,7 +36,7 @@ class InsightPalette {
         health: Color(0xFF9085E9),
         water: Color(0xFF3987E5),
         ink: Colors.white,
-        inkSoft: Colors.white60,
+        inkSoft: Colors.white70,
         grid: Color(0x1AFFFFFF),
         ring: Color(0xFF1A1A19),
         tooltipBg: Color(0xE6262624),
