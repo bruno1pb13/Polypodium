@@ -21,6 +21,8 @@ wget -O ~/.local/bin/appimagetool-x86_64.AppImage \
 chmod +x ~/.local/bin/appimagetool-x86_64.AppImage
 ```
 
+Na primeira build (Linux e Windows), o CMake do plugin `printing` (impressão das etiquetas) baixa o pdfium de [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries), então é preciso internet; no Linux a `libpdfium.so` vai junto no `lib/` do bundle.
+
 ### Gerar o AppImage
 
 ```bash
@@ -41,6 +43,7 @@ chmod +x build/Polypodium-x86_64.AppImage
 |---|---|
 | Notificações de irrigação | Desabilitadas — não há daemon de background no desktop |
 | Geolocalização | Indisponível — `geolocator` não suporta Linux |
+| Escanear etiqueta | Indisponível — `mobile_scanner` não suporta Linux (gerar e imprimir etiquetas funciona) |
 | Sync com servidor | Funciona normalmente via HTTP |
 
 ## Windows (MSIX e ZIP)
@@ -62,4 +65,5 @@ Artefatos de saída:
 |---|---|
 | Notificações de irrigação | Desabilitadas — `workmanager` não suporta Windows |
 | Geolocalização | Funciona normalmente via Windows Location Services |
+| Escanear etiqueta | Indisponível — `mobile_scanner` não suporta Windows (gerar e imprimir etiquetas funciona) |
 | Sync com servidor | Funciona normalmente via HTTP |

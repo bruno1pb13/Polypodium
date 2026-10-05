@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
@@ -7,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'core/database/database_provider.dart';
+import 'core/links/app_link_handler.dart';
 import 'core/notifications/notification_response_handler.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/sync/auto_sync_controller.dart';
@@ -16,9 +18,9 @@ import 'core/theme/app_theme.dart';
 import 'core/widgets/app_shell.dart';
 import 'core/widgets/sync_status_banner.dart';
 import 'features/agenda/data/home_widget_service.dart';
-import 'features/agenda/presentation/home_widget_launch_handler.dart';
 import 'features/agenda/presentation/providers/home_widget_providers.dart';
 import 'features/onboarding/presentation/screens/intro_screen.dart';
+import 'features/plants/presentation/providers/plants_providers.dart';
 import 'features/settings/data/settings_repository.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
 import 'features/workspaces/data/workspace_repository.dart';
@@ -79,12 +81,13 @@ Future<void> main() async {
     await notificationResponses.handle(launchResponse);
   }
 
-  if (Platform.isAndroid && !showIntro) {
-    final widgetLaunches =
-        HomeWidgetLaunchHandler(notificationResponses.navigatorKey);
-    HomeWidget.widgetClicked.listen(widgetLaunches.handle, onError: (_) {});
-    await _guard(() async => widgetLaunches
-        .handle(await HomeWidget.initiallyLaunchedFromHomeWidget()));
+  // polypodium:// links that open the app: home-screen widget taps and
+  // plant labels scanned with the system camera. The stream also delivers
+  // the link that launched the app, if any.
+  if ((Platform.isAndroid || Platform.isIOS) && !showIntro) {
+    final links = AppLinkHandler(notificationResponses.navigatorKey,
+        (id) => container.read(plantsRepositoryProvider).getById(id));
+    AppLinks().uriLinkStream.listen(links.handle, onError: (_) {});
   }
 }
 

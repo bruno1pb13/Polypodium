@@ -11,6 +11,8 @@
 | `flutter_local_notifications` | notificações locais |
 | `home_widget` | widget de tela inicial (Android) |
 | `pdf` + `printing` + `qr` | etiquetas com QR code (PDF, impressão) |
+| `mobile_scanner` | leitura das etiquetas pela câmera (Android/iOS/macOS) |
+| `app_links` | links `polypodium://` que abrem o app (widget, etiquetas) |
 | `http` | chamadas HTTP para o servidor de sync |
 | `shared_preferences` | token JWT e cursor de sync |
 | `image_picker` | fotos das plantas |
@@ -54,6 +56,10 @@ O snapshot guarda o dia em que foi calculado. A atualização periódica do widg
 "Gerar etiquetas" (no detalhe da planta e no modo de seleção da Home) monta um PDF A4 com uma etiqueta por planta — QR code, apelido, nome popular e científico e, opcionalmente, localização e data de aquisição — em dois formatos de folha: 3 × 8 (70 × 37 mm) ou 2 × 5 (99 × 57 mm). O PDF é gerado em Dart puro (`buildLabelsPdf`, pacote `pdf`) com as fontes embutidas do PDF (Helvetica, Latin-1): acentos saem normalmente, emojis e outros alfabetos são omitidos. "Imprimir" abre o diálogo de impressão do sistema (`printing`); o PDF também pode ser compartilhado (Android/iOS) ou salvo (desktop).
 
 O QR code guarda `polypodium://plant/<id da planta>`. Todos os links `polypodium://` (do widget e das etiquetas) passam pelo mesmo parser, `AppLink.parse`.
+
+"Escanear etiqueta", no topo da Home, abre a câmera (`mobile_scanner`, só Android, iOS e macOS — no Windows e no Linux a ação não aparece) e abre a planta lida. A planta é procurada no workspace ativo; se não existir ali (ou foi excluída), o app avisa "Planta não encontrada neste espaço".
+
+A câmera do sistema também abre o app na planta: o Android registra o esquema `polypodium://plant` num intent-filter `VIEW`/`BROWSABLE` da `MainActivity` e o iOS declara o esquema em `CFBundleURLTypes`. Os links que abrem ou chegam ao app — inclusive os toques no widget, que antes vinham pelo `home_widget` — chegam ao Dart pelo `app_links` (`uriLinkStream`, que também entrega o link que lançou o app) e são tratados pelo `AppLinkHandler`. O deep linking próprio do Flutter fica desligado (`flutter_deeplinking_enabled` / `FlutterDeepLinkingEnabled`) para o link não ser empurrado também como rota.
 
 ## Sincronização
 

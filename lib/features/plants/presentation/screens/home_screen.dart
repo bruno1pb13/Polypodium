@@ -6,11 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../species/presentation/screens/species_list_screen.dart';
 // ignore: unused_import
 import '../../../locations/presentation/screens/locations_list_screen.dart';
+import '../../../../core/links/app_link_handler.dart';
 import '../../../../core/sync/auto_sync_controller.dart';
 import '../../../../core/sync/sync_providers.dart';
 import '../../../../core/widgets/app_search_bar.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../entries/presentation/screens/add_entry_screen.dart';
+import '../../../labels/data/label_scanner.dart';
 import '../../../labels/presentation/screens/plant_labels_screen.dart';
 import '../../../workspaces/presentation/providers/workspace_providers.dart';
 import '../providers/plant_search_providers.dart';
@@ -137,6 +139,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (mounted) ref.read(plantSelectionProvider.notifier).state = {};
   }
 
+  Future<void> _scanLabel() async {
+    final navigator = Navigator.of(context);
+    final code = await ref.read(labelScannerProvider).scan(context);
+    if (code == null || !mounted) return;
+    await openScannedLabel(
+        navigator, code, ref.read(plantsRepositoryProvider).getById);
+  }
+
   Future<void> _manualSync() async {
     await ref.read(syncNotifierProvider.notifier).sync();
     if (!mounted) return;
@@ -161,6 +171,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final showArchived = ref.watch(plantShowArchivedNotifierProvider);
     final hasAnyPlant =
         ref.watch(plantsWithSpeciesProvider).value?.isNotEmpty ?? false;
+    final scanner = ref.watch(labelScannerProvider);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -230,6 +241,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
               actions: [
+                if (scanner.isSupported)
+                  IconButton(
+                    icon: const Icon(Icons.qr_code_scanner),
+                    tooltip: context.l10n.labelScan,
+                    onPressed: _scanLabel,
+                  ),
                 if (workspace.isLoggedIn)
                   IconButton(
                     icon: syncState.isLoading
