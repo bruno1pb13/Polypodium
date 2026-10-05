@@ -7,8 +7,9 @@ import 'package:polypodium/features/plants/data/plants_repository.dart';
 import 'package:polypodium/features/entries/data/entries_repository.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/entries/domain/entry_model.dart';
-import 'package:polypodium/features/species/domain/species_model.dart';
-import 'package:polypodium/features/locations/domain/location_model.dart';
+import 'package:polypodium/features/locations/data/locations_repository.dart';
+import 'package:polypodium/features/soils/data/soils_repository.dart';
+import 'package:polypodium/features/species/data/species_repository.dart';
 import 'package:polypodium/features/soils/domain/soil_model.dart';
 import 'package:polypodium/features/species/presentation/providers/species_providers.dart';
 import 'package:polypodium/features/locations/presentation/providers/locations_providers.dart';
@@ -19,32 +20,18 @@ class MockPlantsRepository extends Mock implements PlantsRepository {}
 
 class MockEntriesRepository extends Mock implements EntriesRepository {}
 
-// Simple mocks for notifiers
-class MockSpeciesNotifier extends SpeciesNotifier with Mock {
-  @override
-  Stream<List<SpeciesModel>> build() => Stream.value([]);
-}
+class MockSpeciesRepository extends Mock implements SpeciesRepository {}
 
-class MockLocationsNotifier extends LocationsNotifier with Mock {
-  @override
-  Stream<List<LocationModel>> build() => Stream.value([]);
-}
+class MockLocationsRepository extends Mock implements LocationsRepository {}
 
-class MockSoilsNotifier extends SoilsNotifier with Mock {
-  @override
-  Stream<List<SoilModel>> build() => Stream.value([
-        SoilModel(id: 'loamy', name: 'Franco', createdAt: DateTime.now()),
-      ]);
-}
-
-class MockEntriesNotifier extends EntriesNotifier with Mock {
-  @override
-  Stream<List<EntryModel>> build(String plantId) => Stream.value([]);
-}
+class MockSoilsRepository extends Mock implements SoilsRepository {}
 
 void main() {
   late MockPlantsRepository mockPlantsRepo;
   late MockEntriesRepository mockEntriesRepo;
+  late MockSpeciesRepository mockSpeciesRepo;
+  late MockLocationsRepository mockLocationsRepo;
+  late MockSoilsRepository mockSoilsRepo;
   late ProviderContainer container;
 
   final now = DateTime.now();
@@ -71,18 +58,22 @@ void main() {
   setUp(() {
     mockPlantsRepo = MockPlantsRepository();
     mockEntriesRepo = MockEntriesRepository();
+    mockSpeciesRepo = MockSpeciesRepository();
+    mockLocationsRepo = MockLocationsRepository();
+    mockSoilsRepo = MockSoilsRepository();
+    when(() => mockSpeciesRepo.getAll()).thenAnswer((_) async => []);
+    when(() => mockLocationsRepo.getAll()).thenAnswer((_) async => []);
+    when(() => mockSoilsRepo.getAll()).thenAnswer((_) async => [
+          SoilModel(id: 'loamy', name: 'Franco', createdAt: DateTime.now()),
+        ]);
 
     container = ProviderContainer(
       overrides: [
         plantsRepositoryProvider.overrideWithValue(mockPlantsRepo),
         entriesRepositoryProvider.overrideWithValue(mockEntriesRepo),
-        speciesNotifierProvider.overrideWith(() => MockSpeciesNotifier()),
-        locationsNotifierProvider.overrideWith(() => MockLocationsNotifier()),
-        soilsNotifierProvider.overrideWith(() => MockSoilsNotifier()),
-        // For family providers, we need to override the specific instance or use the whole family
-        // entriesNotifierProvider.overrideWith((p) => MockEntriesNotifier()) is not correct for riverpod_generator
-        // We can override each call or use a different strategy.
-        // Let's try to override the family with a provider that returns our mock.
+        speciesRepositoryProvider.overrideWithValue(mockSpeciesRepo),
+        locationsRepositoryProvider.overrideWithValue(mockLocationsRepo),
+        soilsRepositoryProvider.overrideWithValue(mockSoilsRepo),
       ],
     );
   });
@@ -102,28 +93,9 @@ void main() {
         createdAt: now,
       );
 
-      when(() => mockPlantsRepo.watchAll()).thenAnswer((_) => Stream.value([]));
+      when(() => mockPlantsRepo.getById('p1')).thenAnswer((_) async => null);
       when(() => mockPlantsRepo.save(any())).thenAnswer((_) async => {});
       when(() => mockEntriesRepo.create(any())).thenAnswer((_) async => {});
-
-      // For history creation, PlantsNotifier calls entriesNotifierProvider(plant.id).notifier.create
-      // So we need to ensure that notifier is available.
-      // We can override the provider for this specific ID.
-      container = ProviderContainer(
-        overrides: [
-          plantsRepositoryProvider.overrideWithValue(mockPlantsRepo),
-          entriesRepositoryProvider.overrideWithValue(mockEntriesRepo),
-          speciesNotifierProvider.overrideWith(() => MockSpeciesNotifier()),
-          locationsNotifierProvider.overrideWith(() => MockLocationsNotifier()),
-          soilsNotifierProvider.overrideWith(() => MockSoilsNotifier()),
-          entriesNotifierProvider('p1')
-              .overrideWith(() => MockEntriesNotifier()),
-        ],
-      );
-      container.listen(plantsNotifierProvider, (_, __) {});
-      container.listen(speciesNotifierProvider, (_, __) {});
-      container.listen(locationsNotifierProvider, (_, __) {});
-      container.listen(soilsNotifierProvider, (_, __) {});
 
       final notifier = container.read(plantsNotifierProvider.notifier);
       await notifier.save(plant);
@@ -153,31 +125,12 @@ void main() {
 
       final newPlant = oldPlant.copyWith(nickname: 'Ferny Updated');
 
-      when(() => mockPlantsRepo.watchAll())
-          .thenAnswer((_) => Stream.value([oldPlant]));
+      when(() => mockPlantsRepo.getById('p1'))
+          .thenAnswer((_) async => oldPlant);
       when(() => mockPlantsRepo.save(any())).thenAnswer((_) async => {});
       when(() => mockEntriesRepo.create(any())).thenAnswer((_) async => {});
 
-      container = ProviderContainer(
-        overrides: [
-          plantsRepositoryProvider.overrideWithValue(mockPlantsRepo),
-          entriesRepositoryProvider.overrideWithValue(mockEntriesRepo),
-          speciesNotifierProvider.overrideWith(() => MockSpeciesNotifier()),
-          locationsNotifierProvider.overrideWith(() => MockLocationsNotifier()),
-          soilsNotifierProvider.overrideWith(() => MockSoilsNotifier()),
-          entriesNotifierProvider('p1')
-              .overrideWith(() => MockEntriesNotifier()),
-        ],
-      );
-      container.listen(plantsNotifierProvider, (_, __) {});
-      container.listen(speciesNotifierProvider, (_, __) {});
-      container.listen(locationsNotifierProvider, (_, __) {});
-      container.listen(soilsNotifierProvider, (_, __) {});
-
       final notifier = container.read(plantsNotifierProvider.notifier);
-      // Wait for initial build to populate the "oldPlants" state
-      await container.read(plantsNotifierProvider.future);
-
       await notifier.save(newPlant);
 
       verify(() => mockPlantsRepo.save(newPlant)).called(1);
@@ -200,14 +153,9 @@ void main() {
         createdAt: now,
       );
 
-      when(() => mockPlantsRepo.watchAll())
-          .thenAnswer((_) => Stream.value([plant]));
       when(() => mockPlantsRepo.getById('p1')).thenAnswer((_) async => plant);
       when(() => mockPlantsRepo.save(any())).thenAnswer((_) async => {});
       when(() => mockEntriesRepo.create(any())).thenAnswer((_) async => {});
-
-      container.listen(plantsNotifierProvider, (_, __) {});
-      await container.read(plantsNotifierProvider.future);
 
       await container
           .read(plantsNotifierProvider.notifier)
@@ -231,8 +179,6 @@ void main() {
       const plantId = 'p1';
       when(() => mockPlantsRepo.irrigate(plantId))
           .thenAnswer((_) async => null);
-      when(() => mockPlantsRepo.watchAll())
-          .thenAnswer((_) => Stream.value([]));
 
       final notifier = container.read(plantsNotifierProvider.notifier);
       await notifier.irrigate(plantId);

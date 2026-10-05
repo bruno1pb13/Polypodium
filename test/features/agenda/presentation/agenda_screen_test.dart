@@ -11,6 +11,8 @@ import 'package:polypodium/features/settings/presentation/providers/settings_pro
 import 'package:polypodium/features/species/domain/species_model.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
 
+import '../../../helpers/accessibility.dart';
+
 class _FakeTransparencyNotifier extends TransparencyEnabledNotifier {
   @override
   bool build() => true;
@@ -63,7 +65,8 @@ void main() {
 
   late _FakeEntryMutations mutations;
 
-  Future<void> pump(WidgetTester tester, List<AgendaTask> tasks) async {
+  Future<void> pump(WidgetTester tester, List<AgendaTask> tasks,
+      {ThemeData? theme}) async {
     mutations = _FakeEntryMutations();
     await tester.pumpWidget(ProviderScope(
       overrides: [
@@ -72,11 +75,12 @@ void main() {
         agendaTasksProvider.overrideWith((ref) async => tasks),
         entryMutationsProvider.overrideWithValue(mutations),
       ],
-      child: const MaterialApp(
-        locale: Locale('pt'),
+      child: MaterialApp(
+        theme: theme,
+        locale: const Locale('pt'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: AgendaScreen(),
+        home: const AgendaScreen(),
       ),
     ));
     await tester.pumpAndSettle();
@@ -138,5 +142,51 @@ void main() {
       ['Samambaia', 'Jiboia'],
     ]);
     expect(find.text('Rega registrada em 2 plantas'), findsOneWidget);
+  });
+
+  group('accessibility', () {
+    List<AgendaTask> tasks() => [
+          task('Samambaia', 3),
+          task('Jiboia', 0,
+              kind: AgendaTaskKind.care, type: EntryType.fertilizer),
+          task('Hera', -3,
+              kind: AgendaTaskKind.pesticide, type: EntryType.pesticide),
+        ];
+
+    testWidgets('meets the tap target and labelling guidelines',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, tasks());
+
+      await expectTapTargetGuidelines(tester);
+      // The type is read from the task label, not the emoji next to it.
+      expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+      expect(find.bySemanticsLabel(RegExp('Fertilização')), findsOneWidget);
+      semantics.dispose();
+    });
+
+    for (final (name, theme) in appThemes) {
+      testWidgets('text is readable in the $name theme', (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pump(tester, tasks(), theme: theme);
+        await paintBackground(tester);
+        await expectReadableText(tester);
+        semantics.dispose();
+      });
+    }
+
+    for (final scale in [1.5, 2.0]) {
+      testWidgets('lays out without overflow at text scale $scale',
+          (tester) async {
+        tester.view.physicalSize = const Size(400, 1600);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        setTextScale(tester, scale);
+
+        await pump(tester, tasks());
+        expect(tester.takeException(), isNull);
+        expect(find.text('Samambaia'), findsOneWidget);
+      });
+    }
   });
 }

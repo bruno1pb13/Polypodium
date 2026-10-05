@@ -25,12 +25,20 @@ class SyncCursorsDao extends DatabaseAccessor<AppDatabase>
     return row?.cursor ?? 0;
   }
 
+  /// Only ever moves the cursor forward: the UI and the WorkManager isolate
+  /// may sync the same database concurrently, and a slower pass must not
+  /// rewind what a faster one already recorded.
   Future<void> setCursor(String peerId, String direction, int cursor) =>
-      into(syncCursorsTable).insertOnConflictUpdate(
-        SyncCursorsTableCompanion.insert(
-          peerId: peerId,
-          direction: direction,
-          cursor: Value(cursor),
-        ),
+      customUpdate(
+        'INSERT INTO sync_cursors (peer_id, direction, cursor) '
+        'VALUES (?, ?, ?) ON CONFLICT (peer_id, direction) '
+        'DO UPDATE SET cursor = MAX(cursor, excluded.cursor)',
+        variables: [
+          Variable.withString(peerId),
+          Variable.withString(direction),
+          Variable.withInt(cursor),
+        ],
+        updates: {syncCursorsTable},
+        updateKind: UpdateKind.update,
       );
 }

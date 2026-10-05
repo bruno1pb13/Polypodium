@@ -113,6 +113,7 @@ class _Preview extends StatelessWidget {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           SafeArea(

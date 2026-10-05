@@ -58,7 +58,7 @@ class LocationsRepository {
         localRev: row.localRev,
       );
 
-  static LocationsTableCompanion _toCompanion(LocationModel m,
+  LocationsTableCompanion _toCompanion(LocationModel m,
           {required DateTime updatedAt, required int rev}) =>
       LocationsTableCompanion.insert(
         id: m.id,
@@ -69,5 +69,6 @@ class LocationsRepository {
         createdAt: m.createdAt,
         updatedAt: updatedAt,
         localRev: Value(rev),
+        deviceId: Value(_db.deviceId),
       );
 }

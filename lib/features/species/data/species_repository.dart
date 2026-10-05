@@ -60,7 +60,7 @@ class SpeciesRepository {
         localRev: row.localRev,
       );
 
-  static SpeciesTableCompanion _toCompanion(SpeciesModel m,
+  SpeciesTableCompanion _toCompanion(SpeciesModel m,
           {required DateTime updatedAt, required int rev}) =>
       SpeciesTableCompanion.insert(
         id: m.id,
@@ -72,5 +72,6 @@ class SpeciesRepository {
         createdAt: m.createdAt,
         updatedAt: updatedAt,
         localRev: Value(rev),
+        deviceId: Value(_db.deviceId),
       );
 }

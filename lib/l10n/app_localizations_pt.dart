@@ -1947,4 +1947,55 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get backupNewerVersion =>
       'Backup gerado por uma versão mais nova do aplicativo. Atualize o Polypodium para importá-lo.';
+
+  @override
+  String entryPhotoLabel(String date) {
+    return 'Foto de $date';
+  }
+
+  @override
+  String plantPhotoLabel(String name) {
+    return 'Foto de $name';
+  }
+
+  @override
+  String get removeAction => 'Remover';
+
+  @override
+  String get removePhoto => 'Remover foto';
+
+  @override
+  String selectPlant(String name) {
+    return 'Selecionar $name';
+  }
+
+  @override
+  String get addSoil => 'Adicionar solo';
+
+  @override
+  String get deletePlant => 'Deletar planta';
+
+  @override
+  String get changeImage => 'Alterar imagem';
+
+  @override
+  String get showPassword => 'Mostrar senha';
+
+  @override
+  String get hidePassword => 'Ocultar senha';
+
+  @override
+  String chartGrowthSemantics(int count, String first, String last) {
+    return 'Gráfico de crescimento: $count registros de altura, de $first cm a $last cm';
+  }
+
+  @override
+  String chartHealthSemantics(int count, int score) {
+    return 'Gráfico de saúde: $count notas, a mais recente $score/5';
+  }
+
+  @override
+  String chartWateringSemantics(int count, String summary) {
+    return 'Gráfico de regas: $count intervalos entre regas. $summary';
+  }
 }

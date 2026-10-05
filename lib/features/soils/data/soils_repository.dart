@@ -34,6 +34,7 @@ class SoilsRepository {
         createdAt: model.createdAt,
         updatedAt: DateTime.now(),
         localRev: Value(rev),
+        deviceId: Value(_db.deviceId),
         isSeeded: const Value(false),
       );
       await _db.soilsDao.insertSoil(companion);

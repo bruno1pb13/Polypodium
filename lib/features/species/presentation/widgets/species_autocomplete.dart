@@ -225,12 +225,14 @@ class _SpeciesAutocompleteState extends ConsumerState<SpeciesAutocomplete> {
                                     _options = [];
                                   });
 
+                                  // The text is set before notifying, so
+                                  // onSelected can still replace it.
                                   if (option is SpeciesModel) {
+                                    widget.controller.text = '${option.popularName} (${option.scientificName})';
                                     widget.onSelected(option.id, option.popularName, option.scientificName);
-                                    widget.controller.text = '${option.popularName} (${option.scientificName})';
                                   } else if (option is ExternalSpecies) {
-                                    widget.onSelected(null, option.popularName, option.scientificName);
                                     widget.controller.text = '${option.popularName} (${option.scientificName})';
+                                    widget.onSelected(null, option.popularName, option.scientificName);
                                   }
                                   _focusNode.unfocus();
                                   _removeOverlay();

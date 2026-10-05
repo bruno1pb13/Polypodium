@@ -53,12 +53,20 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase({String fileName = 'polypodium.db'})
+  AppDatabase({String fileName = 'polypodium.db', this.deviceId})
       : super(_openConnection(fileName));
-  AppDatabase.forTesting(super.executor);
+  AppDatabase.forTesting(super.executor, {this.deviceId});
+
+  /// This device's id in the workspace owning this database (null for the
+  /// local workspace). Every local write stamps it on the row's `deviceId`
+  /// next to the new `localRev`, while a pulled row keeps its sender's id,
+  /// so each row records who wrote its current version: the LWW tiebreak
+  /// (`incomingWins`) needs it to resolve exact `updatedAt` ties the same
+  /// way the server does.
+  final String? deviceId;
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 15;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -108,26 +116,23 @@ class AppDatabase extends _$AppDatabase {
             // yet to preserve across this shape change, so upgrading from
             // any prior schema just resets to a fresh, empty database
             // rather than carrying forward a chain of dead syncStatus-era
-            // migration steps. Drop children before parents, recreate
-            // parents before children, to respect FK constraints.
+            // migration steps. Drop children before parents and rebuild at
+            // the current schema; the later steps assume a v10+ shape, so
+            // they must not run here.
+            await m.deleteTable('reminders');
             await m.deleteTable('entries');
             await m.deleteTable('plants');
             await m.deleteTable('species');
             await m.deleteTable('soils');
             await m.deleteTable('locations');
+            await m.deleteTable('defensivos');
             await m.deleteTable('sync_queue');
             await m.deleteTable('sync_meta');
             await m.deleteTable('sync_cursors');
 
-            await m.createTable(speciesTable);
-            await m.createTable(soilsTable);
-            await m.createTable(locationsTable);
-            await m.createTable(plantsTable);
-            await m.createTable(entriesTable);
-            await m.createTable(syncMetaTable);
-            await m.createTable(syncCursorsTable);
-
+            await m.createAll();
             await _seedFresh();
+            return;
           }
           if (from < 11) {
             await m.createTable(defensivosTable);
@@ -141,6 +146,53 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 13) {
             await m.createTable(remindersTable);
+          }
+          if (from < 15) {
+            // Ahead of the v14 step, whose data fix writes device-stamped
+            // rows. Tables created by the steps above already have the
+            // column; an empty column list means a missing table.
+            for (final table in <TableInfo>[
+              speciesTable,
+              plantsTable,
+              entriesTable,
+              locationsTable,
+              soilsTable,
+              defensivosTable,
+              remindersTable,
+            ]) {
+              final columns = await customSelect(
+                      'SELECT name FROM pragma_table_info(?)',
+                      variables: [Variable(table.actualTableName)])
+                  .map((row) => row.read<String>('name'))
+                  .get();
+              if (columns.isNotEmpty && !columns.contains('device_id')) {
+                await m.addColumn(table, table.columnsByName['device_id']!);
+              }
+            }
+          }
+          if (from < 14) {
+            // Link any leftover free-text location to a locations row, then
+            // drop the legacy column. Stamped as local writes so the links
+            // reach the server on the next sync.
+            final legacy = await customSelect(
+              'SELECT id, location FROM plants WHERE location IS NOT NULL '
+              'AND location_id IS NULL AND deleted_at IS NULL',
+            ).get();
+            for (final row in legacy) {
+              final locationId = await locationsDao
+                  .resolveLegacyName(row.read<String>('location'));
+              if (locationId == null) continue;
+              final rev = await syncMetaDao.nextRev();
+              await (update(plantsTable)
+                    ..where((t) => t.id.equals(row.read<String>('id'))))
+                  .write(PlantsTableCompanion(
+                locationId: Value(locationId),
+                updatedAt: Value(DateTime.now()),
+                localRev: Value(rev),
+                deviceId: Value(deviceId),
+              ));
+            }
+            await m.alterTable(TableMigration(plantsTable));
           }
         },
       );

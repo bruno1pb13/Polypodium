@@ -155,7 +155,6 @@ class PlantsRepository {
         soilId: row.soilType,
         irrigationFrequencyDays: row.irrigationFrequencyDays,
         acquisitionDate: row.acquisitionDate,
-        location: row.location,
         locationId: row.locationId,
         lastIrrigatedAt: row.lastIrrigatedAt,
         lastPesticideAppliedAt: row.lastPesticideAppliedAt,
@@ -168,7 +167,7 @@ class PlantsRepository {
         localRev: row.localRev,
       );
 
-  static PlantsTableCompanion _toCompanion(PlantModel m,
+  PlantsTableCompanion _toCompanion(PlantModel m,
           {required DateTime updatedAt, required int rev}) =>
       PlantsTableCompanion.insert(
         id: m.id,
@@ -177,7 +176,6 @@ class PlantsRepository {
         soilType: m.soilId,
         irrigationFrequencyDays: Value(m.irrigationFrequencyDays),
         acquisitionDate: m.acquisitionDate,
-        location: Value(m.location),
         locationId: Value(m.locationId),
         lastIrrigatedAt: Value(m.lastIrrigatedAt),
         lastPesticideAppliedAt: Value(m.lastPesticideAppliedAt),
@@ -187,5 +185,6 @@ class PlantsRepository {
         createdAt: m.createdAt,
         updatedAt: updatedAt,
         localRev: Value(rev),
+        deviceId: Value(_db.deviceId),
       );
 }

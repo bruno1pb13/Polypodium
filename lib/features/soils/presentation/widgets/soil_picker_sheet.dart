@@ -10,6 +10,7 @@ import '../../../../core/widgets/app_search_bar.dart';
 import '../../domain/soil_model.dart';
 import '../providers/soils_search_providers.dart';
 import '../screens/add_edit_soil_screen.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 class SoilPickerSheet extends ConsumerStatefulWidget {
   final String? selectedSoilId;
@@ -37,9 +38,9 @@ class _SoilPickerSheetState extends ConsumerState<SoilPickerSheet> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: context.glass.sheet,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: context.glass.tint(0.1)),
       ),
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -52,15 +53,15 @@ class _SoilPickerSheetState extends ConsumerState<SoilPickerSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white24,
+                  color: context.glass.outline,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 16),
               Text(
                 context.l10n.selectSoilTitle,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: context.glass.fg,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -93,13 +94,13 @@ class _SoilPickerSheetState extends ConsumerState<SoilPickerSheet> {
               ),
               Expanded(
                 child: soilsAsync.when(
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
+                  loading: () => Center(
+                    child: CircularProgressIndicator(color: context.glass.fg),
                   ),
                   error: (e, _) => Center(
                     child: Text(
                       context.l10n.errorGeneric('$e'),
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: context.glass.fg),
                     ),
                   ),
                   data: (soils) {
@@ -107,7 +108,7 @@ class _SoilPickerSheetState extends ConsumerState<SoilPickerSheet> {
                       return Center(
                         child: Text(
                           context.l10n.noSoilsFound,
-                          style: const TextStyle(color: Colors.white70),
+                          style: TextStyle(color: context.glass.fgMuted),
                         ),
                       );
                     }
@@ -130,8 +131,8 @@ class _SoilPickerSheetState extends ConsumerState<SoilPickerSheet> {
                               label: Text(context.l10n.newSoil),
                               style: FilledButton.styleFrom(
                                 backgroundColor:
-                                    Colors.white.withValues(alpha: 0.1),
-                                foregroundColor: Colors.white,
+                                    context.glass.tint(0.1),
+                                foregroundColor: context.glass.fg,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -184,12 +185,12 @@ class _SoilListTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected
                 ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
-                : Colors.white.withValues(alpha: 0.05),
+                : context.glass.tint(0.05),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isSelected
                   ? Theme.of(context).colorScheme.primary
-                  : Colors.white.withValues(alpha: 0.1),
+                  : context.glass.tint(0.1),
             ),
           ),
           child: Row(
@@ -198,7 +199,7 @@ class _SoilListTile extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: context.glass.tint(0.1),
                   borderRadius: BorderRadius.circular(12),
                   image: soil.imagePath != null
                       ? DecorationImage(
@@ -210,7 +211,7 @@ class _SoilListTile extends StatelessWidget {
                       : null,
                 ),
                 child: soil.imagePath == null
-                    ? const Icon(Icons.terrain_outlined, color: Colors.white70)
+                    ? Icon(Icons.terrain_outlined, color: context.glass.fgMuted)
                     : null,
               ),
               const SizedBox(width: 12),
@@ -220,8 +221,8 @@ class _SoilListTile extends StatelessWidget {
                   children: [
                     Text(
                       soil.name,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: context.glass.fg,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -229,8 +230,8 @@ class _SoilListTile extends StatelessWidget {
                     if (soil.composition != null)
                       Text(
                         soil.composition!,
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        style: TextStyle(
+                          color: context.glass.fgMuted,
                           fontSize: 12,
                         ),
                         maxLines: 1,

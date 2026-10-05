@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/enums.dart';
 import '../../../../../core/l10n/l10n.dart';
+import '../../../../../core/widgets/emoji_text.dart';
+import '../../../../../core/theme/glass_colors.dart';
 
 /// Choice chips of the entry types that can be created by hand.
 class EntryTypeSelector extends StatelessWidget {
@@ -21,8 +23,8 @@ class EntryTypeSelector extends StatelessWidget {
       children: [
         Text(
           context.l10n.entryTypeCardTitle,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: context.glass.fg,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -36,14 +38,14 @@ class EntryTypeSelector extends StatelessWidget {
               .map((t) {
             final selected = t == selectedType;
             return ChoiceChip(
-              label: Text('${t.emoji} ${t.label(context.l10n)}'),
+              label: EmojiText(t.emoji, t.label(context.l10n)),
               selected: selected,
               onSelected: (_) => onSelected(t),
-              backgroundColor: Colors.black.withValues(alpha: 0.2),
+              backgroundColor: context.glass.scrim(0.2),
               selectedColor: Theme.of(context).colorScheme.primary,
               showCheckmark: false,
               labelStyle: TextStyle(
-                color: selected ? Colors.white : Colors.white70,
+                color: selected ? Colors.white : context.glass.fgMuted,
                 fontSize: 13,
                 fontWeight: selected ? FontWeight.bold : FontWeight.normal,
               ),
@@ -51,8 +53,8 @@ class EntryTypeSelector extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
                   color: selected
-                      ? Colors.white.withValues(alpha: 0.3)
-                      : Colors.white12,
+                      ? context.glass.tint(0.3)
+                      : context.glass.tint(0.12),
                 ),
               ),
             );

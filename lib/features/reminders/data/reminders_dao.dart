@@ -56,6 +56,7 @@ class RemindersDao extends DatabaseAccessor<AppDatabase>
           deletedAt: Value(deletedAt),
           updatedAt: Value(deletedAt),
           localRev: Value(rev),
+          deviceId: Value(attachedDatabase.deviceId),
         ),
       );
 
@@ -70,6 +71,7 @@ class RemindersDao extends DatabaseAccessor<AppDatabase>
         deletedAt: Value(deletedAt),
         updatedAt: Value(deletedAt),
         localRev: Value(rev),
+        deviceId: Value(attachedDatabase.deviceId),
       ));
 
   Future<List<RemindersTableData>> changesSince(int since,

@@ -1,5 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../l10n/l10n.dart';
+import '../theme/glass_colors.dart';
 
 class AppSearchBar<T> extends StatelessWidget {
   final TextEditingController controller;
@@ -30,21 +32,22 @@ class AppSearchBar<T> extends StatelessWidget {
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.3),
+                    color: context.glass.scrim(0.3),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: context.glass.tint(0.2),
                     ),
                   ),
                   child: TextField(
                     controller: controller,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: context.glass.fg),
                     decoration: InputDecoration(
                       hintText: hintText,
                       hintStyle: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: context.glass.fgAlpha(0.6),
                       ),
-                      prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                      prefixIcon:
+                          Icon(Icons.search, color: context.glass.fgMuted),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(vertical: 15),
                     ),
@@ -69,7 +72,8 @@ class AppSearchBar<T> extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: PopupMenuButton<T>(
-                    icon: const Icon(Icons.tune, color: Colors.white),
+                    icon: Icon(Icons.tune, color: context.glass.fg),
+                    tooltip: context.l10n.sortTooltip,
                     onSelected: onSortSelected,
                     itemBuilder: (context) => sortOptions!,
                   ),

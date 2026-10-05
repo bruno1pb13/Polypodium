@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/database/app_database.dart';
 
@@ -32,8 +33,39 @@ class LocationsDao extends DatabaseAccessor<AppDatabase>
           deletedAt: Value(deletedAt),
           updatedAt: Value(deletedAt),
           localRev: Value(rev),
+          deviceId: Value(attachedDatabase.deviceId),
         ),
       );
+
+  /// Maps a legacy free-text plant location (from before locations were
+  /// their own entity) to a location id, reusing a live location with the
+  /// same name (case-insensitive) or creating one. A created id is derived
+  /// from the name, so devices resolving the same text converge on a single
+  /// row instead of syncing duplicates. Returns null for blank text. Must run
+  /// inside the caller's transaction, since it may stamp a new revision.
+  Future<String?> resolveLegacyName(String? text) async {
+    final name = text?.trim() ?? '';
+    if (name.isEmpty) return null;
+    final key = name.toLowerCase();
+    for (final row in await getAll()) {
+      if (row.name.trim().toLowerCase() == key) return row.id;
+    }
+    final id = const Uuid()
+        .v5(Namespace.url.value, 'polypodium:legacy-location:$key');
+    final now = DateTime.now();
+    final rev = await attachedDatabase.syncMetaDao.nextRev();
+    await upsert(LocationsTableCompanion.insert(
+      id: id,
+      name: name,
+      createdAt: now,
+      updatedAt: now,
+      // Revives the derived row if it was soft-deleted in the meantime.
+      deletedAt: const Value(null),
+      localRev: Value(rev),
+      deviceId: Value(attachedDatabase.deviceId),
+    ));
+    return id;
+  }
 
   Future<List<LocationsTableData>> changesSince(int since,
           {required int limit}) =>

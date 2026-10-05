@@ -7,6 +7,7 @@ import '../../../../entries/domain/entry_model.dart';
 import '../../../../entries/presentation/providers/entries_providers.dart';
 import '../../../../entries/presentation/providers/entry_filters_provider.dart';
 import '../../../../entries/presentation/widgets/entry_timeline_item.dart';
+import '../../../../../core/theme/glass_colors.dart';
 
 /// Timeline of the plant's entries, filtered and sorted as chosen in
 /// [PlantEntriesHeader]. Returns a sliver.
@@ -50,7 +51,7 @@ class PlantDiarySliver extends ConsumerWidget {
               child: Center(
                 child: Text(
                   context.l10n.noEntriesFound,
-                  style: const TextStyle(color: Colors.white70),
+                  style: TextStyle(color: context.glass.fgMuted),
                 ),
               ),
             ),

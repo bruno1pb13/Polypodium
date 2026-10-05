@@ -68,6 +68,7 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
           deletedAt: Value(deletedAt),
           updatedAt: Value(deletedAt),
           localRev: Value(rev),
+          deviceId: Value(attachedDatabase.deviceId),
         ),
       );
 
@@ -86,6 +87,7 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
       deletedAt: Value(deletedAt),
       updatedAt: Value(deletedAt),
       localRev: Value(rev),
+      deviceId: Value(attachedDatabase.deviceId),
     ));
     return rows;
   }

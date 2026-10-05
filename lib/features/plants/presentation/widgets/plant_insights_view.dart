@@ -14,6 +14,7 @@ import 'insights/insight_card.dart';
 import 'insights/insight_chart_helpers.dart';
 import 'insights/insight_palette.dart';
 import 'insights/watering_chart.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 /// Charts view of the plant detail screen: growth, health and watering
 /// regularity, derived from the plant's entries.
@@ -72,7 +73,7 @@ class PlantInsightsView extends ConsumerWidget {
           child: Text(
             l10n.chartsEmpty,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white70, height: 1.4),
+            style: TextStyle(color: context.glass.fgMuted, height: 1.4),
           ),
         ),
       );
@@ -94,6 +95,16 @@ class PlantInsightsView extends ConsumerWidget {
             caption: heights.length >= 2
                 ? _eventsCaption(l10n, careEvents, heights)
                 : null,
+            captionLabel: heights.length >= 2
+                ? _eventsCaption(l10n, careEvents, heights, spoken: true)
+                : null,
+            chartLabel: heights.length >= 2
+                ? l10n.chartGrowthSemantics(
+                    heights.length,
+                    formatChartNumber(heights.first.numericValue!),
+                    formatChartNumber(lastHeight!),
+                  )
+                : null,
             transparent: transparent,
             palette: palette,
             child: heights.length >= 2
@@ -106,11 +117,16 @@ class PlantInsightsView extends ConsumerWidget {
           ),
           InsightCard(
             title: l10n.chartHealthTitle,
-            stat: lastHealth != null
-                ? '${healthScoreEmoji(lastHealth)} ${l10n.healthSummary(lastHealth)}'
-                : null,
+            stat: lastHealth != null ? l10n.healthSummary(lastHealth) : null,
+            statEmoji: lastHealth != null ? healthScoreEmoji(lastHealth) : null,
             caption: healths.length >= 2
                 ? _eventsCaption(l10n, healthEvents, healths)
+                : null,
+            captionLabel: healths.length >= 2
+                ? _eventsCaption(l10n, healthEvents, healths, spoken: true)
+                : null,
+            chartLabel: healths.length >= 2
+                ? l10n.chartHealthSemantics(healths.length, lastHealth!)
                 : null,
             transparent: transparent,
             palette: palette,
@@ -126,6 +142,10 @@ class PlantInsightsView extends ConsumerWidget {
             title: l10n.chartWateringTitle,
             caption: intervals.isNotEmpty
                 ? _wateringCaption(l10n, intervals)
+                : null,
+            chartLabel: intervals.isNotEmpty
+                ? l10n.chartWateringSemantics(
+                    intervals.length, _wateringCaption(l10n, intervals))
                 : null,
             transparent: transparent,
             palette: palette,
@@ -170,8 +190,10 @@ class PlantInsightsView extends ConsumerWidget {
   /// Key line for the event markers actually visible in the chart's window:
   /// the observação (note) logged with each care event (poda, fertilização,
   /// defensivos, ...) when there is one, otherwise just which types occurred.
+  /// [spoken] swaps the emoji markers for the type names, for screen readers.
   String? _eventsCaption(AppLocalizations l10n, List<EntryModel> events,
-      List<EntryModel> points) {
+      List<EntryModel> points,
+      {bool spoken = false}) {
     final start = points.first.date;
     final end = points.last.date;
     final visible = events
@@ -183,7 +205,9 @@ class PlantInsightsView extends ConsumerWidget {
         visible.where((e) => (e.note ?? '').trim().isNotEmpty).toList();
     if (notes.isEmpty) {
       final present = visible.map((e) => e.type).toSet();
-      return present.map((t) => '${t.emoji} ${t.label(l10n)}').join('   ');
+      return spoken
+          ? present.map((t) => t.label(l10n)).join(', ')
+          : present.map((t) => '${t.emoji} ${t.label(l10n)}').join('   ');
     }
     // Keep the key short: only the most recent notes, with a count of the
     // ones left out.
@@ -195,7 +219,8 @@ class PlantInsightsView extends ConsumerWidget {
     return [
       if (notes.length > maxNotes) '… +${notes.length - maxNotes}',
       for (final e in shown)
-        '${e.type.emoji} ${dateFmt.format(e.date)} — ${e.note!.trim()}',
+        '${spoken ? '${e.type.label(l10n)},' : e.type.emoji} '
+            '${dateFmt.format(e.date)} — ${e.note!.trim()}',
     ].join('\n');
   }
 }

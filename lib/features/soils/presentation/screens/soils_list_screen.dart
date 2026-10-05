@@ -13,6 +13,7 @@ import '../../domain/soil_model.dart';
 import '../providers/soils_providers.dart';
 import '../providers/soils_search_providers.dart';
 import 'add_edit_soil_screen.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 class SoilsListScreen extends ConsumerStatefulWidget {
   const SoilsListScreen({super.key});
@@ -47,13 +48,18 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: context.glass.fg),
         title: Text(
           context.l10n.navSoils,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: context.glass.fg,
             fontWeight: FontWeight.w600,
-            shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+            shadows: [
+              Shadow(
+                color: context.glass.shadow(Colors.black45),
+                blurRadius: 4,
+              ),
+            ],
           ),
         ),
       ),
@@ -63,6 +69,7 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(
@@ -72,9 +79,9 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.5),
+                    context.glass.scrim(0.5),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.3),
+                    context.glass.scrim(0.3),
                   ],
                 ),
               ),
@@ -115,13 +122,14 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
                     color: Colors.white,
                     backgroundColor: Colors.black54,
                     child: soilsAsync.when(
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
+                      loading: () => Center(
+                        child:
+                            CircularProgressIndicator(color: context.glass.fg),
                       ),
                       error: (e, _) => Center(
                         child: Text(
                           context.l10n.errorGeneric('$e'),
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: context.glass.fg),
                         ),
                       ),
                       data: (soils) {
@@ -134,8 +142,8 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
                                 child: _searchController.text.isNotEmpty
                                     ? Center(
                                         child: Text(context.l10n.noSoilsFound,
-                                            style: const TextStyle(
-                                                color: Colors.white)))
+                                            style: TextStyle(
+                                                color: context.glass.fg)))
                                     : const _EmptyState(),
                               ),
                             ),
@@ -166,6 +174,7 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: context.l10n.addSoil,
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const AddEditSoilScreen()),
@@ -238,12 +247,12 @@ class _SoilListItem extends ConsumerWidget {
           child: Container(
             decoration: BoxDecoration(
               color: transparencyEnabled
-                  ? Colors.black.withValues(alpha: 0.35)
+                  ? context.glass.glassFill
                   : colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: transparencyEnabled
-                    ? Colors.white.withValues(alpha: 0.1)
+                    ? context.glass.tint(0.1)
                     : Colors.transparent,
               ),
             ),
@@ -259,7 +268,7 @@ class _SoilListItem extends ConsumerWidget {
                       height: 56,
                       decoration: BoxDecoration(
                         color: transparencyEnabled
-                            ? Colors.white.withValues(alpha: 0.1)
+                            ? context.glass.tint(0.1)
                             : colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(12),
                         image: soil.imagePath != null
@@ -276,7 +285,7 @@ class _SoilListItem extends ConsumerWidget {
                           ? Icon(
                               Icons.terrain_outlined,
                               color: transparencyEnabled
-                                  ? Colors.white
+                                  ? context.glass.fg
                                   : colorScheme.primary,
                             )
                           : null,
@@ -292,12 +301,12 @@ class _SoilListItem extends ConsumerWidget {
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
                               color: transparencyEnabled
-                                  ? Colors.white
+                                  ? context.glass.fg
                                   : colorScheme.onSurfaceVariant,
                               shadows: transparencyEnabled
                                   ? [
-                                      const Shadow(
-                                        color: Colors.black26,
+                                      Shadow(
+                                        color: context.glass.shadow(Colors.black26),
                                         offset: Offset(0, 1),
                                         blurRadius: 2,
                                       ),
@@ -313,7 +322,7 @@ class _SoilListItem extends ConsumerWidget {
                               style: TextStyle(
                                 fontSize: 13,
                                 color: transparencyEnabled
-                                    ? Colors.white70
+                                    ? context.glass.fgMuted
                                     : colorScheme.onSurfaceVariant
                                         .withValues(alpha: 0.7),
                               ),
@@ -330,7 +339,7 @@ class _SoilListItem extends ConsumerWidget {
                                 fontSize: 11,
                                 fontStyle: FontStyle.italic,
                                 color: transparencyEnabled
-                                    ? Colors.white60
+                                    ? context.glass.fgSubtle
                                     : colorScheme.onSurfaceVariant
                                         .withValues(alpha: 0.5),
                               ),
@@ -344,15 +353,17 @@ class _SoilListItem extends ConsumerWidget {
                     IconButton(
                       icon: const Icon(Icons.edit_outlined),
                       color: transparencyEnabled
-                          ? Colors.white70
+                          ? context.glass.fgMuted
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.editSoil,
                       onPressed: onEdit,
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete_outline),
                       color: transparencyEnabled
-                          ? Colors.white70
+                          ? context.glass.fgMuted
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.delete,
                       onPressed: onDelete,
                     ),
                   ],
@@ -378,17 +389,17 @@ class _EmptyState extends StatelessWidget {
           Icon(
             Icons.terrain_outlined,
             size: 64,
-            color: Colors.white.withValues(alpha: 0.4),
+            color: context.glass.tint(0.4),
           ),
           const SizedBox(height: 16),
           Text(
             context.l10n.noSoilsRegistered,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+            style: TextStyle(color: context.glass.fg, fontSize: 16),
           ),
           const SizedBox(height: 8),
           Text(
             context.l10n.tapToAddSoil,
-            style: const TextStyle(fontSize: 13, color: Colors.white70),
+            style: TextStyle(fontSize: 13, color: context.glass.fgMuted),
           ),
         ],
       ),

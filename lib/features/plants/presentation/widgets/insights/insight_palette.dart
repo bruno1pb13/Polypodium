@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/glass_colors.dart';
+
 /// Chart colors resolved for the current surface. Series hues come from the
 /// validated data-viz palette (light/dark steps); ink and grid follow the
 /// glassmorphism or Material surface the card renders on.
@@ -28,18 +30,33 @@ class InsightPalette {
 
   factory InsightPalette.of(BuildContext context, bool transparent) {
     final scheme = Theme.of(context).colorScheme;
-    final dark = transparent || Theme.of(context).brightness == Brightness.dark;
+    final dark = Theme.of(context).brightness == Brightness.dark;
 
-    if (transparent) {
+    if (transparent && dark) {
       return const InsightPalette(
         growth: Color(0xFF199E70),
         health: Color(0xFF9085E9),
         water: Color(0xFF3987E5),
         ink: Colors.white,
-        inkSoft: Colors.white60,
+        inkSoft: Colors.white70,
         grid: Color(0x1AFFFFFF),
         ring: Color(0xFF1A1A19),
         tooltipBg: Color(0xE6262624),
+        tooltipInk: Colors.white,
+      );
+    }
+
+    if (transparent) {
+      final glass = context.glass;
+      return InsightPalette(
+        growth: const Color(0xFF1BAF7A),
+        health: const Color(0xFF4A3AA7),
+        water: const Color(0xFF2A78D6),
+        ink: glass.fg,
+        inkSoft: glass.fgMuted,
+        grid: glass.divider,
+        ring: Colors.white,
+        tooltipBg: const Color(0xE6262624),
         tooltipInk: Colors.white,
       );
     }

@@ -32,11 +32,39 @@ class PlantsNotifier extends _$PlantsNotifier {
   Stream<List<PlantModel>> build() =>
       ref.watch(plantsRepositoryProvider).watchAll();
 
-  Future<void> save(PlantModel plant) async {
-    final oldPlants = await future;
-    final oldPlant = oldPlants.where((p) => p.id == plant.id).firstOrNull;
+  // The synchronous ref.read hands the work to the keepAlive mutations
+  // service before any await, so it completes even if this autoDispose
+  // notifier is disposed mid-operation (or was never listened to).
+  Future<void> save(PlantModel plant) =>
+      ref.read(plantMutationsProvider).save(plant);
 
-    await ref.read(plantsRepositoryProvider).save(plant);
+  Future<void> setStatus(String plantId, PlantStatus status) =>
+      ref.read(plantMutationsProvider).setStatus(plantId, status);
+
+  Future<void> irrigate(String plantId) =>
+      ref.read(plantMutationsProvider).irrigate(plantId);
+
+  Future<void> delete(String plantId) =>
+      ref.read(plantMutationsProvider).delete(plantId);
+}
+
+@Riverpod(keepAlive: true)
+PlantMutations plantMutations(Ref ref) => PlantMutations(ref);
+
+/// Plant save/status/irrigate/delete plus their side effects (history entry,
+/// sync trigger). Lives in a keepAlive provider for the same reason as
+/// [EntryMutations]: an autoDispose Ref becomes unusable after the first
+/// await if nothing is watching the provider.
+class PlantMutations {
+  PlantMutations(this._ref);
+
+  final Ref _ref;
+
+  Future<void> save(PlantModel plant) async {
+    final plantsRepo = _ref.read(plantsRepositoryProvider);
+    final oldPlant = await plantsRepo.getById(plant.id);
+
+    await plantsRepo.save(plant);
 
     final note = await _generateHistoryNote(oldPlant, plant);
     if (note != null) {
@@ -48,27 +76,28 @@ class PlantsNotifier extends _$PlantsNotifier {
         note: note,
         createdAt: DateTime.now(),
       );
-      await ref.read(entryMutationsProvider).create(entry);
+      await _ref.read(entryMutationsProvider).create(entry);
     }
-    
-    // Trigger immediate sync if logged in
-    try {
-      final syncService = ref.read(syncServiceProvider);
-      if (syncService.isLoggedIn) {
-        ref.read(syncNotifierProvider.notifier).sync().catchError((_) {});
-      }
-    } catch (_) {
-      // SharedPreferences might not be ready in tests
-    }
+    _triggerSync();
   }
 
   /// Moves the plant through its lifecycle (dead, donated, archived, or back
   /// to active). Goes through [save], so the change lands in the diary as a
   /// history entry and the reminders are rebuilt without it.
   Future<void> setStatus(String plantId, PlantStatus status) async {
-    final plant = await ref.read(plantsRepositoryProvider).getById(plantId);
+    final plant = await _ref.read(plantsRepositoryProvider).getById(plantId);
     if (plant == null || plant.status == status) return;
     await save(plant.copyWith(status: status, statusChangedAt: DateTime.now()));
+  }
+
+  Future<void> irrigate(String plantId) async {
+    await _ref.read(plantsRepositoryProvider).irrigate(plantId);
+    _triggerSync();
+  }
+
+  Future<void> delete(String plantId) async {
+    await _ref.read(plantsRepositoryProvider).delete(plantId);
+    _triggerSync();
   }
 
   Future<String?> _generateHistoryNote(PlantModel? old, PlantModel next) async {
@@ -81,11 +110,11 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     if (old == null) {
       // Creation
-      final species = await ref.read(speciesNotifierProvider.future).then(
+      final species = await _ref.read(speciesRepositoryProvider).getAll().then(
           (list) => list.where((s) => s.id == next.speciesId).firstOrNull);
       final location = next.locationId == null
           ? null
-          : await ref.read(locationsNotifierProvider.future).then(
+          : await _ref.read(locationsRepositoryProvider).getAll().then(
               (list) => list.where((l) => l.id == next.locationId).firstOrNull);
 
       final sb = StringBuffer();
@@ -95,7 +124,7 @@ class PlantsNotifier extends _$PlantsNotifier {
         sb.writeln(
             '• ${l10n.historyFieldSpecies}: ${species.popularName} (${species.scientificName})');
       }
-      final soil = await ref.read(soilsNotifierProvider.future).then(
+      final soil = await _ref.read(soilsRepositoryProvider).getAll().then(
           (list) => list.where((s) => s.id == next.soilId).firstOrNull);
       sb.writeln('• ${l10n.historyFieldSoil}: ${soil?.name ?? l10n.unknown}');
       if (location != null) {
@@ -117,7 +146,7 @@ class PlantsNotifier extends _$PlantsNotifier {
           .add('${l10n.historyFieldNickname}: ${old.nickname} → ${next.nickname}');
     }
     if (old.speciesId != next.speciesId) {
-      final speciesList = await ref.read(speciesNotifierProvider.future);
+      final speciesList = await _ref.read(speciesRepositoryProvider).getAll();
       final oldS = speciesList.where((s) => s.id == old.speciesId).firstOrNull;
       final nextS =
           speciesList.where((s) => s.id == next.speciesId).firstOrNull;
@@ -125,14 +154,14 @@ class PlantsNotifier extends _$PlantsNotifier {
           '${l10n.historyFieldSpecies}: ${oldS?.popularName ?? l10n.unknown} → ${nextS?.popularName ?? l10n.unknown}');
     }
     if (old.soilId != next.soilId) {
-      final soilList = await ref.read(soilsNotifierProvider.future);
+      final soilList = await _ref.read(soilsRepositoryProvider).getAll();
       final oldSoil = soilList.where((s) => s.id == old.soilId).firstOrNull;
       final nextSoil = soilList.where((s) => s.id == next.soilId).firstOrNull;
       changes.add(
           '${l10n.historyFieldSoil}: ${oldSoil?.name ?? l10n.unknown} → ${nextSoil?.name ?? l10n.unknown}');
     }
     if (old.locationId != next.locationId) {
-      final locList = await ref.read(locationsNotifierProvider.future);
+      final locList = await _ref.read(locationsRepositoryProvider).getAll();
       final oldL = locList.where((l) => l.id == old.locationId).firstOrNull;
       final nextL = locList.where((l) => l.id == next.locationId).firstOrNull;
       changes.add(
@@ -163,28 +192,12 @@ class PlantsNotifier extends _$PlantsNotifier {
     return '${l10n.historyUpdatedHeader}\n${changes.map((c) => '• $c').join('\n')}';
   }
 
-  Future<void> irrigate(String plantId) async {
-    await ref.read(plantsRepositoryProvider).irrigate(plantId);
-
-    // Trigger immediate sync if logged in
+  /// Trigger immediate sync if logged in.
+  void _triggerSync() {
     try {
-      final syncService = ref.read(syncServiceProvider);
+      final syncService = _ref.read(syncServiceProvider);
       if (syncService.isLoggedIn) {
-        ref.read(syncNotifierProvider.notifier).sync().catchError((_) {});
-      }
-    } catch (_) {
-      // SharedPreferences might not be ready in tests
-    }
-  }
-
-  Future<void> delete(String plantId) async {
-    await ref.read(plantsRepositoryProvider).delete(plantId);
-
-    // Trigger immediate sync if logged in
-    try {
-      final syncService = ref.read(syncServiceProvider);
-      if (syncService.isLoggedIn) {
-        ref.read(syncNotifierProvider.notifier).sync().catchError((_) {});
+        _ref.read(syncNotifierProvider.notifier).sync().catchError((_) {});
       }
     } catch (_) {
       // SharedPreferences might not be ready in tests

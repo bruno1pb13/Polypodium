@@ -19,7 +19,6 @@ class PlantsTable extends Table {
   IntColumn get irrigationFrequencyDays => integer().nullable()();
 
   DateTimeColumn get acquisitionDate => dateTime()();
-  TextColumn get location => text().nullable()();
   TextColumn get locationId => text()
       .nullable()
       .references(LocationsTable, #id, onDelete: KeyAction.setNull)();
@@ -44,6 +43,7 @@ class PlantsTable extends Table {
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();
   IntColumn get localRev => integer().withDefault(const Constant(0))();
+  TextColumn get deviceId => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

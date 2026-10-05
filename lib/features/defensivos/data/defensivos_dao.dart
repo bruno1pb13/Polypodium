@@ -28,6 +28,7 @@ class DefensivosDao extends DatabaseAccessor<AppDatabase>
           deletedAt: Value(deletedAt),
           updatedAt: Value(deletedAt),
           localRev: Value(rev),
+          deviceId: Value(attachedDatabase.deviceId),
         ),
       );
 

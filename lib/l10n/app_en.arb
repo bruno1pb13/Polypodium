@@ -906,5 +906,52 @@
   "backupCorrupt": "Invalid backup file.",
   "backupUnrecognized": "Unrecognized file: expected a backup .zip or .json.",
   "backupNotPolypodium": "This file is not a Polypodium backup.",
-  "backupNewerVersion": "Backup created by a newer version of the app. Update Polypodium to import it."
+  "backupNewerVersion": "Backup created by a newer version of the app. Update Polypodium to import it.",
+  "entryPhotoLabel": "Photo from {date}",
+  "@entryPhotoLabel": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "plantPhotoLabel": "Photo of {name}",
+  "@plantPhotoLabel": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "removeAction": "Remove",
+  "removePhoto": "Remove photo",
+  "selectPlant": "Select {name}",
+  "@selectPlant": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "addSoil": "Add soil",
+  "deletePlant": "Delete plant",
+  "changeImage": "Change image",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "chartGrowthSemantics": "Growth chart: {count} height records, from {first} cm to {last} cm",
+  "@chartGrowthSemantics": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "first": {"type": "String"},
+      "last": {"type": "String"}
+    }
+  },
+  "chartHealthSemantics": "Health chart: {count} scores, most recent {score}/5",
+  "@chartHealthSemantics": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "score": {"type": "int"}
+    }
+  },
+  "chartWateringSemantics": "Watering chart: {count} intervals between waterings. {summary}",
+  "@chartWateringSemantics": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "summary": {"type": "String"}
+    }
+  }
 }

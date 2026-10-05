@@ -12,7 +12,6 @@ class PlantModel {
   /// Null means: use species.defaultIrrigationFrequencyDays
   final int? irrigationFrequencyDays;
   final DateTime acquisitionDate;
-  final String? location;
   final String? locationId;
   final DateTime? lastIrrigatedAt;
 
@@ -34,7 +33,6 @@ class PlantModel {
     required this.soilId,
     this.irrigationFrequencyDays,
     required this.acquisitionDate,
-    this.location,
     this.locationId,
     this.lastIrrigatedAt,
     this.lastPesticideAppliedAt,
@@ -56,7 +54,6 @@ class PlantModel {
     String? soilId,
     Object? irrigationFrequencyDays = _sentinel,
     DateTime? acquisitionDate,
-    Object? location = _sentinel,
     Object? locationId = _sentinel,
     Object? lastIrrigatedAt = _sentinel,
     Object? lastPesticideAppliedAt = _sentinel,
@@ -77,7 +74,6 @@ class PlantModel {
             ? this.irrigationFrequencyDays
             : irrigationFrequencyDays as int?,
         acquisitionDate: acquisitionDate ?? this.acquisitionDate,
-        location: location == _sentinel ? this.location : location as String?,
         locationId:
             locationId == _sentinel ? this.locationId : locationId as String?,
         lastIrrigatedAt: lastIrrigatedAt == _sentinel

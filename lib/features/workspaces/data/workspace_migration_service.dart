@@ -91,6 +91,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
         ));
       });
     }
@@ -110,6 +111,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
           isSeeded: const Value(false),
         ));
       });
@@ -130,6 +132,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
         ));
       });
     }
@@ -152,6 +155,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
         ));
       });
     }
@@ -168,7 +172,6 @@ class WorkspaceMigrationService {
           soilType: row.soilType,
           irrigationFrequencyDays: Value(row.irrigationFrequencyDays),
           acquisitionDate: row.acquisitionDate,
-          location: Value(row.location),
           locationId: Value(row.locationId),
           lastIrrigatedAt: Value(row.lastIrrigatedAt),
           lastPesticideAppliedAt: Value(row.lastPesticideAppliedAt),
@@ -178,6 +181,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
         ));
       });
     }
@@ -214,6 +218,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
         ));
       });
     }
@@ -232,6 +237,7 @@ class WorkspaceMigrationService {
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),
+          deviceId: Value(target.deviceId),
         ));
       });
     }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../domain/defensivo_model.dart';
 import 'defensivo_picker_sheet.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 class DefensivoSelectionField extends StatelessWidget {
   final DefensivoModel? selectedDefensivo;
@@ -39,12 +40,12 @@ class DefensivoSelectionField extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: context.glass.tint(0.05),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: errorText != null
                     ? Theme.of(context).colorScheme.error
-                    : Colors.white24,
+                    : context.glass.outline,
               ),
             ),
             child: Row(
@@ -53,7 +54,7 @@ class DefensivoSelectionField extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: context.glass.tint(0.1),
                     borderRadius: BorderRadius.circular(8),
                     image: selectedDefensivo?.imagePath != null
                         ? DecorationImage(
@@ -64,8 +65,8 @@ class DefensivoSelectionField extends StatelessWidget {
                         : null,
                   ),
                   child: selectedDefensivo?.imagePath == null
-                      ? const Icon(Icons.science_outlined,
-                          color: Colors.white70, size: 20)
+                      ? Icon(Icons.science_outlined,
+                          color: context.glass.fgMuted, size: 20)
                       : null,
                 ),
                 const SizedBox(width: 12),
@@ -75,8 +76,8 @@ class DefensivoSelectionField extends StatelessWidget {
                     children: [
                       Text(
                         context.l10n.defensivoFieldLabel,
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        style: TextStyle(
+                          color: context.glass.fgMuted,
                           fontSize: 12,
                         ),
                       ),
@@ -86,8 +87,8 @@ class DefensivoSelectionField extends StatelessWidget {
                             context.l10n.selectDefensivoTitle,
                         style: TextStyle(
                           color: selectedDefensivo != null
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.4),
+                              ? context.glass.fg
+                              : context.glass.fgAlpha(0.4),
                           fontSize: 15,
                           fontWeight: selectedDefensivo != null
                               ? FontWeight.w600
@@ -97,7 +98,7 @@ class DefensivoSelectionField extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(Icons.keyboard_arrow_down, color: Colors.white54),
+                Icon(Icons.keyboard_arrow_down, color: context.glass.fgFaint),
               ],
             ),
           ),

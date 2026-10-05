@@ -24,6 +24,7 @@ import '../widgets/entry_forms/observation_form.dart';
 import '../widgets/entry_forms/pest_form.dart';
 import '../widgets/entry_forms/pesticide_form.dart';
 import '../widgets/entry_forms/pruning_form.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 class AddEntryScreen extends ConsumerStatefulWidget {
   /// One entry is created per plant; with a single id this is the regular
@@ -188,15 +189,20 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: context.glass.fg),
         title: Text(
           widget.plantIds.length > 1
               ? context.l10n.newBulkEntryTitle(widget.plantIds.length)
               : context.l10n.newEntryTitle,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: context.glass.fg,
             fontWeight: FontWeight.w600,
-            shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+            shadows: [
+              Shadow(
+                color: context.glass.shadow(Colors.black45),
+                blurRadius: 4,
+              ),
+            ],
           ),
         ),
       ),
@@ -206,6 +212,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(
@@ -215,9 +222,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.5),
+                    context.glass.scrim(0.5),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.3),
+                    context.glass.scrim(0.3),
                   ],
                 ),
               ),
@@ -269,12 +276,12 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                       ),
                     ),
                     child: _saving
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 24,
                             width: 24,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: context.glass.fg,
                             ),
                           )
                         : Text(

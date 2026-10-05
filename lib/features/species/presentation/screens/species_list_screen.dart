@@ -15,6 +15,7 @@ import '../../domain/species_model.dart';
 import '../providers/species_providers.dart';
 import '../providers/species_search_providers.dart';
 import 'add_species_screen.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 class SpeciesListScreen extends ConsumerStatefulWidget {
   const SpeciesListScreen({super.key});
@@ -49,13 +50,18 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: context.glass.fg),
         title: Text(
           context.l10n.navSpecies,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: context.glass.fg,
             fontWeight: FontWeight.w600,
-            shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+            shadows: [
+              Shadow(
+                color: context.glass.shadow(Colors.black45),
+                blurRadius: 4,
+              ),
+            ],
           ),
         ),
       ),
@@ -65,6 +71,7 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(
@@ -74,9 +81,9 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.5),
+                    context.glass.scrim(0.5),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.3),
+                    context.glass.scrim(0.3),
                   ],
                 ),
               ),
@@ -126,13 +133,14 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                     color: Colors.white,
                     backgroundColor: Colors.black54,
                     child: speciesAsync.when(
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
+                      loading: () => Center(
+                        child:
+                            CircularProgressIndicator(color: context.glass.fg),
                       ),
                       error: (e, _) => Center(
                         child: Text(
                           context.l10n.errorGeneric('$e'),
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: context.glass.fg),
                         ),
                       ),
                       data: (species) {
@@ -146,8 +154,8 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                                     ? Center(
                                         child: Text(
                                             context.l10n.noSpeciesFound,
-                                            style: const TextStyle(
-                                                color: Colors.white)))
+                                            style: TextStyle(
+                                                color: context.glass.fg)))
                                     : const _EmptyState(),
                               ),
                             ),
@@ -189,6 +197,7 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: context.l10n.addSpecies,
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const AddSpeciesScreen()),
@@ -250,12 +259,12 @@ class _InfoBanner extends ConsumerWidget {
           child: Container(
             decoration: BoxDecoration(
               color: transparencyEnabled
-                  ? Colors.black.withValues(alpha: 0.35)
+                  ? context.glass.glassFill
                   : Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: transparencyEnabled
-                    ? Colors.white.withValues(alpha: 0.1)
+                    ? context.glass.tint(0.1)
                     : Colors.transparent,
               ),
             ),
@@ -269,7 +278,7 @@ class _InfoBanner extends ConsumerWidget {
                       Icons.info_outline,
                       size: 18,
                       color: transparencyEnabled
-                          ? Colors.white
+                          ? context.glass.fg
                           : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 10),
@@ -280,7 +289,7 @@ class _InfoBanner extends ConsumerWidget {
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: transparencyEnabled
-                              ? Colors.white
+                              ? context.glass.fg
                               : Theme.of(context)
                                   .colorScheme
                                   .onSurfaceVariant,
@@ -301,7 +310,7 @@ class _InfoBanner extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 12,
                         color: transparencyEnabled
-                            ? Colors.white70
+                            ? context.glass.fgMuted
                             : Theme.of(context)
                                 .colorScheme
                                 .onSurfaceVariant
@@ -321,7 +330,7 @@ class _InfoBanner extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 12,
                         color: transparencyEnabled
-                            ? Colors.white70
+                            ? context.glass.fgMuted
                             : Theme.of(context)
                                 .colorScheme
                                 .onSurfaceVariant
@@ -337,11 +346,11 @@ class _InfoBanner extends ConsumerWidget {
                   label: Text(context.l10n.downloadUpdatedDataset),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: transparencyEnabled
-                        ? Colors.white
+                        ? context.glass.fg
                         : Theme.of(context).colorScheme.onSurfaceVariant,
                     side: BorderSide(
                       color: transparencyEnabled
-                          ? Colors.white.withValues(alpha: 0.4)
+                          ? context.glass.tint(0.4)
                           : Theme.of(context).colorScheme.outline,
                     ),
                     visualDensity: VisualDensity.compact,
@@ -410,12 +419,12 @@ class _SpeciesListItem extends ConsumerWidget {
           child: Container(
             decoration: BoxDecoration(
               color: transparencyEnabled
-                  ? Colors.black.withValues(alpha: 0.35)
+                  ? context.glass.glassFill
                   : colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: transparencyEnabled
-                    ? Colors.white.withValues(alpha: 0.1)
+                    ? context.glass.tint(0.1)
                     : Colors.transparent,
               ),
             ),
@@ -431,14 +440,14 @@ class _SpeciesListItem extends ConsumerWidget {
                       height: 48,
                       decoration: BoxDecoration(
                         color: transparencyEnabled
-                            ? Colors.white.withValues(alpha: 0.1)
+                            ? context.glass.tint(0.1)
                             : colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.eco_outlined,
                         color: transparencyEnabled
-                            ? Colors.white
+                            ? context.glass.fg
                             : colorScheme.primary,
                       ),
                     ),
@@ -453,12 +462,12 @@ class _SpeciesListItem extends ConsumerWidget {
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
                               color: transparencyEnabled
-                                  ? Colors.white
+                                  ? context.glass.fg
                                   : colorScheme.onSurfaceVariant,
                               shadows: transparencyEnabled
                                   ? [
-                                      const Shadow(
-                                        color: Colors.black26,
+                                      Shadow(
+                                        color: context.glass.shadow(Colors.black26),
                                         offset: Offset(0, 1),
                                         blurRadius: 2,
                                       ),
@@ -473,7 +482,7 @@ class _SpeciesListItem extends ConsumerWidget {
                               fontSize: 13,
                               fontStyle: FontStyle.italic,
                               color: transparencyEnabled
-                                  ? Colors.white70
+                                  ? context.glass.fgMuted
                                   : colorScheme.onSurfaceVariant
                                       .withValues(alpha: 0.7),
                             ),
@@ -488,22 +497,24 @@ class _SpeciesListItem extends ConsumerWidget {
                           Icons.cloud_upload_outlined,
                           size: 16,
                           color: transparencyEnabled
-                              ? Colors.orangeAccent
+                              ? context.glass.warning
                               : Colors.orange,
                         ),
                       ),
                     IconButton(
                       icon: const Icon(Icons.edit_outlined),
                       color: transparencyEnabled
-                          ? Colors.white70
+                          ? context.glass.fgMuted
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.editSpecies,
                       onPressed: onEdit,
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete_outline),
                       color: transparencyEnabled
-                          ? Colors.white70
+                          ? context.glass.fgMuted
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.delete,
                       onPressed: onDelete,
                     ),
                   ],
@@ -529,17 +540,17 @@ class _EmptyState extends StatelessWidget {
           Icon(
             Icons.eco_outlined,
             size: 64,
-            color: Colors.white.withValues(alpha: 0.4),
+            color: context.glass.tint(0.4),
           ),
           const SizedBox(height: 16),
           Text(
             context.l10n.noSpeciesRegistered,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+            style: TextStyle(color: context.glass.fg, fontSize: 16),
           ),
           const SizedBox(height: 8),
           Text(
             context.l10n.tapToAddSpecies,
-            style: const TextStyle(fontSize: 13, color: Colors.white70),
+            style: TextStyle(fontSize: 13, color: context.glass.fgMuted),
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/enums.dart';
 import '../../../../../core/l10n/l10n.dart';
+import '../../../../../core/theme/glass_colors.dart';
 
 /// Free-text note of the entry, with a hint suited to its [type].
 class EntryNoteSection extends StatelessWidget {
@@ -21,8 +22,8 @@ class EntryNoteSection extends StatelessWidget {
       children: [
         Text(
           context.l10n.notesTitle,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: context.glass.fg,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -30,7 +31,7 @@ class EntryNoteSection extends StatelessWidget {
         const SizedBox(height: 8),
         TextField(
           controller: controller,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: context.glass.fg),
           maxLines: 4,
           decoration: InputDecoration(
             hintText: switch (type) {
@@ -45,15 +46,15 @@ class EntryNoteSection extends StatelessWidget {
               _ => context.l10n.noteHintDefault,
             },
             hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.4),
+              color: context.glass.fgAlpha(0.4),
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.white24),
+              borderSide: BorderSide(color: context.glass.outline),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.white24),
+              borderSide: BorderSide(color: context.glass.outline),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -61,7 +62,7 @@ class EntryNoteSection extends StatelessWidget {
                   BorderSide(color: Theme.of(context).colorScheme.primary),
             ),
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.05),
+            fillColor: context.glass.tint(0.05),
           ),
         ),
       ],

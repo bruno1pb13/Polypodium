@@ -8,10 +8,12 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/widgets/emoji_text.dart';
 import '../../../plants/presentation/widgets/plant_status.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/reminder_model.dart';
 import '../providers/reminders_providers.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 /// Glass card on the plant detail screen listing the plant's recurring care
 /// reminders, with their next due date, and letting the user add, edit,
@@ -31,7 +33,7 @@ class PlantRemindersCard extends ConsumerWidget {
     final usedTypes = {for (final s in statuses) s.reminder.entryType};
     final freeTypes =
         reminderEntryTypes.where((t) => !usedTypes.contains(t)).toList();
-    final secondary = transparent ? Colors.white60 : null;
+    final secondary = transparent ? context.glass.fgSubtle : null;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -45,12 +47,12 @@ class PlantRemindersCard extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
             decoration: BoxDecoration(
               color: transparent
-                  ? Colors.black.withValues(alpha: 0.3)
+                  ? context.glass.scrim(0.3)
                   : Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: transparent
-                    ? Colors.white.withValues(alpha: 0.1)
+                    ? context.glass.tint(0.1)
                     : Colors.transparent,
               ),
             ),
@@ -67,14 +69,14 @@ class PlantRemindersCard extends ConsumerWidget {
                         l10n.remindersSectionTitle,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: transparent ? Colors.white : null,
+                          color: transparent ? context.glass.fg : null,
                         ),
                       ),
                     ),
                     if (freeTypes.isNotEmpty)
                       IconButton(
                         icon: Icon(Icons.add,
-                            color: transparent ? Colors.white : null),
+                            color: transparent ? context.glass.fg : null),
                         tooltip: l10n.addReminder,
                         onPressed: () => showDialog<void>(
                           context: context,
@@ -160,12 +162,15 @@ class _ReminderRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
+            // The type label next to it already names it.
             SizedBox(
               width: 20,
-              child: Text(
-                reminder.entryType.emoji,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 15),
+              child: ExcludeSemantics(
+                child: Text(
+                  reminder.entryType.emoji,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 15),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -176,7 +181,7 @@ class _ReminderRow extends StatelessWidget {
                   Text(
                     reminder.entryType.label(l10n),
                     style: TextStyle(
-                      color: transparent ? Colors.white : null,
+                      color: transparent ? context.glass.fg : null,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -185,14 +190,19 @@ class _ReminderRow extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: transparent ? Colors.white60 : null,
+                      color: transparent ? context.glass.fgMuted : null,
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            chip,
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width * 0.4,
+              ),
+              child: chip,
+            ),
           ],
         ),
       ),
@@ -305,7 +315,8 @@ class _ReminderDialogState extends ConsumerState<ReminderDialog> {
                 for (final type in widget.availableTypes)
                   DropdownMenuItem(
                     value: type,
-                    child: Text('${type.emoji}  ${type.label(l10n)}'),
+                    child: EmojiText(type.emoji, type.label(l10n),
+                        separator: '  '),
                   ),
               ],
               onChanged: _isEditing

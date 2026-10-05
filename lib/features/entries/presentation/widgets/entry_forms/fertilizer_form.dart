@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/l10n/l10n.dart';
 import 'entry_form_widgets.dart';
+import '../../../../../core/theme/glass_colors.dart';
 
 // Holds name + dose controllers for one fertilizer product row.
 class FertilizerProductEntry {
@@ -81,7 +82,7 @@ class FertilizerForm extends StatelessWidget {
                 ),
                 if (i < products.length - 1)
                   Divider(
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: context.glass.tint(0.1),
                     height: 1,
                   ),
               ],

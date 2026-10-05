@@ -13,6 +13,7 @@ import '../../domain/location_model.dart';
 import '../providers/locations_providers.dart';
 import '../providers/locations_search_providers.dart';
 import 'add_edit_location_screen.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 class LocationsListScreen extends ConsumerStatefulWidget {
   const LocationsListScreen({super.key});
@@ -47,13 +48,18 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: context.glass.fg),
         title: Text(
           context.l10n.navLocations,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: context.glass.fg,
             fontWeight: FontWeight.w600,
-            shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+            shadows: [
+              Shadow(
+                color: context.glass.shadow(Colors.black45),
+                blurRadius: 4,
+              ),
+            ],
           ),
         ),
       ),
@@ -63,6 +69,7 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(
@@ -72,9 +79,9 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.5),
+                    context.glass.scrim(0.5),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.3),
+                    context.glass.scrim(0.3),
                   ],
                 ),
               ),
@@ -115,13 +122,14 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
                     color: Colors.white,
                     backgroundColor: Colors.black54,
                     child: locationsAsync.when(
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
+                      loading: () => Center(
+                        child:
+                            CircularProgressIndicator(color: context.glass.fg),
                       ),
                       error: (e, _) => Center(
                         child: Text(
                           context.l10n.errorGeneric('$e'),
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: context.glass.fg),
                         ),
                       ),
                       data: (locations) {
@@ -135,8 +143,8 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
                                     ? Center(
                                         child: Text(
                                             context.l10n.noLocationsFound,
-                                            style: const TextStyle(
-                                                color: Colors.white)))
+                                            style: TextStyle(
+                                                color: context.glass.fg)))
                                     : const _EmptyState(),
                               ),
                             ),
@@ -178,6 +186,7 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: context.l10n.addLocation,
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const AddEditLocationScreen()),
@@ -246,12 +255,12 @@ class _LocationListItem extends ConsumerWidget {
           child: Container(
             decoration: BoxDecoration(
               color: transparencyEnabled
-                  ? Colors.black.withValues(alpha: 0.35)
+                  ? context.glass.glassFill
                   : colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: transparencyEnabled
-                    ? Colors.white.withValues(alpha: 0.1)
+                    ? context.glass.tint(0.1)
                     : Colors.transparent,
               ),
             ),
@@ -267,14 +276,14 @@ class _LocationListItem extends ConsumerWidget {
                       height: 48,
                       decoration: BoxDecoration(
                         color: transparencyEnabled
-                            ? Colors.white.withValues(alpha: 0.1)
+                            ? context.glass.tint(0.1)
                             : colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.location_on_outlined,
                         color: transparencyEnabled
-                            ? Colors.white
+                            ? context.glass.fg
                             : colorScheme.primary,
                       ),
                     ),
@@ -289,12 +298,12 @@ class _LocationListItem extends ConsumerWidget {
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
                               color: transparencyEnabled
-                                  ? Colors.white
+                                  ? context.glass.fg
                                   : colorScheme.onSurfaceVariant,
                               shadows: transparencyEnabled
                                   ? [
-                                      const Shadow(
-                                        color: Colors.black26,
+                                      Shadow(
+                                        color: context.glass.shadow(Colors.black26),
                                         offset: Offset(0, 1),
                                         blurRadius: 2,
                                       ),
@@ -310,7 +319,7 @@ class _LocationListItem extends ConsumerWidget {
                               style: TextStyle(
                                 fontSize: 13,
                                 color: transparencyEnabled
-                                    ? Colors.white70
+                                    ? context.glass.fgMuted
                                     : colorScheme.onSurfaceVariant
                                         .withValues(alpha: 0.7),
                               ),
@@ -326,22 +335,24 @@ class _LocationListItem extends ConsumerWidget {
                           Icons.cloud_upload_outlined,
                           size: 16,
                           color: transparencyEnabled
-                              ? Colors.orangeAccent
+                              ? context.glass.warning
                               : Colors.orange,
                         ),
                       ),
                     IconButton(
                       icon: const Icon(Icons.edit_outlined),
                       color: transparencyEnabled
-                          ? Colors.white70
+                          ? context.glass.fgMuted
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.editLocation,
                       onPressed: onEdit,
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete_outline),
                       color: transparencyEnabled
-                          ? Colors.white70
+                          ? context.glass.fgMuted
                           : colorScheme.onSurfaceVariant,
+                      tooltip: context.l10n.delete,
                       onPressed: onDelete,
                     ),
                   ],
@@ -367,17 +378,17 @@ class _EmptyState extends StatelessWidget {
           Icon(
             Icons.location_on_outlined,
             size: 64,
-            color: Colors.white.withValues(alpha: 0.4),
+            color: context.glass.tint(0.4),
           ),
           const SizedBox(height: 16),
           Text(
             context.l10n.noLocationsRegistered,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+            style: TextStyle(color: context.glass.fg, fontSize: 16),
           ),
           const SizedBox(height: 8),
           Text(
             context.l10n.tapToAddLocation,
-            style: const TextStyle(fontSize: 13, color: Colors.white70),
+            style: TextStyle(fontSize: 13, color: context.glass.fgMuted),
           ),
         ],
       ),

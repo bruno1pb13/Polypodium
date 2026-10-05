@@ -85,6 +85,23 @@ void main() {
   });
 
   group('migrateData', () {
+    test('stamps the remote workspace deviceId on the copied rows',
+        () async {
+      final remote = AppDatabase.forTesting(NativeDatabase.memory(),
+          deviceId: 'remote-device');
+      addTearDown(remote.close);
+      await addLocation(source, 'loc1');
+
+      await service.migrateData(
+        sourceDb: source,
+        targetDb: remote,
+        targetPhotos: FakePhotoStorage(await Directory.systemTemp.createTemp()),
+      );
+
+      expect((await remote.locationsDao.getById('loc1'))!.deviceId,
+          'remote-device');
+    });
+
     test('copies locations but skips already-seeded default soils',
         () async {
       await addLocation(source, 'loc1');

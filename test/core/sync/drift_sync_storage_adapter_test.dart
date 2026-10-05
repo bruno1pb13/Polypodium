@@ -262,5 +262,71 @@ void main() {
 
     expect(await db.remindersDao.getById('rem1'), isNull);
   });
-}
 
+  group('legacy location text', () {
+    SyncChange legacyPlant(String id, String? location,
+            {String? locationId}) =>
+        SyncChange(
+          entityType: 'plant',
+          entityId: id,
+          payload: {
+            'id': id,
+            'speciesId': 'species1',
+            'nickname': 'Planta',
+            'soilId': 'sandy',
+            'acquisitionDate': DateTime(2026, 1, 1).toIso8601String(),
+            'location': location,
+            'locationId': locationId,
+            'createdAt': DateTime(2026, 1, 1).toIso8601String(),
+          },
+          updatedAt: DateTime(2026, 2, 1),
+          deviceId: 'device-2',
+          rev: 1,
+        );
+
+    test('is linked to one location when pulled without a locationId',
+        () async {
+      await adapter.applyRemoteChange(legacyPlant('plant1', 'Varanda'));
+      await adapter.applyRemoteChange(legacyPlant('plant2', ' varanda'));
+
+      final plant1 = await db.plantsDao.getById('plant1');
+      final plant2 = await db.plantsDao.getById('plant2');
+      expect(plant1!.locationId, isNotNull);
+      expect(plant2!.locationId, plant1.locationId);
+      // The plant stays as received; only the new location is pushed.
+      expect(plant1.localRev, 0);
+
+      final location = await db.locationsDao.getById(plant1.locationId!);
+      expect(location!.name, 'Varanda');
+      expect(location.localRev, greaterThan(0));
+      expect(await db.locationsDao.getAll(), hasLength(1));
+    });
+
+    test('is ignored when the payload already has a locationId', () async {
+      await adapter.applyRemoteChange(
+          legacyPlant('plant1', 'Varanda', locationId: 'loc1'));
+
+      expect((await db.plantsDao.getById('plant1'))!.locationId, 'loc1');
+      expect(await db.locationsDao.getAll(), isEmpty);
+    });
+
+    test('is no longer sent in the outgoing payload', () async {
+      await db.plantsDao.upsert(PlantsTableCompanion.insert(
+        id: 'plant1',
+        speciesId: 'species1',
+        nickname: 'Planta',
+        soilType: 'sandy',
+        acquisitionDate: DateTime(2026, 1, 1),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+        localRev: const Value(1),
+      ));
+
+      final change = (await adapter.localChangesSince(0,
+              limit: 100, deviceId: 'device-1'))
+          .single;
+      expect(change.payload.containsKey('location'), isFalse);
+      expect(change.payload.containsKey('locationId'), isTrue);
+    });
+  });
+}

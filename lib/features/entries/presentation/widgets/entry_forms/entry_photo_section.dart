@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../../core/l10n/l10n.dart';
+import '../../../../../core/theme/glass_colors.dart';
 
 /// Photo of the entry: a preview with a remove button, or camera/gallery
 /// buttons when there is none yet.
@@ -26,8 +27,8 @@ class EntryPhotoSection extends StatelessWidget {
       children: [
         Text(
           context.l10n.photoTitle,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: context.glass.fg,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -43,6 +44,7 @@ class EntryPhotoSection extends StatelessWidget {
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
+                  semanticLabel: context.l10n.photoTitle,
                 ),
               ),
               Positioned(
@@ -50,6 +52,7 @@ class EntryPhotoSection extends StatelessWidget {
                 right: 8,
                 child: IconButton.filled(
                   onPressed: onRemove,
+                  tooltip: context.l10n.removePhoto,
                   icon: const Icon(Icons.close, size: 20),
                   style: IconButton.styleFrom(
                     backgroundColor: Colors.black54,
@@ -104,17 +107,17 @@ class _PhotoButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.white24),
+            border: Border.all(color: context.glass.outline),
             borderRadius: BorderRadius.circular(16),
-            color: Colors.white.withValues(alpha: 0.05),
+            color: context.glass.tint(0.05),
           ),
           child: Column(
             children: [
-              Icon(icon, color: Colors.white70),
+              Icon(icon, color: context.glass.fgMuted),
               const SizedBox(height: 8),
               Text(
                 label,
-                style: const TextStyle(color: Colors.white70),
+                style: TextStyle(color: context.glass.fgMuted),
               ),
             ],
           ),

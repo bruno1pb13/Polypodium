@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/widgets/fullscreen_image_viewer.dart';
 import '../../../entries/domain/entry_model.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 /// Chronological photo grid ("time-lapse") of a plant, built from the
 /// entries that carry a photo. Oldest first, so scrolling reads as growth.
@@ -27,7 +28,7 @@ class PlantPhotosSliver extends StatelessWidget {
             child: Text(
               context.l10n.photosEmpty,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white70, height: 1.4),
+              style: TextStyle(color: context.glass.fgMuted, height: 1.4),
             ),
           ),
         ),
@@ -61,48 +62,56 @@ class _PhotoTile extends StatelessWidget {
     final date =
         DateFormat.yMd(context.l10n.localeName).format(entry.date);
 
-    return GestureDetector(
-      onTap: () => showFullscreenImageViewer(context, entry.photoPath!),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.file(
-              File(entry.photoPath!),
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: Colors.white.withValues(alpha: 0.1),
-                child: const Icon(
-                  Icons.broken_image_outlined,
-                  color: Colors.white24,
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(8, 14, 8, 5),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black54],
+    return Semantics(
+      container: true,
+      button: true,
+      image: true,
+      label: context.l10n.entryPhotoLabel(date),
+      child: GestureDetector(
+        onTap: () => showFullscreenImageViewer(context, entry.photoPath!),
+        child: ExcludeSemantics(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.file(
+                  File(entry.photoPath!),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: context.glass.tint(0.1),
+                    child: Icon(
+                      Icons.broken_image_outlined,
+                      color: context.glass.outline,
+                    ),
                   ),
                 ),
-                child: Text(
-                  date,
-                  style: const TextStyle(
-                    fontSize: 10.5,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    shadows: [Shadow(color: Colors.black45, blurRadius: 2)],
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(8, 14, 8, 5),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Colors.black54],
+                      ),
+                    ),
+                    child: Text(
+                      date,
+                      style: const TextStyle(
+                        fontSize: 10.5,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        shadows: [Shadow(color: Colors.black45, blurRadius: 2)],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

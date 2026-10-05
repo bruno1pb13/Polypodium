@@ -10,6 +10,7 @@ import '../../../../entries/presentation/providers/entries_providers.dart';
 import '../../../../settings/presentation/providers/settings_providers.dart';
 import '../../../domain/plant_model.dart';
 import '../plant_status.dart';
+import '../../../../../core/theme/glass_colors.dart';
 
 /// Soil, location, acquisition date, watering frequency and the active
 /// pest/chlorosis/pesticide statuses of the plant.
@@ -44,12 +45,12 @@ class PlantInfoCard extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: transparencyEnabled
-                  ? Colors.black.withValues(alpha: 0.3)
+                  ? context.glass.scrim(0.3)
                   : Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: transparencyEnabled
-                    ? Colors.white.withValues(alpha: 0.1)
+                    ? context.glass.tint(0.1)
                     : Colors.transparent,
               ),
             ),
@@ -73,25 +74,23 @@ class PlantInfoCard extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 12,
                           color: transparencyEnabled
-                              ? Colors.white54
-                              : Colors.black54,
+                              ? context.glass.fgFaint
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                           fontStyle: FontStyle.italic,
                         ),
                       ),
                     ),
                   ),
                 ],
-                const Divider(color: Colors.white10, height: 16),
+                Divider(color: context.glass.divider, height: 16),
                 _row(
                   context,
                   Icons.location_on_outlined,
                   context.l10n.locationLabel,
-                  pws?.location?.name ??
-                      plant.location ??
-                      context.l10n.notInformed,
+                  pws?.location?.name ?? context.l10n.notInformed,
                   transparencyEnabled,
                 ),
-                const Divider(color: Colors.white10, height: 16),
+                Divider(color: context.glass.divider, height: 16),
                 _row(
                   context,
                   Icons.calendar_today_outlined,
@@ -101,7 +100,7 @@ class PlantInfoCard extends ConsumerWidget {
                   transparencyEnabled,
                 ),
                 if (pws?.effectiveFrequencyDays != null) ...[
-                  const Divider(color: Colors.white10, height: 16),
+                  Divider(color: context.glass.divider, height: 16),
                   _row(
                     context,
                     Icons.opacity_outlined,
@@ -111,7 +110,7 @@ class PlantInfoCard extends ConsumerWidget {
                   ),
                 ],
                 if (alertStatus.hasActivePest) ...[
-                  const Divider(color: Colors.white10, height: 16),
+                  Divider(color: context.glass.divider, height: 16),
                   _statusRow(
                     context,
                     EntryType.pest,
@@ -124,7 +123,7 @@ class PlantInfoCard extends ConsumerWidget {
                   ),
                 ],
                 if (alertStatus.hasActiveChlorosis) ...[
-                  const Divider(color: Colors.white10, height: 16),
+                  Divider(color: context.glass.divider, height: 16),
                   _statusRow(
                     context,
                     EntryType.chlorosis,
@@ -141,7 +140,7 @@ class PlantInfoCard extends ConsumerWidget {
                 if (pws != null &&
                     (pws!.pesticideUnderActiveControl ||
                         pws!.needsPesticideReapplication)) ...[
-                  const Divider(color: Colors.white10, height: 16),
+                  Divider(color: context.glass.divider, height: 16),
                   _statusRow(
                     context,
                     EntryType.pesticide,
@@ -176,16 +175,34 @@ class PlantInfoCard extends ConsumerWidget {
       Row(
         children: [
           Icon(icon,
-              size: 20, color: transparencyEnabled ? Colors.white60 : null),
+              size: 20,
+              color: transparencyEnabled ? context.glass.fgSubtle : null),
           const SizedBox(width: 12),
-          Text(label,
-              style: TextStyle(
-                  color: transparencyEnabled ? Colors.white70 : null)),
-          const Spacer(),
-          Text(value,
-              style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: transparencyEnabled ? Colors.white : null)),
+          Expanded(
+            child: _spaceBetween(
+              Text(label,
+                  style: TextStyle(
+                      color: transparencyEnabled
+                          ? context.glass.fgMuted
+                          : null)),
+              Text(value,
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: transparencyEnabled ? context.glass.fg : null)),
+            ),
+          ),
+        ],
+      );
+
+  /// [start] and [end] pushed to opposite edges, both wrapping instead of
+  /// overflowing when they don't fit side by side (large text sizes).
+  Widget _spaceBetween(Widget start, Widget end) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(child: start),
+          const SizedBox(width: 12),
+          Flexible(child: end),
         ],
       );
 
@@ -205,20 +222,28 @@ class PlantInfoCard extends ConsumerWidget {
   ) =>
       Row(
         children: [
+          // The label next to it already names the type.
           SizedBox(
             width: 20,
-            child: Text(
-              type.emoji,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 15),
+            child: ExcludeSemantics(
+              child: Text(
+                type.emoji,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 15),
+              ),
             ),
           ),
           const SizedBox(width: 12),
-          Text(label,
-              style: TextStyle(
-                  color: transparencyEnabled ? Colors.white70 : null)),
-          const Spacer(),
-          chip,
+          Expanded(
+            child: _spaceBetween(
+              Text(label,
+                  style: TextStyle(
+                      color: transparencyEnabled
+                          ? context.glass.fgMuted
+                          : null)),
+              chip,
+            ),
+          ),
         ],
       );
 }

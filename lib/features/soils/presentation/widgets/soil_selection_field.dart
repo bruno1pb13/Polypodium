@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../domain/soil_model.dart';
 import 'soil_picker_sheet.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 class SoilSelectionField extends StatelessWidget {
   final SoilModel? selectedSoil;
@@ -41,12 +42,12 @@ class SoilSelectionField extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: context.glass.tint(0.05),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: errorText != null
                     ? Theme.of(context).colorScheme.error
-                    : Colors.white24,
+                    : context.glass.outline,
               ),
             ),
             child: Row(
@@ -55,7 +56,7 @@ class SoilSelectionField extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: context.glass.tint(0.1),
                     borderRadius: BorderRadius.circular(8),
                     image: selectedSoil?.imagePath != null
                         ? DecorationImage(
@@ -68,8 +69,8 @@ class SoilSelectionField extends StatelessWidget {
                         : null,
                   ),
                   child: selectedSoil?.imagePath == null
-                      ? const Icon(Icons.terrain_outlined,
-                          color: Colors.white70, size: 20)
+                      ? Icon(Icons.terrain_outlined,
+                          color: context.glass.fgMuted, size: 20)
                       : null,
                 ),
                 const SizedBox(width: 12),
@@ -79,8 +80,8 @@ class SoilSelectionField extends StatelessWidget {
                     children: [
                       Text(
                         '${context.l10n.soilTypeLabel} *${isRecommended ? ' ${context.l10n.recommendedSuffix}' : ''}',
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        style: TextStyle(
+                          color: context.glass.fgMuted,
                           fontSize: 12,
                         ),
                       ),
@@ -89,8 +90,8 @@ class SoilSelectionField extends StatelessWidget {
                         selectedSoil?.name ?? context.l10n.selectSoilTitle,
                         style: TextStyle(
                           color: selectedSoil != null
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.4),
+                              ? context.glass.fg
+                              : context.glass.fgAlpha(0.4),
                           fontSize: 15,
                           fontWeight: selectedSoil != null
                               ? FontWeight.w600
@@ -100,7 +101,7 @@ class SoilSelectionField extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(Icons.keyboard_arrow_down, color: Colors.white54),
+                Icon(Icons.keyboard_arrow_down, color: context.glass.fgFaint),
               ],
             ),
           ),

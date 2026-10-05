@@ -4,6 +4,7 @@ import '../../../../../core/l10n/l10n.dart';
 import '../../../../defensivos/domain/defensivo_model.dart';
 import '../../../../defensivos/presentation/widgets/defensivo_selection_field.dart';
 import 'entry_form_widgets.dart';
+import '../../../../../core/theme/glass_colors.dart';
 
 // Holds a selected catalog defensivo + dose controller for one pesticide
 // application row.
@@ -88,7 +89,7 @@ class PesticideForm extends StatelessWidget {
                 if (i < products.length - 1) ...[
                   const SizedBox(height: 12),
                   Divider(
-                      color: Colors.white.withValues(alpha: 0.1), height: 1),
+                      color: context.glass.tint(0.1), height: 1),
                 ],
               ],
             ),

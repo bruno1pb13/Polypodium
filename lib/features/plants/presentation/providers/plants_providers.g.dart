@@ -75,7 +75,7 @@ final class PlantsNotifierProvider
   PlantsNotifier create() => PlantsNotifier();
 }
 
-String _$plantsNotifierHash() => r'aff6430dbc3a2839df4d39f57930f51d1fa105f4';
+String _$plantsNotifierHash() => r'73d02ee394a767dd2f24a6f7f2ea5307672e3b8c';
 
 abstract class _$PlantsNotifier extends $StreamNotifier<List<PlantModel>> {
   Stream<List<PlantModel>> build();
@@ -92,6 +92,47 @@ abstract class _$PlantsNotifier extends $StreamNotifier<List<PlantModel>> {
     return element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(plantMutations)
+final plantMutationsProvider = PlantMutationsProvider._();
+
+final class PlantMutationsProvider
+    extends $FunctionalProvider<PlantMutations, PlantMutations, PlantMutations>
+    with $Provider<PlantMutations> {
+  PlantMutationsProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'plantMutationsProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$plantMutationsHash();
+
+  @$internal
+  @override
+  $ProviderElement<PlantMutations> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  PlantMutations create(Ref ref) {
+    return plantMutations(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PlantMutations value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PlantMutations>(value),
+    );
+  }
+}
+
+String _$plantMutationsHash() => r'0617a417c80649743d180f45b4355b761ad23d84';
 
 /// Combines each plant with its resolved species for home-screen display.
 

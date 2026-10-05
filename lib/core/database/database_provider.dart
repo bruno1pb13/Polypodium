@@ -9,7 +9,8 @@ part 'database_provider.g.dart';
 @Riverpod(keepAlive: true)
 AppDatabase appDatabase(Ref ref) {
   final workspace = ref.watch(activeWorkspaceProvider);
-  final db = AppDatabase(fileName: dbFileNameFor(workspace));
+  final db = AppDatabase(
+      fileName: dbFileNameFor(workspace), deviceId: workspace.deviceId);
   ref.onDispose(db.close);
   return db;
 }

@@ -73,12 +73,8 @@ class SettingsRepository {
     await _prefs.setBool(_autoSyncEnabledKey, enabled);
   }
 
-  Future<void> rescheduleAllNotifications(Ref ref) async {
-    final enabled = areNotificationsEnabled();
-    final plantsWithSpecies = await ref.read(plantsWithSpeciesProvider.future);
-    await NotificationService.rescheduleAllNotifications(
-      plantsWithSpecies,
-      enabled: enabled,
-    );
-  }
+  /// Goes through the same path as every plant mutation, so the recurring
+  /// care reminders are rescheduled along with irrigation and pesticide.
+  Future<void> rescheduleAllNotifications(Ref ref) =>
+      ref.read(plantsRepositoryProvider).rescheduleNotifications();
 }

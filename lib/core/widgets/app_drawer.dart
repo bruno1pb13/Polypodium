@@ -10,6 +10,7 @@ import '../../features/soils/presentation/screens/soils_list_screen.dart';
 import '../../features/defensivos/presentation/screens/defensivos_list_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/workspaces/presentation/widgets/workspace_selector.dart';
+import '../theme/glass_colors.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -27,6 +28,7 @@ class AppDrawer extends StatelessWidget {
               child: Image.asset(
                 'assets/images/background.png',
                 fit: BoxFit.cover,
+                excludeFromSemantics: true,
               ),
             ),
             // Blur + dark overlay — glassmorphism
@@ -34,7 +36,7 @@ class AppDrawer extends StatelessWidget {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: Container(
-                  color: Colors.black.withValues(alpha: 0.55),
+                  color: context.glass.scrim(0.55),
                 ),
               ),
             ),
@@ -49,7 +51,7 @@ class AppDrawer extends StatelessWidget {
                     decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.12),
+                          color: context.glass.tint(0.12),
                         ),
                       ),
                     ),
@@ -59,18 +61,22 @@ class AppDrawer extends StatelessWidget {
                           'assets/images/logo.png',
                           width: 52,
                           height: 52,
+                          excludeFromSemantics: true,
                         ),
                         const SizedBox(width: 14),
-                        const Text(
+                        Text(
                           'Polypodium',
                           style: TextStyle(
                             fontFamily: 'CormorantGaramond',
                             fontWeight: FontWeight.w600,
                             fontSize: 26,
                             letterSpacing: 0.5,
-                            color: Colors.white,
+                            color: context.glass.fg,
                             shadows: [
-                              Shadow(color: Colors.black45, blurRadius: 4),
+                              Shadow(
+                                color: context.glass.shadow(Colors.black45),
+                                blurRadius: 4,
+                              ),
                             ],
                           ),
                         ),
@@ -170,7 +176,7 @@ class AppDrawer extends StatelessWidget {
                   child: Text(
                     'v1.0.0',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.35),
+                      color: context.glass.fgAlpha(0.35),
                       fontSize: 12,
                     ),
                   ),
@@ -207,23 +213,25 @@ class _DrawerItem extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
-          splashColor: Colors.white.withValues(alpha: 0.08),
-          highlightColor: Colors.white.withValues(alpha: 0.05),
+          splashColor: context.glass.tint(0.08),
+          highlightColor: context.glass.tint(0.05),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
             child: Row(
               children: [
-                Icon(icon, color: Colors.white70, size: 22),
+                Icon(icon, color: context.glass.fgMuted, size: 22),
                 const SizedBox(width: 14),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: context.glass.fg,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 ),
-                if (trailing != null) ...[const Spacer(), trailing!],
+                if (trailing != null) trailing!,
               ],
             ),
           ),

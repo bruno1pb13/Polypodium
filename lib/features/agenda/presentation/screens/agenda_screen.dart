@@ -13,6 +13,7 @@ import '../../../plants/presentation/widgets/plant_status.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/agenda_task.dart';
 import '../providers/agenda_providers.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 /// Pending care of every active plant: overdue, due today and coming up in
 /// the next [agendaHorizonDays] days, with quick actions per task.
@@ -33,13 +34,18 @@ class AgendaScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: context.glass.fg),
         title: Text(
           context.l10n.navAgenda,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: context.glass.fg,
             fontWeight: FontWeight.w600,
-            shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+            shadows: [
+              Shadow(
+                color: context.glass.shadow(Colors.black45),
+                blurRadius: 4,
+              ),
+            ],
           ),
         ),
         actions: [
@@ -57,6 +63,7 @@ class AgendaScreen extends ConsumerWidget {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           Positioned.fill(
@@ -66,9 +73,9 @@ class AgendaScreen extends ConsumerWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.5),
+                    context.glass.scrim(0.5),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.3),
+                    context.glass.scrim(0.3),
                   ],
                 ),
               ),
@@ -76,13 +83,13 @@ class AgendaScreen extends ConsumerWidget {
           ),
           SafeArea(
             child: tasksAsync.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(color: Colors.white),
+              loading: () => Center(
+                child: CircularProgressIndicator(color: context.glass.fg),
               ),
               error: (e, _) => Center(
                 child: Text(
                   context.l10n.errorGeneric('$e'),
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: context.glass.fg),
                 ),
               ),
               data: (tasks) {
@@ -168,13 +175,21 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-      child: Text(
-        '$title ($count)',
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+      child: Semantics(
+        header: true,
+        child: Text(
+          '$title ($count)',
+          style: TextStyle(
+            color: context.glass.fg,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            shadows: [
+              Shadow(
+                color: context.glass.shadow(Colors.black45),
+                blurRadius: 4,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -192,11 +207,13 @@ class _DayHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 2),
       child: Text(
         title,
-        style: const TextStyle(
-          color: Colors.white70,
+        style: TextStyle(
+          color: context.glass.fgMuted,
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+          shadows: [
+            Shadow(color: context.glass.shadow(Colors.black45), blurRadius: 4),
+          ],
         ),
       ),
     );
@@ -249,11 +266,11 @@ class _AgendaTaskItem extends ConsumerWidget {
           child: Container(
             decoration: BoxDecoration(
               color: transparencyEnabled
-                  ? Colors.black.withValues(alpha: 0.35)
+                  ? context.glass.glassFill
                   : colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(16),
               border: transparencyEnabled
-                  ? Border.all(color: Colors.white.withValues(alpha: 0.1))
+                  ? Border.all(color: context.glass.tint(0.1))
                   : Border.all(color: Colors.transparent),
             ),
             child: InkWell(
@@ -274,13 +291,16 @@ class _AgendaTaskItem extends ConsumerWidget {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: transparencyEnabled
-                            ? Colors.white.withValues(alpha: 0.1)
+                            ? context.glass.tint(0.1)
                             : colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Text(
-                        task.entryType.emoji,
-                        style: const TextStyle(fontSize: 22),
+                      // The task label below already names the type.
+                      child: ExcludeSemantics(
+                        child: Text(
+                          task.entryType.emoji,
+                          style: const TextStyle(fontSize: 22),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -294,12 +314,12 @@ class _AgendaTaskItem extends ConsumerWidget {
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
                               color: transparencyEnabled
-                                  ? Colors.white
+                                  ? context.glass.fg
                                   : colorScheme.onSurfaceVariant,
                               shadows: transparencyEnabled
                                   ? [
-                                      const Shadow(
-                                        color: Colors.black26,
+                                      Shadow(
+                                        color: context.glass.shadow(Colors.black26),
                                         offset: Offset(0, 1),
                                         blurRadius: 2,
                                       ),
@@ -314,7 +334,7 @@ class _AgendaTaskItem extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 13,
                               color: transparencyEnabled
-                                  ? Colors.white70
+                                  ? context.glass.fgMuted
                                   : colorScheme.onSurfaceVariant
                                       .withValues(alpha: 0.7),
                             ),
@@ -330,26 +350,33 @@ class _AgendaTaskItem extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: transparencyEnabled
-                            ? Colors.white
-                            : colorScheme.primary,
+                    // Capped so large text sizes wrap the label instead of
+                    // squeezing the plant name out.
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.sizeOf(context).width * 0.4,
                       ),
-                      onPressed: isIrrigation
-                          ? () => _water(context, ref)
-                          : () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => AddEntryScreen(
-                                    plantId: pws.plant.id,
-                                    initialType: task.entryType,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: transparencyEnabled
+                              ? context.glass.fg
+                              : colorScheme.primary,
+                        ),
+                        onPressed: isIrrigation
+                            ? () => _water(context, ref)
+                            : () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => AddEntryScreen(
+                                      plantId: pws.plant.id,
+                                      initialType: task.entryType,
+                                    ),
                                   ),
                                 ),
-                              ),
-                      child: Text(isIrrigation
-                          ? l10n.notificationActionWatered
-                          : l10n.agendaRecord),
+                        child: Text(isIrrigation
+                            ? l10n.notificationActionWatered
+                            : l10n.agendaRecord),
+                      ),
                     ),
                   ],
                 ),
@@ -374,18 +401,18 @@ class _EmptyState extends StatelessWidget {
           Icon(
             Icons.event_available_outlined,
             size: 64,
-            color: Colors.white.withValues(alpha: 0.4),
+            color: context.glass.tint(0.4),
           ),
           const SizedBox(height: 16),
           Text(
             context.l10n.agendaAllCaughtUp,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+            style: TextStyle(color: context.glass.fg, fontSize: 16),
           ),
           const SizedBox(height: 8),
           Text(
             context.l10n.agendaAllCaughtUpHint(agendaHorizonDays),
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13, color: Colors.white70),
+            style: TextStyle(fontSize: 13, color: context.glass.fgMuted),
           ),
         ],
       ),

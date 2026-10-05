@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ignore: unused_import
@@ -22,6 +23,7 @@ import '../../../../core/widgets/app_shell.dart';
 import '../widgets/plant_list_item.dart';
 import 'add_edit_plant_screen.dart';
 import 'plant_detail_screen.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -149,6 +151,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ? AppBar(
               backgroundColor: Colors.black87,
               elevation: 0,
+              systemOverlayStyle: SystemUiOverlayStyle.light,
               iconTheme: const IconThemeData(color: Colors.white),
               leading: IconButton(
                 icon: const Icon(Icons.close),
@@ -183,20 +186,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               centerTitle: true,
-              iconTheme: const IconThemeData(color: Colors.white),
+              iconTheme: IconThemeData(color: context.glass.fg),
               title: MediaQuery.sizeOf(context).width >= kWideBreakpoint
                   ? null
-                  : const Text(
+                  : Text(
                       'Polypodium',
                       style: TextStyle(
                         fontFamily: 'CormorantGaramond',
                         fontWeight: FontWeight.w600,
                         fontSize: 28,
                         letterSpacing: 0.5,
-                        color: Colors.white,
+                        color: context.glass.fg,
                         shadows: [
                           Shadow(
-                            color: Colors.black45,
+                            color: context.glass.shadow(Colors.black45),
                             offset: Offset(0, 2),
                             blurRadius: 4,
                           ),
@@ -207,12 +210,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 if (workspace.isLoggedIn)
                   IconButton(
                     icon: syncState.isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: context.glass.fg,
                             ),
                           )
                         : const Icon(Icons.sync),
@@ -231,6 +234,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
+              excludeFromSemantics: true,
             ),
           ),
           // Gradient overlay for better readability - darkened at top
@@ -241,9 +245,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.5),
+                    context.glass.scrim(0.5),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.2),
+                    context.glass.scrim(0.2),
                   ],
                 ),
               ),
@@ -308,7 +312,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             const Center(child: CircularProgressIndicator()),
                         error: (e, _) => Center(
                             child: Text(context.l10n.errorLoadingPlants('$e'),
-                                style: const TextStyle(color: Colors.white))),
+                                style: TextStyle(color: context.glass.fg))),
                         data: (plants) {
                           if (plants.isEmpty) {
                             return LayoutBuilder(
@@ -321,8 +325,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ? Center(
                                           child: Text(
                                               context.l10n.noPlantsFound,
-                                              style: const TextStyle(
-                                                  color: Colors.white)))
+                                              style: TextStyle(
+                                                  color: context.glass.fg)))
                                       : !showArchived && hasAnyPlant
                                           ? const _AllArchivedState()
                                           : const _EmptyState(),
@@ -376,6 +380,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       floatingActionButton: isSelectionMode
           ? null
           : FloatingActionButton(
+              tooltip: context.l10n.addPlant,
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const AddEditPlantScreen()),
@@ -401,15 +406,15 @@ class _AllArchivedState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.inventory_2_outlined,
-                size: 64, color: Colors.white.withValues(alpha: 0.4)),
+                size: 64, color: context.glass.tint(0.4)),
             const SizedBox(height: 16),
             Text(context.l10n.allPlantsArchived,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white, fontSize: 16)),
+                style: TextStyle(color: context.glass.fg, fontSize: 16)),
             const SizedBox(height: 8),
             Text(context.l10n.allPlantsArchivedHint,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 13, color: Colors.white70)),
+                style: TextStyle(fontSize: 13, color: context.glass.fgMuted)),
           ],
         ),
       ),
@@ -427,13 +432,13 @@ class _EmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.local_florist_outlined,
-              size: 64, color: Colors.white.withValues(alpha: 0.4)),
+              size: 64, color: context.glass.tint(0.4)),
           const SizedBox(height: 16),
           Text(context.l10n.noPlantsRegistered,
-              style: const TextStyle(color: Colors.white, fontSize: 16)),
+              style: TextStyle(color: context.glass.fg, fontSize: 16)),
           const SizedBox(height: 8),
           Text(context.l10n.tapToAddFirstPlant,
-              style: const TextStyle(fontSize: 13, color: Colors.white70)),
+              style: TextStyle(fontSize: 13, color: context.glass.fgMuted)),
         ],
       ),
     );

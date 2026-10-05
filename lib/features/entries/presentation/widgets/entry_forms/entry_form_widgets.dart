@@ -3,6 +3,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../../core/l10n/l10n.dart';
+import '../../../../../core/widgets/emoji_text.dart';
+import '../../../../../core/theme/glass_colors.dart';
+
 // ---------------------------------------------------------------------------
 // Shared small widgets of the new entry form
 // ---------------------------------------------------------------------------
@@ -16,12 +20,16 @@ class EntrySectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      '$emoji $label',
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
+    return Semantics(
+      header: true,
+      child: EmojiText(
+        emoji,
+        label,
+        style: TextStyle(
+          color: context.glass.fg,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -36,7 +44,7 @@ class EntryHintText extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        color: Colors.white.withValues(alpha: 0.5),
+        color: context.glass.fgAlpha(0.7),
         fontSize: 12,
       ),
     );
@@ -67,7 +75,7 @@ class EntryNumericField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      style: const TextStyle(color: Colors.white),
+      style: TextStyle(color: context.glass.fg),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
@@ -76,28 +84,29 @@ class EntryNumericField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(
-          color: hasError ? Colors.redAccent : Colors.white70,
+          color: hasError ? context.glass.danger : context.glass.fgMuted,
         ),
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+        hintStyle: TextStyle(color: context.glass.fgAlpha(0.3)),
         suffixText: suffix,
-        suffixStyle: const TextStyle(color: Colors.white54),
+        suffixStyle: TextStyle(color: context.glass.fgFaint),
         errorText: errorText,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.white24),
+          borderSide: BorderSide(color: context.glass.outline),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: hasError ? Colors.redAccent : Colors.white24),
+          borderSide: BorderSide(
+            color: hasError ? context.glass.danger : context.glass.outline,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
         ),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.05),
+        fillColor: context.glass.tint(0.05),
       ),
     );
   }
@@ -125,32 +134,33 @@ class EntryTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      style: const TextStyle(color: Colors.white),
+      style: TextStyle(color: context.glass.fg),
       textCapitalization: TextCapitalization.sentences,
       onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(
-          color: hasError ? Colors.redAccent : Colors.white70,
+          color: hasError ? context.glass.danger : context.glass.fgMuted,
         ),
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+        hintStyle: TextStyle(color: context.glass.fgAlpha(0.3)),
         errorText: errorText,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.white24),
+          borderSide: BorderSide(color: context.glass.outline),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: hasError ? Colors.redAccent : Colors.white24),
+          borderSide: BorderSide(
+            color: hasError ? context.glass.danger : context.glass.outline,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
         ),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.05),
+        fillColor: context.glass.tint(0.05),
       ),
     );
   }
@@ -175,54 +185,63 @@ class EntrySelectionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: selected
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
-              : Colors.white.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
+    return Semantics(
+      container: true,
+      button: true,
+      selected: selected,
+      inMutuallyExclusiveGroup: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
             color: selected
-                ? Theme.of(context).colorScheme.primary
-                : Colors.white24,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              selected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
+                : context.glass.tint(0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
               color: selected
                   ? Theme.of(context).colorScheme.primary
-                  : Colors.white54,
-              size: 20,
+                  : context.glass.outline,
             ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                  ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                selected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
+                color: selected
+                    ? Theme.of(context).colorScheme.primary
+                    : context.glass.fgFaint,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: context.glass.fg,
+                        fontWeight:
+                            selected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        color: context.glass.fgAlpha(0.7),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  description,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.5),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -241,16 +260,16 @@ class EntryAddRowButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton.icon(
       onPressed: onPressed,
-      icon: const Icon(Icons.add, size: 18, color: Colors.white70),
+      icon: Icon(Icons.add, size: 18, color: context.glass.fgMuted),
       label: Text(
         label,
-        style: const TextStyle(color: Colors.white70, fontSize: 13),
+        style: TextStyle(color: context.glass.fgMuted, fontSize: 13),
       ),
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Colors.white24),
+          side: BorderSide(color: context.glass.outline),
         ),
       ),
     );
@@ -269,9 +288,9 @@ class EntryRemoveRowButton extends StatelessWidget {
       padding: const EdgeInsets.only(top: 4),
       child: IconButton(
         onPressed: onPressed,
-        icon: const Icon(Icons.remove_circle_outline,
-            color: Colors.white54, size: 22),
-        visualDensity: VisualDensity.compact,
+        tooltip: context.l10n.removeAction,
+        icon: Icon(Icons.remove_circle_outline,
+            color: context.glass.fgFaint, size: 22),
       ),
     );
   }
@@ -291,9 +310,9 @@ class EntryGlassCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: context.glass.scrim(0.3),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            border: Border.all(color: context.glass.tint(0.1)),
           ),
           child: child,
         ),

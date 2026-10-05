@@ -7,6 +7,7 @@ import '../../../../../core/enums.dart';
 import '../../../../../core/l10n/l10n.dart';
 import '../../../../settings/presentation/providers/settings_providers.dart';
 import '../../providers/plant_detail_view_provider.dart';
+import '../../../../../core/theme/glass_colors.dart';
 
 /// Diary / charts / photos segmented switch of the plant detail screen.
 class PlantDetailViewSelector extends ConsumerWidget {
@@ -28,15 +29,15 @@ class PlantDetailViewSelector extends ConsumerWidget {
               ? ImageFilter.blur(sigmaX: 10, sigmaY: 10)
               : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
           child: Container(
-            padding: const EdgeInsets.all(4),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               color: transparencyEnabled
-                  ? Colors.black.withValues(alpha: 0.3)
+                  ? context.glass.scrim(0.3)
                   : colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: transparencyEnabled
-                    ? Colors.white.withValues(alpha: 0.1)
+                    ? context.glass.tint(0.1)
                     : Colors.transparent,
               ),
             ),
@@ -85,38 +86,55 @@ class _Segment extends StatelessWidget {
       PlantDetailView.photos => Icons.photo_library_outlined,
     };
     final fg = selected
-        ? (transparent ? Colors.white : colorScheme.onPrimaryContainer)
-        : (transparent ? Colors.white60 : colorScheme.onSurfaceVariant);
+        ? (transparent ? context.glass.fg : colorScheme.onPrimaryContainer)
+        : (transparent ? context.glass.fgSubtle : colorScheme.onSurfaceVariant);
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: selected
-              ? (transparent
-                  ? Colors.white.withValues(alpha: 0.18)
-                  : colorScheme.primaryContainer)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 16, color: fg),
-            const SizedBox(width: 6),
-            Text(
-              view.label(context.l10n),
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: fg,
+    return Semantics(
+      container: true,
+      button: true,
+      selected: selected,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        // The vertical padding of the selector lives here so it counts
+        // towards the 48 dp tap target.
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                color: selected
+                    ? (transparent
+                        ? context.glass.tint(0.18)
+                        : colorScheme.primaryContainer)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 16, color: fg),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      view.label(context.l10n),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: fg,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

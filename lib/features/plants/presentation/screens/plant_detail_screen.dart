@@ -24,6 +24,7 @@ import '../widgets/plant_detail/plant_status_banners.dart';
 import '../widgets/plant_insights_view.dart';
 import '../widgets/plant_photos_sliver.dart';
 import 'add_edit_plant_screen.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 class PlantDetailScreen extends ConsumerWidget {
   final String plantId;
@@ -79,18 +80,24 @@ class PlantDetailScreen extends ConsumerWidget {
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            iconTheme: const IconThemeData(color: Colors.white),
+            iconTheme: IconThemeData(color: context.glass.fg),
             title: Text(
               plant.nickname,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: context.glass.fg,
                 fontWeight: FontWeight.w600,
-                shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+                shadows: [
+                  Shadow(
+                    color: context.glass.shadow(Colors.black45),
+                    blurRadius: 4,
+                  ),
+                ],
               ),
             ),
             actions: [
               IconButton(
                 icon: const Icon(Icons.edit_outlined),
+                tooltip: context.l10n.editPlant,
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -101,6 +108,7 @@ class PlantDetailScreen extends ConsumerWidget {
               PlantStatusMenuButton(plant: plant),
               IconButton(
                 icon: const Icon(Icons.delete_outline),
+                tooltip: context.l10n.deletePlant,
                 onPressed: () => confirmDeletePlant(context, ref, plantId),
               ),
             ],
@@ -112,6 +120,7 @@ class PlantDetailScreen extends ConsumerWidget {
                 child: Image.asset(
                   'assets/images/background.png',
                   fit: BoxFit.cover,
+                  excludeFromSemantics: true,
                 ),
               ),
               // Gradient overlay
@@ -122,9 +131,9 @@ class PlantDetailScreen extends ConsumerWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withValues(alpha: 0.5),
+                        context.glass.scrim(0.5),
                         Colors.transparent,
-                        Colors.black.withValues(alpha: 0.3),
+                        context.glass.scrim(0.3),
                       ],
                     ),
                   ),
@@ -214,6 +223,7 @@ class PlantDetailScreen extends ConsumerWidget {
             children: [
               FloatingActionButton.small(
                 heroTag: 'add_entry',
+                tooltip: context.l10n.newEntryTitle,
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(

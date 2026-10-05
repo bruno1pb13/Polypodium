@@ -12,6 +12,8 @@ import 'package:polypodium/features/entries/presentation/providers/entries_provi
 import 'package:polypodium/features/entries/presentation/screens/add_entry_screen.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
 
+import '../../../helpers/accessibility.dart';
+
 class _FakeEntryMutations implements EntryMutations {
   final created = <List<EntryModel>>[];
 
@@ -35,8 +37,9 @@ void main() {
 
   // Pushes [screen] over a launcher route so the Navigator.pop on save has
   // somewhere to go back to.
-  Future<void> pump(WidgetTester tester, AddEntryScreen screen) async {
-    tester.view.physicalSize = const Size(800, 3000);
+  Future<void> pump(WidgetTester tester, AddEntryScreen screen,
+      {Size size = const Size(800, 3000), ThemeData? theme}) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
@@ -52,6 +55,7 @@ void main() {
             .overrideWith((ref) async => defensivos),
       ],
       child: MaterialApp(
+        theme: theme,
         locale: const Locale('pt'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -298,5 +302,89 @@ void main() {
     expect(entries.map((e) => e.numericValue), [2, 2]);
     expect(entries.map((e) => e.type).toSet(), {EntryType.irrigation});
     expect(entries[0].id, isNot(entries[1].id));
+  });
+
+  group('accessibility', () {
+    const manualTypes = [
+      EntryType.observation,
+      EntryType.irrigation,
+      EntryType.fertilizer,
+      EntryType.pruning,
+      EntryType.height,
+      EntryType.chlorosis,
+      EntryType.pest,
+      EntryType.pesticide,
+    ];
+
+    testWidgets('meets the tap target and labelling guidelines',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      for (final type in manualTypes) {
+        await pump(tester, AddEntryScreen(plantId: 'p1', initialType: type));
+        await expectTapTargetGuidelines(tester);
+      }
+      semantics.dispose();
+    });
+
+    testWidgets('type chips and section titles are read without the emoji',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester,
+          AddEntryScreen(plantId: 'p1', initialType: EntryType.irrigation));
+
+      expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+      expect(
+        tester.getSemantics(find.widgetWithText(
+            ChoiceChip, '${EntryType.irrigation.emoji} Irrigação')),
+        matchesSemantics(
+          label: 'Irrigação',
+          isButton: true,
+          isSelected: true,
+          hasSelectedState: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          isFocusable: true,
+          hasTapAction: true,
+          hasFocusAction: true,
+        ),
+      );
+      semantics.dispose();
+    });
+
+    for (final (name, theme) in appThemes) {
+      testWidgets('text is readable in the $name theme', (tester) async {
+        final semantics = tester.ensureSemantics();
+        for (final type in manualTypes) {
+          await pump(tester, AddEntryScreen(plantId: 'p1', initialType: type),
+              theme: theme);
+          await paintBackground(tester);
+          await expectReadableText(tester);
+        }
+        semantics.dispose();
+      });
+    }
+
+    testWidgets('health score buttons say what they mean', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, AddEntryScreen(plantId: 'p1'));
+
+      expect(find.bySemanticsLabel('Saúde 4/5 — Boa'), findsOneWidget);
+      semantics.dispose();
+    });
+
+    for (final scale in [1.5, 2.0]) {
+      testWidgets('lays out without overflow at text scale $scale',
+          (tester) async {
+        setTextScale(tester, scale);
+        for (final type in manualTypes) {
+          await pump(
+            tester,
+            AddEntryScreen(plantId: 'p1', initialType: type),
+            size: const Size(400, 3000),
+          );
+          expect(tester.takeException(), isNull, reason: '$type');
+        }
+      });
+    }
   });
 }
