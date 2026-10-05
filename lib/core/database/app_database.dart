@@ -108,26 +108,23 @@ class AppDatabase extends _$AppDatabase {
             // yet to preserve across this shape change, so upgrading from
             // any prior schema just resets to a fresh, empty database
             // rather than carrying forward a chain of dead syncStatus-era
-            // migration steps. Drop children before parents, recreate
-            // parents before children, to respect FK constraints.
+            // migration steps. Drop children before parents and rebuild at
+            // the current schema; the later steps assume a v10+ shape, so
+            // they must not run here.
+            await m.deleteTable('reminders');
             await m.deleteTable('entries');
             await m.deleteTable('plants');
             await m.deleteTable('species');
             await m.deleteTable('soils');
             await m.deleteTable('locations');
+            await m.deleteTable('defensivos');
             await m.deleteTable('sync_queue');
             await m.deleteTable('sync_meta');
             await m.deleteTable('sync_cursors');
 
-            await m.createTable(speciesTable);
-            await m.createTable(soilsTable);
-            await m.createTable(locationsTable);
-            await m.createTable(plantsTable);
-            await m.createTable(entriesTable);
-            await m.createTable(syncMetaTable);
-            await m.createTable(syncCursorsTable);
-
+            await m.createAll();
             await _seedFresh();
+            return;
           }
           if (from < 11) {
             await m.createTable(defensivosTable);
@@ -142,8 +139,7 @@ class AppDatabase extends _$AppDatabase {
           if (from < 13) {
             await m.createTable(remindersTable);
           }
-          // Below v10 the plants table was just recreated without the column.
-          if (from >= 10 && from < 14) {
+          if (from < 14) {
             // Link any leftover free-text location to a locations row, then
             // drop the legacy column. Stamped as local writes so the links
             // reach the server on the next sync.

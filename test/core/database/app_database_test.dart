@@ -33,6 +33,56 @@ void main() {
     expect(species.defaultIrrigationFrequencyDays, isNull);
   });
 
+  test('migration from before v10 resets to the current schema', () async {
+    await db.close();
+    // A v9 database from the event-log sync era.
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE plants (
+          id TEXT NOT NULL PRIMARY KEY,
+          species_id TEXT NOT NULL,
+          nickname TEXT NOT NULL,
+          soil_type TEXT NOT NULL,
+          acquisition_date INTEGER NOT NULL,
+          location TEXT NULL,
+          sync_status TEXT NOT NULL DEFAULT 'pending'
+        )
+      ''');
+      raw.execute('''
+        CREATE TABLE sync_queue (
+          id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+          payload TEXT NOT NULL
+        )
+      ''');
+      raw.execute('''
+        INSERT INTO plants (id, species_id, nickname, soil_type,
+          acquisition_date)
+        VALUES ('p1', 's1', 'Old plant', 'loamy', 0)
+      ''');
+      raw.execute('PRAGMA user_version = 9');
+    }));
+
+    expect(await db.plantsDao.getById('p1'), isNull);
+    expect(await db.soilsDao.getAllSoils(), isNotEmpty);
+
+    final columns =
+        await db.customSelect('PRAGMA table_info(plants)').get();
+    final names = columns.map((c) => c.read<String>('name'));
+    expect(names, containsAll(['status', 'last_pesticide_applied_at']));
+    expect(names, isNot(contains('location')));
+
+    final tables = await db
+        .customSelect("SELECT name FROM sqlite_master WHERE type = 'table'")
+        .get();
+    final tableNames = tables.map((t) => t.read<String>('name'));
+    expect(tableNames, containsAll(['reminders', 'defensivos', 'sync_cursors']));
+    expect(tableNames, isNot(contains('sync_queue')));
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
   test('migration from v11 adds plant status columns defaulting to active',
       () async {
     await db.close();
