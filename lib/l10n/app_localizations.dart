@@ -3961,6 +3961,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{index} of {total}'**
   String photoPosition(int index, int total);
+
+  /// No description provided for @compareWithFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare with the first photo'**
+  String get compareWithFirst;
+
+  /// No description provided for @compareWithOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare with another photo'**
+  String get compareWithOther;
+
+  /// No description provided for @pickPhotoToCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick another photo to compare'**
+  String get pickPhotoToCompare;
+
+  /// No description provided for @comparisonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before and after'**
+  String get comparisonTitle;
+
+  /// No description provided for @comparisonBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before · {date}'**
+  String comparisonBefore(String date);
+
+  /// No description provided for @comparisonAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After · {date}'**
+  String comparisonAfter(String date);
+
+  /// No description provided for @comparisonSideBySide.
+  ///
+  /// In en, this message translates to:
+  /// **'Side by side'**
+  String get comparisonSideBySide;
+
+  /// No description provided for @comparisonSlider.
+  ///
+  /// In en, this message translates to:
+  /// **'Slider'**
+  String get comparisonSlider;
+
+  /// No description provided for @comparisonDivider.
+  ///
+  /// In en, this message translates to:
+  /// **'Divider between the photos'**
+  String get comparisonDivider;
 }
 
 class _AppLocalizationsDelegate

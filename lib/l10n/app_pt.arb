@@ -675,5 +675,14 @@
   "photoNumberLabel": "Foto {index} de {total}",
   "removePhotoNumber": "Remover foto {index}",
   "entryPhotoNumberLabel": "Foto {index} de {total} de {date}",
-  "photoPosition": "{index} de {total}"
+  "photoPosition": "{index} de {total}",
+  "compareWithFirst": "Comparar com a primeira foto",
+  "compareWithOther": "Comparar com outra foto",
+  "pickPhotoToCompare": "Escolha outra foto para comparar",
+  "comparisonTitle": "Antes e depois",
+  "comparisonBefore": "Antes · {date}",
+  "comparisonAfter": "Depois · {date}",
+  "comparisonSideBySide": "Lado a lado",
+  "comparisonSlider": "Deslizante",
+  "comparisonDivider": "Divisória entre as fotos"
 }

@@ -1150,5 +1150,24 @@
       "index": {"type": "int"},
       "total": {"type": "int"}
     }
-  }
+  },
+  "compareWithFirst": "Compare with the first photo",
+  "compareWithOther": "Compare with another photo",
+  "pickPhotoToCompare": "Pick another photo to compare",
+  "comparisonTitle": "Before and after",
+  "comparisonBefore": "Before · {date}",
+  "@comparisonBefore": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "comparisonAfter": "After · {date}",
+  "@comparisonAfter": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "comparisonSideBySide": "Side by side",
+  "comparisonSlider": "Slider",
+  "comparisonDivider": "Divider between the photos"
 }

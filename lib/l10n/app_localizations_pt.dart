@@ -2298,4 +2298,35 @@ class AppLocalizationsPt extends AppLocalizations {
   String photoPosition(int index, int total) {
     return '$index de $total';
   }
+
+  @override
+  String get compareWithFirst => 'Comparar com a primeira foto';
+
+  @override
+  String get compareWithOther => 'Comparar com outra foto';
+
+  @override
+  String get pickPhotoToCompare => 'Escolha outra foto para comparar';
+
+  @override
+  String get comparisonTitle => 'Antes e depois';
+
+  @override
+  String comparisonBefore(String date) {
+    return 'Antes · $date';
+  }
+
+  @override
+  String comparisonAfter(String date) {
+    return 'Depois · $date';
+  }
+
+  @override
+  String get comparisonSideBySide => 'Lado a lado';
+
+  @override
+  String get comparisonSlider => 'Deslizante';
+
+  @override
+  String get comparisonDivider => 'Divisória entre as fotos';
 }

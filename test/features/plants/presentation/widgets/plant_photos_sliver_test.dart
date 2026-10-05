@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/core/widgets/fullscreen_image_viewer.dart';
 import 'package:polypodium/features/entries/domain/entry_model.dart';
+import 'package:polypodium/features/plants/domain/plant_photos.dart';
+import 'package:polypodium/features/plants/presentation/screens/photo_comparison_screen.dart';
 import 'package:polypodium/features/plants/presentation/widgets/plant_photos_sliver.dart';
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
@@ -152,6 +154,155 @@ void main() {
         ),
       );
       semantics.dispose();
+    });
+  });
+
+  group('comparison', () {
+    testWidgets('compares a photo with the first one', (tester) async {
+      await pump(tester);
+
+      await tester.longPress(find.bySemanticsLabel('Foto de 01/03/2026'));
+      await tester.pumpAndSettle();
+      // The first photo has nothing before it.
+      expect(find.text('Comparar com a primeira foto'), findsNothing);
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+
+      await tester
+          .longPress(find.bySemanticsLabel('Foto de capa de 10/03/2026'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Comparar com a primeira foto'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PhotoComparisonScreen), findsOneWidget);
+      expect(find.text('Antes · 01/03/2026'), findsOneWidget);
+      expect(find.text('Depois · 10/03/2026'), findsOneWidget);
+    });
+
+    testWidgets('compares with another photo picked next, in date order',
+        (tester) async {
+      await pump(tester);
+
+      await tester
+          .longPress(find.bySemanticsLabel('Foto de capa de 10/03/2026'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Comparar com outra foto'));
+      await tester.pumpAndSettle();
+      expect(find.text('Escolha outra foto para comparar'), findsOneWidget);
+
+      await tester.tap(find.bySemanticsLabel('Foto de 01/03/2026'));
+      await tester.pumpAndSettle();
+      final screen = tester
+          .widget<PhotoComparisonScreen>(find.byType(PhotoComparisonScreen));
+      expect(screen.before.photo.id, 'e1');
+      expect(screen.after.photo.id, 'e2');
+
+      Navigator.of(tester.element(find.byType(PhotoComparisonScreen))).pop();
+      await tester.pumpAndSettle();
+      expect(find.text('Escolha outra foto para comparar'), findsNothing);
+    });
+
+    testWidgets('picking another photo can be cancelled', (tester) async {
+      await pump(tester);
+      await tester.longPress(find.bySemanticsLabel('Foto de 01/03/2026'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Comparar com outra foto'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+      expect(find.text('Escolha outra foto para comparar'), findsNothing);
+    });
+
+    for (final (name, theme) in appThemes) {
+      testWidgets('the prompt is readable in the $name theme', (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pump(tester, theme: theme);
+        await tester.longPress(find.bySemanticsLabel('Foto de 01/03/2026'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Comparar com outra foto'));
+        await tester.pumpAndSettle();
+
+        await expectReadableText(tester);
+        await expectTapTargetGuidelines(tester);
+        semantics.dispose();
+      });
+    }
+  });
+
+  group('PhotoComparisonScreen', () {
+    PlantPhoto photo(String id, int day) {
+      final entry = _entry(id, day, photoPath: '/nonexistent/$id.jpg');
+      return (photo: entry.photos.single, entry: entry);
+    }
+
+    Future<void> pumpScreen(WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        // Given newest first: still shown oldest first.
+        home: PhotoComparisonScreen(a: photo('new', 20), b: photo('old', 2)),
+      ));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+        'shows both photos with their dates, side by side or '
+        'with a divider', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pumpScreen(tester);
+
+      expect(find.text('Antes e depois'), findsOneWidget);
+      expect(find.text('Antes · 02/03/2026'), findsOneWidget);
+      expect(find.text('Depois · 20/03/2026'), findsOneWidget);
+      expect(find.bySemanticsLabel('Antes · 02/03/2026'), findsOneWidget);
+      expect(tester.getTopLeft(find.text('Antes · 02/03/2026')).dx,
+          lessThan(tester.getTopLeft(find.text('Depois · 20/03/2026')).dx));
+
+      await tester.tap(find.text('Deslizante'));
+      await tester.pumpAndSettle();
+      expect(find.text('Antes · 02/03/2026'), findsOneWidget);
+      expect(find.text('Depois · 20/03/2026'), findsOneWidget);
+
+      final divider = find.bySemanticsLabel('Divisória entre as fotos');
+      expect(tester.getSemantics(divider).value, '50%');
+      // As a screen reader's "increase".
+      tester
+          .widget<Semantics>(find.byWidgetPredicate((w) =>
+              w is Semantics &&
+              w.properties.label == 'Divisória entre as fotos'))
+          .properties
+          .onIncrease!();
+      await tester.pumpAndSettle();
+      expect(tester.getSemantics(divider).value, '60%');
+
+      await tester.drag(
+          find.byIcon(Icons.compare_arrows), const Offset(-2000, 0));
+      await tester.pumpAndSettle();
+      expect(tester.getSemantics(divider).value, '0%');
+      semantics.dispose();
+    });
+
+    testWidgets('meets the accessibility guidelines', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pumpScreen(tester);
+      await expectReadableText(tester);
+      await expectTapTargetGuidelines(tester);
+
+      await tester.tap(find.text('Deslizante'));
+      await tester.pumpAndSettle();
+      await expectTapTargetGuidelines(tester);
+      semantics.dispose();
+    });
+
+    testWidgets('lays out without overflow at text scale 2', (tester) async {
+      setTextScale(tester, 2);
+      tester.view.physicalSize = const Size(360, 720);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await pumpScreen(tester);
+      expect(tester.takeException(), isNull);
     });
   });
 }
