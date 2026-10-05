@@ -75,6 +75,21 @@ void main() {
       '{"potMaterial":"fabric"}',
       RepottingDetails(potMaterial: PotMaterial.fabric),
     ),
+    (
+      EntryType.harvest,
+      '{"quantity":1.5,"unit":"kg"}',
+      HarvestDetails(quantity: 1.5, unit: HarvestUnit.kg),
+    ),
+    (
+      EntryType.harvest,
+      '{"quantity":300.0,"unit":"g","duringCarencia":true}',
+      HarvestDetails(quantity: 300, unit: HarvestUnit.g, duringCarencia: true),
+    ),
+    (
+      EntryType.harvest,
+      '{"unit":"bunches"}',
+      HarvestDetails(unit: HarvestUnit.bunches),
+    ),
   ];
 
   group('golden extraData', () {
@@ -101,6 +116,7 @@ void main() {
       expect(const PruningDetails().encode(), isNull);
       expect(const PesticideDetails().encode(), isNull);
       expect(const RepottingDetails().encode(), isNull);
+      expect(const HarvestDetails().encode(), isNull);
     });
   });
 
@@ -135,6 +151,23 @@ void main() {
           const PesticideDetails());
       expect(EntryDetails.decode(EntryType.repotting, '{}'),
           const RepottingDetails());
+      expect(
+          EntryDetails.decode(EntryType.harvest, '{}'), const HarvestDetails());
+    });
+
+    test('harvest: unexpected types and unknown units are skipped', () {
+      expect(
+          EntryDetails.decode(EntryType.harvest,
+              '{"quantity":"2","unit":5,"duringCarencia":"yes"}'),
+          const HarvestDetails());
+      expect(
+          EntryDetails.decode(
+              EntryType.harvest, '{"quantity":2,"unit":"box","extra":1}'),
+          const HarvestDetails(quantity: 2));
+      expect(
+          EntryDetails.decode(
+              EntryType.harvest, '{"quantity":3,"unit":"units"}'),
+          const HarvestDetails(quantity: 3, unit: HarvestUnit.units));
     });
 
     test('repotting: unexpected types are skipped, unknown materials kept '

@@ -11,19 +11,25 @@ import 'package:polypodium/l10n/app_localizations.dart';
 import '../../../helpers/accessibility.dart';
 
 class _FakeTransparencyNotifier extends TransparencyEnabledNotifier {
+  _FakeTransparencyNotifier([this.enabled = false]);
+  final bool enabled;
+
   @override
-  bool build() => false;
+  bool build() => enabled;
 }
 
 void main() {
   Future<void> pump(WidgetTester tester, EntryModel entry,
-      {VoidCallback? onDelete}) async {
+      {VoidCallback? onDelete,
+      ThemeData? theme,
+      bool transparent = false}) async {
     await tester.pumpWidget(ProviderScope(
       overrides: [
         transparencyEnabledNotifierProvider
-            .overrideWith(_FakeTransparencyNotifier.new),
+            .overrideWith(() => _FakeTransparencyNotifier(transparent)),
       ],
       child: MaterialApp(
+        theme: theme,
         locale: const Locale('pt'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -116,6 +122,81 @@ void main() {
     await pump(tester, entry(EntryType.repotting));
     expect(find.text('Replantio'), findsOneWidget);
     expect(find.textContaining('🪴'), findsNothing);
+  });
+
+  group('harvest', () {
+    testWidgets('summary shows the quantity with its unit', (tester) async {
+      await pump(tester,
+          entry(EntryType.harvest, extraData: '{"quantity":1.5,"unit":"kg"}'));
+      expect(find.text('Colheita'), findsOneWidget);
+      expect(find.text('🧺 1,5 kg'), findsOneWidget);
+      expect(find.text('Colheita durante a carência'), findsNothing);
+
+      await pump(tester,
+          entry(EntryType.harvest, extraData: '{"quantity":1,"unit":"units"}'));
+      expect(find.text('🧺 1 unidade'), findsOneWidget);
+
+      await pump(
+          tester,
+          entry(EntryType.harvest,
+              extraData: '{"quantity":3,"unit":"bunches"}'));
+      expect(find.text('🧺 3 maços'), findsOneWidget);
+
+      // A unit from a newer version: just the number.
+      await pump(tester,
+          entry(EntryType.harvest, extraData: '{"quantity":2,"unit":"box"}'));
+      expect(find.text('🧺 2'), findsOneWidget);
+    });
+
+    testWidgets('without a quantity shows no badge', (tester) async {
+      await pump(tester, entry(EntryType.harvest, extraData: '{"unit":"g"}'));
+      expect(find.text('Colheita'), findsOneWidget);
+      expect(find.textContaining('🧺'), findsNothing);
+    });
+
+    testWidgets('a harvest during carência shows the warning', (tester) async {
+      await pump(
+          tester,
+          entry(EntryType.harvest,
+              extraData:
+                  '{"quantity":300.0,"unit":"g","duringCarencia":true}'));
+      expect(find.text('🧺 300 g'), findsOneWidget);
+      expect(find.text('Colheita durante a carência'), findsOneWidget);
+
+      await pump(tester,
+          entry(EntryType.harvest, extraData: '{"duringCarencia":true}'));
+      expect(find.text('Colheita durante a carência'), findsOneWidget);
+    });
+
+    testWidgets('the warning is read without its emoji', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(
+          tester,
+          entry(EntryType.harvest,
+              extraData:
+                  '{"quantity":300.0,"unit":"g","duringCarencia":true}'));
+      expect(find.bySemanticsLabel('Colheita durante a carência'),
+          findsOneWidget);
+      expect(find.bySemanticsLabel('300 g'), findsOneWidget);
+      expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+      semantics.dispose();
+    });
+
+    // On the glass style the plant screen uses.
+    for (final (name, theme) in appThemes) {
+      testWidgets('the warning is readable in the $name theme',
+          (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pump(
+            tester,
+            entry(EntryType.harvest,
+                extraData: '{"quantity":2,"unit":"kg","duringCarencia":true}'),
+            theme: theme,
+            transparent: true);
+        await expectReadableText(tester);
+        semantics.dispose();
+      });
+    }
   });
 
   group('accessibility', () {

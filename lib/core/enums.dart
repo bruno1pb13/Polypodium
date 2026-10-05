@@ -31,12 +31,26 @@ enum EntryType {
   pesticide,
   other,
   history,
-  repotting;
+  repotting,
+  harvest;
 
   /// Unknown or missing names (rows written by a newer client) yield null;
   /// callers skip such rows instead of failing.
   static EntryType? fromName(String? name) =>
       EntryType.values.asNameMap()[name];
+}
+
+/// Unit of a harvested quantity (see HarvestDetails). Persisted by name.
+enum HarvestUnit {
+  g,
+  kg,
+  units,
+  bunches;
+
+  /// Missing or unknown names (a newer client's unit) yield null: the
+  /// quantity is then shown without a unit.
+  static HarvestUnit? fromName(String? name) =>
+      HarvestUnit.values.asNameMap()[name];
 }
 
 /// Material of the pot a plant was moved to (see RepottingDetails).
@@ -336,6 +350,7 @@ extension EntryTypeX on EntryType {
         EntryType.other => l10n.entryTypeOther,
         EntryType.history => l10n.entryTypeHistory,
         EntryType.repotting => l10n.entryTypeRepotting,
+        EntryType.harvest => l10n.entryTypeHarvest,
       };
 
   String get emoji => switch (this) {
@@ -350,6 +365,25 @@ extension EntryTypeX on EntryType {
         EntryType.other => '📝',
         EntryType.history => '📜',
         EntryType.repotting => '🪴',
+        EntryType.harvest => '🧺',
+      };
+}
+
+extension HarvestUnitX on HarvestUnit {
+  String label(AppLocalizations l10n) => switch (this) {
+        HarvestUnit.g => l10n.harvestUnitG,
+        HarvestUnit.kg => l10n.harvestUnitKg,
+        HarvestUnit.units => l10n.harvestUnitUnits,
+        HarvestUnit.bunches => l10n.harvestUnitBunches,
+      };
+
+  /// [quantity] already formatted for display, followed by the unit.
+  String amount(AppLocalizations l10n, double quantity, String formatted) =>
+      switch (this) {
+        HarvestUnit.g => l10n.harvestAmountG(formatted),
+        HarvestUnit.kg => l10n.harvestAmountKg(formatted),
+        HarvestUnit.units => l10n.harvestAmountUnits(quantity, formatted),
+        HarvestUnit.bunches => l10n.harvestAmountBunches(quantity, formatted),
       };
 }
 

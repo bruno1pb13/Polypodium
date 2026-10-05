@@ -2136,4 +2136,114 @@ class AppLocalizationsEn extends AppLocalizations {
   String carenciaDoNotHarvestProducts(String products) {
     return 'Do not harvest — $products';
   }
+
+  @override
+  String get entryTypeHarvest => 'Harvest';
+
+  @override
+  String get noteHintHarvest => 'Ripeness, quality, where it went...';
+
+  @override
+  String get harvestHint => 'How much was harvested.';
+
+  @override
+  String get harvestQuantityLabel => 'Quantity';
+
+  @override
+  String get harvestUnitLabel => 'Unit';
+
+  @override
+  String get harvestUnitG => 'g';
+
+  @override
+  String get harvestUnitKg => 'kg';
+
+  @override
+  String get harvestUnitUnits => 'units';
+
+  @override
+  String get harvestUnitBunches => 'bunches';
+
+  @override
+  String harvestAmountG(String quantity) {
+    return '$quantity g';
+  }
+
+  @override
+  String harvestAmountKg(String quantity) {
+    return '$quantity kg';
+  }
+
+  @override
+  String harvestAmountUnits(num count, String quantity) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$quantity units',
+      one: '$quantity unit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String harvestAmountBunches(num count, String quantity) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$quantity bunches',
+      one: '$quantity bunch',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get harvestDuringCarencia =>
+      'Harvested during the pre-harvest interval';
+
+  @override
+  String get harvestCarenciaDialogTitle =>
+      'Harvest during the pre-harvest interval?';
+
+  @override
+  String harvestCarenciaDialogBody(String date) {
+    return 'This plant is in the pre-harvest interval until $date. Harvesting now may leave pesticide residue.';
+  }
+
+  @override
+  String harvestCarenciaDialogBulkBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count plants are in the pre-harvest interval. Harvesting them now may leave pesticide residue:',
+      one:
+          '1 plant is in the pre-harvest interval. Harvesting it now may leave pesticide residue:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String harvestCarenciaPlantLine(String plant, String date) {
+    return '$plant: until $date';
+  }
+
+  @override
+  String carenciaProductsLine(String products) {
+    return 'Products: $products';
+  }
+
+  @override
+  String get harvestCarenciaQuestion =>
+      'Record the harvest anyway? It will be marked as made during the interval.';
+
+  @override
+  String get harvestCarenciaConfirm => 'Record anyway';
+
+  @override
+  String get harvestTotalsTitle => 'Harvests';
+
+  @override
+  String harvestTotalsSummary(String amounts) {
+    return 'Harvested in total: $amounts';
+  }
 }

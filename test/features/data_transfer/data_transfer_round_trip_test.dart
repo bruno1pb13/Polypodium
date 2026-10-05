@@ -411,6 +411,38 @@ void main() {
     expect(await target.entriesDao.getById('e2'), isNull);
   });
 
+  test('harvest entries survive the round trip', () async {
+    await seedSpecies(source, 'Solanum lycopersicum', t0);
+    await source.plantsDao.upsert(PlantsTableCompanion.insert(
+      id: 'plant1',
+      speciesId: 'species1',
+      nickname: 'Tomateiro',
+      soilType: 'loamy',
+      acquisitionDate: t0,
+      createdAt: t0,
+      updatedAt: t0,
+      localRev: const Value(2),
+    ));
+    const extra = '{"quantity":300.0,"unit":"g","duringCarencia":true}';
+    await source.entriesDao.upsert(EntriesTableCompanion.insert(
+      id: 'e1',
+      plantId: 'plant1',
+      date: t1,
+      type: EntryType.harvest,
+      extraData: const Value(extra),
+      createdAt: t1,
+      updatedAt: t1,
+      localRev: const Value(3),
+    ));
+    final bytes = await DataExportService(source).buildArchiveBytes();
+
+    await DataImportService(target, FakePhotoStorage()).importFromBytes(bytes);
+
+    final entry = await target.entriesDao.getById('e1');
+    expect(entry!.type, EntryType.harvest);
+    expect(entry.extraData, extra);
+  });
+
   test('rejects files that are not a Polypodium backup', () async {
     final service = DataImportService(target, FakePhotoStorage());
     await expectLater(

@@ -32,6 +32,7 @@ sealed class EntryDetails {
       EntryType.pruning => PruningDetails._fromJson(decoded),
       EntryType.pesticide => PesticideDetails._fromJson(decoded),
       EntryType.repotting => RepottingDetails._fromJson(decoded),
+      EntryType.harvest => HarvestDetails._fromJson(decoded),
       _ => null,
     };
   }
@@ -287,6 +288,56 @@ final class RepottingDetails extends EntryDetails {
   @override
   int get hashCode =>
       Object.hash(potDiameterCm, potMaterial, newSoilId, newSoilName);
+}
+
+/// `{"quantity": double, "unit": String, "duringCarencia": true}` — all keys
+/// optional. `unit` is a [HarvestUnit] name; `duringCarencia` is only stored
+/// when the harvest was confirmed while the plant was in carência.
+final class HarvestDetails extends EntryDetails {
+  final double? quantity;
+  final HarvestUnit? unit;
+  final bool duringCarencia;
+
+  const HarvestDetails({
+    this.quantity,
+    this.unit,
+    this.duringCarencia = false,
+  });
+
+  factory HarvestDetails._fromJson(Map<String, dynamic> json) =>
+      HarvestDetails(
+        quantity: (json['quantity'] is num)
+            ? (json['quantity'] as num).toDouble()
+            : null,
+        unit: HarvestUnit.fromName(_string(json['unit'])),
+        duringCarencia: json['duringCarencia'] == true,
+      );
+
+  HarvestDetails copyWith({bool? duringCarencia}) => HarvestDetails(
+        quantity: quantity,
+        unit: unit,
+        duringCarencia: duringCarencia ?? this.duringCarencia,
+      );
+
+  @override
+  bool get isEmpty => quantity == null && unit == null && !duringCarencia;
+
+  @override
+  Map<String, dynamic> toJson() => {
+        if (quantity != null) 'quantity': quantity,
+        if (unit != null) 'unit': unit!.name,
+        if (duringCarencia) 'duringCarencia': true,
+      };
+
+  @override
+  bool operator ==(Object other) =>
+      other is HarvestDetails &&
+      other.quantity == quantity &&
+      other.unit == unit &&
+      other.duringCarencia == duringCarencia;
+
+  @override
+  int get hashCode => Object.hash(quantity, unit, duringCarencia);
 }
 
 String? _string(Object? value) => value is String ? value : null;

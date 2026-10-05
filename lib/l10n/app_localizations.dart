@@ -3751,6 +3751,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Do not harvest — {products}'**
   String carenciaDoNotHarvestProducts(String products);
+
+  /// No description provided for @entryTypeHarvest.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvest'**
+  String get entryTypeHarvest;
+
+  /// No description provided for @noteHintHarvest.
+  ///
+  /// In en, this message translates to:
+  /// **'Ripeness, quality, where it went...'**
+  String get noteHintHarvest;
+
+  /// No description provided for @harvestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How much was harvested.'**
+  String get harvestHint;
+
+  /// No description provided for @harvestQuantityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get harvestQuantityLabel;
+
+  /// No description provided for @harvestUnitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get harvestUnitLabel;
+
+  /// No description provided for @harvestUnitG.
+  ///
+  /// In en, this message translates to:
+  /// **'g'**
+  String get harvestUnitG;
+
+  /// No description provided for @harvestUnitKg.
+  ///
+  /// In en, this message translates to:
+  /// **'kg'**
+  String get harvestUnitKg;
+
+  /// No description provided for @harvestUnitUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'units'**
+  String get harvestUnitUnits;
+
+  /// No description provided for @harvestUnitBunches.
+  ///
+  /// In en, this message translates to:
+  /// **'bunches'**
+  String get harvestUnitBunches;
+
+  /// No description provided for @harvestAmountG.
+  ///
+  /// In en, this message translates to:
+  /// **'{quantity} g'**
+  String harvestAmountG(String quantity);
+
+  /// No description provided for @harvestAmountKg.
+  ///
+  /// In en, this message translates to:
+  /// **'{quantity} kg'**
+  String harvestAmountKg(String quantity);
+
+  /// No description provided for @harvestAmountUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{quantity} unit} other{{quantity} units}}'**
+  String harvestAmountUnits(num count, String quantity);
+
+  /// No description provided for @harvestAmountBunches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{quantity} bunch} other{{quantity} bunches}}'**
+  String harvestAmountBunches(num count, String quantity);
+
+  /// No description provided for @harvestDuringCarencia.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvested during the pre-harvest interval'**
+  String get harvestDuringCarencia;
+
+  /// No description provided for @harvestCarenciaDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvest during the pre-harvest interval?'**
+  String get harvestCarenciaDialogTitle;
+
+  /// No description provided for @harvestCarenciaDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This plant is in the pre-harvest interval until {date}. Harvesting now may leave pesticide residue.'**
+  String harvestCarenciaDialogBody(String date);
+
+  /// No description provided for @harvestCarenciaDialogBulkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 plant is in the pre-harvest interval. Harvesting it now may leave pesticide residue:} other{{count} plants are in the pre-harvest interval. Harvesting them now may leave pesticide residue:}}'**
+  String harvestCarenciaDialogBulkBody(int count);
+
+  /// No description provided for @harvestCarenciaPlantLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{plant}: until {date}'**
+  String harvestCarenciaPlantLine(String plant, String date);
+
+  /// No description provided for @carenciaProductsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Products: {products}'**
+  String carenciaProductsLine(String products);
+
+  /// No description provided for @harvestCarenciaQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the harvest anyway? It will be marked as made during the interval.'**
+  String get harvestCarenciaQuestion;
+
+  /// No description provided for @harvestCarenciaConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Record anyway'**
+  String get harvestCarenciaConfirm;
+
+  /// No description provided for @harvestTotalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvests'**
+  String get harvestTotalsTitle;
+
+  /// No description provided for @harvestTotalsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvested in total: {amounts}'**
+  String harvestTotalsSummary(String amounts);
 }
 
 class _AppLocalizationsDelegate

@@ -9,6 +9,8 @@ import 'package:polypodium/features/defensivos/presentation/providers/defensivos
 import 'package:polypodium/features/defensivos/presentation/widgets/defensivo_selection_field.dart';
 import 'package:polypodium/features/entries/domain/entry_details.dart';
 import 'package:polypodium/features/entries/domain/entry_model.dart';
+import 'package:polypodium/features/entries/domain/carencia.dart';
+import 'package:polypodium/features/entries/presentation/providers/carencia_providers.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/entries/presentation/screens/add_entry_screen.dart';
 import 'package:polypodium/features/soils/domain/soil_model.dart';
@@ -26,6 +28,19 @@ class _FakeEntryMutations implements EntryMutations {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeCarenciaChecker implements CarenciaChecker {
+  _FakeCarenciaChecker(this.affected);
+  final List<PlantCarencia> affected;
+  final checked = <List<String>>[];
+
+  @override
+  Future<List<PlantCarencia>> plantsInCarencia(
+      List<String> plantIds, DateTime day) async {
+    checked.add(plantIds);
+    return affected.where((p) => plantIds.contains(p.plantId)).toList();
+  }
 }
 
 void main() {
@@ -46,11 +61,14 @@ void main() {
   ];
 
   late _FakeEntryMutations mutations;
+  late _FakeCarenciaChecker carenciaChecker;
 
   // Pushes [screen] over a launcher route so the Navigator.pop on save has
   // somewhere to go back to.
   Future<void> pump(WidgetTester tester, AddEntryScreen screen,
-      {Size size = const Size(800, 3000), ThemeData? theme}) async {
+      {Size size = const Size(800, 3000),
+      ThemeData? theme,
+      List<PlantCarencia> inCarencia = const []}) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -58,9 +76,11 @@ void main() {
     // Start from scratch when a test opens the screen more than once.
     await tester.pumpWidget(const SizedBox());
     mutations = _FakeEntryMutations();
+    carenciaChecker = _FakeCarenciaChecker(inCarencia);
     await tester.pumpWidget(ProviderScope(
       overrides: [
         entryMutationsProvider.overrideWithValue(mutations),
+        carenciaCheckerProvider.overrideWithValue(carenciaChecker),
         photoStorageProvider
             .overrideWithValue(PhotoStorage(baseDirName: 'test_photos')),
         filteredSortedDefensivosProvider
@@ -366,6 +386,181 @@ void main() {
     expect(entries[0].id, isNot(entries[1].id));
   });
 
+  group('harvest', () {
+    PlantCarencia carencia(String plantId, String name, DateTime until,
+            [List<String> products = const ['Óleo de Neem']]) =>
+        (
+          plantId: plantId,
+          plantName: name,
+          status: CarenciaStatus(until: until, productNames: products),
+        );
+
+    testWidgets('stores the quantity and the unit', (tester) async {
+      await pump(tester, AddEntryScreen(plantId: 'p1'));
+      await selectType(tester, EntryType.harvest, 'Colheita');
+
+      await tester.enterText(field('Quantidade'), '1,5');
+      await tester.tap(find.text('kg'));
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).last, 'Bem madura');
+      await save(tester);
+
+      expect(carenciaChecker.checked, [
+        ['p1']
+      ]);
+      final entry = mutations.created.single.single;
+      expect(entry.type, EntryType.harvest);
+      expect(entry.numericValue, isNull);
+      expect(entry.note, 'Bem madura');
+      expect(entry.extraData, '{"quantity":1.5,"unit":"kg"}');
+      expect(entry.details,
+          const HarvestDetails(quantity: 1.5, unit: HarvestUnit.kg));
+      // No carência, no dialog.
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.byType(AddEntryScreen), findsNothing);
+    });
+
+    testWidgets('without details stores no extraData', (tester) async {
+      await pump(tester,
+          AddEntryScreen(plantId: 'p1', initialType: EntryType.harvest));
+      // A picked unit can be dropped again.
+      final chip = find.widgetWithText(ChoiceChip, 'maços');
+      await tester.tap(chip);
+      await tester.pump();
+      await tester.tap(chip);
+      await tester.pump();
+      await tester.enterText(field('Quantidade'), '0');
+      await save(tester);
+
+      expect(mutations.created.single.single.extraData, isNull);
+    });
+
+    testWidgets('other entry types skip the carência check', (tester) async {
+      await pump(tester, AddEntryScreen(plantId: 'p1'),
+          inCarencia: [carencia('p1', 'Tomateiro', DateTime(2026, 10, 12))]);
+      await selectType(tester, EntryType.pruning, 'Poda');
+      await save(tester);
+
+      expect(carenciaChecker.checked, isEmpty);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(mutations.created, hasLength(1));
+    });
+
+    testWidgets('during carência asks first; cancelling saves nothing',
+        (tester) async {
+      await pump(
+        tester,
+        AddEntryScreen(plantId: 'p1', initialType: EntryType.harvest),
+        inCarencia: [
+          carencia('p1', 'Tomateiro', DateTime(2026, 10, 12),
+              ['Óleo de Neem', 'Calda Bordalesa']),
+        ],
+      );
+      await tester.enterText(field('Quantidade'), '300');
+      await save(tester);
+
+      expect(find.text('Colheita durante a carência'), findsOneWidget);
+      expect(find.textContaining('em carência até 12/10'), findsOneWidget);
+      expect(find.text('Produtos: Óleo de Neem, Calda Bordalesa'),
+          findsOneWidget);
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+
+      expect(mutations.created, isEmpty);
+      expect(find.byType(AlertDialog), findsNothing);
+      // Still on the form, which can be saved again.
+      expect(find.byType(AddEntryScreen), findsOneWidget);
+      expect(
+          tester
+              .widget<FilledButton>(find.widgetWithText(
+                  FilledButton, 'Salvar registro'))
+              .onPressed,
+          isNotNull);
+    });
+
+    testWidgets('during carência, confirming saves with the mark',
+        (tester) async {
+      await pump(
+        tester,
+        AddEntryScreen(plantId: 'p1', initialType: EntryType.harvest),
+        inCarencia: [carencia('p1', 'Tomateiro', DateTime(2026, 10, 12))],
+      );
+      await tester.enterText(field('Quantidade'), '300');
+      await tester.tap(find.text('g'));
+      await tester.pump();
+      await save(tester);
+      await tester.tap(find.text('Registrar mesmo assim'));
+      await tester.pumpAndSettle();
+
+      final entry = mutations.created.single.single;
+      expect(entry.extraData,
+          '{"quantity":300.0,"unit":"g","duringCarencia":true}');
+      expect(find.byType(AddEntryScreen), findsNothing);
+    });
+
+    testWidgets('bulk lists the plants in carência and marks only them',
+        (tester) async {
+      await pump(
+        tester,
+        const AddEntryScreen.bulk(
+          plantIds: ['p1', 'p2', 'p3'],
+          initialType: EntryType.harvest,
+        ),
+        inCarencia: [
+          carencia('p1', 'Tomateiro', DateTime(2026, 10, 12)),
+          carencia('p3', 'Alface', DateTime(2026, 10, 8), const []),
+        ],
+      );
+      await tester.enterText(field('Quantidade'), '2');
+      await tester.tap(find.text('unidades'));
+      await tester.pump();
+      await tester.tap(find.text('Salvar para 3 plantas'));
+      await tester.pumpAndSettle();
+
+      expect(carenciaChecker.checked, [
+        ['p1', 'p2', 'p3']
+      ]);
+      expect(find.textContaining('2 plantas estão em carência'),
+          findsOneWidget);
+      expect(find.textContaining('• Tomateiro: até 12/10'), findsOneWidget);
+      expect(find.textContaining('Produtos: Óleo de Neem'), findsOneWidget);
+      expect(find.textContaining('• Alface: até 08/10'), findsOneWidget);
+      await tester.tap(find.text('Registrar mesmo assim'));
+      await tester.pumpAndSettle();
+
+      final entries = mutations.created.single;
+      expect(entries.map((e) => e.plantId), ['p1', 'p2', 'p3']);
+      expect(
+        entries.map((e) => (e.details as HarvestDetails).duringCarencia),
+        [true, false, true],
+      );
+      expect(entries[1].extraData, '{"quantity":2.0,"unit":"units"}');
+    });
+
+    for (final (name, theme) in appThemes) {
+      testWidgets('the form and the warning are readable in the $name theme',
+          (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pump(
+          tester,
+          AddEntryScreen(plantId: 'p1', initialType: EntryType.harvest),
+          theme: theme,
+          inCarencia: [carencia('p1', 'Tomateiro', DateTime(2026, 10, 12))],
+        );
+        await tester.tap(find.text('kg'));
+        await paintBackground(tester);
+        await expectReadableText(tester);
+        expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+
+        await save(tester);
+        expect(find.byType(AlertDialog), findsOneWidget);
+        await expectReadableText(tester);
+        await expectTapTargetGuidelines(tester);
+        semantics.dispose();
+      });
+    }
+  });
+
   group('accessibility', () {
     const manualTypes = [
       EntryType.observation,
@@ -377,6 +572,7 @@ void main() {
       EntryType.pest,
       EntryType.pesticide,
       EntryType.repotting,
+      EntryType.harvest,
     ];
 
     testWidgets('meets the tap target and labelling guidelines',

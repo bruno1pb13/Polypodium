@@ -413,6 +413,32 @@ void main() {
       expect(change.payload['type'], 'repotting');
     });
 
+    test('a harvest entry round-trips', () async {
+      const extra = '{"quantity":1.5,"unit":"kg","duringCarencia":true}';
+      await adapter.applyRemoteChange(SyncChange(
+        entityType: 'entry',
+        entityId: 'e1',
+        payload: {
+          ...entryChange('e1', 'harvest').payload,
+          'extraData': extra,
+        },
+        updatedAt: DateTime(2026, 5, 1),
+        deviceId: 'device-2',
+        rev: 1,
+      ));
+      final row = await db.entriesDao.getById('e1');
+      expect(row!.type, EntryType.harvest);
+      expect(row.extraData, extra);
+
+      await db.entriesDao.upsert(
+          row.toCompanion(false).copyWith(localRev: const Value(3)));
+      final change = (await adapter.localChangesSince(0,
+              limit: 100, deviceId: 'device-1'))
+          .single;
+      expect(change.payload['type'], 'harvest');
+      expect(change.payload['extraData'], extra);
+    });
+
     test('an entry of an unknown type is skipped without failing the pull',
         () async {
       await adapter.applyRemoteChange(entryChange('e1', 'grafting'));

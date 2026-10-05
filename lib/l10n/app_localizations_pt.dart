@@ -2142,4 +2142,112 @@ class AppLocalizationsPt extends AppLocalizations {
   String carenciaDoNotHarvestProducts(String products) {
     return 'Não colher — $products';
   }
+
+  @override
+  String get entryTypeHarvest => 'Colheita';
+
+  @override
+  String get noteHintHarvest => 'Ponto de maturação, qualidade, destino...';
+
+  @override
+  String get harvestHint => 'Quanto foi colhido.';
+
+  @override
+  String get harvestQuantityLabel => 'Quantidade';
+
+  @override
+  String get harvestUnitLabel => 'Unidade';
+
+  @override
+  String get harvestUnitG => 'g';
+
+  @override
+  String get harvestUnitKg => 'kg';
+
+  @override
+  String get harvestUnitUnits => 'unidades';
+
+  @override
+  String get harvestUnitBunches => 'maços';
+
+  @override
+  String harvestAmountG(String quantity) {
+    return '$quantity g';
+  }
+
+  @override
+  String harvestAmountKg(String quantity) {
+    return '$quantity kg';
+  }
+
+  @override
+  String harvestAmountUnits(num count, String quantity) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$quantity unidades',
+      one: '$quantity unidade',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String harvestAmountBunches(num count, String quantity) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$quantity maços',
+      one: '$quantity maço',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get harvestDuringCarencia => 'Colheita durante a carência';
+
+  @override
+  String get harvestCarenciaDialogTitle => 'Colheita durante a carência';
+
+  @override
+  String harvestCarenciaDialogBody(String date) {
+    return 'Esta planta está em carência até $date. Colher agora pode deixar resíduos de defensivo.';
+  }
+
+  @override
+  String harvestCarenciaDialogBulkBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count plantas estão em carência. Colher agora pode deixar resíduos de defensivo:',
+      one:
+          '1 planta está em carência. Colher agora pode deixar resíduos de defensivo:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String harvestCarenciaPlantLine(String plant, String date) {
+    return '$plant: até $date';
+  }
+
+  @override
+  String carenciaProductsLine(String products) {
+    return 'Produtos: $products';
+  }
+
+  @override
+  String get harvestCarenciaQuestion =>
+      'Registrar a colheita mesmo assim? Ela ficará marcada como feita durante a carência.';
+
+  @override
+  String get harvestCarenciaConfirm => 'Registrar mesmo assim';
+
+  @override
+  String get harvestTotalsTitle => 'Colheitas';
+
+  @override
+  String harvestTotalsSummary(String amounts) {
+    return 'Total colhido: $amounts';
+  }
 }

@@ -1032,5 +1032,76 @@
     "placeholders": {
       "products": {"type": "String"}
     }
+  },
+  "entryTypeHarvest": "Harvest",
+  "noteHintHarvest": "Ripeness, quality, where it went...",
+  "harvestHint": "How much was harvested.",
+  "harvestQuantityLabel": "Quantity",
+  "harvestUnitLabel": "Unit",
+  "harvestUnitG": "g",
+  "harvestUnitKg": "kg",
+  "harvestUnitUnits": "units",
+  "harvestUnitBunches": "bunches",
+  "harvestAmountG": "{quantity} g",
+  "@harvestAmountG": {
+    "placeholders": {
+      "quantity": {"type": "String"}
+    }
+  },
+  "harvestAmountKg": "{quantity} kg",
+  "@harvestAmountKg": {
+    "placeholders": {
+      "quantity": {"type": "String"}
+    }
+  },
+  "harvestAmountUnits": "{count, plural, one{{quantity} unit} other{{quantity} units}}",
+  "@harvestAmountUnits": {
+    "placeholders": {
+      "count": {"type": "num"},
+      "quantity": {"type": "String"}
+    }
+  },
+  "harvestAmountBunches": "{count, plural, one{{quantity} bunch} other{{quantity} bunches}}",
+  "@harvestAmountBunches": {
+    "placeholders": {
+      "count": {"type": "num"},
+      "quantity": {"type": "String"}
+    }
+  },
+  "harvestDuringCarencia": "Harvested during the pre-harvest interval",
+  "harvestCarenciaDialogTitle": "Harvest during the pre-harvest interval?",
+  "harvestCarenciaDialogBody": "This plant is in the pre-harvest interval until {date}. Harvesting now may leave pesticide residue.",
+  "@harvestCarenciaDialogBody": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "harvestCarenciaDialogBulkBody": "{count, plural, one{1 plant is in the pre-harvest interval. Harvesting it now may leave pesticide residue:} other{{count} plants are in the pre-harvest interval. Harvesting them now may leave pesticide residue:}}",
+  "@harvestCarenciaDialogBulkBody": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "harvestCarenciaPlantLine": "{plant}: until {date}",
+  "@harvestCarenciaPlantLine": {
+    "placeholders": {
+      "plant": {"type": "String"},
+      "date": {"type": "String"}
+    }
+  },
+  "carenciaProductsLine": "Products: {products}",
+  "@carenciaProductsLine": {
+    "placeholders": {
+      "products": {"type": "String"}
+    }
+  },
+  "harvestCarenciaQuestion": "Record the harvest anyway? It will be marked as made during the interval.",
+  "harvestCarenciaConfirm": "Record anyway",
+  "harvestTotalsTitle": "Harvests",
+  "harvestTotalsSummary": "Harvested in total: {amounts}",
+  "@harvestTotalsSummary": {
+    "placeholders": {
+      "amounts": {"type": "String"}
+    }
   }
 }

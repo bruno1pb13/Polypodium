@@ -9,9 +9,11 @@ import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/widgets/emoji_text.dart';
 import '../../../../core/widgets/fullscreen_image_viewer.dart';
+import '../../../plants/presentation/widgets/plant_status.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/entry_details.dart';
 import '../../domain/entry_model.dart';
+import 'harvest_format.dart';
 import '../../../../core/theme/glass_colors.dart';
 
 class EntryTimelineItem extends ConsumerWidget {
@@ -112,6 +114,15 @@ class EntryTimelineItem extends ConsumerWidget {
                             entry: entry,
                             transparent: transparencyEnabled,
                           ),
+                          if (entry.details
+                              case HarvestDetails(duringCarencia: true)) ...[
+                            const SizedBox(height: 6),
+                            PlantStatusChip(
+                              emoji: '⚠️',
+                              label: context.l10n.harvestDuringCarencia,
+                              tone: StatusTone.warning,
+                            ),
+                          ],
                           if (entry.note != null && entry.note!.isNotEmpty) ...[
                             const SizedBox(height: 6),
                             Text(
@@ -259,6 +270,12 @@ class _EntryDataBadge extends StatelessWidget {
         _pesticideSummary(l10n, details as PesticideDetails?, entry.date),
       EntryType.repotting =>
         _repottingSummary(l10n, details as RepottingDetails?),
+      EntryType.harvest
+          when details is HarvestDetails && details.quantity != null =>
+        (
+          EntryType.harvest.emoji,
+          formatHarvestAmount(l10n, details.quantity!, details.unit),
+        ),
       EntryType.observation when nv != null =>
         (
           _healthEmoji(nv.toInt()),

@@ -11,6 +11,7 @@ import '../../../../core/storage/photo_storage.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../entries/domain/entry_details.dart';
 import '../../../entries/domain/entry_model.dart';
+import '../../../entries/presentation/providers/carencia_providers.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../soils/domain/soil_model.dart';
 import '../widgets/entry_forms/chlorosis_form.dart';
@@ -19,6 +20,7 @@ import '../widgets/entry_forms/entry_note_section.dart';
 import '../widgets/entry_forms/entry_photo_section.dart';
 import '../widgets/entry_forms/entry_type_selector.dart';
 import '../widgets/entry_forms/fertilizer_form.dart';
+import '../widgets/entry_forms/harvest_form.dart';
 import '../widgets/entry_forms/height_form.dart';
 import '../widgets/entry_forms/irrigation_form.dart';
 import '../widgets/entry_forms/observation_form.dart';
@@ -26,6 +28,7 @@ import '../widgets/entry_forms/pest_form.dart';
 import '../widgets/entry_forms/pesticide_form.dart';
 import '../widgets/entry_forms/pruning_form.dart';
 import '../widgets/entry_forms/repotting_form.dart';
+import '../widgets/harvest_carencia_dialog.dart';
 import '../../../../core/theme/glass_colors.dart';
 
 class AddEntryScreen extends ConsumerStatefulWidget {
@@ -85,6 +88,10 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   PotMaterial? _potMaterial;
   SoilModel? _newSoil;
 
+  // Harvest
+  final _harvestQuantityCtrl = TextEditingController();
+  HarvestUnit? _harvestUnit;
+
   bool _saving = false;
   bool _submitted = false;
   bool _showFieldErrors = false;
@@ -109,6 +116,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     }
     _pesticideRecurrenceCtrl.dispose();
     _potDiameterCtrl.dispose();
+    _harvestQuantityCtrl.dispose();
     if (!_submitted && _photoPath != null) {
       _photoStorage.deletePhoto(_photoPath!);
     }
@@ -189,6 +197,13 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           potMaterial: _potMaterial,
           newSoilId: _newSoil?.id,
           newSoilName: _newSoil?.name,
+        );
+      case EntryType.harvest:
+        final quantity =
+            double.tryParse(_harvestQuantityCtrl.text.replaceAll(',', '.'));
+        return HarvestDetails(
+          quantity: quantity != null && quantity > 0 ? quantity : null,
+          unit: _harvestUnit,
         );
       default:
         return null;
@@ -382,6 +397,11 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           newSoil: _newSoil,
           onSoilChanged: (soil) => setState(() => _newSoil = soil),
         ),
+      EntryType.harvest => HarvestForm(
+          quantityController: _harvestQuantityCtrl,
+          unit: _harvestUnit,
+          onUnitChanged: (u) => setState(() => _harvestUnit = u),
+        ),
       _ => const SizedBox.shrink(),
     };
   }
@@ -411,12 +431,39 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     setState(() => _saving = true);
     try {
       final now = DateTime.now();
+      final details = _details;
+
+      // Harvesting a plant still in carência needs a confirmation, and the
+      // entry keeps a mark of it.
+      var inCarencia = const <String>{};
+      if (_type == EntryType.harvest) {
+        final affected = await ref
+            .read(carenciaCheckerProvider)
+            .plantsInCarencia(widget.plantIds, now);
+        if (affected.isNotEmpty) {
+          if (!mounted) return;
+          // The dialog is modal; no spinner behind it.
+          setState(() => _saving = false);
+          final confirmed = await confirmHarvestDuringCarencia(
+            context,
+            affected,
+            bulk: widget.plantIds.length > 1,
+          );
+          if (!confirmed || !mounted) return;
+          setState(() => _saving = true);
+          inCarencia = {for (final p in affected) p.plantId};
+        }
+      }
+
       final note =
           _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim();
       final mutations = ref.read(entryMutationsProvider);
       final entries = <EntryModel>[];
       for (var i = 0; i < widget.plantIds.length; i++) {
         final plantId = widget.plantIds[i];
+        final entryDetails = details is HarvestDetails
+            ? details.copyWith(duringCarencia: inCarencia.contains(plantId))
+            : details;
         // Each entry owns its photo file (deleting an entry deletes the
         // photo), so extra plants get their own copy of the picked photo.
         final photoPath = i == 0 || _photoPath == null
@@ -430,7 +477,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           note: note,
           type: _type,
           numericValue: _numericValue,
-          extraData: _details?.encode(),
+          extraData: entryDetails?.encode(),
           createdAt: now,
         );
         entries.add(entry);
