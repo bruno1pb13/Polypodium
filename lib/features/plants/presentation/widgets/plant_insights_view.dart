@@ -14,6 +14,7 @@ import 'insights/insight_card.dart';
 import 'insights/insight_chart_helpers.dart';
 import 'insights/insight_palette.dart';
 import 'insights/watering_chart.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 /// Charts view of the plant detail screen: growth, health and watering
 /// regularity, derived from the plant's entries.
@@ -72,7 +73,7 @@ class PlantInsightsView extends ConsumerWidget {
           child: Text(
             l10n.chartsEmpty,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white70, height: 1.4),
+            style: TextStyle(color: context.glass.fgMuted, height: 1.4),
           ),
         ),
       );

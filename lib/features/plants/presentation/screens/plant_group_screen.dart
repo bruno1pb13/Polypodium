@@ -8,6 +8,7 @@ import '../../domain/plant_model.dart';
 import '../providers/plants_providers.dart';
 import '../widgets/plant_list_item.dart';
 import 'plant_detail_screen.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 /// Lists the active plants of a single location or species, with a
 /// bulk-entry action that creates one entry for every plant shown.
@@ -46,13 +47,18 @@ class PlantGroupScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: context.glass.fg),
         title: Text(
           title,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: context.glass.fg,
             fontWeight: FontWeight.w600,
-            shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+            shadows: [
+              Shadow(
+                color: context.glass.shadow(Colors.black45),
+                blurRadius: 4,
+              ),
+            ],
           ),
         ),
         bottom: speciesId == null
@@ -83,9 +89,9 @@ class PlantGroupScreen extends ConsumerWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.5),
+                    context.glass.scrim(0.5),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.3),
+                    context.glass.scrim(0.3),
                   ],
                 ),
               ),
@@ -93,13 +99,13 @@ class PlantGroupScreen extends ConsumerWidget {
           ),
           SafeArea(
             child: plantsAsync.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(color: Colors.white),
+              loading: () => Center(
+                child: CircularProgressIndicator(color: context.glass.fg),
               ),
               error: (e, _) => Center(
                 child: Text(
                   context.l10n.errorGeneric('$e'),
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: context.glass.fg),
                 ),
               ),
               data: (plants) {
@@ -187,7 +193,7 @@ class _SurvivalLine extends ConsumerWidget implements PreferredSizeWidget {
         child: Text(
           context.l10n
               .speciesSurvivalRate(survival.total, percent, survival.alive),
-          style: const TextStyle(fontSize: 13, color: Colors.white70),
+          style: TextStyle(fontSize: 13, color: context.glass.fgMuted),
         ),
       ),
     );
@@ -208,14 +214,14 @@ class _EmptyState extends StatelessWidget {
           Icon(
             Icons.local_florist_outlined,
             size: 64,
-            color: Colors.white.withValues(alpha: 0.4),
+            color: context.glass.tint(0.4),
           ),
           const SizedBox(height: 16),
           Text(
             isLocation
                 ? context.l10n.noPlantsAtLocation
                 : context.l10n.noPlantsOfSpecies,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+            style: TextStyle(color: context.glass.fg, fontSize: 16),
           ),
           const SizedBox(height: 8),
           Text(
@@ -223,7 +229,7 @@ class _EmptyState extends StatelessWidget {
                 ? context.l10n.plantsAtLocationHint
                 : context.l10n.plantsOfSpeciesHint,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13, color: Colors.white70),
+            style: TextStyle(fontSize: 13, color: context.glass.fgMuted),
           ),
         ],
       ),

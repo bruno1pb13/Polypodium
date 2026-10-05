@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'glass_colors.dart';
 import 'smooth_page_transitions_builder.dart';
+
+export 'glass_colors.dart';
 
 class AppTheme {
   AppTheme._();
@@ -20,6 +25,11 @@ class AppTheme {
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(seedColor: _seed),
     pageTransitionsTheme: _pageTransitionsTheme,
+    // The glass app bars are transparent over a light surface.
+    appBarTheme: const AppBarTheme(
+      systemOverlayStyle: SystemUiOverlayStyle.dark,
+    ),
+    extensions: const [GlassColors.light],
   );
 
   static final dark = ThemeData(
@@ -29,5 +39,6 @@ class AppTheme {
       brightness: Brightness.dark,
     ),
     pageTransitionsTheme: _pageTransitionsTheme,
+    extensions: const [GlassColors.dark],
   );
 }

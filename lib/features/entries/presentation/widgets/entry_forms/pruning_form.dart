@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/l10n/l10n.dart';
 import 'entry_form_widgets.dart';
+import '../../../../../core/theme/glass_colors.dart';
 
 // ---------------------------------------------------------------------------
 // Pruning — reason chips
@@ -42,11 +43,11 @@ class PruningForm extends StatelessWidget {
               label: Text(r.label),
               selected: selected,
               onSelected: (_) => onReasonChanged(selected ? null : r.key),
-              backgroundColor: Colors.black.withValues(alpha: 0.2),
+              backgroundColor: context.glass.scrim(0.2),
               selectedColor: Theme.of(context).colorScheme.primary,
               showCheckmark: false,
               labelStyle: TextStyle(
-                color: selected ? Colors.white : Colors.white70,
+                color: selected ? Colors.white : context.glass.fgMuted,
                 fontSize: 13,
                 fontWeight: selected ? FontWeight.bold : FontWeight.normal,
               ),
@@ -54,8 +55,8 @@ class PruningForm extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
                   color: selected
-                      ? Colors.white.withValues(alpha: 0.3)
-                      : Colors.white12,
+                      ? context.glass.tint(0.3)
+                      : context.glass.tint(0.12),
                 ),
               ),
             );

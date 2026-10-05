@@ -7,6 +7,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/notifications/notification_service.dart';
 import '../../../../core/widgets/app_shell.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 /// One-time introduction shown on the first launch of the app.
 ///
@@ -125,9 +126,9 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.5),
+                    context.glass.scrim(0.5),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.4),
+                    context.glass.scrim(0.4),
                   ],
                 ),
               ),
@@ -143,7 +144,7 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
                     child: TextButton(
                       onPressed: _finish,
                       style: TextButton.styleFrom(
-                        foregroundColor: Colors.white70,
+                        foregroundColor: context.glass.fgMuted,
                       ),
                       child: Text(context.l10n.introSkip),
                     ),
@@ -226,10 +227,10 @@ class _IntroPage extends StatelessWidget {
                   vertical: 36,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.35),
+                  color: context.glass.glassFill,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: context.glass.tint(0.1),
                   ),
                 ),
                 child: Column(
@@ -243,27 +244,27 @@ class _IntroPage extends StatelessWidget {
                         excludeFromSemantics: true,
                       )
                     else
-                      Icon(data.icon, size: 72, color: Colors.white),
+                      Icon(data.icon, size: 72, color: context.glass.fg),
                     const SizedBox(height: 28),
                     Text(
                       data.title,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'CormorantGaramond',
                         fontWeight: FontWeight.w600,
                         fontSize: 30,
                         letterSpacing: 0.5,
-                        color: Colors.white,
+                        color: context.glass.fg,
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       data.body,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         height: 1.5,
-                        color: Colors.white70,
+                        color: context.glass.fgMuted,
                       ),
                     ),
                     if (data.child != null) ...[
@@ -307,14 +308,14 @@ class _ReminderSetup extends ConsumerWidget {
           children: [
             Text(
               context.l10n.introRemindersTimeLabel,
-              style: const TextStyle(color: Colors.white70, fontSize: 15),
+              style: TextStyle(color: context.glass.fgMuted, fontSize: 15),
             ),
             const SizedBox(width: 12),
             OutlinedButton.icon(
               onPressed: onPickTime,
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
-                side: const BorderSide(color: Colors.white38),
+                foregroundColor: context.glass.fg,
+                side: BorderSide(color: context.glass.tint(0.38)),
               ),
               icon: const Icon(Icons.schedule, size: 18),
               label: Text(
@@ -346,7 +347,7 @@ class _ReminderSetup extends ConsumerWidget {
         Text(
           context.l10n.introRemindersLaterNote,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.white54, fontSize: 12),
+          style: TextStyle(color: context.glass.fgFaint, fontSize: 12),
         ),
       ],
     );
@@ -371,7 +372,7 @@ class _PageDots extends StatelessWidget {
             width: i == current ? 24 : 8,
             height: 8,
             decoration: BoxDecoration(
-              color: i == current ? Colors.white : Colors.white38,
+              color: i == current ? context.glass.fg : context.glass.tint(0.38),
               borderRadius: BorderRadius.circular(4),
             ),
           ),

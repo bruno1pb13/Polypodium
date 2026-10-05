@@ -10,6 +10,7 @@ import '../../../../core/widgets/app_search_bar.dart';
 import '../../domain/defensivo_model.dart';
 import '../providers/defensivos_search_providers.dart';
 import '../screens/add_edit_defensivo_screen.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 class DefensivoPickerSheet extends ConsumerStatefulWidget {
   final String? selectedDefensivoId;
@@ -38,9 +39,9 @@ class _DefensivoPickerSheetState extends ConsumerState<DefensivoPickerSheet> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: context.glass.sheet,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: context.glass.tint(0.1)),
       ),
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -53,15 +54,15 @@ class _DefensivoPickerSheetState extends ConsumerState<DefensivoPickerSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white24,
+                  color: context.glass.outline,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 16),
               Text(
                 context.l10n.selectDefensivoTitle,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: context.glass.fg,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -96,13 +97,13 @@ class _DefensivoPickerSheetState extends ConsumerState<DefensivoPickerSheet> {
               ),
               Expanded(
                 child: defensivosAsync.when(
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
+                  loading: () => Center(
+                    child: CircularProgressIndicator(color: context.glass.fg),
                   ),
                   error: (e, _) => Center(
                     child: Text(
                       context.l10n.errorGeneric('$e'),
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: context.glass.fg),
                     ),
                   ),
                   data: (defensivos) {
@@ -132,8 +133,8 @@ class _DefensivoPickerSheetState extends ConsumerState<DefensivoPickerSheet> {
                               label: Text(context.l10n.newDefensivo),
                               style: FilledButton.styleFrom(
                                 backgroundColor:
-                                    Colors.white.withValues(alpha: 0.1),
-                                foregroundColor: Colors.white,
+                                    context.glass.tint(0.1),
+                                foregroundColor: context.glass.fg,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -147,7 +148,7 @@ class _DefensivoPickerSheetState extends ConsumerState<DefensivoPickerSheet> {
                             padding: const EdgeInsets.only(bottom: 16),
                             child: Text(
                               context.l10n.noDefensivosFound,
-                              style: const TextStyle(color: Colors.white70),
+                              style: TextStyle(color: context.glass.fgMuted),
                             ),
                           );
                         }
@@ -200,12 +201,12 @@ class _DefensivoListTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected
                 ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
-                : Colors.white.withValues(alpha: 0.05),
+                : context.glass.tint(0.05),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isSelected
                   ? Theme.of(context).colorScheme.primary
-                  : Colors.white.withValues(alpha: 0.1),
+                  : context.glass.tint(0.1),
             ),
           ),
           child: Row(
@@ -214,7 +215,7 @@ class _DefensivoListTile extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: context.glass.tint(0.1),
                   borderRadius: BorderRadius.circular(12),
                   image: defensivo.imagePath != null
                       ? DecorationImage(
@@ -224,7 +225,7 @@ class _DefensivoListTile extends StatelessWidget {
                       : null,
                 ),
                 child: defensivo.imagePath == null
-                    ? const Icon(Icons.science_outlined, color: Colors.white70)
+                    ? Icon(Icons.science_outlined, color: context.glass.fgMuted)
                     : null,
               ),
               const SizedBox(width: 12),
@@ -234,8 +235,8 @@ class _DefensivoListTile extends StatelessWidget {
                   children: [
                     Text(
                       defensivo.name,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: context.glass.fg,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -243,8 +244,8 @@ class _DefensivoListTile extends StatelessWidget {
                     if (categoryLabel != null)
                       Text(
                         categoryLabel,
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        style: TextStyle(
+                          color: context.glass.fgMuted,
                           fontSize: 12,
                         ),
                         maxLines: 1,

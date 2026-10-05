@@ -7,6 +7,7 @@ import '../../../../../core/l10n/l10n.dart';
 import '../../../../../core/widgets/fullscreen_image_viewer.dart';
 import '../../../../entries/presentation/providers/entries_providers.dart';
 import '../../../domain/plant_model.dart';
+import '../../../../../core/theme/glass_colors.dart';
 
 /// Latest photo, nickname and species of the plant.
 class PlantDetailHeader extends ConsumerWidget {
@@ -37,28 +38,33 @@ class PlantDetailHeader extends ConsumerWidget {
                   header: true,
                   child: Text(
                     plant.nickname,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [Shadow(color: Colors.black38, blurRadius: 4)],
+                      color: context.glass.fg,
+                      shadows: [
+                        Shadow(
+                          color: context.glass.shadow(Colors.black38),
+                          blurRadius: 4,
+                        ),
+                      ],
                     ),
                   ),
                 ),
                 if (pws != null) ...[
                   Text(
                     pws!.species.popularName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
-                      color: Colors.white70,
+                      color: context.glass.fgMuted,
                     ),
                   ),
                   Text(
                     pws!.species.scientificName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontStyle: FontStyle.italic,
-                      color: Colors.white54,
+                      color: context.glass.fgFaint,
                     ),
                   ),
                 ],
@@ -87,7 +93,7 @@ class _PlantPhoto extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: context.glass.scrim(0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -121,11 +127,11 @@ class _PhotoPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white.withValues(alpha: 0.1),
-      child: const Icon(
+      color: context.glass.tint(0.1),
+      child: Icon(
         Icons.local_florist_outlined,
         size: 48,
-        color: Colors.white24,
+        color: context.glass.outline,
       ),
     );
   }

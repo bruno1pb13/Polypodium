@@ -6,6 +6,7 @@ import '../../../../core/widgets/app_shell.dart';
 import '../../domain/workspace_model.dart';
 import '../providers/workspace_providers.dart';
 import '../screens/workspaces_screen.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 const String _manageAction = '__manage__';
 
@@ -28,10 +29,10 @@ class WorkspaceSelector extends ConsumerWidget {
     final active = ref.watch(activeWorkspaceProvider);
     final cs = Theme.of(context).colorScheme;
 
-    final textColor = dark ? Colors.white : cs.onSurface;
-    final subtleColor = dark ? Colors.white70 : cs.onSurfaceVariant;
+    final textColor = dark ? context.glass.fg : cs.onSurface;
+    final subtleColor = dark ? context.glass.fgMuted : cs.onSurfaceVariant;
     final chipColor = dark
-        ? Colors.white.withValues(alpha: 0.08)
+        ? context.glass.tint(0.08)
         : cs.surfaceContainerHighest.withValues(alpha: 0.6);
 
     return PopupMenuButton<String>(
@@ -136,12 +137,12 @@ class _WorkspaceIcon extends StatelessWidget {
       height: 26,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(7),
-        color: dark ? Colors.white.withValues(alpha: 0.12) : cs.primaryContainer,
+        color: dark ? context.glass.tint(0.12) : cs.primaryContainer,
       ),
       child: Icon(
         icon,
         size: 15,
-        color: dark ? Colors.white : cs.onPrimaryContainer,
+        color: dark ? context.glass.fg : cs.onPrimaryContainer,
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/widgets/emoji_text.dart';
 import 'insight_palette.dart';
+import '../../../../../core/theme/glass_colors.dart';
 
 class InsightHintText extends StatelessWidget {
   final String text;
@@ -68,12 +69,12 @@ class InsightCard extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: transparent
-                  ? Colors.black.withValues(alpha: 0.3)
+                  ? context.glass.scrim(0.3)
                   : Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: transparent
-                    ? Colors.white.withValues(alpha: 0.1)
+                    ? context.glass.tint(0.1)
                     : Colors.transparent,
               ),
             ),

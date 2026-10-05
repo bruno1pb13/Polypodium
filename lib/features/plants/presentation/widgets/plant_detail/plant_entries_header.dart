@@ -9,6 +9,7 @@ import '../../../../../core/enums.dart';
 import '../../../../../core/l10n/l10n.dart';
 import '../../../../../core/widgets/emoji_text.dart';
 import '../../../../entries/presentation/providers/entry_filters_provider.dart';
+import '../../../../../core/theme/glass_colors.dart';
 
 /// Title of the diary with its entry type filter and sort menu.
 class PlantEntriesHeader extends ConsumerWidget {
@@ -29,10 +30,10 @@ class PlantEntriesHeader extends ConsumerWidget {
           Expanded(
             child: Text(
               context.l10n.entriesTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: context.glass.fg,
               ),
             ),
           ),
@@ -40,7 +41,7 @@ class PlantEntriesHeader extends ConsumerWidget {
             clipBehavior: Clip.none,
             children: [
               IconButton(
-                icon: const Icon(Icons.filter_list, color: Colors.white70),
+                icon: Icon(Icons.filter_list, color: context.glass.fgMuted),
                 tooltip: context.l10n.filterTypes,
                 onPressed: () {
                   final isDesktop = switch (defaultTargetPlatform) {
@@ -86,7 +87,7 @@ class PlantEntriesHeader extends ConsumerWidget {
               Icons.sort,
               color: activeSort != EntrySortOption.dateDesc
                   ? colorScheme.primary
-                  : Colors.white70,
+                  : context.glass.fgMuted,
             ),
             tooltip: context.l10n.sortTooltip,
             onSelected: (sort) => ref
@@ -133,9 +134,9 @@ class _FilterSheet extends ConsumerWidget {
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.65),
+            color: context.glass.scrim(0.65),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            border: Border.all(color: context.glass.tint(0.1)),
           ),
           child: SafeArea(
             top: false,
@@ -147,7 +148,7 @@ class _FilterSheet extends ConsumerWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white30,
+                    color: context.glass.tint(0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -158,8 +159,8 @@ class _FilterSheet extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           context.l10n.entryTypesTitle,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: context.glass.fg,
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
                           ),
@@ -190,11 +191,11 @@ class _FilterSheet extends ConsumerWidget {
                       type.emoji,
                       type.label(context.l10n),
                       separator: '  ',
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: context.glass.fg),
                     ),
                     checkColor: Colors.white,
                     activeColor: colorScheme.primary,
-                    side: const BorderSide(color: Colors.white30),
+                    side: BorderSide(color: context.glass.tint(0.3)),
                     dense: true,
                   );
                 }),
@@ -228,9 +229,9 @@ class _FilterDialog extends ConsumerWidget {
             width: 360,
             constraints: const BoxConstraints(maxWidth: 360),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.65),
+              color: context.glass.scrim(0.65),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              border: Border.all(color: context.glass.tint(0.1)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -242,8 +243,8 @@ class _FilterDialog extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           context.l10n.entryTypesTitle,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: context.glass.fg,
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
                           ),
@@ -261,8 +262,8 @@ class _FilterDialog extends ConsumerWidget {
                           ),
                         ),
                       IconButton(
-                        icon: const Icon(Icons.close,
-                            color: Colors.white54, size: 18),
+                        icon: Icon(Icons.close,
+                            color: context.glass.fgFaint, size: 18),
                         tooltip: MaterialLocalizations.of(context)
                             .closeButtonTooltip,
                         onPressed: () => Navigator.pop(context),
@@ -281,11 +282,11 @@ class _FilterDialog extends ConsumerWidget {
                       type.emoji,
                       type.label(context.l10n),
                       separator: '  ',
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: context.glass.fg),
                     ),
                     checkColor: Colors.white,
                     activeColor: colorScheme.primary,
-                    side: const BorderSide(color: Colors.white30),
+                    side: BorderSide(color: context.glass.tint(0.3)),
                     dense: true,
                   );
                 }),

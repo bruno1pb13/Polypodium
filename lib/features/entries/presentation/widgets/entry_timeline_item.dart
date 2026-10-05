@@ -12,6 +12,7 @@ import '../../../../core/widgets/fullscreen_image_viewer.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/entry_details.dart';
 import '../../domain/entry_model.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 class EntryTimelineItem extends ConsumerWidget {
   final EntryModel entry;
@@ -55,14 +56,14 @@ class EntryTimelineItem extends ConsumerWidget {
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: transparencyEnabled
-                            ? Colors.black.withValues(alpha: 0.25)
+                            ? context.glass.scrim(0.25)
                             : Theme.of(context)
                                 .colorScheme
                                 .surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: transparencyEnabled
-                              ? Colors.white.withValues(alpha: 0.1)
+                              ? context.glass.tint(0.1)
                               : Colors.transparent,
                         ),
                       ),
@@ -83,7 +84,7 @@ class EntryTimelineItem extends ConsumerWidget {
                                   style: TextStyle(
                                     fontWeight: FontWeight.w700,
                                     color: transparencyEnabled
-                                        ? Colors.white
+                                        ? context.glass.fg
                                         : Theme.of(context)
                                             .colorScheme
                                             .onSurfaceVariant,
@@ -96,7 +97,7 @@ class EntryTimelineItem extends ConsumerWidget {
                                       .format(entry.date),
                                   style: TextStyle(
                                     color: transparencyEnabled
-                                        ? Colors.white70
+                                        ? context.glass.fgMuted
                                         : Theme.of(context)
                                             .colorScheme
                                             .onSurfaceVariant
@@ -117,7 +118,7 @@ class EntryTimelineItem extends ConsumerWidget {
                               entry.note!,
                               style: TextStyle(
                                 color: transparencyEnabled
-                                    ? Colors.white
+                                    ? context.glass.fg
                                     : Theme.of(context)
                                         .colorScheme
                                         .onSurfaceVariant,
@@ -169,7 +170,7 @@ class EntryTimelineItem extends ConsumerWidget {
                                 icon: Icon(
                                   Icons.delete_outline,
                                   color: transparencyEnabled
-                                      ? Colors.white60
+                                      ? context.glass.fgSubtle
                                       : Theme.of(context)
                                           .colorScheme
                                           .onSurfaceVariant
@@ -216,7 +217,7 @@ class _EntryDataBadge extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: transparent
-              ? Colors.white.withValues(alpha: 0.12)
+              ? context.glass.tint(0.12)
               : Theme.of(context)
                   .colorScheme
                   .secondaryContainer
@@ -230,7 +231,7 @@ class _EntryDataBadge extends StatelessWidget {
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: transparent
-                ? Colors.white.withValues(alpha: 0.85)
+                ? context.glass.fgAlpha(0.85)
                 : Theme.of(context).colorScheme.onSecondaryContainer,
           ),
         ),
@@ -387,7 +388,7 @@ class SliverTimelineIndicator extends ConsumerWidget {
           child: Container(
             width: 2,
             color: transparencyEnabled
-                ? Colors.white24
+                ? context.glass.outline
                 : colorScheme.outlineVariant,
           ),
         ),
@@ -399,12 +400,12 @@ class SliverTimelineIndicator extends ConsumerWidget {
               height: 12,
               decoration: BoxDecoration(
                 color: transparencyEnabled
-                    ? Colors.white.withValues(alpha: 0.4)
+                    ? context.glass.tint(0.4)
                     : colorScheme.surfaceContainer,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: transparencyEnabled
-                      ? Colors.white
+                      ? context.glass.fg
                       : colorScheme.outlineVariant,
                 ),
               ),

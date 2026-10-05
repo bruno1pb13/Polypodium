@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../domain/soil_model.dart';
 import '../providers/soils_providers.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 class AddEditSoilScreen extends ConsumerStatefulWidget {
   final SoilModel? soil;
@@ -107,13 +108,18 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: context.glass.fg),
         title: Text(
           _isEditing ? context.l10n.editSoil : context.l10n.newSoil,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: context.glass.fg,
             fontWeight: FontWeight.w600,
-            shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+            shadows: [
+              Shadow(
+                color: context.glass.shadow(Colors.black45),
+                blurRadius: 4,
+              ),
+            ],
           ),
         ),
       ),
@@ -133,9 +139,9 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.5),
+                    context.glass.scrim(0.5),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.3),
+                    context.glass.scrim(0.3),
                   ],
                 ),
               ),
@@ -163,10 +169,10 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
                                   width: 160,
                                   height: 160,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.1),
+                                    color: context.glass.tint(0.1),
                                     borderRadius: BorderRadius.circular(24),
                                     border: Border.all(
-                                        color: Colors.white.withValues(alpha: 0.2)),
+                                        color: context.glass.tint(0.2)),
                                     image: _imagePath != null
                                         ? DecorationImage(
                                             image: _imagePath!.startsWith('assets/')
@@ -178,8 +184,11 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
                                         : null,
                                   ),
                                   child: _imagePath == null
-                                      ? const Icon(Icons.add_a_photo_outlined,
-                                          size: 48, color: Colors.white70)
+                                      ? Icon(
+                                          Icons.add_a_photo_outlined,
+                                          size: 48,
+                                          color: context.glass.fgMuted,
+                                        )
                                       : null,
                                 ),
                               ),
@@ -188,17 +197,17 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
                           const SizedBox(height: 12),
                           Text(
                             context.l10n.tapToChangeImage,
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.white70),
+                            style: TextStyle(
+                                fontSize: 12, color: context.glass.fgMuted),
                           ),
                           if (_isAssetImage && _sourceCtrl.text.isNotEmpty) ...[
                             const SizedBox(height: 8),
                             Text(
                               context.l10n.imageSource(_sourceCtrl.text),
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontSize: 11,
-                                  color: Colors.white54,
+                                  color: context.glass.fgFaint,
                                   fontStyle: FontStyle.italic),
                             ),
                           ],
@@ -214,7 +223,7 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
                           const SizedBox(height: 12),
                           TextFormField(
                             controller: _nameCtrl,
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(color: context.glass.fg),
                             decoration: InputDecoration(
                               labelText: '${context.l10n.soilNameLabel} *',
                               hintText: context.l10n.soilNameHint,
@@ -227,7 +236,7 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _compositionCtrl,
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(color: context.glass.fg),
                             decoration: InputDecoration(
                               labelText: context.l10n.compositionLabel,
                               hintText: context.l10n.compositionHint,
@@ -240,7 +249,7 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _sourceCtrl,
-                              style: const TextStyle(color: Colors.white),
+                              style: TextStyle(color: context.glass.fg),
                               decoration: InputDecoration(
                                 labelText: context.l10n.imageSourceLabel,
                                 hintText: context.l10n.imageSourceHint,
@@ -262,12 +271,12 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
                           ),
                         ),
                         child: _saving
-                            ? const SizedBox(
+                            ? SizedBox(
                                 height: 24,
                                 width: 24,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white,
+                                  color: context.glass.fg,
                                 ),
                               )
                             : Text(
@@ -295,23 +304,23 @@ class _AddEditSoilScreenState extends ConsumerState<AddEditSoilScreen> {
 ThemeData _darkFormTheme(BuildContext context) {
   final base = Theme.of(context);
   final primary = base.colorScheme.primary;
-  OutlineInputBorder border([Color color = Colors.white24]) =>
+  OutlineInputBorder border([Color? color]) =>
       OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: color),
+        borderSide: BorderSide(color: color ?? context.glass.outline),
       );
 
   return base.copyWith(
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white.withValues(alpha: 0.05),
-      labelStyle: const TextStyle(color: Colors.white70),
+      fillColor: context.glass.tint(0.05),
+      labelStyle: TextStyle(color: context.glass.fgMuted),
       floatingLabelStyle: TextStyle(color: primary),
-      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
-      helperStyle: const TextStyle(color: Colors.white60),
-      prefixIconColor: Colors.white70,
-      suffixIconColor: Colors.white70,
-      iconColor: Colors.white70,
+      hintStyle: TextStyle(color: context.glass.fgAlpha(0.4)),
+      helperStyle: TextStyle(color: context.glass.fgSubtle),
+      prefixIconColor: context.glass.fgMuted,
+      suffixIconColor: context.glass.fgMuted,
+      iconColor: context.glass.fgMuted,
       border: border(),
       enabledBorder: border(),
       focusedBorder: border(primary),
@@ -336,8 +345,8 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: context.glass.fg,
         fontSize: 18,
         fontWeight: FontWeight.bold,
       ),
@@ -359,9 +368,9 @@ class _GlassCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: context.glass.scrim(0.3),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            border: Border.all(color: context.glass.tint(0.1)),
           ),
           child: child,
         ),

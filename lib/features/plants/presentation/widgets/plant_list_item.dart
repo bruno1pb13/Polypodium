@@ -9,6 +9,7 @@ import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/plant_model.dart';
 import 'plant_status.dart';
+import '../../../../core/theme/glass_colors.dart';
 
 class PlantListItem extends ConsumerWidget {
   final PlantWithSpecies plantWithSpecies;
@@ -59,14 +60,14 @@ class PlantListItem extends ConsumerWidget {
           child: Container(
             decoration: BoxDecoration(
               color: transparencyEnabled
-                  ? Colors.black.withValues(alpha: 0.35)
+                  ? context.glass.glassFill
                   : Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isSelected
                     ? colorScheme.primary
                     : transparencyEnabled
-                        ? Colors.white.withValues(alpha: 0.1)
+                        ? context.glass.tint(0.1)
                         : Colors.transparent,
                 width: isSelected ? 2 : 1,
               ),
@@ -131,15 +132,15 @@ class PlantListItem extends ConsumerWidget {
                                     fontWeight: FontWeight.w600,
                                     fontSize: 17,
                                     color: transparencyEnabled
-                                        ? Colors.white
+                                        ? context.glass.fg
                                         : Theme.of(context)
                                             .colorScheme
                                             .onSurfaceVariant,
                                     letterSpacing: 0.3,
                                     shadows: transparencyEnabled
                                         ? [
-                                            const Shadow(
-                                              color: Colors.black26,
+                                            Shadow(
+                                              color: context.glass.shadow(Colors.black26),
                                               offset: Offset(0, 1),
                                               blurRadius: 2,
                                             ),
@@ -157,7 +158,7 @@ class PlantListItem extends ConsumerWidget {
                                       Icons.cloud_upload_outlined,
                                       size: 16,
                                       color: transparencyEnabled
-                                          ? Colors.orangeAccent
+                                          ? context.glass.warning
                                           : Colors.orange,
                                     ),
                                   ),
@@ -166,7 +167,7 @@ class PlantListItem extends ConsumerWidget {
                                 Icons.more_vert,
                                 size: 20,
                                 color: transparencyEnabled
-                                    ? Colors.white70
+                                    ? context.glass.fgMuted
                                     : Theme.of(context)
                                         .colorScheme
                                         .onSurfaceVariant,
@@ -179,7 +180,7 @@ class PlantListItem extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 13,
                               color: transparencyEnabled
-                                  ? Colors.white70
+                                  ? context.glass.fgMuted
                                   : Theme.of(context)
                                       .colorScheme
                                       .onSurfaceVariant
