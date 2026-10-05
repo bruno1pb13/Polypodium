@@ -151,7 +151,7 @@ void main() {
         locationsNotifierProvider.overrideWith(_FakeLocationsNotifier.new),
         soilsNotifierProvider.overrideWith(_FakeSoilsNotifier.new),
         entriesNotifierProvider('p1').overrideWith(_FakeEntriesNotifier.new),
-        latestPlantPhotoProvider('p1')
+        plantCoverPhotoProvider('p1')
             .overrideWith((ref) => Stream.value(null)),
         plantAlertStatusProvider('p1').overrideWith((ref) => Stream.value((
               hasActiveChlorosis: false,

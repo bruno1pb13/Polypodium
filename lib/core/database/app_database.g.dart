@@ -1932,6 +1932,12 @@ class $PlantsTableTable extends PlantsTable
       requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES plants (id) ON DELETE SET NULL'));
+  static const VerificationMeta _coverPhotoIdMeta =
+      const VerificationMeta('coverPhotoId');
+  @override
+  late final GeneratedColumn<String> coverPhotoId = GeneratedColumn<String>(
+      'cover_photo_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -1979,6 +1985,7 @@ class $PlantsTableTable extends PlantsTable
         status,
         statusChangedAt,
         parentPlantId,
+        coverPhotoId,
         createdAt,
         updatedAt,
         deletedAt,
@@ -2070,6 +2077,12 @@ class $PlantsTableTable extends PlantsTable
           parentPlantId.isAcceptableOrUnknown(
               data['parent_plant_id']!, _parentPlantIdMeta));
     }
+    if (data.containsKey('cover_photo_id')) {
+      context.handle(
+          _coverPhotoIdMeta,
+          coverPhotoId.isAcceptableOrUnknown(
+              data['cover_photo_id']!, _coverPhotoIdMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -2133,6 +2146,8 @@ class $PlantsTableTable extends PlantsTable
           DriftSqlType.dateTime, data['${effectivePrefix}status_changed_at']),
       parentPlantId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}parent_plant_id']),
+      coverPhotoId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}cover_photo_id']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -2183,6 +2198,12 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
   /// The plant this one was propagated from (a cutting/division), if any.
   /// Plants are only soft-deleted, so a removed parent keeps its id here.
   final String? parentPlantId;
+
+  /// Photo picked as the plant's cover: the id of an entry (its main photo)
+  /// or of an entry_photos row. Ids, not paths, since each device stores a
+  /// synced photo under its own path. Null, or pointing at a photo that was
+  /// deleted, means the latest photo is used.
+  final String? coverPhotoId;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -2202,6 +2223,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       required this.status,
       this.statusChangedAt,
       this.parentPlantId,
+      this.coverPhotoId,
       required this.createdAt,
       required this.updatedAt,
       this.deletedAt,
@@ -2241,6 +2263,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
     }
     if (!nullToAbsent || parentPlantId != null) {
       map['parent_plant_id'] = Variable<String>(parentPlantId);
+    }
+    if (!nullToAbsent || coverPhotoId != null) {
+      map['cover_photo_id'] = Variable<String>(coverPhotoId);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -2284,6 +2309,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       parentPlantId: parentPlantId == null && nullToAbsent
           ? const Value.absent()
           : Value(parentPlantId),
+      coverPhotoId: coverPhotoId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(coverPhotoId),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -2316,6 +2344,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       status: serializer.fromJson<PlantStatus>(json['status']),
       statusChangedAt: serializer.fromJson<DateTime?>(json['statusChangedAt']),
       parentPlantId: serializer.fromJson<String?>(json['parentPlantId']),
+      coverPhotoId: serializer.fromJson<String?>(json['coverPhotoId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -2343,6 +2372,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       'status': serializer.toJson<PlantStatus>(status),
       'statusChangedAt': serializer.toJson<DateTime?>(statusChangedAt),
       'parentPlantId': serializer.toJson<String?>(parentPlantId),
+      'coverPhotoId': serializer.toJson<String?>(coverPhotoId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -2365,6 +2395,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           PlantStatus? status,
           Value<DateTime?> statusChangedAt = const Value.absent(),
           Value<String?> parentPlantId = const Value.absent(),
+          Value<String?> coverPhotoId = const Value.absent(),
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
@@ -2395,6 +2426,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
             : this.statusChangedAt,
         parentPlantId:
             parentPlantId.present ? parentPlantId.value : this.parentPlantId,
+        coverPhotoId:
+            coverPhotoId.present ? coverPhotoId.value : this.coverPhotoId,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -2431,6 +2464,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       parentPlantId: data.parentPlantId.present
           ? data.parentPlantId.value
           : this.parentPlantId,
+      coverPhotoId: data.coverPhotoId.present
+          ? data.coverPhotoId.value
+          : this.coverPhotoId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -2455,6 +2491,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ..write('status: $status, ')
           ..write('statusChangedAt: $statusChangedAt, ')
           ..write('parentPlantId: $parentPlantId, ')
+          ..write('coverPhotoId: $coverPhotoId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -2479,6 +2516,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       status,
       statusChangedAt,
       parentPlantId,
+      coverPhotoId,
       createdAt,
       updatedAt,
       deletedAt,
@@ -2501,6 +2539,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           other.status == this.status &&
           other.statusChangedAt == this.statusChangedAt &&
           other.parentPlantId == this.parentPlantId &&
+          other.coverPhotoId == this.coverPhotoId &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -2522,6 +2561,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
   final Value<PlantStatus> status;
   final Value<DateTime?> statusChangedAt;
   final Value<String?> parentPlantId;
+  final Value<String?> coverPhotoId;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -2542,6 +2582,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.status = const Value.absent(),
     this.statusChangedAt = const Value.absent(),
     this.parentPlantId = const Value.absent(),
+    this.coverPhotoId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -2563,6 +2604,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.status = const Value.absent(),
     this.statusChangedAt = const Value.absent(),
     this.parentPlantId = const Value.absent(),
+    this.coverPhotoId = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -2590,6 +2632,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     Expression<String>? status,
     Expression<DateTime>? statusChangedAt,
     Expression<String>? parentPlantId,
+    Expression<String>? coverPhotoId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -2614,6 +2657,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       if (status != null) 'status': status,
       if (statusChangedAt != null) 'status_changed_at': statusChangedAt,
       if (parentPlantId != null) 'parent_plant_id': parentPlantId,
+      if (coverPhotoId != null) 'cover_photo_id': coverPhotoId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -2637,6 +2681,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       Value<PlantStatus>? status,
       Value<DateTime?>? statusChangedAt,
       Value<String?>? parentPlantId,
+      Value<String?>? coverPhotoId,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
@@ -2660,6 +2705,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       status: status ?? this.status,
       statusChangedAt: statusChangedAt ?? this.statusChangedAt,
       parentPlantId: parentPlantId ?? this.parentPlantId,
+      coverPhotoId: coverPhotoId ?? this.coverPhotoId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -2715,6 +2761,9 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     if (parentPlantId.present) {
       map['parent_plant_id'] = Variable<String>(parentPlantId.value);
     }
+    if (coverPhotoId.present) {
+      map['cover_photo_id'] = Variable<String>(coverPhotoId.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -2752,6 +2801,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
           ..write('status: $status, ')
           ..write('statusChangedAt: $statusChangedAt, ')
           ..write('parentPlantId: $parentPlantId, ')
+          ..write('coverPhotoId: $coverPhotoId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -6377,6 +6427,7 @@ typedef $$PlantsTableTableCreateCompanionBuilder = PlantsTableCompanion
   Value<PlantStatus> status,
   Value<DateTime?> statusChangedAt,
   Value<String?> parentPlantId,
+  Value<String?> coverPhotoId,
   required DateTime createdAt,
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
@@ -6399,6 +6450,7 @@ typedef $$PlantsTableTableUpdateCompanionBuilder = PlantsTableCompanion
   Value<PlantStatus> status,
   Value<DateTime?> statusChangedAt,
   Value<String?> parentPlantId,
+  Value<String?> coverPhotoId,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
@@ -6539,6 +6591,9 @@ class $$PlantsTableTableFilterComposer
   ColumnFilters<DateTime> get statusChangedAt => $composableBuilder(
       column: $table.statusChangedAt,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get coverPhotoId => $composableBuilder(
+      column: $table.coverPhotoId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -6720,6 +6775,10 @@ class $$PlantsTableTableOrderingComposer
       column: $table.statusChangedAt,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get coverPhotoId => $composableBuilder(
+      column: $table.coverPhotoId,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -6851,6 +6910,9 @@ class $$PlantsTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get statusChangedAt => $composableBuilder(
       column: $table.statusChangedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get coverPhotoId => $composableBuilder(
+      column: $table.coverPhotoId, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -7032,6 +7094,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<PlantStatus> status = const Value.absent(),
             Value<DateTime?> statusChangedAt = const Value.absent(),
             Value<String?> parentPlantId = const Value.absent(),
+            Value<String?> coverPhotoId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -7053,6 +7116,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             status: status,
             statusChangedAt: statusChangedAt,
             parentPlantId: parentPlantId,
+            coverPhotoId: coverPhotoId,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -7074,6 +7138,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<PlantStatus> status = const Value.absent(),
             Value<DateTime?> statusChangedAt = const Value.absent(),
             Value<String?> parentPlantId = const Value.absent(),
+            Value<String?> coverPhotoId = const Value.absent(),
             required DateTime createdAt,
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -7095,6 +7160,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             status: status,
             statusChangedAt: statusChangedAt,
             parentPlantId: parentPlantId,
+            coverPhotoId: coverPhotoId,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,

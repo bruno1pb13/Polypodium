@@ -141,6 +141,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'status': r.status.name,
           'statusChangedAt': r.statusChangedAt?.toIso8601String(),
           'parentPlantId': r.parentPlantId,
+          'coverPhotoId': r.coverPhotoId,
           'createdAt': r.createdAt.toIso8601String(),
         };
       case 'entry':
@@ -320,6 +321,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           : null),
       // Older clients don't send it: no known parent.
       parentPlantId: Value(p['parentPlantId'] as String?),
+      // Older clients don't send it: back to the latest photo.
+      coverPhotoId: Value(p['coverPhotoId'] as String?),
       createdAt: DateTime.parse(p['createdAt'] as String),
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),

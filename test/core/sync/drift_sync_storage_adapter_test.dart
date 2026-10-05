@@ -226,6 +226,34 @@ void main() {
       expect((await db.plantsDao.getById('plant1'))!.parentPlantId, isNull);
     });
 
+    test('the cover photo round-trips; older clients send none', () async {
+      await db.plantsDao.upsert(PlantsTableCompanion.insert(
+        id: 'plant1',
+        speciesId: 'species1',
+        nickname: 'Planta',
+        soilType: 'sandy',
+        acquisitionDate: DateTime(2026, 1, 1),
+        coverPhotoId: const Value('entry9'),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+        localRev: const Value(1),
+      ));
+      final change = (await adapter.localChangesSince(0,
+              limit: 100, deviceId: 'device-1'))
+          .single;
+      expect(change.payload['coverPhotoId'], 'entry9');
+
+      final other = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(other.close);
+      await DriftSyncStorageAdapter(other)
+          .applyRemoteChange(SyncChange.fromJson(change.toJson()));
+      expect(
+          (await other.plantsDao.getById('plant1'))!.coverPhotoId, 'entry9');
+
+      await adapter.applyRemoteChange(plantChange(plantPayload()));
+      expect((await db.plantsDao.getById('plant1'))!.coverPhotoId, isNull);
+    });
+
     test('falls back to active for an unknown value', () async {
       await adapter.applyRemoteChange(
           plantChange({...plantPayload(), 'status': 'composted'}));

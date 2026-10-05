@@ -95,6 +95,15 @@ class PlantsRepository {
     if (reschedule) await rescheduleNotifications();
   }
 
+  /// Picks [photoId] (an entry or entry photo id; null to go back to the
+  /// latest photo) as the cover of [plantId].
+  Future<void> setCoverPhoto(String plantId, String? photoId) =>
+      _db.transaction(() async {
+        final rev = await _db.syncMetaDao.nextRev();
+        await _dao.updateCoverPhoto(plantId, photoId,
+            updatedAt: DateTime.now(), rev: rev);
+      });
+
   Future<void> delete(String id) async {
     final now = DateTime.now();
     await _db.transaction(() async {
@@ -162,6 +171,7 @@ class PlantsRepository {
         status: row.status,
         statusChangedAt: row.statusChangedAt,
         parentPlantId: row.parentPlantId,
+        coverPhotoId: row.coverPhotoId,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         deletedAt: row.deletedAt,
@@ -184,6 +194,7 @@ class PlantsRepository {
         status: Value(m.status),
         statusChangedAt: Value(m.statusChangedAt),
         parentPlantId: Value(m.parentPlantId),
+        coverPhotoId: Value(m.coverPhotoId),
         createdAt: m.createdAt,
         updatedAt: updatedAt,
         localRev: Value(rev),

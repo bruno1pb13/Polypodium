@@ -141,6 +141,7 @@ void main() {
       status: const Value(PlantStatus.donated),
       statusChangedAt: Value(t1),
       parentPlantId: const Value('mother'),
+      coverPhotoId: const Value('entry1'),
       createdAt: t0,
       updatedAt: t1,
       localRev: const Value(2),
@@ -154,6 +155,7 @@ void main() {
     expect(plant!.status, PlantStatus.donated);
     expect(plant.statusChangedAt, t1);
     expect(plant.parentPlantId, 'mother');
+    expect(plant.coverPhotoId, 'entry1');
   });
 
   test('the species care sheet survives the round trip', () async {

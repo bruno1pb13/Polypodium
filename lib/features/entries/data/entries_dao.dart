@@ -129,17 +129,22 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
     return row?.photoPath;
   }
 
-  Stream<String?> watchLatestPhotoPath(String plantId) {
-    return (select(entriesTable)
-          ..where((t) =>
-              t.plantId.equals(plantId) &
-              t.photoPath.isNotNull() &
-              t.deletedAt.isNull())
-          ..orderBy([(t) => OrderingTerm.desc(t.date)])
-          ..limit(1))
-        .watchSingleOrNull()
-        .map((row) => row?.photoPath);
-  }
+  /// Path of the plant's cover photo: the one picked in
+  /// `plants.cover_photo_id` while it still exists among the plant's live
+  /// entries, else the latest photo.
+  Stream<String?> watchCoverPhotoPath(String plantId) => customSelect(
+        'SELECT COALESCE('
+        '(SELECT e.photo_path FROM entries e '
+        'WHERE e.id = (SELECT cover_photo_id FROM plants WHERE id = ?1) '
+        'AND e.plant_id = ?1 AND e.photo_path IS NOT NULL '
+        'AND e.deleted_at IS NULL), '
+        '(SELECT photo_path FROM entries '
+        'WHERE plant_id = ?1 AND photo_path IS NOT NULL '
+        'AND deleted_at IS NULL ORDER BY date DESC LIMIT 1)'
+        ') AS path',
+        variables: [Variable.withString(plantId)],
+        readsFrom: {entriesTable, attachedDatabase.plantsTable},
+      ).watchSingle().map((row) => row.read<String?>('path'));
 
   /// Returns active entries beyond [keepCount] (oldest first) using a SQL
   /// OFFSET, evitando carregar todas as entradas da planta em memória.

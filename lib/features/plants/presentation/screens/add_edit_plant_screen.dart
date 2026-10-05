@@ -623,6 +623,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
         status: widget.plant?.status ?? PlantStatus.active,
         statusChangedAt: widget.plant?.statusChangedAt,
         parentPlantId: _parentPlantId,
+        coverPhotoId: widget.plant?.coverPhotoId,
         createdAt: widget.plant?.createdAt ?? DateTime.now(),
       );
 

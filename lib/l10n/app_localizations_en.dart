@@ -2246,4 +2246,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String harvestTotalsSummary(String amounts) {
     return 'Harvested in total: $amounts';
   }
+
+  @override
+  String get setAsCover => 'Set as cover';
+
+  @override
+  String get useLatestAsCover => 'Use the latest photo as cover';
+
+  @override
+  String get coverBadge => 'Cover';
+
+  @override
+  String coverPhotoLabel(String date) {
+    return 'Cover photo from $date';
+  }
+
+  @override
+  String get photoOptionsHint => 'show photo options';
+
+  @override
+  String get coverPhotoUpdated => 'Cover updated';
 }

@@ -237,8 +237,12 @@ class PlantDetailScreen extends ConsumerWidget {
                           child: Center(
                               child: Text(context.l10n.errorGeneric('$e'))),
                         ),
-                        data: (entries) =>
-                            PlantPhotosSliver(entries: entries),
+                        data: (entries) => PlantPhotosSliver(
+                          entries: entries,
+                          coverPhotoId: plant.coverPhotoId,
+                          onSetCover: (photoId) =>
+                              _setCover(context, ref, photoId),
+                        ),
                       ),
                     const SliverToBoxAdapter(child: SizedBox(height: 120)),
                   ],
@@ -276,6 +280,17 @@ class PlantDetailScreen extends ConsumerWidget {
         );
       },
     );
+  }
+
+  Future<void> _setCover(
+      BuildContext context, WidgetRef ref, String? photoId) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final message = context.l10n.coverPhotoUpdated;
+    await ref.read(plantMutationsProvider).setCoverPhoto(plantId, photoId);
+    messenger.showSnackBar(SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 2),
+    ));
   }
 
   Future<void> _irrigate(BuildContext context, WidgetRef ref) async {

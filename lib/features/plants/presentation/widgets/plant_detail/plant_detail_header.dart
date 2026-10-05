@@ -9,7 +9,7 @@ import '../../../../entries/presentation/providers/entries_providers.dart';
 import '../../../domain/plant_model.dart';
 import '../../../../../core/theme/glass_colors.dart';
 
-/// Latest photo, nickname and species of the plant.
+/// Cover photo, nickname and species of the plant.
 class PlantDetailHeader extends ConsumerWidget {
   final PlantModel plant;
   final PlantWithSpecies? pws;
@@ -18,7 +18,7 @@ class PlantDetailHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final photoAsync = ref.watch(latestPlantPhotoProvider(plant.id));
+    final photoAsync = ref.watch(plantCoverPhotoProvider(plant.id));
 
     return Padding(
       padding: const EdgeInsets.all(16),

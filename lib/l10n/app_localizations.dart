@@ -3889,6 +3889,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Harvested in total: {amounts}'**
   String harvestTotalsSummary(String amounts);
+
+  /// No description provided for @setAsCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as cover'**
+  String get setAsCover;
+
+  /// No description provided for @useLatestAsCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the latest photo as cover'**
+  String get useLatestAsCover;
+
+  /// No description provided for @coverBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get coverBadge;
+
+  /// No description provided for @coverPhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover photo from {date}'**
+  String coverPhotoLabel(String date);
+
+  /// No description provided for @photoOptionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'show photo options'**
+  String get photoOptionsHint;
+
+  /// No description provided for @coverPhotoUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover updated'**
+  String get coverPhotoUpdated;
 }
 
 class _AppLocalizationsDelegate

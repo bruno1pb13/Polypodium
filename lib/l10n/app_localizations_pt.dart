@@ -2250,4 +2250,24 @@ class AppLocalizationsPt extends AppLocalizations {
   String harvestTotalsSummary(String amounts) {
     return 'Total colhido: $amounts';
   }
+
+  @override
+  String get setAsCover => 'Definir como capa';
+
+  @override
+  String get useLatestAsCover => 'Usar a foto mais recente como capa';
+
+  @override
+  String get coverBadge => 'Capa';
+
+  @override
+  String coverPhotoLabel(String date) {
+    return 'Foto de capa de $date';
+  }
+
+  @override
+  String get photoOptionsHint => 'mostrar opções da foto';
+
+  @override
+  String get coverPhotoUpdated => 'Capa atualizada';
 }

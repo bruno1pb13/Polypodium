@@ -100,6 +100,12 @@ class PlantMutations {
     _triggerSync();
   }
 
+  /// Picks [photoId] as the plant's cover (null: back to the latest photo).
+  Future<void> setCoverPhoto(String plantId, String? photoId) async {
+    await _ref.read(plantsRepositoryProvider).setCoverPhoto(plantId, photoId);
+    _triggerSync();
+  }
+
   Future<String?> _generateHistoryNote(PlantModel? old, PlantModel next) async {
     // History notes are persisted (and synced) as entry text, so they are
     // written once in the device language at the time of the change. The

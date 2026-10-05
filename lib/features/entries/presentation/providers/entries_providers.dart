@@ -69,10 +69,11 @@ final plantAlertStatusProvider =
   },
 );
 
-final latestPlantPhotoProvider =
+/// The plant's cover: the photo picked for it, or its latest photo.
+final plantCoverPhotoProvider =
     StreamProvider.autoDispose.family<String?, String>((ref, plantId) {
   final db = ref.watch(appDatabaseProvider);
-  return db.entriesDao.watchLatestPhotoPath(plantId);
+  return db.entriesDao.watchCoverPhotoPath(plantId);
 });
 
 @Riverpod(keepAlive: true)

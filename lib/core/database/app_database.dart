@@ -67,7 +67,7 @@ class AppDatabase extends _$AppDatabase {
   final String? deviceId;
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -192,7 +192,10 @@ class AppDatabase extends _$AppDatabase {
             // The rebuilt table has the current shape; columns added by
             // later steps don't exist yet in the old one.
             await m.alterTable(TableMigration(plantsTable,
-                newColumns: [plantsTable.parentPlantId]));
+                newColumns: [
+              plantsTable.parentPlantId,
+              plantsTable.coverPhotoId,
+            ]));
           }
           if (from < 16) {
             // Species care sheet. Same missing-table guard as the v15 step.
@@ -221,6 +224,14 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 18) {
             await m.createTable(syncEntryTypesTable);
+          }
+          if (from < 19) {
+            // Cover photo. The v14 rebuild above already creates it.
+            final columns = await _columnNames(plantsTable);
+            if (columns.isNotEmpty &&
+                !columns.contains(plantsTable.coverPhotoId.name)) {
+              await m.addColumn(plantsTable, plantsTable.coverPhotoId);
+            }
           }
         },
       );

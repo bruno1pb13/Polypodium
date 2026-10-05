@@ -167,6 +167,7 @@ void main() {
         status: const Value(PlantStatus.archived),
         statusChangedAt: Value(DateTime(2026, 1, 3)),
         parentPlantId: const Value('mother'),
+        coverPhotoId: const Value('entry1'),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       ));
@@ -199,6 +200,7 @@ void main() {
       expect(plant!.status, PlantStatus.archived);
       expect(plant.statusChangedAt, DateTime(2026, 1, 3));
       expect(plant.parentPlantId, 'mother');
+      expect(plant.coverPhotoId, 'entry1');
       expect(entry, isNotNull);
     });
 

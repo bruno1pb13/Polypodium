@@ -663,5 +663,11 @@
   "harvestCarenciaQuestion": "Registrar a colheita mesmo assim? Ela ficará marcada como feita durante a carência.",
   "harvestCarenciaConfirm": "Registrar mesmo assim",
   "harvestTotalsTitle": "Colheitas",
-  "harvestTotalsSummary": "Total colhido: {amounts}"
+  "harvestTotalsSummary": "Total colhido: {amounts}",
+  "setAsCover": "Definir como capa",
+  "useLatestAsCover": "Usar a foto mais recente como capa",
+  "coverBadge": "Capa",
+  "coverPhotoLabel": "Foto de capa de {date}",
+  "photoOptionsHint": "mostrar opções da foto",
+  "coverPhotoUpdated": "Capa atualizada"
 }

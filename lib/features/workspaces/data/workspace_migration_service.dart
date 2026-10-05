@@ -184,6 +184,7 @@ class WorkspaceMigrationService {
           status: Value(row.status),
           statusChangedAt: Value(row.statusChangedAt),
           parentPlantId: Value(row.parentPlantId),
+          coverPhotoId: Value(row.coverPhotoId),
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),

@@ -34,7 +34,7 @@ class PlantListItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pws = plantWithSpecies;
     final overdue = pws.needsWatering;
-    final photoAsync = ref.watch(latestPlantPhotoProvider(pws.plant.id));
+    final photoAsync = ref.watch(plantCoverPhotoProvider(pws.plant.id));
     final alertStatus =
         ref.watch(plantAlertStatusProvider(pws.plant.id)).value ??
             noPlantAlerts;

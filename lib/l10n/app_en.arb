@@ -1103,5 +1103,16 @@
     "placeholders": {
       "amounts": {"type": "String"}
     }
-  }
+  },
+  "setAsCover": "Set as cover",
+  "useLatestAsCover": "Use the latest photo as cover",
+  "coverBadge": "Cover",
+  "coverPhotoLabel": "Cover photo from {date}",
+  "@coverPhotoLabel": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "photoOptionsHint": "show photo options",
+  "coverPhotoUpdated": "Cover updated"
 }

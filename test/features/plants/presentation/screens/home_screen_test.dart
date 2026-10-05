@@ -133,7 +133,7 @@ void main() {
         plantsNotifierProvider
             .overrideWith(() => _FakePlantsNotifier(plantCalls)),
         entryMutationsProvider.overrideWithValue(mutations),
-        latestPlantPhotoProvider.overrideWith((ref, id) => Stream.value(null)),
+        plantCoverPhotoProvider.overrideWith((ref, id) => Stream.value(null)),
         plantAlertStatusProvider
             .overrideWith((ref, id) => Stream.value(noPlantAlerts)),
         plantCarenciaProvider.overrideWith((ref, id) => id == anturio.plant.id

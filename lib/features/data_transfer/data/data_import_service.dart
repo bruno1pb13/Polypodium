@@ -380,6 +380,8 @@ class DataImportService {
           : null),
       // Backups from before schema v17 have no lineage.
       parentPlantId: Value(row['parentPlantId'] as String?),
+      // Backups from before schema v19 have no cover photo.
+      coverPhotoId: Value(row['coverPhotoId'] as String?),
       createdAt: DateTime.parse(row['createdAt'] as String),
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),

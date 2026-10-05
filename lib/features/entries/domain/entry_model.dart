@@ -35,6 +35,11 @@ class EntryModel {
 
   EntryDetails? get details => EntryDetails.decode(type, extraData);
 
+  /// The entry's photos in order. The first one is [photoPath] and shares
+  /// the entry's id.
+  List<EntryPhoto> get photos =>
+      [if (photoPath != null) EntryPhoto(id: id, path: photoPath!)];
+
   EntryModel copyWith({
     String? id,
     String? plantId,
@@ -70,3 +75,19 @@ class EntryModel {
 }
 
 const Object _sentinel = Object();
+
+/// One photo of an entry, identified by an id that stays the same on every
+/// device (its local [path] doesn't).
+class EntryPhoto {
+  final String id;
+  final String path;
+
+  const EntryPhoto({required this.id, required this.path});
+
+  @override
+  bool operator ==(Object other) =>
+      other is EntryPhoto && other.id == id && other.path == path;
+
+  @override
+  int get hashCode => Object.hash(id, path);
+}
