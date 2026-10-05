@@ -278,6 +278,7 @@
   "entryTypePesticide": "Defensivos",
   "entryTypeOther": "Outro",
   "entryTypeHistory": "Histórico",
+  "entryTypeRepotting": "Replantio",
 
   "newEntryTitle": "Novo Registro",
   "newBulkEntryTitle": "{count, plural, one{Novo registro ({count} planta)} other{Novo registro ({count} plantas)}}",
@@ -291,6 +292,7 @@
   "noteHintChlorosis": "Quais folhas estão afetadas?",
   "noteHintPest": "Onde foi identificado? Algum tratamento?",
   "noteHintPesticide": "Onde foi aplicado? Alguma reação da planta?",
+  "noteHintRepotting": "Como estavam as raízes? Houve divisão da planta?",
   "noteHintDefault": "Notas opcionais...",
   "photoTitle": "Foto",
   "saveEntry": "Salvar registro",
@@ -615,5 +617,17 @@
   "hidePassword": "Ocultar senha",
   "chartGrowthSemantics": "Gráfico de crescimento: {count} registros de altura, de {first} cm a {last} cm",
   "chartHealthSemantics": "Gráfico de saúde: {count} notas, a mais recente {score}/5",
-  "chartWateringSemantics": "Gráfico de regas: {count} intervalos entre regas. {summary}"
+  "chartWateringSemantics": "Gráfico de regas: {count} intervalos entre regas. {summary}",
+  "repottingHint": "O novo vaso e, se mudou, o solo.",
+  "potDiameterLabel": "Diâmetro do vaso",
+  "potMaterialLabel": "Material do vaso",
+  "potMaterialPlastic": "Plástico",
+  "potMaterialClay": "Barro",
+  "potMaterialCeramic": "Cerâmica",
+  "potMaterialFabric": "Tecido",
+  "potMaterialOther": "Outro",
+  "newSoilLabel": "Novo solo",
+  "newSoilHint": "Também altera o solo da planta.",
+  "keepCurrentSoil": "Manter o solo atual",
+  "potDiameterSummary": "Vaso de {diameter} cm"
 }

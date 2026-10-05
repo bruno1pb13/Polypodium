@@ -57,6 +57,7 @@ void main() {
           lastDoneAt: midnight.subtract(const Duration(days: 33))),
       status(EntryType.pruning, 10, lastDoneAt: midnight),
       status(EntryType.observation, 7, enabled: false),
+      status(EntryType.repotting, 365, lastDoneAt: midnight),
     ]);
 
     expect(find.text('Lembretes'), findsOneWidget);
@@ -66,6 +67,7 @@ void main() {
     final mm = next.month.toString().padLeft(2, '0');
     expect(find.text('Próxima: $dd/$mm'), findsOneWidget);
     expect(find.text('Pausado'), findsOneWidget);
+    expect(find.text('Replantio'), findsOneWidget);
     // Every supported type already has a reminder: nothing left to add.
     expect(find.byTooltip('Adicionar lembrete'), findsNothing);
   });

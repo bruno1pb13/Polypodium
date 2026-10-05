@@ -48,7 +48,8 @@ class PlantInsightsView extends ConsumerWidget {
         .where((e) =>
             e.type == EntryType.fertilizer ||
             e.type == EntryType.pruning ||
-            e.type == EntryType.pesticide)
+            e.type == EntryType.pesticide ||
+            e.type == EntryType.repotting)
         .toList();
     // Pest/chlorosis onsets also matter for the health trend (null severity
     // counts as active, matching plantAlertStatusProvider).
@@ -57,6 +58,7 @@ class PlantInsightsView extends ConsumerWidget {
             e.type == EntryType.fertilizer ||
             e.type == EntryType.pruning ||
             e.type == EntryType.pesticide ||
+            e.type == EntryType.repotting ||
             ((e.type == EntryType.pest || e.type == EntryType.chlorosis) &&
                 (e.numericValue ?? 1) > 0))
         .toList();

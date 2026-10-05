@@ -151,11 +151,13 @@ void main() {
 
   test('retention keeps the latest entry a reminder derives from', () async {
     await addEntry('fert', EntryType.fertilizer, DateTime(2026, 1, 2));
+    await addEntry('repot', EntryType.repotting, DateTime(2026, 1, 3));
     for (var i = 0; i < 31; i++) {
       await addEntry('obs$i', EntryType.height, DateTime(2026, 2, 1 + i));
     }
 
     expect((await db.entriesDao.getById('fert'))?.deletedAt, isNull);
+    expect((await db.entriesDao.getById('repot'))?.deletedAt, isNull);
     // The oldest non-protected entry was purged instead.
     expect((await db.entriesDao.getById('obs0'))?.deletedAt, isNotNull);
   });

@@ -12,6 +12,7 @@ import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../entries/domain/entry_details.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
+import '../../../soils/domain/soil_model.dart';
 import '../widgets/entry_forms/chlorosis_form.dart';
 import '../widgets/entry_forms/entry_form_widgets.dart';
 import '../widgets/entry_forms/entry_note_section.dart';
@@ -24,6 +25,7 @@ import '../widgets/entry_forms/observation_form.dart';
 import '../widgets/entry_forms/pest_form.dart';
 import '../widgets/entry_forms/pesticide_form.dart';
 import '../widgets/entry_forms/pruning_form.dart';
+import '../widgets/entry_forms/repotting_form.dart';
 import '../../../../core/theme/glass_colors.dart';
 
 class AddEntryScreen extends ConsumerStatefulWidget {
@@ -78,6 +80,11 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   ];
   final _pesticideRecurrenceCtrl = TextEditingController();
 
+  // Repotting
+  final _potDiameterCtrl = TextEditingController();
+  PotMaterial? _potMaterial;
+  SoilModel? _newSoil;
+
   bool _saving = false;
   bool _submitted = false;
   bool _showFieldErrors = false;
@@ -101,6 +108,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
       p.dispose();
     }
     _pesticideRecurrenceCtrl.dispose();
+    _potDiameterCtrl.dispose();
     if (!_submitted && _photoPath != null) {
       _photoStorage.deletePhoto(_photoPath!);
     }
@@ -171,6 +179,15 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           recurrenceDays: double.tryParse(
                   _pesticideRecurrenceCtrl.text.replaceAll(',', '.'))
               ?.round(),
+        );
+      case EntryType.repotting:
+        final diameter =
+            double.tryParse(_potDiameterCtrl.text.replaceAll(',', '.'));
+        return RepottingDetails(
+          potDiameterCm: diameter != null && diameter > 0 ? diameter : null,
+          potMaterial: _potMaterial,
+          newSoilId: _newSoil?.id,
+          newSoilName: _newSoil?.name,
         );
       default:
         return null;
@@ -356,6 +373,13 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
             _pesticideProducts.removeAt(i);
           }),
           onDefensivoSelected: (p, d) => setState(() => p.selected = d),
+        ),
+      EntryType.repotting => RepottingForm(
+          diameterController: _potDiameterCtrl,
+          material: _potMaterial,
+          onMaterialChanged: (m) => setState(() => _potMaterial = m),
+          newSoil: _newSoil,
+          onSoilChanged: (soil) => setState(() => _newSoil = soil),
         ),
       _ => const SizedBox.shrink(),
     };

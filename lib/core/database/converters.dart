@@ -54,7 +54,10 @@ class EntryTypeConverter extends TypeConverter<EntryType, String> {
   const EntryTypeConverter();
 
   @override
-  EntryType fromSql(String fromDb) => EntryType.values.byName(fromDb);
+  // Unknown names never reach the table (sync and backup import skip them),
+  // but a bad row must not break every query of its plant.
+  EntryType fromSql(String fromDb) =>
+      EntryType.fromName(fromDb) ?? EntryType.other;
 
   @override
   String toSql(EntryType value) => value.name;

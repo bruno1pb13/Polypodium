@@ -458,6 +458,7 @@
   "entryTypePesticide": "Pesticides",
   "entryTypeOther": "Other",
   "entryTypeHistory": "History",
+  "entryTypeRepotting": "Repotting",
 
   "newEntryTitle": "New Entry",
   "newBulkEntryTitle": "{count, plural, one{New entry ({count} plant)} other{New entry ({count} plants)}}",
@@ -476,6 +477,7 @@
   "noteHintChlorosis": "Which leaves are affected?",
   "noteHintPest": "Where was it found? Any treatment?",
   "noteHintPesticide": "Where was it applied? Any reaction from the plant?",
+  "noteHintRepotting": "How were the roots? Was the plant divided?",
   "noteHintDefault": "Optional notes...",
   "photoTitle": "Photo",
   "saveEntry": "Save entry",
@@ -976,6 +978,23 @@
     "placeholders": {
       "count": {"type": "int"},
       "summary": {"type": "String"}
+    }
+  },
+  "repottingHint": "The new pot and, if it changed, the soil.",
+  "potDiameterLabel": "Pot diameter",
+  "potMaterialLabel": "Pot material",
+  "potMaterialPlastic": "Plastic",
+  "potMaterialClay": "Clay",
+  "potMaterialCeramic": "Ceramic",
+  "potMaterialFabric": "Fabric",
+  "potMaterialOther": "Other",
+  "newSoilLabel": "New soil",
+  "newSoilHint": "Also changes the plant's soil.",
+  "keepCurrentSoil": "Keep the current soil",
+  "potDiameterSummary": "{diameter} cm pot",
+  "@potDiameterSummary": {
+    "placeholders": {
+      "diameter": {"type": "String"}
     }
   }
 }

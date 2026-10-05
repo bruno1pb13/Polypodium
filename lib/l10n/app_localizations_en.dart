@@ -937,6 +937,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get entryTypeHistory => 'History';
 
   @override
+  String get entryTypeRepotting => 'Repotting';
+
+  @override
   String get newEntryTitle => 'New Entry';
 
   @override
@@ -980,6 +983,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noteHintPesticide =>
       'Where was it applied? Any reaction from the plant?';
+
+  @override
+  String get noteHintRepotting => 'How were the roots? Was the plant divided?';
 
   @override
   String get noteHintDefault => 'Optional notes...';
@@ -2048,5 +2054,43 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String chartWateringSemantics(int count, String summary) {
     return 'Watering chart: $count intervals between waterings. $summary';
+  }
+
+  @override
+  String get repottingHint => 'The new pot and, if it changed, the soil.';
+
+  @override
+  String get potDiameterLabel => 'Pot diameter';
+
+  @override
+  String get potMaterialLabel => 'Pot material';
+
+  @override
+  String get potMaterialPlastic => 'Plastic';
+
+  @override
+  String get potMaterialClay => 'Clay';
+
+  @override
+  String get potMaterialCeramic => 'Ceramic';
+
+  @override
+  String get potMaterialFabric => 'Fabric';
+
+  @override
+  String get potMaterialOther => 'Other';
+
+  @override
+  String get newSoilLabel => 'New soil';
+
+  @override
+  String get newSoilHint => 'Also changes the plant\'s soil.';
+
+  @override
+  String get keepCurrentSoil => 'Keep the current soil';
+
+  @override
+  String potDiameterSummary(String diameter) {
+    return '$diameter cm pot';
   }
 }

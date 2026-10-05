@@ -43,6 +43,7 @@ class EntryNoteSection extends StatelessWidget {
               EntryType.chlorosis => context.l10n.noteHintChlorosis,
               EntryType.pest => context.l10n.noteHintPest,
               EntryType.pesticide => context.l10n.noteHintPesticide,
+              EntryType.repotting => context.l10n.noteHintRepotting,
               _ => context.l10n.noteHintDefault,
             },
             hintStyle: TextStyle(

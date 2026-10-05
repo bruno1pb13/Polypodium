@@ -31,6 +31,7 @@ sealed class EntryDetails {
       EntryType.fertilizer => FertilizerDetails._fromJson(decoded),
       EntryType.pruning => PruningDetails._fromJson(decoded),
       EntryType.pesticide => PesticideDetails._fromJson(decoded),
+      EntryType.repotting => RepottingDetails._fromJson(decoded),
       _ => null,
     };
   }
@@ -216,6 +217,60 @@ class PesticideProduct {
 
   @override
   int get hashCode => Object.hash(defensivoId, name, dose);
+}
+
+/// `{"potDiameterCm": double, "potMaterial": String, "newSoilId": String,
+/// "newSoilName": String}` — all keys optional. `potMaterial` is a
+/// [PotMaterial] name. The soil name is copied at save time so the entry
+/// survives catalog deletions, like [PesticideProduct.name].
+final class RepottingDetails extends EntryDetails {
+  final double? potDiameterCm;
+  final PotMaterial? potMaterial;
+
+  /// The soils row the plant was moved to, when the soil changed.
+  final String? newSoilId;
+  final String? newSoilName;
+
+  const RepottingDetails({
+    this.potDiameterCm,
+    this.potMaterial,
+    this.newSoilId,
+    this.newSoilName,
+  });
+
+  factory RepottingDetails._fromJson(Map<String, dynamic> json) =>
+      RepottingDetails(
+        potDiameterCm: (json['potDiameterCm'] is num)
+            ? (json['potDiameterCm'] as num).toDouble()
+            : null,
+        potMaterial: PotMaterial.fromName(_string(json['potMaterial'])),
+        newSoilId: _string(json['newSoilId']),
+        newSoilName: _string(json['newSoilName']),
+      );
+
+  @override
+  bool get isEmpty =>
+      potDiameterCm == null && potMaterial == null && newSoilId == null;
+
+  @override
+  Map<String, dynamic> toJson() => {
+        if (potDiameterCm != null) 'potDiameterCm': potDiameterCm,
+        if (potMaterial != null) 'potMaterial': potMaterial!.name,
+        if (newSoilId != null) 'newSoilId': newSoilId,
+        if (newSoilName != null) 'newSoilName': newSoilName,
+      };
+
+  @override
+  bool operator ==(Object other) =>
+      other is RepottingDetails &&
+      other.potDiameterCm == potDiameterCm &&
+      other.potMaterial == potMaterial &&
+      other.newSoilId == newSoilId &&
+      other.newSoilName == newSoilName;
+
+  @override
+  int get hashCode =>
+      Object.hash(potDiameterCm, potMaterial, newSoilId, newSoilName);
 }
 
 String? _string(Object? value) => value is String ? value : null;

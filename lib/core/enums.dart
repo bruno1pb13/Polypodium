@@ -31,6 +31,27 @@ enum EntryType {
   pesticide,
   other,
   history,
+  repotting;
+
+  /// Unknown or missing names (rows written by a newer client) yield null;
+  /// callers skip such rows instead of failing.
+  static EntryType? fromName(String? name) =>
+      EntryType.values.asNameMap()[name];
+}
+
+/// Material of the pot a plant was moved to (see RepottingDetails).
+enum PotMaterial {
+  plastic,
+  clay,
+  ceramic,
+  fabric,
+  other;
+
+  /// Missing values mean "not informed"; unknown ones (a newer client's
+  /// material) are shown as [other].
+  static PotMaterial? fromName(String? name) => name == null
+      ? null
+      : PotMaterial.values.asNameMap()[name] ?? PotMaterial.other;
 }
 
 enum DefensivoCategory {
@@ -314,6 +335,7 @@ extension EntryTypeX on EntryType {
         EntryType.pesticide => l10n.entryTypePesticide,
         EntryType.other => l10n.entryTypeOther,
         EntryType.history => l10n.entryTypeHistory,
+        EntryType.repotting => l10n.entryTypeRepotting,
       };
 
   String get emoji => switch (this) {
@@ -327,6 +349,17 @@ extension EntryTypeX on EntryType {
         EntryType.pesticide => '🧪',
         EntryType.other => '📝',
         EntryType.history => '📜',
+        EntryType.repotting => '🪴',
+      };
+}
+
+extension PotMaterialX on PotMaterial {
+  String label(AppLocalizations l10n) => switch (this) {
+        PotMaterial.plastic => l10n.potMaterialPlastic,
+        PotMaterial.clay => l10n.potMaterialClay,
+        PotMaterial.ceramic => l10n.potMaterialCeramic,
+        PotMaterial.fabric => l10n.potMaterialFabric,
+        PotMaterial.other => l10n.potMaterialOther,
       };
 }
 

@@ -336,7 +336,7 @@ void main() {
       payload: {
         'id': 'rem1',
         'plantId': 'plant1',
-        'entryType': 'repotting',
+        'entryType': 'grafting',
         'intervalDays': 365,
         'enabled': true,
         'createdAt': DateTime(2026, 1, 1).toIso8601String(),
@@ -347,6 +347,58 @@ void main() {
     ));
 
     expect(await db.remindersDao.getById('rem1'), isNull);
+  });
+
+  group('entries', () {
+    SyncChange entryChange(String id, String type, {int rev = 1}) =>
+        SyncChange(
+          entityType: 'entry',
+          entityId: id,
+          payload: {
+            'id': id,
+            'plantId': 'plant1',
+            'date': DateTime(2026, 5, 1).toIso8601String(),
+            'photoPath': null,
+            'note': 'Vaso maior',
+            'type': type,
+            'numericValue': null,
+            'extraData': '{"potDiameterCm":20.0,"potMaterial":"clay"}',
+            'createdAt': DateTime(2026, 5, 1).toIso8601String(),
+          },
+          updatedAt: DateTime(2026, 5, 1),
+          deviceId: 'device-2',
+          rev: rev,
+        );
+
+    test('a repotting entry round-trips', () async {
+      await adapter.applyRemoteChange(entryChange('e1', 'repotting'));
+      final row = await db.entriesDao.getById('e1');
+      expect(row!.type, EntryType.repotting);
+      expect(row.extraData, '{"potDiameterCm":20.0,"potMaterial":"clay"}');
+
+      await db.entriesDao.upsert(
+          row.toCompanion(false).copyWith(localRev: const Value(3)));
+      final change = (await adapter.localChangesSince(0,
+              limit: 100, deviceId: 'device-1'))
+          .single;
+      expect(change.payload['type'], 'repotting');
+    });
+
+    test('an entry of an unknown type is skipped without failing the pull',
+        () async {
+      await adapter.applyRemoteChange(entryChange('e1', 'grafting'));
+      await adapter.applyRemoteChange(entryChange('e2', 'observation', rev: 2));
+
+      expect(await db.entriesDao.getById('e1'), isNull);
+      expect((await db.entriesDao.getById('e2'))!.type, EntryType.observation);
+    });
+
+    test('a stored unknown type reads back as other', () async {
+      await db.customStatement(
+          "INSERT INTO entries (id, plant_id, date, type, created_at, "
+          "updated_at) VALUES ('e1', 'plant1', 0, 'grafting', 0, 0)");
+      expect((await db.entriesDao.getById('e1'))!.type, EntryType.other);
+    });
   });
 
   group('legacy location text', () {

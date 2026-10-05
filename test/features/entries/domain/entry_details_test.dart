@@ -52,6 +52,22 @@ void main() {
       '{"recurrenceDays":7}',
       PesticideDetails(recurrenceDays: 7),
     ),
+    (
+      EntryType.repotting,
+      '{"potDiameterCm":14.5,"potMaterial":"clay","newSoilId":"s1",'
+          '"newSoilName":"Substrato"}',
+      RepottingDetails(
+        potDiameterCm: 14.5,
+        potMaterial: PotMaterial.clay,
+        newSoilId: 's1',
+        newSoilName: 'Substrato',
+      ),
+    ),
+    (
+      EntryType.repotting,
+      '{"potMaterial":"fabric"}',
+      RepottingDetails(potMaterial: PotMaterial.fabric),
+    ),
   ];
 
   group('golden extraData', () {
@@ -77,6 +93,7 @@ void main() {
       expect(const FertilizerDetails().encode(), isNull);
       expect(const PruningDetails().encode(), isNull);
       expect(const PesticideDetails().encode(), isNull);
+      expect(const RepottingDetails().encode(), isNull);
     });
   });
 
@@ -109,6 +126,21 @@ void main() {
           EntryDetails.decode(EntryType.pruning, '{}'), const PruningDetails());
       expect(EntryDetails.decode(EntryType.pesticide, '{}'),
           const PesticideDetails());
+      expect(EntryDetails.decode(EntryType.repotting, '{}'),
+          const RepottingDetails());
+    });
+
+    test('repotting: unexpected types are skipped, unknown materials kept '
+        'as other', () {
+      expect(
+          EntryDetails.decode(EntryType.repotting,
+              '{"potDiameterCm":"14","potMaterial":3,"newSoilId":7}'),
+          const RepottingDetails());
+      expect(
+          EntryDetails.decode(EntryType.repotting,
+              '{"potDiameterCm":12,"potMaterial":"bamboo"}'),
+          const RepottingDetails(
+              potDiameterCm: 12, potMaterial: PotMaterial.other));
     });
 
     test('ignores fields of unexpected types', () {

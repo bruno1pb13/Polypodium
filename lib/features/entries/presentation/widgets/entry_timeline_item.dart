@@ -257,6 +257,8 @@ class _EntryDataBadge extends StatelessWidget {
         ('✂️', _pruningLabel(l10n, details.reason)),
       EntryType.pesticide =>
         _pesticideSummary(l10n, details as PesticideDetails?, entry.date),
+      EntryType.repotting =>
+        _repottingSummary(l10n, details as RepottingDetails?),
       EntryType.observation when nv != null =>
         (
           _healthEmoji(nv.toInt()),
@@ -317,6 +319,19 @@ class _EntryDataBadge extends StatelessWidget {
     ];
     if (parts.isEmpty) return null;
     return ('🧪', parts.join(' · '));
+  }
+
+  _Summary? _repottingSummary(
+      AppLocalizations l10n, RepottingDetails? details) {
+    if (details == null) return null;
+    final diameter = details.potDiameterCm;
+    final parts = [
+      if (diameter != null) l10n.potDiameterSummary(_fmt(diameter)),
+      if (details.potMaterial != null) details.potMaterial!.label(l10n),
+      if (details.newSoilName case final soil? when soil.isNotEmpty) soil,
+    ];
+    if (parts.isEmpty) return null;
+    return (EntryType.repotting.emoji, parts.join(' · '));
   }
 
   String _fmt(double v) =>

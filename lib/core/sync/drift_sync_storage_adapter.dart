@@ -326,18 +326,22 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
   }
 
   Future<void> _applyEntry(SyncChange change) async {
+    final p = change.payload;
+    // An entry type this app version doesn't know (created by a newer
+    // client) can't be represented locally; skip it, as with reminders.
+    final entryType = EntryType.fromName(p['type'] as String?);
+    if (entryType == null) return;
     final existing = await _db.entriesDao.getById(change.entityId);
     if (!_incomingWins(change, existing?.updatedAt, existing?.deviceId)) {
       return;
     }
-    final p = change.payload;
     await _db.entriesDao.upsert(EntriesTableCompanion.insert(
       id: change.entityId,
       plantId: p['plantId'] as String,
       date: DateTime.parse(p['date'] as String),
       photoPath: Value(p['photoPath'] as String?),
       note: Value(p['note'] as String?),
-      type: EntryType.values.byName(p['type'] as String),
+      type: entryType,
       numericValue: Value((p['numericValue'] as num?)?.toDouble()),
       extraData: Value(p['extraData'] as String?),
       createdAt: DateTime.parse(p['createdAt'] as String),
@@ -347,7 +351,6 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       deviceId: Value(change.deviceId),
     ));
 
-    final entryType = EntryType.values.byName(p['type'] as String);
     if (change.deletedAt == null && entryType == EntryType.irrigation) {
       // Recomputing lastIrrigatedAt from entries is a locally-derived fact,
       // not itself remote data -- stamp it as a fresh local write (own

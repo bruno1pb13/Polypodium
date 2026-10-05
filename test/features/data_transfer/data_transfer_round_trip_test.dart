@@ -364,6 +364,51 @@ void main() {
     expect(await target.remindersDao.getAll(), isEmpty);
   });
 
+  test('repotting entries survive the round trip; unknown types are skipped',
+      () async {
+    await seedSpecies(source, 'Ficus lyrata', t0);
+    await source.plantsDao.upsert(PlantsTableCompanion.insert(
+      id: 'plant1',
+      speciesId: 'species1',
+      nickname: 'Minha planta',
+      soilType: 'loamy',
+      acquisitionDate: t0,
+      createdAt: t0,
+      updatedAt: t0,
+      localRev: const Value(2),
+    ));
+    for (final id in ['e1', 'e2']) {
+      await source.entriesDao.upsert(EntriesTableCompanion.insert(
+        id: id,
+        plantId: 'plant1',
+        date: t1,
+        type: EntryType.repotting,
+        extraData: const Value('{"potMaterial":"fabric"}'),
+        createdAt: t1,
+        updatedAt: t1,
+        localRev: const Value(3),
+      ));
+    }
+    final bytes = await DataExportService(source).buildArchiveBytes();
+    final archive = ZipDecoder().decodeBytes(bytes);
+    final data = jsonDecode(utf8.decode(archive
+            .findFile(DataExportService.dataFileName)!
+            .content as List<int>)) as Map<String, dynamic>;
+    // As a newer version would write an entry type this one doesn't know.
+    final entries = (data['entities'] as Map<String, dynamic>)['entries']
+        as List<dynamic>;
+    (entries.firstWhere((e) => e['id'] == 'e2') as Map)['type'] = 'grafting';
+
+    final summary = await DataImportService(target, FakePhotoStorage())
+        .importFromBytes(Uint8List.fromList(utf8.encode(jsonEncode(data))));
+
+    expect(summary.skipped, greaterThanOrEqualTo(1));
+    final entry = await target.entriesDao.getById('e1');
+    expect(entry!.type, EntryType.repotting);
+    expect(entry.extraData, '{"potMaterial":"fabric"}');
+    expect(await target.entriesDao.getById('e2'), isNull);
+  });
+
   test('rejects files that are not a Polypodium backup', () async {
     final service = DataImportService(target, FakePhotoStorage());
     await expectLater(

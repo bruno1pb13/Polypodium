@@ -102,6 +102,22 @@ void main() {
     expect(find.text('🧪 2 produtos'), findsOneWidget);
   });
 
+  testWidgets('repotting summary shows pot and new soil', (tester) async {
+    await pump(
+        tester,
+        entry(EntryType.repotting,
+            extraData: '{"potDiameterCm":14.0,"potMaterial":"clay",'
+                '"newSoilId":"s1","newSoilName":"Substrato"}'));
+    expect(find.text('Replantio'), findsOneWidget);
+    expect(find.text('🪴 Vaso de 14 cm · Barro · Substrato'), findsOneWidget);
+  });
+
+  testWidgets('repotting without details shows no badge', (tester) async {
+    await pump(tester, entry(EntryType.repotting));
+    expect(find.text('Replantio'), findsOneWidget);
+    expect(find.textContaining('🪴'), findsNothing);
+  });
+
   group('accessibility', () {
     testWidgets('the data badge is read without its emoji', (tester) async {
       final semantics = tester.ensureSemantics();
@@ -111,6 +127,11 @@ void main() {
               extraData: '{"pestType":"Cochonilha"}', numericValue: 2));
 
       expect(find.bySemanticsLabel('Cochonilha · Moderada'), findsOneWidget);
+      expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+
+      await pump(tester,
+          entry(EntryType.repotting, extraData: '{"potMaterial":"fabric"}'));
+      expect(find.bySemanticsLabel('Tecido'), findsOneWidget);
       expect(find.bySemanticsLabel(emojiLabel), findsNothing);
       semantics.dispose();
     });

@@ -1652,6 +1652,12 @@ abstract class AppLocalizations {
   /// **'History'**
   String get entryTypeHistory;
 
+  /// No description provided for @entryTypeRepotting.
+  ///
+  /// In en, this message translates to:
+  /// **'Repotting'**
+  String get entryTypeRepotting;
+
   /// No description provided for @newEntryTitle.
   ///
   /// In en, this message translates to:
@@ -1723,6 +1729,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Where was it applied? Any reaction from the plant?'**
   String get noteHintPesticide;
+
+  /// No description provided for @noteHintRepotting.
+  ///
+  /// In en, this message translates to:
+  /// **'How were the roots? Was the plant divided?'**
+  String get noteHintRepotting;
 
   /// No description provided for @noteHintDefault.
   ///
@@ -3601,6 +3613,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Watering chart: {count} intervals between waterings. {summary}'**
   String chartWateringSemantics(int count, String summary);
+
+  /// No description provided for @repottingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The new pot and, if it changed, the soil.'**
+  String get repottingHint;
+
+  /// No description provided for @potDiameterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pot diameter'**
+  String get potDiameterLabel;
+
+  /// No description provided for @potMaterialLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pot material'**
+  String get potMaterialLabel;
+
+  /// No description provided for @potMaterialPlastic.
+  ///
+  /// In en, this message translates to:
+  /// **'Plastic'**
+  String get potMaterialPlastic;
+
+  /// No description provided for @potMaterialClay.
+  ///
+  /// In en, this message translates to:
+  /// **'Clay'**
+  String get potMaterialClay;
+
+  /// No description provided for @potMaterialCeramic.
+  ///
+  /// In en, this message translates to:
+  /// **'Ceramic'**
+  String get potMaterialCeramic;
+
+  /// No description provided for @potMaterialFabric.
+  ///
+  /// In en, this message translates to:
+  /// **'Fabric'**
+  String get potMaterialFabric;
+
+  /// No description provided for @potMaterialOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get potMaterialOther;
+
+  /// No description provided for @newSoilLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New soil'**
+  String get newSoilLabel;
+
+  /// No description provided for @newSoilHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Also changes the plant\'s soil.'**
+  String get newSoilHint;
+
+  /// No description provided for @keepCurrentSoil.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the current soil'**
+  String get keepCurrentSoil;
+
+  /// No description provided for @potDiameterSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{diameter} cm pot'**
+  String potDiameterSummary(String diameter);
 }
 
 class _AppLocalizationsDelegate

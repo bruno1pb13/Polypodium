@@ -7,9 +7,12 @@ import 'package:polypodium/core/storage/photo_storage_provider.dart';
 import 'package:polypodium/features/defensivos/domain/defensivo_model.dart';
 import 'package:polypodium/features/defensivos/presentation/providers/defensivos_search_providers.dart';
 import 'package:polypodium/features/defensivos/presentation/widgets/defensivo_selection_field.dart';
+import 'package:polypodium/features/entries/domain/entry_details.dart';
 import 'package:polypodium/features/entries/domain/entry_model.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/entries/presentation/screens/add_entry_screen.dart';
+import 'package:polypodium/features/soils/domain/soil_model.dart';
+import 'package:polypodium/features/soils/presentation/providers/soils_search_providers.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
 
 import '../../../helpers/accessibility.dart';
@@ -33,6 +36,12 @@ void main() {
         id: 'd2', name: 'Calda Bordalesa', createdAt: DateTime(2026, 1, 1)),
   ];
 
+  final soils = [
+    SoilModel(
+        id: 'soil1', name: 'Substrato p/ suculentas',
+        createdAt: DateTime(2026, 1, 1)),
+  ];
+
   late _FakeEntryMutations mutations;
 
   // Pushes [screen] over a launcher route so the Navigator.pop on save has
@@ -53,6 +62,7 @@ void main() {
             .overrideWithValue(PhotoStorage(baseDirName: 'test_photos')),
         filteredSortedDefensivosProvider
             .overrideWith((ref) async => defensivos),
+        filteredSortedSoilsProvider.overrideWith((ref) async => soils),
       ],
       child: MaterialApp(
         theme: theme,
@@ -185,6 +195,53 @@ void main() {
     );
   });
 
+  testWidgets('repotting stores the pot and the new soil', (tester) async {
+    await pump(tester, AddEntryScreen(plantId: 'p1'));
+    await selectType(tester, EntryType.repotting, 'Replantio');
+
+    await tester.enterText(field('Diâmetro do vaso'), '14,5');
+    await tester.tap(find.text('Barro'));
+    await tester.pump();
+    await tester.tap(find.text('Novo solo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Substrato p/ suculentas').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Substrato p/ suculentas'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).last, 'Raízes enoveladas');
+    await save(tester);
+
+    final entry = mutations.created.single.single;
+    expect(entry.type, EntryType.repotting);
+    expect(entry.numericValue, isNull);
+    expect(entry.note, 'Raízes enoveladas');
+    expect(
+      entry.extraData,
+      '{"potDiameterCm":14.5,"potMaterial":"clay","newSoilId":"soil1",'
+      '"newSoilName":"Substrato p/ suculentas"}',
+    );
+    expect(entry.details, isA<RepottingDetails>());
+  });
+
+  testWidgets('repotting without details stores no extraData',
+      (tester) async {
+    await pump(tester,
+        AddEntryScreen(plantId: 'p1', initialType: EntryType.repotting));
+
+    // A picked soil can be dropped again.
+    await tester.tap(find.text('Novo solo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Substrato p/ suculentas').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Manter o solo atual'));
+    await tester.pump();
+    expect(find.byTooltip('Manter o solo atual'), findsNothing);
+    await save(tester);
+
+    final entry = mutations.created.single.single;
+    expect(entry.type, EntryType.repotting);
+    expect(entry.extraData, isNull);
+  });
+
   testWidgets('pest stores the type and the severity', (tester) async {
     await pump(tester, AddEntryScreen(plantId: 'p1'));
     await selectType(tester, EntryType.pest, 'Parasitas');
@@ -314,6 +371,7 @@ void main() {
       EntryType.chlorosis,
       EntryType.pest,
       EntryType.pesticide,
+      EntryType.repotting,
     ];
 
     testWidgets('meets the tap target and labelling guidelines',
@@ -360,6 +418,21 @@ void main() {
           await paintBackground(tester);
           await expectReadableText(tester);
         }
+        semantics.dispose();
+      });
+    }
+
+    for (final (name, theme) in appThemes) {
+      testWidgets('a picked pot material is readable in the $name theme',
+          (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pump(tester,
+            AddEntryScreen(plantId: 'p1', initialType: EntryType.repotting),
+            theme: theme);
+        await tester.tap(find.text('Cerâmica'));
+        await paintBackground(tester);
+        await expectReadableText(tester);
+        expect(find.bySemanticsLabel(emojiLabel), findsNothing);
         semantics.dispose();
       });
     }

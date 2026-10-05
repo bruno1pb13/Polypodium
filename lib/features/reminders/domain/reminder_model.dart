@@ -10,6 +10,7 @@ const reminderEntryTypes = [
   EntryType.fertilizer,
   EntryType.pruning,
   EntryType.observation,
+  EntryType.repotting,
 ];
 
 class ReminderModel {

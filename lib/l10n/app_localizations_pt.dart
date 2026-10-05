@@ -943,6 +943,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get entryTypeHistory => 'Histórico';
 
   @override
+  String get entryTypeRepotting => 'Replantio';
+
+  @override
   String get newEntryTitle => 'Novo Registro';
 
   @override
@@ -985,6 +988,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get noteHintPesticide => 'Onde foi aplicado? Alguma reação da planta?';
+
+  @override
+  String get noteHintRepotting =>
+      'Como estavam as raízes? Houve divisão da planta?';
 
   @override
   String get noteHintDefault => 'Notas opcionais...';
@@ -2053,5 +2060,43 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String chartWateringSemantics(int count, String summary) {
     return 'Gráfico de regas: $count intervalos entre regas. $summary';
+  }
+
+  @override
+  String get repottingHint => 'O novo vaso e, se mudou, o solo.';
+
+  @override
+  String get potDiameterLabel => 'Diâmetro do vaso';
+
+  @override
+  String get potMaterialLabel => 'Material do vaso';
+
+  @override
+  String get potMaterialPlastic => 'Plástico';
+
+  @override
+  String get potMaterialClay => 'Barro';
+
+  @override
+  String get potMaterialCeramic => 'Cerâmica';
+
+  @override
+  String get potMaterialFabric => 'Tecido';
+
+  @override
+  String get potMaterialOther => 'Outro';
+
+  @override
+  String get newSoilLabel => 'Novo solo';
+
+  @override
+  String get newSoilHint => 'Também altera o solo da planta.';
+
+  @override
+  String get keepCurrentSoil => 'Manter o solo atual';
+
+  @override
+  String potDiameterSummary(String diameter) {
+    return 'Vaso de $diameter cm';
   }
 }

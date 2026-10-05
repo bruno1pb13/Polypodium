@@ -389,6 +389,9 @@ class DataImportService {
 
   Future<bool> _applyEntry(
       Map<String, dynamic> row, Map<String, String> photoPaths) async {
+    // Entry types unknown to this version (newer backup) are skipped.
+    final type = EntryType.fromName(row['type'] as String?);
+    if (type == null) return false;
     final existing = await _db.entriesDao.getById(row['id'] as String);
     final updatedAt = _updatedAt(row);
     if (!_incomingWins(
@@ -408,7 +411,7 @@ class DataImportService {
       date: DateTime.parse(row['date'] as String),
       photoPath: Value(photoPath),
       note: Value(row['note'] as String?),
-      type: EntryType.values.byName(row['type'] as String),
+      type: type,
       numericValue: Value((row['numericValue'] as num?)?.toDouble()),
       extraData: Value(row['extraData'] as String?),
       createdAt: DateTime.parse(row['createdAt'] as String),
