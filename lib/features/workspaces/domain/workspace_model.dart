@@ -55,10 +55,10 @@ class Workspace {
   /// Clears session credentials while keeping the server connection details,
   /// mirroring the previous global SyncService.logout() behavior.
   Workspace disconnected() => copyWith(
-        token: const _Sentinel(),
-        userEmail: const _Sentinel(),
-        lastSyncAt: const _Sentinel(),
-        role: const _Sentinel(),
+        token: null,
+        userEmail: null,
+        lastSyncAt: null,
+        role: null,
       );
 
   Workspace copyWith({
