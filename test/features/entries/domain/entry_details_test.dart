@@ -49,6 +49,13 @@ void main() {
     ),
     (
       EntryType.pesticide,
+      '{"products":[{"defensivoId":"d1","name":"Neem","carenciaDays":3}]}',
+      PesticideDetails(products: [
+        PesticideProduct(defensivoId: 'd1', name: 'Neem', carenciaDays: 3),
+      ]),
+    ),
+    (
+      EntryType.pesticide,
       '{"recurrenceDays":7}',
       PesticideDetails(recurrenceDays: 7),
     ),
@@ -159,6 +166,10 @@ void main() {
           EntryDetails.decode(EntryType.pesticide,
               '{"products":{"name":"A"},"recurrenceDays":"7"}'),
           const PesticideDetails());
+      expect(
+          EntryDetails.decode(EntryType.pesticide,
+              '{"products":[{"name":"A","carenciaDays":"7"}]}'),
+          const PesticideDetails(products: [PesticideProduct(name: 'A')]));
     });
 
     test('accepts numeric values encoded as int or double', () {
@@ -169,6 +180,11 @@ void main() {
               products: [FertilizerProduct(name: 'A', dose: 3.0)]));
       expect(EntryDetails.decode(EntryType.pesticide, '{"recurrenceDays":7.0}'),
           const PesticideDetails(recurrenceDays: 7));
+      expect(
+          EntryDetails.decode(EntryType.pesticide,
+              '{"products":[{"name":"A","carenciaDays":7.0}]}'),
+          const PesticideDetails(
+              products: [PesticideProduct(name: 'A', carenciaDays: 7)]));
     });
 
     test('ignores unknown keys', () {

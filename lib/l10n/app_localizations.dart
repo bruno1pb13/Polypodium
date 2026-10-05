@@ -3727,6 +3727,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Removed plant'**
   String get parentPlantRemoved;
+
+  /// No description provided for @carenciaUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-harvest interval until {date}'**
+  String carenciaUntil(String date);
+
+  /// No description provided for @carenciaBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval until {date}'**
+  String carenciaBadge(String date);
+
+  /// No description provided for @carenciaDoNotHarvest.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not harvest until {date}'**
+  String carenciaDoNotHarvest(String date);
+
+  /// No description provided for @carenciaDoNotHarvestProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not harvest — {products}'**
+  String carenciaDoNotHarvestProducts(String products);
 }
 
 class _AppLocalizationsDelegate

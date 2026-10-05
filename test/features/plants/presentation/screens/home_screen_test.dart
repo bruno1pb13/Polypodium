@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/core/theme/app_theme.dart';
+import 'package:polypodium/features/entries/domain/carencia.dart';
+import 'package:polypodium/features/entries/presentation/providers/carencia_providers.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/plants/presentation/providers/plants_providers.dart';
 import 'package:polypodium/features/plants/presentation/screens/add_edit_plant_screen.dart';
 import 'package:polypodium/features/plants/presentation/screens/home_screen.dart';
+import 'package:polypodium/features/plants/presentation/widgets/plant_list_item.dart';
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
 import 'package:polypodium/features/species/domain/species_model.dart';
 import 'package:polypodium/features/species/presentation/providers/species_providers.dart';
@@ -133,6 +136,10 @@ void main() {
         latestPlantPhotoProvider.overrideWith((ref, id) => Stream.value(null)),
         plantAlertStatusProvider
             .overrideWith((ref, id) => Stream.value(noPlantAlerts)),
+        plantCarenciaProvider.overrideWith((ref, id) => id == anturio.plant.id
+            ? CarenciaStatus(
+                until: DateTime(2026, 10, 12), productNames: const ['Neem'])
+            : null),
         // Watched by the add-plant screen opened from the FAB.
         speciesNotifierProvider.overrideWith(_EmptySpeciesNotifier.new),
         locationsNotifierProvider.overrideWith(_EmptyLocationsNotifier.new),
@@ -170,6 +177,18 @@ void main() {
     expect(find.text('Babosa'), findsNothing);
     expect(tester.getTopLeft(find.text('Samambaia')).dy,
         lessThan(tester.getTopLeft(find.text('Antúrio')).dy));
+  });
+
+  testWidgets('a plant in carência shows its badge', (tester) async {
+    await pump(tester, [samambaia, anturio]);
+
+    final badge = find.text('Carência até 12/10');
+    expect(badge, findsOneWidget);
+    expect(
+      find.descendant(
+          of: find.widgetWithText(PlantListItem, 'Antúrio'), matching: badge),
+      findsOneWidget,
+    );
   });
 
   testWidgets('search filters by nickname and species', (tester) async {

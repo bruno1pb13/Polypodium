@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../entries/domain/entry_model.dart';
+import '../../../entries/presentation/providers/carencia_providers.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../entries/presentation/screens/add_entry_screen.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
@@ -40,6 +41,7 @@ class PlantDetailScreen extends ConsumerWidget {
     final locationsAsync = ref.watch(locationsNotifierProvider);
     final soilsAsync = ref.watch(soilsNotifierProvider);
     final entriesAsync = ref.watch(entriesNotifierProvider(plantId));
+    final carencia = ref.watch(plantCarenciaProvider(plantId));
     final activeView = ref.watch(plantDetailViewNotifierProvider(plantId));
 
     return plantsAsync.when(
@@ -166,7 +168,10 @@ class PlantDetailScreen extends ConsumerWidget {
                       ),
                     if (pws != null)
                       SliverToBoxAdapter(
-                        child: PlantCareAlerts(pws: pws),
+                        child: PlantCareAlerts(
+                          pws: pws,
+                          carencia: carencia,
+                        ),
                       ),
                     SliverToBoxAdapter(
                       child: PlantInfoCard(plant: plant, pws: pws, soilName: soil?.name, soilComposition: soil?.composition),

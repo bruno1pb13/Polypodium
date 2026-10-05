@@ -2122,4 +2122,24 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get parentPlantRemoved => 'Planta removida';
+
+  @override
+  String carenciaUntil(String date) {
+    return 'Em carência até $date';
+  }
+
+  @override
+  String carenciaBadge(String date) {
+    return 'Carência até $date';
+  }
+
+  @override
+  String carenciaDoNotHarvest(String date) {
+    return 'Não colher até $date';
+  }
+
+  @override
+  String carenciaDoNotHarvestProducts(String products) {
+    return 'Não colher — $products';
+  }
 }

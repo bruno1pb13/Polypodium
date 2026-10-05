@@ -1008,5 +1008,29 @@
       "name": {"type": "String"}
     }
   },
-  "parentPlantRemoved": "Removed plant"
+  "parentPlantRemoved": "Removed plant",
+  "carenciaUntil": "Pre-harvest interval until {date}",
+  "@carenciaUntil": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "carenciaBadge": "Interval until {date}",
+  "@carenciaBadge": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "carenciaDoNotHarvest": "Do not harvest until {date}",
+  "@carenciaDoNotHarvest": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "carenciaDoNotHarvestProducts": "Do not harvest — {products}",
+  "@carenciaDoNotHarvestProducts": {
+    "placeholders": {
+      "products": {"type": "String"}
+    }
+  }
 }

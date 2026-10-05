@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/core/theme/app_theme.dart';
+import 'package:polypodium/features/entries/domain/carencia.dart';
 import 'package:polypodium/features/entries/domain/entry_model.dart';
+import 'package:polypodium/features/entries/presentation/providers/carencia_providers.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/locations/domain/location_model.dart';
 import 'package:polypodium/features/locations/presentation/providers/locations_providers.dart';
@@ -13,6 +15,7 @@ import 'package:polypodium/features/plants/presentation/providers/plants_provide
 import 'package:polypodium/features/plants/presentation/screens/add_edit_plant_screen.dart';
 import 'package:polypodium/features/plants/presentation/screens/plant_detail_screen.dart';
 import 'package:polypodium/features/plants/presentation/widgets/plant_detail/plant_lineage_card.dart';
+import 'package:polypodium/features/plants/presentation/widgets/plant_detail/plant_status_banners.dart';
 import 'package:polypodium/features/plants/presentation/widgets/plant_status.dart';
 import 'package:polypodium/features/reminders/presentation/providers/reminders_providers.dart';
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
@@ -127,6 +130,7 @@ void main() {
       {Size size = const Size(800, 2400),
       ThemeData? theme,
       SpeciesModel? species,
+      CarenciaStatus? carencia,
       List<PlantModel> others = const []}) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -157,6 +161,7 @@ void main() {
             ))),
         plantRemindersProvider('p1')
             .overrideWith((ref) => Stream.value(const [])),
+        plantCarenciaProvider('p1').overrideWith((ref) => carencia),
       ],
       child: MaterialApp(
         theme: theme,
@@ -402,6 +407,87 @@ void main() {
             relative('mae', 'Samambaia mãe com nome comprido'),
             relative('m1', 'Muda 1', parent: 'p1'),
           ]);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('carência', () {
+    final carencia = CarenciaStatus(
+      until: DateTime(2026, 10, 12),
+      productNames: const ['Óleo de Neem', 'Calda Bordalesa'],
+    );
+
+    testWidgets('shows the banner with the date and the products',
+        (tester) async {
+      await pump(tester, plant(), carencia: carencia);
+
+      expect(find.text('Em carência até 12/10'), findsOneWidget);
+      expect(find.text('Não colher — Óleo de Neem, Calda Bordalesa'),
+          findsOneWidget);
+    });
+
+    testWidgets('has no banner without carência or on an inactive plant',
+        (tester) async {
+      await pump(tester, plant());
+      expect(find.textContaining('Em carência'), findsNothing);
+
+      await pump(tester, plant(status: PlantStatus.archived),
+          carencia: carencia);
+      expect(find.textContaining('Em carência'), findsNothing);
+    });
+
+    testWidgets('does not read emoji names out', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, plant(), carencia: carencia);
+      expect(find.bySemanticsLabel(emojiLabel), findsNothing);
+      semantics.dispose();
+    });
+
+    // Only the alerts over the background: where the rest of the screen lands
+    // on the leaf illustration depends on the banners above it.
+    for (final (name, theme) in appThemes) {
+      testWidgets('is readable in the $name theme', (tester) async {
+        final semantics = tester.ensureSemantics();
+        await tester.pumpWidget(ProviderScope(
+          overrides: [
+            transparencyEnabledNotifierProvider
+                .overrideWith(_FakeTransparencyNotifier.new),
+          ],
+          child: MaterialApp(
+            theme: theme,
+            locale: const Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Image.asset('assets/images/background.png',
+                        fit: BoxFit.cover),
+                  ),
+                  SafeArea(
+                    child: PlantCareAlerts(
+                      pws: PlantWithSpecies(plant: plant(), species: _species),
+                      carencia: carencia,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ));
+        await paintBackground(tester);
+        expect(find.text('Em carência até 12/10'), findsOneWidget);
+        await expectReadableText(tester);
+        semantics.dispose();
+      });
+    }
+
+    testWidgets('lays out without overflow at text scale 2.0',
+        (tester) async {
+      setTextScale(tester, 2.0);
+      await pump(tester, plant(),
+          size: const Size(400, 3200), carencia: carencia);
       expect(tester.takeException(), isNull);
     });
   });

@@ -636,5 +636,9 @@
   "cuttingsLabel": "Mudas",
   "createCutting": "Criar muda",
   "cuttingNicknameSuggestion": "{name} (muda)",
-  "parentPlantRemoved": "Planta removida"
+  "parentPlantRemoved": "Planta removida",
+  "carenciaUntil": "Em carência até {date}",
+  "carenciaBadge": "Carência até {date}",
+  "carenciaDoNotHarvest": "Não colher até {date}",
+  "carenciaDoNotHarvestProducts": "Não colher — {products}"
 }

@@ -142,9 +142,11 @@ final class PruningDetails extends EntryDetails {
   int get hashCode => reason.hashCode;
 }
 
-/// `{"products": [{"defensivoId": String, "name": String, "dose": String?}],
-/// "recurrenceDays": int}` — both top-level keys optional. The defensivo name
-/// is copied at launch time so the entry survives catalog deletions.
+/// `{"products": [{"defensivoId": String, "name": String, "dose": String?,
+/// "carenciaDays": int?}], "recurrenceDays": int}` — both top-level keys
+/// optional. The defensivo name and carência are copied at launch time so the
+/// entry survives catalog edits and deletions; entries saved before the
+/// carência was copied have no `carenciaDays`.
 final class PesticideDetails extends EntryDetails {
   final List<PesticideProduct> products;
 
@@ -160,6 +162,9 @@ final class PesticideDetails extends EntryDetails {
                   defensivoId: _string(p['defensivoId']),
                   name: _string(p['name']) ?? '',
                   dose: _string(p['dose']),
+                  carenciaDays: (p['carenciaDays'] is num)
+                      ? (p['carenciaDays'] as num).toInt()
+                      : null,
                 ))
             .toList(),
         recurrenceDays: (json['recurrenceDays'] is num)
@@ -184,6 +189,7 @@ final class PesticideDetails extends EntryDetails {
                 if (p.defensivoId != null) 'defensivoId': p.defensivoId,
                 'name': p.name,
                 if (p.dose != null) 'dose': p.dose,
+                if (p.carenciaDays != null) 'carenciaDays': p.carenciaDays,
               },
           ],
         if (recurrenceDays != null) 'recurrenceDays': recurrenceDays,
@@ -206,17 +212,27 @@ class PesticideProduct {
   /// Free-text dose as typed by the user (e.g. "5 ml/L").
   final String? dose;
 
-  const PesticideProduct({this.defensivoId, required this.name, this.dose});
+  /// The defensivo's carência when it was applied; null on older entries,
+  /// which fall back to the catalog (see `carenciaOn`).
+  final int? carenciaDays;
+
+  const PesticideProduct({
+    this.defensivoId,
+    required this.name,
+    this.dose,
+    this.carenciaDays,
+  });
 
   @override
   bool operator ==(Object other) =>
       other is PesticideProduct &&
       other.defensivoId == defensivoId &&
       other.name == name &&
-      other.dose == dose;
+      other.dose == dose &&
+      other.carenciaDays == carenciaDays;
 
   @override
-  int get hashCode => Object.hash(defensivoId, name, dose);
+  int get hashCode => Object.hash(defensivoId, name, dose, carenciaDays);
 }
 
 /// `{"potDiameterCm": double, "potMaterial": String, "newSoilId": String,

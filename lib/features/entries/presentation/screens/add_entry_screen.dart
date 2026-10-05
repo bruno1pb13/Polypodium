@@ -173,6 +173,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                   defensivoId: p.selected!.id,
                   name: p.selected!.name,
                   dose: dose.isEmpty ? null : dose,
+                  carenciaDays: p.selected!.carenciaDays,
                 );
               })
               .toList(),

@@ -33,7 +33,10 @@ void main() {
     DefensivoModel(
         id: 'd1', name: 'Óleo de Neem', createdAt: DateTime(2026, 1, 1)),
     DefensivoModel(
-        id: 'd2', name: 'Calda Bordalesa', createdAt: DateTime(2026, 1, 1)),
+        id: 'd2',
+        name: 'Calda Bordalesa',
+        carenciaDays: 7,
+        createdAt: DateTime(2026, 1, 1)),
   ];
 
   final soils = [
@@ -191,7 +194,9 @@ void main() {
     expect(
       entry.extraData,
       '{"products":[{"defensivoId":"d1","name":"Óleo de Neem","dose":"5 ml/L"},'
-      '{"defensivoId":"d2","name":"Calda Bordalesa"}],"recurrenceDays":15}',
+      // The carência is copied from the catalog.
+      '{"defensivoId":"d2","name":"Calda Bordalesa","carenciaDays":7}],'
+      '"recurrenceDays":15}',
     );
   });
 
