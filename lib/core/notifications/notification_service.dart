@@ -450,8 +450,12 @@ class NotificationService implements INotificationService {
 
   /// Called from the WorkManager background isolate every 12 h to recover
   /// notifications lost after a device reboot.
-  // TODO(sync): Also trigger a background sync pass here
-  static Future<void> checkAndRescheduleAll() async {
+  /// [beforeReschedule] runs first against the same database (the
+  /// background sync pass); its failures never prevent the reschedule.
+  static Future<void> checkAndRescheduleAll({
+    Future<void> Function(AppDatabase db, Workspace? workspace)?
+        beforeReschedule,
+  }) async {
     // ignore: avoid_print
     print('[NotificationService] Background check triggered');
 
@@ -462,6 +466,14 @@ class NotificationService implements INotificationService {
     final active = await _openActiveDatabase();
     if (active == null) return;
     try {
+      if (beforeReschedule != null) {
+        try {
+          await beforeReschedule(active.db, active.workspace);
+        } catch (e) {
+          // ignore: avoid_print
+          print('[NotificationService] Pre-reschedule step failed: $e');
+        }
+      }
       await PlantsRepository(active.db, const NotificationService())
           .rescheduleNotifications();
     } finally {
@@ -472,7 +484,8 @@ class NotificationService implements INotificationService {
   /// Handles "Watered" / "Remind in 3 h" from a background isolate, with no
   /// Riverpod: writes go straight to the active workspace's database. The
   /// UI isolate's Drift streams don't see them; the app refreshes its
-  /// queries when resumed. Synced on the next regular sync pass.
+  /// queries when resumed. Synced on the next sync pass (in the app or the
+  /// WorkManager task).
   static Future<void> _handleBackgroundResponse(
       NotificationResponse response) async {
     final action = response.actionId;

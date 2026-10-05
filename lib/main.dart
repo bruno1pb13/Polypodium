@@ -9,6 +9,7 @@ import 'core/database/database_provider.dart';
 import 'core/notifications/notification_response_handler.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/sync/auto_sync_controller.dart';
+import 'core/sync/background_sync.dart';
 import 'l10n/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/app_shell.dart';
@@ -22,9 +23,9 @@ import 'features/workspaces/data/workspace_repository.dart';
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
-    // TODO(sync): Add background sync trigger here alongside notification check
     if (taskName == NotificationService.irrigationCheckTask) {
-      await NotificationService.checkAndRescheduleAll();
+      await NotificationService.checkAndRescheduleAll(
+          beforeReschedule: BackgroundSync.runForActiveWorkspace);
     }
     return true;
   });
@@ -47,6 +48,8 @@ Future<void> main() async {
 
   if (Platform.isAndroid) {
     await Workmanager().initialize(callbackDispatcher);
+    // No network constraint: the reminder reschedule must also run offline,
+    // where the sync pass that precedes it just fails fast.
     await Workmanager().registerPeriodicTask(
       'irrigation-check',
       NotificationService.irrigationCheckTask,
