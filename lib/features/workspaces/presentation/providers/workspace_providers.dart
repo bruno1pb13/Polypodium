@@ -6,7 +6,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../settings/presentation/providers/settings_providers.dart';
+import '../../data/garden_client.dart';
 import '../../data/workspace_auth_client.dart';
+import '../../domain/garden.dart';
 import '../../data/workspace_repository.dart';
 import '../../domain/workspace_model.dart';
 import '../../domain/workspace_paths.dart';
@@ -51,10 +53,17 @@ class WorkspacesNotifier extends _$WorkspacesNotifier {
 
   /// Authenticates against [serverUrl] and adds the result as a brand-new
   /// remote workspace, without touching the currently active one.
+  ///
+  /// When the account belongs to more than its personal garden, [pickGarden]
+  /// chooses which one the workspace syncs (null: the personal one). A
+  /// server predating gardens, or any failure listing them, means the
+  /// personal garden, as before.
   Future<Workspace> createAndLoginRemote({
     required String serverUrl,
     required String email,
     required String password,
+    Future<GardenChoice?> Function(List<Garden> gardens)? pickGarden,
+    GardenClient gardenClient = const GardenClient(),
   }) async {
     const authClient = WorkspaceAuthClient();
     final result = await authClient.login(
@@ -63,9 +72,22 @@ class WorkspacesNotifier extends _$WorkspacesNotifier {
       password: password,
       deviceId: const Uuid().v4(),
     );
+    GardenChoice? garden;
+    if (pickGarden != null) {
+      List<Garden> gardens;
+      try {
+        gardens = await gardenClient.listGardens(
+            serverUrl: serverUrl, token: result.token);
+      } catch (_) {
+        gardens = const [];
+      }
+      if (gardens.length > 1) garden = await pickGarden(gardens);
+    }
     final workspace = Workspace(
       id: const Uuid().v4(),
-      name: serverUrl,
+      name: garden?.name ?? serverUrl,
+      gardenId: garden?.id,
+      gardenName: garden?.name,
       type: WorkspaceType.remote,
       serverUrl: serverUrl,
       userEmail: email,
@@ -105,6 +127,39 @@ class WorkspacesNotifier extends _$WorkspacesNotifier {
       role: result.role,
     );
     await upsert(workspace);
+    return workspace;
+  }
+
+  /// Opens [garden] in its own workspace, reusing [from]'s server session
+  /// (same account and device), and makes it active. A workspace already
+  /// syncing that garden is reused instead of duplicated; its database starts
+  /// empty otherwise and fills on the first sync.
+  Future<Workspace> openGardenWorkspace(
+      Workspace from, GardenChoice? garden) async {
+    final existing = state.where((w) =>
+        w.type == WorkspaceType.remote &&
+        w.serverUrl == from.serverUrl &&
+        w.userEmail == from.userEmail &&
+        w.gardenId == garden?.id);
+    final workspace = existing.isNotEmpty
+        ? existing.first
+        : Workspace(
+            id: const Uuid().v4(),
+            name: garden?.name ?? from.serverUrl ?? from.name,
+            type: WorkspaceType.remote,
+            serverUrl: from.serverUrl,
+            userEmail: from.userEmail,
+            token: from.token,
+            deviceId: from.deviceId,
+            createdAt: DateTime.now(),
+            role: from.role,
+            gardenId: garden?.id,
+            gardenName: garden?.name,
+          );
+    if (existing.isEmpty) await upsert(workspace);
+    await ref
+        .read(activeWorkspaceIdNotifierProvider.notifier)
+        .setActive(workspace.id);
     return workspace;
   }
 
