@@ -48,3 +48,17 @@ class SyncEntityTypesTable extends Table {
   @override
   Set<Column> get primaryKey => {peerId, entityType};
 }
+
+/// Entity types a peer confirmed storing (see SyncOrchestrator's re-push).
+/// Lives next to the push cursor because it qualifies it: an older server
+/// dropped rows of a type it didn't know while that cursor moved past them.
+class SyncConfirmedEntityTypesTable extends Table {
+  @override
+  String get tableName => 'sync_confirmed_entity_types';
+
+  TextColumn get peerId => text()();
+  TextColumn get entityType => text()();
+
+  @override
+  Set<Column> get primaryKey => {peerId, entityType};
+}

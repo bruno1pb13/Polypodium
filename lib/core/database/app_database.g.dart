@@ -5923,6 +5923,210 @@ class SyncEntityTypesTableCompanion
   }
 }
 
+class $SyncConfirmedEntityTypesTableTable extends SyncConfirmedEntityTypesTable
+    with
+        TableInfo<$SyncConfirmedEntityTypesTableTable,
+            SyncConfirmedEntityTypesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncConfirmedEntityTypesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _peerIdMeta = const VerificationMeta('peerId');
+  @override
+  late final GeneratedColumn<String> peerId = GeneratedColumn<String>(
+      'peer_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _entityTypeMeta =
+      const VerificationMeta('entityType');
+  @override
+  late final GeneratedColumn<String> entityType = GeneratedColumn<String>(
+      'entity_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [peerId, entityType];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_confirmed_entity_types';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<SyncConfirmedEntityTypesTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('peer_id')) {
+      context.handle(_peerIdMeta,
+          peerId.isAcceptableOrUnknown(data['peer_id']!, _peerIdMeta));
+    } else if (isInserting) {
+      context.missing(_peerIdMeta);
+    }
+    if (data.containsKey('entity_type')) {
+      context.handle(
+          _entityTypeMeta,
+          entityType.isAcceptableOrUnknown(
+              data['entity_type']!, _entityTypeMeta));
+    } else if (isInserting) {
+      context.missing(_entityTypeMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {peerId, entityType};
+  @override
+  SyncConfirmedEntityTypesTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncConfirmedEntityTypesTableData(
+      peerId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}peer_id'])!,
+      entityType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}entity_type'])!,
+    );
+  }
+
+  @override
+  $SyncConfirmedEntityTypesTableTable createAlias(String alias) {
+    return $SyncConfirmedEntityTypesTableTable(attachedDatabase, alias);
+  }
+}
+
+class SyncConfirmedEntityTypesTableData extends DataClass
+    implements Insertable<SyncConfirmedEntityTypesTableData> {
+  final String peerId;
+  final String entityType;
+  const SyncConfirmedEntityTypesTableData(
+      {required this.peerId, required this.entityType});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['peer_id'] = Variable<String>(peerId);
+    map['entity_type'] = Variable<String>(entityType);
+    return map;
+  }
+
+  SyncConfirmedEntityTypesTableCompanion toCompanion(bool nullToAbsent) {
+    return SyncConfirmedEntityTypesTableCompanion(
+      peerId: Value(peerId),
+      entityType: Value(entityType),
+    );
+  }
+
+  factory SyncConfirmedEntityTypesTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncConfirmedEntityTypesTableData(
+      peerId: serializer.fromJson<String>(json['peerId']),
+      entityType: serializer.fromJson<String>(json['entityType']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'peerId': serializer.toJson<String>(peerId),
+      'entityType': serializer.toJson<String>(entityType),
+    };
+  }
+
+  SyncConfirmedEntityTypesTableData copyWith(
+          {String? peerId, String? entityType}) =>
+      SyncConfirmedEntityTypesTableData(
+        peerId: peerId ?? this.peerId,
+        entityType: entityType ?? this.entityType,
+      );
+  SyncConfirmedEntityTypesTableData copyWithCompanion(
+      SyncConfirmedEntityTypesTableCompanion data) {
+    return SyncConfirmedEntityTypesTableData(
+      peerId: data.peerId.present ? data.peerId.value : this.peerId,
+      entityType:
+          data.entityType.present ? data.entityType.value : this.entityType,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncConfirmedEntityTypesTableData(')
+          ..write('peerId: $peerId, ')
+          ..write('entityType: $entityType')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(peerId, entityType);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncConfirmedEntityTypesTableData &&
+          other.peerId == this.peerId &&
+          other.entityType == this.entityType);
+}
+
+class SyncConfirmedEntityTypesTableCompanion
+    extends UpdateCompanion<SyncConfirmedEntityTypesTableData> {
+  final Value<String> peerId;
+  final Value<String> entityType;
+  final Value<int> rowid;
+  const SyncConfirmedEntityTypesTableCompanion({
+    this.peerId = const Value.absent(),
+    this.entityType = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncConfirmedEntityTypesTableCompanion.insert({
+    required String peerId,
+    required String entityType,
+    this.rowid = const Value.absent(),
+  })  : peerId = Value(peerId),
+        entityType = Value(entityType);
+  static Insertable<SyncConfirmedEntityTypesTableData> custom({
+    Expression<String>? peerId,
+    Expression<String>? entityType,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (peerId != null) 'peer_id': peerId,
+      if (entityType != null) 'entity_type': entityType,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncConfirmedEntityTypesTableCompanion copyWith(
+      {Value<String>? peerId, Value<String>? entityType, Value<int>? rowid}) {
+    return SyncConfirmedEntityTypesTableCompanion(
+      peerId: peerId ?? this.peerId,
+      entityType: entityType ?? this.entityType,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (peerId.present) {
+      map['peer_id'] = Variable<String>(peerId.value);
+    }
+    if (entityType.present) {
+      map['entity_type'] = Variable<String>(entityType.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncConfirmedEntityTypesTableCompanion(')
+          ..write('peerId: $peerId, ')
+          ..write('entityType: $entityType, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5943,6 +6147,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $SyncEntryTypesTableTable(this);
   late final $SyncEntityTypesTableTable syncEntityTypesTable =
       $SyncEntityTypesTableTable(this);
+  late final $SyncConfirmedEntityTypesTableTable syncConfirmedEntityTypesTable =
+      $SyncConfirmedEntityTypesTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5959,7 +6165,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         syncMetaTable,
         syncCursorsTable,
         syncEntryTypesTable,
-        syncEntityTypesTable
+        syncEntityTypesTable,
+        syncConfirmedEntityTypesTable
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -9979,6 +10186,141 @@ typedef $$SyncEntityTypesTableTableProcessedTableManager
         ),
         SyncEntityTypesTableData,
         PrefetchHooks Function()>;
+typedef $$SyncConfirmedEntityTypesTableTableCreateCompanionBuilder
+    = SyncConfirmedEntityTypesTableCompanion Function({
+  required String peerId,
+  required String entityType,
+  Value<int> rowid,
+});
+typedef $$SyncConfirmedEntityTypesTableTableUpdateCompanionBuilder
+    = SyncConfirmedEntityTypesTableCompanion Function({
+  Value<String> peerId,
+  Value<String> entityType,
+  Value<int> rowid,
+});
+
+class $$SyncConfirmedEntityTypesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncConfirmedEntityTypesTableTable> {
+  $$SyncConfirmedEntityTypesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get peerId => $composableBuilder(
+      column: $table.peerId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get entityType => $composableBuilder(
+      column: $table.entityType, builder: (column) => ColumnFilters(column));
+}
+
+class $$SyncConfirmedEntityTypesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncConfirmedEntityTypesTableTable> {
+  $$SyncConfirmedEntityTypesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get peerId => $composableBuilder(
+      column: $table.peerId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get entityType => $composableBuilder(
+      column: $table.entityType, builder: (column) => ColumnOrderings(column));
+}
+
+class $$SyncConfirmedEntityTypesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncConfirmedEntityTypesTableTable> {
+  $$SyncConfirmedEntityTypesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get peerId =>
+      $composableBuilder(column: $table.peerId, builder: (column) => column);
+
+  GeneratedColumn<String> get entityType => $composableBuilder(
+      column: $table.entityType, builder: (column) => column);
+}
+
+class $$SyncConfirmedEntityTypesTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $SyncConfirmedEntityTypesTableTable,
+    SyncConfirmedEntityTypesTableData,
+    $$SyncConfirmedEntityTypesTableTableFilterComposer,
+    $$SyncConfirmedEntityTypesTableTableOrderingComposer,
+    $$SyncConfirmedEntityTypesTableTableAnnotationComposer,
+    $$SyncConfirmedEntityTypesTableTableCreateCompanionBuilder,
+    $$SyncConfirmedEntityTypesTableTableUpdateCompanionBuilder,
+    (
+      SyncConfirmedEntityTypesTableData,
+      BaseReferences<_$AppDatabase, $SyncConfirmedEntityTypesTableTable,
+          SyncConfirmedEntityTypesTableData>
+    ),
+    SyncConfirmedEntityTypesTableData,
+    PrefetchHooks Function()> {
+  $$SyncConfirmedEntityTypesTableTableTableManager(
+      _$AppDatabase db, $SyncConfirmedEntityTypesTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncConfirmedEntityTypesTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncConfirmedEntityTypesTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncConfirmedEntityTypesTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> peerId = const Value.absent(),
+            Value<String> entityType = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SyncConfirmedEntityTypesTableCompanion(
+            peerId: peerId,
+            entityType: entityType,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String peerId,
+            required String entityType,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SyncConfirmedEntityTypesTableCompanion.insert(
+            peerId: peerId,
+            entityType: entityType,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$SyncConfirmedEntityTypesTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $SyncConfirmedEntityTypesTableTable,
+        SyncConfirmedEntityTypesTableData,
+        $$SyncConfirmedEntityTypesTableTableFilterComposer,
+        $$SyncConfirmedEntityTypesTableTableOrderingComposer,
+        $$SyncConfirmedEntityTypesTableTableAnnotationComposer,
+        $$SyncConfirmedEntityTypesTableTableCreateCompanionBuilder,
+        $$SyncConfirmedEntityTypesTableTableUpdateCompanionBuilder,
+        (
+          SyncConfirmedEntityTypesTableData,
+          BaseReferences<_$AppDatabase, $SyncConfirmedEntityTypesTableTable,
+              SyncConfirmedEntityTypesTableData>
+        ),
+        SyncConfirmedEntityTypesTableData,
+        PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -10007,4 +10349,8 @@ class $AppDatabaseManager {
       $$SyncEntryTypesTableTableTableManager(_db, _db.syncEntryTypesTable);
   $$SyncEntityTypesTableTableTableManager get syncEntityTypesTable =>
       $$SyncEntityTypesTableTableTableManager(_db, _db.syncEntityTypesTable);
+  $$SyncConfirmedEntityTypesTableTableTableManager
+      get syncConfirmedEntityTypesTable =>
+          $$SyncConfirmedEntityTypesTableTableTableManager(
+              _db, _db.syncConfirmedEntityTypesTable);
 }

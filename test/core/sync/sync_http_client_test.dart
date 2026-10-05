@@ -63,4 +63,45 @@ void main() {
     body = {...body}..remove('entities');
     expect((await fetch()).entities, isNull);
   });
+
+  test('the types the server stores and the ones it dropped are reported, '
+      'or null when it predates that', () async {
+    Map<String, dynamic> pullBody = {
+      'changes': [],
+      'nextCursor': 0,
+      'hasMore': false,
+      'supportedEntities': ['entry', 'plant'],
+    };
+    Map<String, dynamic> pushBody = {
+      'appliedCount': 1,
+      'ignoredEntityTypes': ['reminder'],
+    };
+    final client = MockClient((request) async => http.Response(
+        jsonEncode(request.url.path.endsWith('/changes') ? pullBody : pushBody),
+        200));
+
+    Future<(ChangesPage, ReceiveResult)> sync() => http.runWithClient(
+          () async => (
+            await const SyncHttpClient().fetchChanges(
+                serverUrl: 'https://example.test', token: 't', since: 0),
+            await const SyncHttpClient().receiveChanges(
+                serverUrl: 'https://example.test',
+                token: 't',
+                deviceId: 'd',
+                changes: const []),
+          ),
+          () => client,
+        );
+
+    final (page, receipt) = await sync();
+    expect(page.supportedEntities, {'entry', 'plant'});
+    expect(receipt.appliedCount, 1);
+    expect(receipt.ignoredEntityTypes, {'reminder'});
+
+    pullBody = {...pullBody}..remove('supportedEntities');
+    pushBody = {'appliedCount': 1};
+    final (oldPage, oldReceipt) = await sync();
+    expect(oldPage.supportedEntities, isNull);
+    expect(oldReceipt.ignoredEntityTypes, isNull);
+  });
 }

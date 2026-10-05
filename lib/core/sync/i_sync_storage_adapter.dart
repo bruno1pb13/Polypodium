@@ -20,6 +20,14 @@ abstract interface class ISyncStorageAdapter {
     required String deviceId,
   });
 
+  /// Same as [localChangesSince], for [entityType] only.
+  Future<List<SyncChange>> localChangesOfTypeSince(
+    String entityType,
+    int since, {
+    required int limit,
+    required String deviceId,
+  });
+
   /// Applies one remote change via last-write-wins; a no-op if the local
   /// row (when one exists) is already newer. Applying resets the row's
   /// local rev to 0 -- data that just arrived from a peer is inherently

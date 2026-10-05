@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/native.dart';
 import 'package:polypodium/core/database/app_database.dart';
+import 'package:polypodium/core/database/sync_cursors_dao.dart';
 import 'package:polypodium/core/enums.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 
@@ -597,6 +598,40 @@ void main() {
       updatedAt: DateTime(2026, 1, 1),
     ));
     expect((await db.entryPhotosDao.getById('ph1'))!.position, 0);
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
+  test('migration from v20 creates the confirmed entity types table, keeping '
+      'the cursors', () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE sync_cursors (
+          peer_id TEXT NOT NULL,
+          direction TEXT NOT NULL,
+          cursor INTEGER NOT NULL DEFAULT 0,
+          PRIMARY KEY (peer_id, direction)
+        )
+      ''');
+      raw.execute(
+          "INSERT INTO sync_cursors VALUES ('server', 'push', 42)");
+      raw.execute('PRAGMA user_version = 20');
+    }));
+
+    final dao = db.syncCursorsDao;
+    expect(await dao.getCursor('server', 'push'), 42);
+    expect(await dao.getConfirmedEntityTypes('server'), isEmpty);
+    await dao.setCursor('server', '${syncDirectionRepushPrefix}reminder', 7);
+    await dao.confirmEntityTypes('server', ['plant', 'reminder']);
+    expect(await dao.getConfirmedEntityTypes('server'), {'plant', 'reminder'});
+    expect(
+        await dao.getCursor('server', '${syncDirectionRepushPrefix}reminder'),
+        0);
+    await dao.unconfirmEntityTypes('server', ['reminder']);
+    expect(await dao.getConfirmedEntityTypes('server'), {'plant'});
 
     final version =
         await db.customSelect('PRAGMA user_version').getSingle();

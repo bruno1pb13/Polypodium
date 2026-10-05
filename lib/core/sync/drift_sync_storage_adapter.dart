@@ -54,6 +54,17 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
   }
 
   @override
+  Future<List<SyncChange>> localChangesOfTypeSince(
+    String entityType,
+    int since, {
+    required int limit,
+    required String deviceId,
+  }) async {
+    final rows = await _changesSinceFor(entityType, since, limit);
+    return [for (final row in rows) _toChange(entityType, row, deviceId)];
+  }
+
+  @override
   Future<void> applyRemoteChange(SyncChange change) async {
     switch (change.entityType) {
       case 'species':

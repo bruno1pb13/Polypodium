@@ -34,6 +34,17 @@ const legacyEntityTypes = {
   'reminder',
 };
 
+/// Entity types every server with per-entity tables stored (its `_matTable`
+/// since Polypodium_server 386c0f1), so no server ever dropped them on push.
+const originalServerEntityTypes = {
+  'species',
+  'plant',
+  'entry',
+  'location',
+  'soil',
+  'bed',
+};
+
 /// Entities whose payload carries a photo file through the photo side
 /// channel (`photoPath` locally, `photoKey` on the wire).
 const _photoEntityTypes = {'entry', 'entry_photo'};
@@ -76,10 +87,24 @@ class SyncOrchestrator {
     // Before the pull, which moves the cursor the first record depends on.
     final newEntryTypes = await _undeclaredEntryTypes();
     final newEntities = await _undeclaredEntityTypes();
-    var pulled = await _pull(
+    // Before the push, which moves the cursor a fresh device is told by.
+    final pushedBefore = await _cursors.getPushCursor(_serverPeerId) > 0;
+    final pull = await _pull(
         serverUrl: serverUrl, token: token, deviceId: deviceId);
-    final pushed = await _push(
+    var pulled = pull.applied;
+    final supported = pull.supported;
+    final repush = supported == null
+        ? const <String>{}
+        : await _unconfirmedEntityTypes(supported, pushedBefore: pushedBefore);
+    var pushed = await _push(
         serverUrl: serverUrl, token: token, deviceId: deviceId);
+    for (final entityType in repush) {
+      pushed += await _repush(
+          serverUrl: serverUrl,
+          token: token,
+          deviceId: deviceId,
+          entityType: entityType);
+    }
     if (newEntryTypes.isNotEmpty) {
       pulled += await _backfill(
           serverUrl: serverUrl, token: token, entryTypes: newEntryTypes);
@@ -93,7 +118,9 @@ class SyncOrchestrator {
 
   // -- pull: real GET, applies the server's changes locally ------------------
 
-  Future<int> _pull({
+  /// Returns the server's [supported] entity types along with how many
+  /// changes were applied.
+  Future<({int applied, Set<String>? supported})> _pull({
     required String serverUrl,
     required String token,
     required String deviceId,
@@ -115,7 +142,7 @@ class SyncOrchestrator {
             .catchError((_) {});
       },
     );
-    return result.applied;
+    return (applied: result.applied, supported: result.supported);
   }
 
   // -- backfill: entries of types this build learned since its last
@@ -146,7 +173,7 @@ class SyncOrchestrator {
     required Set<String> entryTypes,
   }) async {
     const entities = {'entry'};
-    final (:applied, :completed, echoed: _) = await _pullPages(
+    final (:applied, :completed, echoed: _, supported: _) = await _pullPages(
       serverUrl: serverUrl,
       token: token,
       since: await _cursors.getBackfillCursor(_serverPeerId, entryTypes),
@@ -186,7 +213,7 @@ class SyncOrchestrator {
     required String token,
     required Set<String> entityTypes,
   }) async {
-    final (:applied, :completed, :echoed) = await _pullPages(
+    final (:applied, :completed, :echoed, supported: _) = await _pullPages(
       serverUrl: serverUrl,
       token: token,
       since:
@@ -207,8 +234,15 @@ class SyncOrchestrator {
   /// Pulls pages from [since], applying each change and reporting the rev
   /// of the last one applied per page to [onApplied]. Not [completed] when
   /// cut short by a failed photo download. [echoed] is the entity
-  /// restriction as the server echoed it (null without one).
-  Future<({int applied, bool completed, Set<String>? echoed})> _pullPages({
+  /// restriction as the server echoed it (null without one), [supported]
+  /// the entity types it reported storing.
+  Future<
+      ({
+        int applied,
+        bool completed,
+        Set<String>? echoed,
+        Set<String>? supported,
+      })> _pullPages({
     required String serverUrl,
     required String token,
     required int since,
@@ -226,8 +260,14 @@ class SyncOrchestrator {
           limit: _pageSize,
           entryTypes: entryTypes,
           entities: entities);
+      final supported = page.supportedEntities;
       if (entities != null && page.entities == null) {
-        return (applied: total, completed: true, echoed: null);
+        return (
+          applied: total,
+          completed: true,
+          echoed: null,
+          supported: supported,
+        );
       }
 
       var appliedCount = 0;
@@ -245,11 +285,13 @@ class SyncOrchestrator {
         await onApplied(since);
       }
 
-      if (appliedCount < page.changes.length) {
-        return (applied: total, completed: false, echoed: page.entities);
-      }
-      if (!page.hasMore) {
-        return (applied: total, completed: true, echoed: page.entities);
+      if (appliedCount < page.changes.length || !page.hasMore) {
+        return (
+          applied: total,
+          completed: appliedCount == page.changes.length,
+          echoed: page.entities,
+          supported: supported,
+        );
       }
     }
   }
@@ -270,29 +312,126 @@ class SyncOrchestrator {
           limit: _pageSize, deviceId: deviceId);
       if (batch.isEmpty) break;
 
-      final prepared = <SyncChange>[];
-      for (final change in batch) {
-        final ready = await _prepareOutgoingPhoto(serverUrl, token, change);
-        if (ready == null) break; // upload failed; retry next sync
-        prepared.add(ready);
-      }
+      final (:prepared, :ignored) = await _deliver(
+          serverUrl: serverUrl, token: token, deviceId: deviceId, batch: batch);
       if (prepared.isEmpty) break;
+      // Moving past them all the same keeps the other types flowing; they're
+      // re-pushed once the server stores them.
+      if (ignored != null && ignored.isNotEmpty) {
+        await _cursors.unconfirmEntityTypes(_serverPeerId, ignored);
+      }
 
-      await _http.receiveChanges(
-        serverUrl: serverUrl,
-        token: token,
-        deviceId: deviceId,
-        changes: prepared,
-      );
-
-      final maxRev = prepared.map((c) => c.rev).reduce((a, b) => a > b ? a : b);
-      await _cursors.setPushCursor(_serverPeerId, maxRev);
+      await _cursors.setPushCursor(_serverPeerId, _maxRev(prepared));
       total += prepared.length;
 
       if (prepared.length < batch.length) break; // a photo failed partway
       if (batch.length < _pageSize) break;
     }
 
+    return total;
+  }
+
+  /// Prepares the photos of [batch] and sends it, cut short before the
+  /// first change whose photo failed to upload (retried next sync).
+  /// [ignored] are the entity types the server reported dropping.
+  Future<({List<SyncChange> prepared, Set<String>? ignored})> _deliver({
+    required String serverUrl,
+    required String token,
+    required String deviceId,
+    required List<SyncChange> batch,
+    bool skipExistingPhotos = false,
+  }) async {
+    final prepared = <SyncChange>[];
+    for (final change in batch) {
+      final ready = await _prepareOutgoingPhoto(serverUrl, token, change,
+          skipExisting: skipExistingPhotos);
+      if (ready == null) break;
+      prepared.add(ready);
+    }
+    if (prepared.isEmpty) return (prepared: prepared, ignored: null);
+
+    final result = await _http.receiveChanges(
+      serverUrl: serverUrl,
+      token: token,
+      deviceId: deviceId,
+      changes: prepared,
+    );
+    return (prepared: prepared, ignored: result.ignoredEntityTypes);
+  }
+
+  static int _maxRev(List<SyncChange> changes) =>
+      changes.map((c) => c.rev).reduce((a, b) => a > b ? a : b);
+
+  // -- re-push: a server predating `ignoredEntityTypes` dropped the rows of
+  //    types it didn't store yet in silence, while the push cursor moved
+  //    past them. Once it reports storing such a type, every local row of
+  //    it is sent once more, on a cursor of its own; LWW on the server
+  //    makes resending what it already has a no-op. ------------------------
+
+  /// Entity types this build pushes that the server reports storing but
+  /// never confirmed, after confirming those that need no re-push: the
+  /// types every server stored, and, on a device that never pushed, all of
+  /// them (the regular push sends their rows anyway). Types the server
+  /// stopped reporting are unconfirmed.
+  Future<Set<String>> _unconfirmedEntityTypes(Set<String> supported,
+      {required bool pushedBefore}) async {
+    final confirmed = await _cursors.getConfirmedEntityTypes(_serverPeerId);
+    final dropped = confirmed.difference(supported);
+    if (dropped.isNotEmpty) {
+      await _cursors.unconfirmEntityTypes(_serverPeerId, dropped);
+    }
+    final pending =
+        _storage.entityTypes.intersection(supported).difference(confirmed);
+    final safe = pushedBefore
+        ? pending.intersection(originalServerEntityTypes)
+        : pending;
+    if (safe.isNotEmpty) {
+      await _cursors.confirmEntityTypes(_serverPeerId, safe);
+    }
+    return pending.difference(safe);
+  }
+
+  /// Re-pushes every local row of [entityType] (only rows written here:
+  /// pulled ones came from the server), resuming where an interrupted pass
+  /// stopped, and confirms the type once the server took them all.
+  Future<int> _repush({
+    required String serverUrl,
+    required String token,
+    required String deviceId,
+    required String entityType,
+  }) async {
+    var total = 0;
+
+    while (true) {
+      final since = await _cursors.getRepushCursor(_serverPeerId, entityType);
+      final batch = await _storage.localChangesOfTypeSince(entityType, since,
+          limit: _pageSize, deviceId: deviceId);
+      if (batch.isEmpty) break;
+
+      // Their photos were uploaded the first time, whatever became of the
+      // rows, so only the missing ones are sent.
+      final (:prepared, :ignored) = await _deliver(
+          serverUrl: serverUrl,
+          token: token,
+          deviceId: deviceId,
+          batch: batch,
+          skipExistingPhotos: true);
+      if (prepared.isEmpty) return total;
+      if (ignored != null && ignored.contains(entityType)) {
+        // Downgraded since the pull: start over once it's back.
+        await _cursors.unconfirmEntityTypes(_serverPeerId, {entityType});
+        return total;
+      }
+
+      await _cursors.setRepushCursor(
+          _serverPeerId, entityType, _maxRev(prepared));
+      total += prepared.length;
+
+      if (prepared.length < batch.length) return total;
+      if (batch.length < _pageSize) break;
+    }
+
+    await _cursors.confirmEntityTypes(_serverPeerId, {entityType});
     return total;
   }
 
@@ -323,7 +462,8 @@ class SyncOrchestrator {
   }
 
   Future<SyncChange?> _prepareOutgoingPhoto(
-      String serverUrl, String token, SyncChange change) async {
+      String serverUrl, String token, SyncChange change,
+      {bool skipExisting = false}) async {
     if (!_photoEntityTypes.contains(change.entityType) ||
         change.deletedAt != null) {
       return change;
@@ -336,6 +476,7 @@ class SyncOrchestrator {
       token: token,
       entityId: change.entityId,
       localPath: photoPath,
+      skipExisting: skipExisting,
     );
     if (photoKey == null) return null;
 

@@ -56,6 +56,7 @@ part 'app_database.g.dart';
     SyncCursorsTable,
     SyncEntryTypesTable,
     SyncEntityTypesTable,
+    SyncConfirmedEntityTypesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -72,7 +73,7 @@ class AppDatabase extends _$AppDatabase {
   final String? deviceId;
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -243,6 +244,9 @@ class AppDatabase extends _$AppDatabase {
             // Several photos per entry; the entity type they sync as is new.
             await m.createTable(entryPhotosTable);
             await m.createTable(syncEntityTypesTable);
+          }
+          if (from < 21) {
+            await m.createTable(syncConfirmedEntityTypesTable);
           }
         },
       );

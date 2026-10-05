@@ -20,11 +20,25 @@ class ChangesPage {
   /// The entity restriction as echoed by the server; null when none was
   /// asked for, or the server predates it and sent every entity.
   final Set<String>? entities;
+
+  /// Every entity type the server stores; null when it predates reporting
+  /// them.
+  final Set<String>? supportedEntities;
   const ChangesPage(
       {required this.changes,
       required this.nextCursor,
       required this.hasMore,
-      this.entities});
+      this.entities,
+      this.supportedEntities});
+}
+
+class ReceiveResult {
+  final int appliedCount;
+
+  /// Entity types of the batch the server dropped instead of storing; null
+  /// when it predates reporting them.
+  final Set<String>? ignoredEntityTypes;
+  const ReceiveResult({required this.appliedCount, this.ignoredEntityTypes});
 }
 
 /// Pure HTTP transport for the sync protocol -- no storage or merge logic,
@@ -71,11 +85,12 @@ class SyncHttpClient {
       changes: changes,
       nextCursor: data['nextCursor'] as int,
       hasMore: data['hasMore'] as bool? ?? false,
-      entities: (data['entities'] as List<dynamic>?)?.cast<String>().toSet(),
+      entities: _stringSet(data['entities']),
+      supportedEntities: _stringSet(data['supportedEntities']),
     );
   }
 
-  Future<int> receiveChanges({
+  Future<ReceiveResult> receiveChanges({
     required String serverUrl,
     required String token,
     required String deviceId,
@@ -100,7 +115,10 @@ class SyncHttpClient {
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
-    return data['appliedCount'] as int? ?? 0;
+    return ReceiveResult(
+      appliedCount: data['appliedCount'] as int? ?? 0,
+      ignoredEntityTypes: _stringSet(data['ignoredEntityTypes']),
+    );
   }
 
   /// Best-effort: failures here don't affect correctness, only the
@@ -124,4 +142,7 @@ class SyncHttpClient {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       };
+
+  static Set<String>? _stringSet(Object? json) =>
+      (json as List<dynamic>?)?.cast<String>().toSet();
 }

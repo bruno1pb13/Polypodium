@@ -32,4 +32,18 @@ abstract interface class ISyncCursorStore {
 
   /// Marks [entityTypes] declared and drops their backfill cursors.
   Future<void> completeEntityBackfill(String peerId, Set<String> entityTypes);
+
+  /// Entity types [peerId] confirmed storing (empty if none yet).
+  Future<Set<String>> getConfirmedEntityTypes(String peerId);
+
+  /// Marks [entityTypes] confirmed and drops their re-push cursors.
+  Future<void> confirmEntityTypes(String peerId, Set<String> entityTypes);
+
+  /// Marks [entityTypes] unconfirmed and drops their re-push cursors.
+  Future<void> unconfirmEntityTypes(String peerId, Set<String> entityTypes);
+
+  /// Local rev up to which rows of [entityType] were re-pushed (0 if none
+  /// yet).
+  Future<int> getRepushCursor(String peerId, String entityType);
+  Future<void> setRepushCursor(String peerId, String entityType, int cursor);
 }
