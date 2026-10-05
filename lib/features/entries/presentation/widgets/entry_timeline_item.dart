@@ -137,7 +137,10 @@ class EntryTimelineItem extends ConsumerWidget {
                               ),
                             ),
                           ],
-                          if (entry.photoPath != null) ...[
+                          if (entry.photos.length > 1) ...[
+                            const SizedBox(height: 10),
+                            _EntryPhotoStrip(entry: entry),
+                          ] else if (entry.photoPath != null) ...[
                             const SizedBox(height: 10),
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
@@ -201,6 +204,63 @@ class EntryTimelineItem extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Thumbnails of an entry with several photos; each opens the fullscreen
+/// viewer, which swipes between them.
+class _EntryPhotoStrip extends StatelessWidget {
+  final EntryModel entry;
+
+  const _EntryPhotoStrip({required this.entry});
+
+  @override
+  Widget build(BuildContext context) {
+    final photos = entry.photos;
+    final paths = [for (final p in photos) p.path];
+    final date = DateFormat.yMd(context.l10n.localeName).format(entry.date);
+
+    // A scroll view that, unlike a ListView, reports its intrinsic height to
+    // the IntrinsicHeight around the timeline row.
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (var i = 0; i < photos.length; i++) ...[
+            if (i > 0) const SizedBox(width: 8),
+            Semantics(
+              container: true,
+              button: true,
+              image: true,
+              label: context.l10n
+                  .entryPhotoNumberLabel(i + 1, photos.length, date),
+              child: GestureDetector(
+                onTap: () => showFullscreenImageViewer(context, paths[i],
+                    gallery: paths),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox.square(
+                    dimension: 96,
+                    child: Image.file(
+                      File(paths[i]),
+                      fit: BoxFit.cover,
+                      excludeFromSemantics: true,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: context.glass.tint(0.1),
+                        child: Icon(
+                          Icons.broken_image_outlined,
+                          color: context.glass.outline,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

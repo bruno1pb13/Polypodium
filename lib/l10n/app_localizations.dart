@@ -3925,6 +3925,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cover updated'**
   String get coverPhotoUpdated;
+
+  /// No description provided for @photosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get photosTitle;
+
+  /// No description provided for @photosCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {max}'**
+  String photosCounter(int count, int max);
+
+  /// No description provided for @photoNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {index} of {total}'**
+  String photoNumberLabel(int index, int total);
+
+  /// No description provided for @removePhotoNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo {index}'**
+  String removePhotoNumber(int index);
+
+  /// No description provided for @entryPhotoNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {index} of {total} from {date}'**
+  String entryPhotoNumberLabel(int index, int total, String date);
+
+  /// No description provided for @photoPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'{index} of {total}'**
+  String photoPosition(int index, int total);
 }
 
 class _AppLocalizationsDelegate

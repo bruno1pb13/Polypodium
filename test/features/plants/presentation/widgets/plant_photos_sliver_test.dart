@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polypodium/core/enums.dart';
+import 'package:polypodium/core/widgets/fullscreen_image_viewer.dart';
 import 'package:polypodium/features/entries/domain/entry_model.dart';
 import 'package:polypodium/features/plants/presentation/widgets/plant_photos_sliver.dart';
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
@@ -24,11 +25,12 @@ EntryModel _entry(String id, int day, {String? photoPath}) => EntryModel(
     );
 
 void main() {
-  final entries = [
-    _entry('e1', 1, photoPath: '/nonexistent/a.jpg'),
-    _entry('e2', 10, photoPath: '/nonexistent/b.jpg'),
-    _entry('e3', 12),
-  ];
+  var entries = <EntryModel>[];
+  setUp(() => entries = [
+        _entry('e1', 1, photoPath: '/nonexistent/a.jpg'),
+        _entry('e2', 10, photoPath: '/nonexistent/b.jpg'),
+        _entry('e3', 12),
+      ]);
 
   Future<void> pump(WidgetTester tester,
       {String? coverPhotoId,
@@ -57,6 +59,33 @@ void main() {
     ));
     await tester.pumpAndSettle();
   }
+
+  testWidgets('shows every photo of an entry; a tap swipes through all',
+      (tester) async {
+    final semantics = tester.ensureSemantics();
+    entries = [
+      _entry('e1', 1, photoPath: '/nonexistent/a.jpg'),
+      _entry('e2', 10, photoPath: '/nonexistent/b.jpg').copyWith(extraPhotos: [
+        const EntryPhoto(id: 'ph', path: '/nonexistent/c.jpg')
+      ]),
+    ];
+    await pump(tester);
+
+    expect(find.bySemanticsLabel(RegExp('Foto (de capa )?de 10/03/2026')),
+        findsNWidgets(2));
+    await tester.tap(find.bySemanticsLabel('Foto de 01/03/2026'));
+    await tester.pumpAndSettle();
+    final viewer = tester
+        .widget<FullscreenImageViewer>(find.byType(FullscreenImageViewer));
+    expect(viewer.imagePaths, [
+      '/nonexistent/a.jpg',
+      '/nonexistent/b.jpg',
+      '/nonexistent/c.jpg',
+    ]);
+    expect(viewer.initialIndex, 0);
+    expect(find.text('1 de 3'), findsOneWidget);
+    semantics.dispose();
+  });
 
   group('cover', () {
     testWidgets('marks the latest photo without a pick', (tester) async {

@@ -49,6 +49,7 @@ class PlantPhotosSliver extends StatelessWidget {
     }
 
     final coverId = coverPhotoIdOf(photos, coverPhotoId);
+    final gallery = [for (final p in photos) p.photo.path];
 
     return SliverPadding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -64,6 +65,7 @@ class PlantPhotosSliver extends StatelessWidget {
             final isCover = item.photo.id == coverId;
             return _PhotoTile(
               item: item,
+              gallery: gallery,
               isCover: isCover,
               onLongPress: onSetCover == null
                   ? null
@@ -115,11 +117,15 @@ class PlantPhotosSliver extends StatelessWidget {
 
 class _PhotoTile extends StatelessWidget {
   final PlantPhoto item;
+
+  /// Every photo of the plant, swiped through from this one.
+  final List<String> gallery;
   final bool isCover;
   final VoidCallback? onLongPress;
 
   const _PhotoTile({
     required this.item,
+    required this.gallery,
     required this.isCover,
     this.onLongPress,
   });
@@ -140,7 +146,8 @@ class _PhotoTile extends StatelessWidget {
       onLongPressHint:
           onLongPress == null ? null : context.l10n.photoOptionsHint,
       child: GestureDetector(
-        onTap: () => showFullscreenImageViewer(context, path),
+        onTap: () =>
+            showFullscreenImageViewer(context, path, gallery: gallery),
         onLongPress: onLongPress,
         child: ExcludeSemantics(
           child: ClipRRect(

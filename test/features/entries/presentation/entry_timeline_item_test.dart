@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:polypodium/core/enums.dart';
+import 'package:polypodium/core/widgets/fullscreen_image_viewer.dart';
 import 'package:polypodium/features/entries/domain/entry_model.dart';
 import 'package:polypodium/features/entries/presentation/widgets/entry_timeline_item.dart';
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
@@ -196,6 +197,63 @@ void main() {
         await expectReadableText(tester);
         semantics.dispose();
       });
+    }
+  });
+
+  group('photos', () {
+    EntryModel withPhotos(int count) => entry(EntryType.observation).copyWith(
+          photoPath: '/nonexistent/1.jpg',
+          extraPhotos: [
+            for (var i = 2; i <= count; i++)
+              EntryPhoto(id: 'ph$i', path: '/nonexistent/$i.jpg'),
+          ],
+        );
+
+    testWidgets('a single photo shows as before', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, withPhotos(1));
+      expect(find.bySemanticsLabel('Foto de 01/01/2026'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('Foto 1 de')), findsNothing);
+      semantics.dispose();
+    });
+
+    testWidgets('several photos show as a strip that opens a swipeable '
+        'viewer', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, withPhotos(3), transparent: true);
+
+      for (var i = 1; i <= 3; i++) {
+        expect(find.bySemanticsLabel('Foto $i de 3 de 01/01/2026'),
+            findsOneWidget);
+      }
+      await expectTapTargetGuidelines(tester);
+
+      await tester.tap(find.bySemanticsLabel('Foto 2 de 3 de 01/01/2026'));
+      await tester.pumpAndSettle();
+      final viewer = tester
+          .widget<FullscreenImageViewer>(find.byType(FullscreenImageViewer));
+      expect(viewer.imagePaths,
+          ['/nonexistent/1.jpg', '/nonexistent/2.jpg', '/nonexistent/3.jpg']);
+      expect(find.text('2 de 3'), findsOneWidget);
+
+      await tester.fling(find.byType(PageView), const Offset(-600, 0), 1000);
+      await tester.pumpAndSettle();
+      expect(find.text('3 de 3'), findsOneWidget);
+      semantics.dispose();
+    });
+
+    for (final (name, theme) in appThemes) {
+      for (final transparent in [true, false]) {
+        testWidgets(
+            'the strip is readable in the $name theme '
+            '(transparency ${transparent ? 'on' : 'off'})', (tester) async {
+          final semantics = tester.ensureSemantics();
+          await pump(tester, withPhotos(2),
+              theme: theme, transparent: transparent);
+          await expectReadableText(tester);
+          semantics.dispose();
+        });
+      }
     }
   });
 

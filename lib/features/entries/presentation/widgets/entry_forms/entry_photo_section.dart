@@ -6,62 +6,67 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../../core/l10n/l10n.dart';
 import '../../../../../core/theme/glass_colors.dart';
 
-/// Photo of the entry: a preview with a remove button, or camera/gallery
-/// buttons when there is none yet.
+/// Most photos one entry takes.
+const maxEntryPhotos = 5;
+
+/// Photos of the entry: previews with a remove button each, and
+/// camera/gallery buttons while there's room for more.
 class EntryPhotoSection extends StatelessWidget {
-  final String? photoPath;
-  final VoidCallback onRemove;
+  final List<String> photoPaths;
+  final ValueChanged<int> onRemove;
   final ValueChanged<ImageSource> onPick;
 
   const EntryPhotoSection({
     super.key,
-    required this.photoPath,
+    required this.photoPaths,
     required this.onRemove,
     required this.onPick,
   });
 
   @override
   Widget build(BuildContext context) {
+    final count = photoPaths.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.photoTitle,
-          style: TextStyle(
-            color: context.glass.fg,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+        Wrap(
+          spacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(
+              context.l10n.photosTitle,
+              style: TextStyle(
+                color: context.glass.fg,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (count > 0)
+              Text(
+                context.l10n.photosCounter(count, maxEntryPhotos),
+                style: TextStyle(color: context.glass.fgMuted, fontSize: 14),
+              ),
+          ],
         ),
         const SizedBox(height: 12),
-        if (photoPath != null) ...[
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.file(
-                  File(photoPath!),
-                  height: 200,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  semanticLabel: context.l10n.photoTitle,
-                ),
+        if (count > 0) ...[
+          SizedBox(
+            height: 120,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: count,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, i) => _PhotoPreview(
+                path: photoPaths[i],
+                label: context.l10n.photoNumberLabel(i + 1, count),
+                removeTooltip: context.l10n.removePhotoNumber(i + 1),
+                onRemove: () => onRemove(i),
               ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: IconButton.filled(
-                  onPressed: onRemove,
-                  tooltip: context.l10n.removePhoto,
-                  icon: const Icon(Icons.close, size: 20),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.black54,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ] else
+          if (count < maxEntryPhotos) const SizedBox(height: 12),
+        ],
+        if (count < maxEntryPhotos)
           Row(
             children: [
               Expanded(
@@ -82,6 +87,61 @@ class EntryPhotoSection extends StatelessWidget {
             ],
           ),
       ],
+    );
+  }
+}
+
+class _PhotoPreview extends StatelessWidget {
+  final String path;
+  final String label;
+  final String removeTooltip;
+  final VoidCallback onRemove;
+
+  const _PhotoPreview({
+    required this.path,
+    required this.label,
+    required this.removeTooltip,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 120,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.file(
+              File(path),
+              fit: BoxFit.cover,
+              semanticLabel: label,
+              errorBuilder: (_, __, ___) => Semantics(
+                image: true,
+                label: label,
+                child: Container(
+                  color: context.glass.tint(0.1),
+                  child: Icon(Icons.broken_image_outlined,
+                      color: context.glass.outline),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton.filled(
+              onPressed: onRemove,
+              tooltip: removeTooltip,
+              icon: const Icon(Icons.close, size: 20),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.black54,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

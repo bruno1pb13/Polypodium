@@ -2266,4 +2266,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coverPhotoUpdated => 'Cover updated';
+
+  @override
+  String get photosTitle => 'Photos';
+
+  @override
+  String photosCounter(int count, int max) {
+    return '$count of $max';
+  }
+
+  @override
+  String photoNumberLabel(int index, int total) {
+    return 'Photo $index of $total';
+  }
+
+  @override
+  String removePhotoNumber(int index) {
+    return 'Remove photo $index';
+  }
+
+  @override
+  String entryPhotoNumberLabel(int index, int total, String date) {
+    return 'Photo $index of $total from $date';
+  }
+
+  @override
+  String photoPosition(int index, int total) {
+    return '$index of $total';
+  }
 }

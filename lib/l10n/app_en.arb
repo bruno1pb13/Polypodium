@@ -1114,5 +1114,41 @@
     }
   },
   "photoOptionsHint": "show photo options",
-  "coverPhotoUpdated": "Cover updated"
+  "coverPhotoUpdated": "Cover updated",
+  "photosTitle": "Photos",
+  "photosCounter": "{count} of {max}",
+  "@photosCounter": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "max": {"type": "int"}
+    }
+  },
+  "photoNumberLabel": "Photo {index} of {total}",
+  "@photoNumberLabel": {
+    "placeholders": {
+      "index": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "removePhotoNumber": "Remove photo {index}",
+  "@removePhotoNumber": {
+    "placeholders": {
+      "index": {"type": "int"}
+    }
+  },
+  "entryPhotoNumberLabel": "Photo {index} of {total} from {date}",
+  "@entryPhotoNumberLabel": {
+    "placeholders": {
+      "index": {"type": "int"},
+      "total": {"type": "int"},
+      "date": {"type": "String"}
+    }
+  },
+  "photoPosition": "{index} of {total}",
+  "@photoPosition": {
+    "placeholders": {
+      "index": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  }
 }

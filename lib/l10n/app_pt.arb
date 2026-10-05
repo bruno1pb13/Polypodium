@@ -669,5 +669,11 @@
   "coverBadge": "Capa",
   "coverPhotoLabel": "Foto de capa de {date}",
   "photoOptionsHint": "mostrar opções da foto",
-  "coverPhotoUpdated": "Capa atualizada"
+  "coverPhotoUpdated": "Capa atualizada",
+  "photosTitle": "Fotos",
+  "photosCounter": "{count} de {max}",
+  "photoNumberLabel": "Foto {index} de {total}",
+  "removePhotoNumber": "Remover foto {index}",
+  "entryPhotoNumberLabel": "Foto {index} de {total} de {date}",
+  "photoPosition": "{index} de {total}"
 }

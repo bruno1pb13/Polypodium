@@ -2270,4 +2270,32 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get coverPhotoUpdated => 'Capa atualizada';
+
+  @override
+  String get photosTitle => 'Fotos';
+
+  @override
+  String photosCounter(int count, int max) {
+    return '$count de $max';
+  }
+
+  @override
+  String photoNumberLabel(int index, int total) {
+    return 'Foto $index de $total';
+  }
+
+  @override
+  String removePhotoNumber(int index) {
+    return 'Remover foto $index';
+  }
+
+  @override
+  String entryPhotoNumberLabel(int index, int total, String date) {
+    return 'Foto $index de $total de $date';
+  }
+
+  @override
+  String photoPosition(int index, int total) {
+    return '$index de $total';
+  }
 }
