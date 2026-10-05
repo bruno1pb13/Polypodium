@@ -15,6 +15,7 @@ import 'package:uuid/uuid.dart';
 import '../database/app_database.dart';
 import '../enums.dart';
 import '../storage/photo_storage.dart';
+import '../../features/agenda/data/home_widget_service.dart';
 import '../../features/entries/data/entries_repository.dart';
 import '../../features/entries/domain/entry_model.dart';
 import '../../features/plants/data/plants_repository.dart';
@@ -476,6 +477,8 @@ class NotificationService implements INotificationService {
       }
       await PlantsRepository(active.db, const NotificationService())
           .rescheduleNotifications();
+      // Also keeps the home-screen widget current when the app isn't opened.
+      await _publishHomeWidget(active.db);
     } finally {
       await active.db.close();
     }
@@ -513,6 +516,7 @@ class NotificationService implements INotificationService {
           await snoozeReminder(payload);
         }
         await plantsRepo.rescheduleNotifications();
+        await _publishHomeWidget(active.db);
       } finally {
         await active.db.close();
       }
@@ -520,6 +524,44 @@ class NotificationService implements INotificationService {
       // ignore: avoid_print
       print(
           '[NotificationService] Notification action $action failed: $e\n$st');
+    }
+  }
+
+  /// Handles a home-screen widget action in the widget's background
+  /// isolate: "Watered" on [waterPlantIds], if any, then a fresh widget
+  /// snapshot (all a stale-day refresh asks for).
+  static Future<void> handleWidgetAction(
+      {List<String> waterPlantIds = const []}) async {
+    try {
+      DartPluginRegistrant.ensureInitialized();
+      final active = await _openActiveDatabase();
+      if (active == null) return;
+      try {
+        if (waterPlantIds.isNotEmpty) {
+          await _initTimezone();
+          await _initializePlugin();
+          await recordWatered(active.db, active.workspace, waterPlantIds);
+          await PlantsRepository(active.db, const NotificationService())
+              .rescheduleNotifications();
+        }
+        await _publishHomeWidget(active.db);
+      } finally {
+        await active.db.close();
+      }
+    } catch (e, st) {
+      // ignore: avoid_print
+      print('[NotificationService] Widget action failed: $e\n$st');
+    }
+  }
+
+  /// Never fails the background task that calls it.
+  static Future<void> _publishHomeWidget(AppDatabase db) async {
+    if (!Platform.isAndroid) return;
+    try {
+      await publishHomeWidgetFromDatabase(db);
+    } catch (e) {
+      // ignore: avoid_print
+      print('[NotificationService] Home widget refresh failed: $e');
     }
   }
 

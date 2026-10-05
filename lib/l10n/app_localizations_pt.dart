@@ -502,6 +502,24 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String homeWidgetDueCount(int count) {
+    return '$count para hoje';
+  }
+
+  @override
+  String homeWidgetOverdue(int days) {
+    return 'atrasado $days d';
+  }
+
+  @override
+  String get homeWidgetToday => 'hoje';
+
+  @override
+  String homeWidgetMore(int count) {
+    return '+$count mais';
+  }
+
+  @override
   String get deleteReminderTitle => 'Excluir lembrete?';
 
   @override

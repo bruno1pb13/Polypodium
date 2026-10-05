@@ -9,6 +9,7 @@
 | `flutter_riverpod` + `riverpod_generator` | estado e DI |
 | `workmanager` | tarefa periódica de verificação de irrigação |
 | `flutter_local_notifications` | notificações locais |
+| `home_widget` | widget de tela inicial (Android) |
 | `http` | chamadas HTTP para o servidor de sync |
 | `shared_preferences` | token JWT e cursor de sync |
 | `image_picker` | fotos das plantas |
@@ -36,6 +37,16 @@ O gerador de código precisa ser reexecutado sempre que arquivos anotados com `@
 flutter analyze   # lint
 flutter test      # testes
 ```
+
+## Widget de tela inicial (Android)
+
+O widget mostra as tarefas atrasadas e de hoje da agenda (até 5 linhas) do workspace ativo. O conteúdo é um snapshot JSON já localizado, montado em Dart (`buildHomeWidgetSnapshot`) e gravado com `home_widget` na chave `agenda_snapshot`; o `AgendaWidgetProvider` (Kotlin) só o desenha. O snapshot é republicado:
+
+- com o app aberto, a cada mudança do `agendaTasksProvider` (com debounce de 1 s) — inclusive troca de workspace e o refresh ao voltar para o app;
+- na tarefa de 12 h do WorkManager, depois de reagendar os lembretes;
+- depois das ações "Reguei"/"Lembrar em 3 h" das notificações e do botão "Reguei" do próprio widget (que roda em segundo plano, sem abrir o app).
+
+O snapshot guarda o dia em que foi calculado. A atualização periódica do widget (`updatePeriodMillis`, 1 h) compara esse dia com a data do aparelho e, se virou o dia, pede uma vez um snapshot novo ao Dart em segundo plano — então os rótulos "hoje"/"atrasado" ficam no máximo ~1 h desatualizados depois da meia-noite (mais, se o sistema adiar a atualização; abrir o app sempre atualiza). Tocar no widget abre a agenda; tocar numa linha abre a planta.
 
 ## Sincronização
 

@@ -896,6 +896,30 @@ abstract class AppLocalizations {
   /// **'No care due in the next {days} days.'**
   String agendaAllCaughtUpHint(int days);
 
+  /// Home-screen widget header: overdue plus due-today tasks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} due today'**
+  String homeWidgetDueCount(int count);
+
+  /// No description provided for @homeWidgetOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} d late'**
+  String homeWidgetOverdue(int days);
+
+  /// No description provided for @homeWidgetToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get homeWidgetToday;
+
+  /// No description provided for @homeWidgetMore.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String homeWidgetMore(int count);
+
   /// No description provided for @deleteReminderTitle.
   ///
   /// In en, this message translates to:

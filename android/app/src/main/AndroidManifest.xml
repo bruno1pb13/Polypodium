@@ -54,6 +54,23 @@
              notificações ("Reguei", "Lembrar em 3 h") sem abrir o app. -->
         <receiver android:exported="false"
             android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
+        <!-- Home-screen widget with the day's tasks (home_widget). -->
+        <receiver android:name=".AgendaWidgetProvider" android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/agenda_widget_info" />
+        </receiver>
+        <!-- home_widget: runs Dart in the background for the widget's
+             "Watered" button and its day-rollover refresh. -->
+        <receiver android:exported="false"
+            android:name="es.antonborri.home_widget.HomeWidgetBackgroundReceiver">
+            <intent-filter>
+                <action android:name="es.antonborri.home_widget.action.BACKGROUND" />
+            </intent-filter>
+        </receiver>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

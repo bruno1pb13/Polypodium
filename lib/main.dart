@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -14,6 +15,9 @@ import 'l10n/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/app_shell.dart';
 import 'core/widgets/sync_status_banner.dart';
+import 'features/agenda/data/home_widget_service.dart';
+import 'features/agenda/presentation/home_widget_launch_handler.dart';
+import 'features/agenda/presentation/providers/home_widget_providers.dart';
 import 'features/onboarding/presentation/screens/intro_screen.dart';
 import 'features/settings/data/settings_repository.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
@@ -56,6 +60,8 @@ Future<void> main() async {
       frequency: const Duration(hours: 12),
       existingWorkPolicy: ExistingPeriodicWorkPolicy.replace,
     );
+    await _guard(() =>
+        HomeWidget.registerInteractivityCallback(onHomeWidgetInteraction));
   }
 
   runApp(UncontrolledProviderScope(
@@ -71,6 +77,25 @@ Future<void> main() async {
   final launchResponse = await NotificationService.launchResponse();
   if (launchResponse != null && !showIntro) {
     await notificationResponses.handle(launchResponse);
+  }
+
+  if (Platform.isAndroid && !showIntro) {
+    final widgetLaunches =
+        HomeWidgetLaunchHandler(notificationResponses.navigatorKey);
+    HomeWidget.widgetClicked.listen(widgetLaunches.handle, onError: (_) {});
+    await _guard(() async => widgetLaunches
+        .handle(await HomeWidget.initiallyLaunchedFromHomeWidget()));
+  }
+}
+
+/// The home-screen widget is an extra: a plugin failure must not stop the
+/// app from starting.
+Future<void> _guard(Future<void> Function() action) async {
+  try {
+    await action();
+  } catch (e) {
+    // ignore: avoid_print
+    print('[HomeWidget] $e');
   }
 }
 
@@ -129,6 +154,10 @@ class _AutoSyncScopeState extends ConsumerState<_AutoSyncScope>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _triggerSync());
+    // Listened, not read: an unlistened provider's own listeners are paused.
+    if (Platform.isAndroid) {
+      ref.listenManual(homeWidgetSyncProvider, (_, __) {});
+    }
   }
 
   @override

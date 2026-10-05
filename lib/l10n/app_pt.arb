@@ -145,6 +145,10 @@
   "agendaPesticideTask": "Reaplicação de defensivo",
   "agendaAllCaughtUp": "Tudo em dia! 🌿",
   "agendaAllCaughtUpHint": "Nenhum cuidado previsto para os próximos {days} dias.",
+  "homeWidgetDueCount": "{count} para hoje",
+  "homeWidgetOverdue": "atrasado {days} d",
+  "homeWidgetToday": "hoje",
+  "homeWidgetMore": "+{count} mais",
   "deleteReminderTitle": "Excluir lembrete?",
   "deleteReminderBody": "As entradas do diário são mantidas; só o lembrete é removido.",
 

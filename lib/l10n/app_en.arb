@@ -267,6 +267,26 @@
       "days": {"type": "int"}
     }
   },
+  "homeWidgetDueCount": "{count} due today",
+  "@homeWidgetDueCount": {
+    "description": "Home-screen widget header: overdue plus due-today tasks.",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "homeWidgetOverdue": "{days} d late",
+  "@homeWidgetOverdue": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "homeWidgetToday": "today",
+  "homeWidgetMore": "+{count} more",
+  "@homeWidgetMore": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "deleteReminderTitle": "Delete reminder?",
   "deleteReminderBody": "The diary entries are kept; only the reminder is removed.",
 

@@ -499,6 +499,24 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String homeWidgetDueCount(int count) {
+    return '$count due today';
+  }
+
+  @override
+  String homeWidgetOverdue(int days) {
+    return '$days d late';
+  }
+
+  @override
+  String get homeWidgetToday => 'today';
+
+  @override
+  String homeWidgetMore(int count) {
+    return '+$count more';
+  }
+
+  @override
   String get deleteReminderTitle => 'Delete reminder?';
 
   @override
