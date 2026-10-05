@@ -340,6 +340,32 @@ void main() {
     expect(find.text('Babosa'), findsOneWidget);
   });
 
+  group('theme colors', () {
+    Color? textColor(WidgetTester tester, String text) =>
+        tester.widget<Text>(find.text(text)).style?.color;
+
+    for (final (name, theme, glass) in [
+      ('light', AppTheme.light, GlassColors.light),
+      ('dark', AppTheme.dark, GlassColors.dark),
+    ]) {
+      testWidgets('text follows the $name theme', (tester) async {
+        await pump(tester, [samambaia], theme: theme);
+
+        expect(textColor(tester, 'Polypodium'), glass.fg);
+        expect(textColor(tester, 'Samambaia'), glass.fg);
+        expect(textColor(tester, 'Espécie p1'), glass.fgMuted);
+      });
+    }
+
+    testWidgets('dark keeps the white foregrounds', (tester) async {
+      await pump(tester, [samambaia], theme: AppTheme.dark);
+
+      expect(textColor(tester, 'Polypodium'), Colors.white);
+      expect(textColor(tester, 'Samambaia'), Colors.white);
+      expect(textColor(tester, 'Espécie p1'), Colors.white70);
+    });
+  });
+
   group('accessibility', () {
     testWidgets('meets the tap target and labelling guidelines',
         (tester) async {
@@ -354,14 +380,15 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('text is readable over the dark theme surface',
-        (tester) async {
-      final semantics = tester.ensureSemantics();
-      clearImageCache();
-      await pump(tester, [anturio, samambaia], theme: AppTheme.dark);
-      await expectReadableText(tester);
-      semantics.dispose();
-    });
+    for (final (name, theme) in appThemes) {
+      testWidgets('text is readable in the $name theme', (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pump(tester, [anturio, samambaia], theme: theme);
+        await paintBackground(tester);
+        await expectReadableText(tester);
+        semantics.dispose();
+      });
+    }
 
     testWidgets('selection mode meets the guidelines too', (tester) async {
       final semantics = tester.ensureSemantics();

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polypodium/core/enums.dart';
-import 'package:polypodium/core/theme/app_theme.dart';
 import 'package:polypodium/features/agenda/domain/agenda_task.dart';
 import 'package:polypodium/features/agenda/presentation/providers/agenda_providers.dart';
 import 'package:polypodium/features/agenda/presentation/screens/agenda_screen.dart';
@@ -166,14 +165,15 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('text is readable over the dark theme surface',
-        (tester) async {
-      final semantics = tester.ensureSemantics();
-      clearImageCache();
-      await pump(tester, tasks(), theme: AppTheme.dark);
-      await expectReadableText(tester);
-      semantics.dispose();
-    });
+    for (final (name, theme) in appThemes) {
+      testWidgets('text is readable in the $name theme', (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pump(tester, tasks(), theme: theme);
+        await paintBackground(tester);
+        await expectReadableText(tester);
+        semantics.dispose();
+      });
+    }
 
     for (final scale in [1.5, 2.0]) {
       testWidgets('lays out without overflow at text scale $scale',

@@ -41,7 +41,7 @@ void main() {
   late _FakePlantsRepository plants;
 
   Future<void> pump(WidgetTester tester, Workspace workspace,
-      {Size size = const Size(800, 2000)}) async {
+      {Size size = const Size(800, 2000), ThemeData? theme}) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -58,8 +58,9 @@ void main() {
         dataTransferPermissionProvider
             .overrideWith((ref) async => DataTransferPermission.allowed),
       ],
-      child: const MaterialApp(
-        locale: Locale('pt'),
+      child: MaterialApp(
+        theme: theme,
+        locale: const Locale('pt'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: SettingsScreen(),
@@ -150,6 +151,15 @@ void main() {
       await expectTapTargetGuidelines(tester);
       semantics.dispose();
     });
+
+    for (final (name, theme) in appThemes) {
+      testWidgets('text is readable in the $name theme', (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pump(tester, remote, theme: theme);
+        await expectReadableText(tester);
+        semantics.dispose();
+      });
+    }
 
     for (final scale in [1.5, 2.0]) {
       testWidgets('lays out without overflow at text scale $scale',

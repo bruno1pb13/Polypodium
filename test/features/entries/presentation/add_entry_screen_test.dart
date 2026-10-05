@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polypodium/core/enums.dart';
-import 'package:polypodium/core/theme/app_theme.dart';
 import 'package:polypodium/core/storage/photo_storage.dart';
 import 'package:polypodium/core/storage/photo_storage_provider.dart';
 import 'package:polypodium/features/defensivos/domain/defensivo_model.dart';
@@ -352,17 +351,18 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('text is readable over the dark theme surface',
-        (tester) async {
-      final semantics = tester.ensureSemantics();
-      clearImageCache();
-      for (final type in manualTypes) {
-        await pump(tester, AddEntryScreen(plantId: 'p1', initialType: type),
-            theme: AppTheme.dark);
-        await expectReadableText(tester);
-      }
-      semantics.dispose();
-    });
+    for (final (name, theme) in appThemes) {
+      testWidgets('text is readable in the $name theme', (tester) async {
+        final semantics = tester.ensureSemantics();
+        for (final type in manualTypes) {
+          await pump(tester, AddEntryScreen(plantId: 'p1', initialType: type),
+              theme: theme);
+          await paintBackground(tester);
+          await expectReadableText(tester);
+        }
+        semantics.dispose();
+      });
+    }
 
     testWidgets('health score buttons say what they mean', (tester) async {
       final semantics = tester.ensureSemantics();
