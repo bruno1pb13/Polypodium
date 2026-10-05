@@ -483,6 +483,18 @@ void main() {
       });
     }
 
+    // The banner pushes the info card further down the leaf illustration.
+    for (final (name, theme) in appThemes) {
+      testWidgets('the whole screen is readable in the $name theme',
+          (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pump(tester, plant(), theme: theme, carencia: carencia);
+        await paintBackground(tester);
+        await expectReadableText(tester);
+        semantics.dispose();
+      });
+    }
+
     testWidgets('lays out without overflow at text scale 2.0',
         (tester) async {
       setTextScale(tester, 2.0);

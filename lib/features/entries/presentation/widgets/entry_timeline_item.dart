@@ -102,8 +102,7 @@ class EntryTimelineItem extends ConsumerWidget {
                                         ? context.glass.fgMuted
                                         : Theme.of(context)
                                             .colorScheme
-                                            .onSurfaceVariant
-                                            .withValues(alpha: 0.7),
+                                            .onSurfaceVariant,
                                     fontSize: 12,
                                   ),
                                 ),

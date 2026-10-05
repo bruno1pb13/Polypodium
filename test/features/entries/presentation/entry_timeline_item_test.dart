@@ -227,6 +227,24 @@ void main() {
       semantics.dispose();
     });
 
+    // Opaque mode (transparency off) draws on the theme surface colors.
+    for (final (name, theme) in appThemes) {
+      testWidgets('is readable without transparency in the $name theme',
+          (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pump(
+            tester,
+            entry(EntryType.pest,
+                extraData: '{"pestType":"Cochonilha"}', numericValue: 2)
+                .copyWith(note: 'Folhas com manchas'),
+            onDelete: () {},
+            theme: theme);
+        expect(find.text('01/01/2026 00:00'), findsOneWidget);
+        await expectReadableText(tester);
+        semantics.dispose();
+      });
+    }
+
     testWidgets('the delete button is labelled', (tester) async {
       final semantics = tester.ensureSemantics();
       await pump(tester, entry(EntryType.observation), onDelete: () {});

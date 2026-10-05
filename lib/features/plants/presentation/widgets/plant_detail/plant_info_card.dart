@@ -45,7 +45,7 @@ class PlantInfoCard extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: transparencyEnabled
-                  ? context.glass.scrim(0.3)
+                  ? context.glass.scrim(0.36)
                   : Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
