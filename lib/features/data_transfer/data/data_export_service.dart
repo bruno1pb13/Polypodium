@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../core/database/app_database.dart';
+import '../../../core/database/converters.dart';
 
 /// Serializes the active workspace's database (including soft-delete
 /// tombstones, so a restored backup can't resurrect deleted rows on a live
@@ -37,27 +38,32 @@ class DataExportService {
     final locations = await _db.select(_db.locationsTable).get();
     final plants = await _db.select(_db.plantsTable).get();
     final entries = await _db.select(_db.entriesTable).get();
+    final entryPhotos = await _db.select(_db.entryPhotosTable).get();
     final defensivos = await _db.select(_db.defensivosTable).get();
     final reminders = await _db.select(_db.remindersTable).get();
 
     final archive = Archive();
     final photoNames = <String>{};
 
+    /// Adds the photo at [path] to the archive's photos/ folder and returns
+    /// its name there, or null when the file is missing on disk.
+    Future<String?> addPhoto(String path) async {
+      final file = File(path);
+      if (!file.existsSync()) return null;
+      final photoFile = p.basename(path);
+      if (photoNames.add(photoFile)) {
+        final bytes = await file.readAsBytes();
+        archive.addFile(
+            ArchiveFile('$photosDirName/$photoFile', bytes.length, bytes));
+      }
+      return photoFile;
+    }
+
     final entryMaps = <Map<String, dynamic>>[];
     for (final r in entries) {
-      String? photoFile;
       final path = r.photoPath;
-      if (path != null && r.deletedAt == null) {
-        final file = File(path);
-        if (file.existsSync()) {
-          photoFile = p.basename(path);
-          if (photoNames.add(photoFile)) {
-            final bytes = await file.readAsBytes();
-            archive.addFile(
-                ArchiveFile('$photosDirName/$photoFile', bytes.length, bytes));
-          }
-        }
-      }
+      final photoFile =
+          path != null && r.deletedAt == null ? await addPhoto(path) : null;
       entryMaps.add({
         'id': r.id,
         'plantId': r.plantId,
@@ -91,6 +97,11 @@ class DataExportService {
               'defaultIrrigationFrequencyDays':
                   r.defaultIrrigationFrequencyDays,
               'recommendedSoilIds': r.recommendedSoilTypes,
+              'light': r.light?.name,
+              'humidity': r.humidity?.name,
+              'petToxicity': r.petToxicity.name,
+              'floweringMonths': MonthSetConverter.toJson(r.floweringMonths),
+              'careNotes': r.careNotes,
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),
@@ -142,6 +153,8 @@ class DataExportService {
               'pesticideReapplicationDays': r.pesticideReapplicationDays,
               'status': r.status.name,
               'statusChangedAt': r.statusChangedAt?.toIso8601String(),
+              'parentPlantId': r.parentPlantId,
+              'coverPhotoId': r.coverPhotoId,
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),
@@ -149,6 +162,23 @@ class DataExportService {
             }
         ],
         'entries': entryMaps,
+        // Photos of an entry after its first. Releases without them skip
+        // the section and keep only each entry's first photo.
+        'entryPhotos': [
+          for (final r in entryPhotos)
+            {
+              'id': r.id,
+              'entryId': r.entryId,
+              'photoPath': r.photoPath,
+              'photoFile':
+                  r.deletedAt == null ? await addPhoto(r.photoPath) : null,
+              'position': r.position,
+              'createdAt': r.createdAt.toIso8601String(),
+              'updatedAt': r.updatedAt.toIso8601String(),
+              'deletedAt': r.deletedAt?.toIso8601String(),
+              'deviceId': r.deviceId,
+            }
+        ],
         'defensivos': [
           for (final r in defensivos)
             {

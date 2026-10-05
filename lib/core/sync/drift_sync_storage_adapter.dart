@@ -3,6 +3,7 @@ import 'package:polypodium_core/polypodium_core.dart';
 
 import '../../features/entries/domain/entry_details.dart';
 import '../database/app_database.dart';
+import '../database/converters.dart';
 import '../enums.dart';
 import 'i_sync_storage_adapter.dart';
 
@@ -23,9 +24,13 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
     'location',
     'plant',
     'entry',
+    'entry_photo',
     'defensivo',
     'reminder',
   ];
+
+  @override
+  Set<String> get entityTypes => _entityTypes.toSet();
 
   @override
   Future<List<SyncChange>> localChangesSince(
@@ -49,6 +54,17 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
   }
 
   @override
+  Future<List<SyncChange>> localChangesOfTypeSince(
+    String entityType,
+    int since, {
+    required int limit,
+    required String deviceId,
+  }) async {
+    final rows = await _changesSinceFor(entityType, since, limit);
+    return [for (final row in rows) _toChange(entityType, row, deviceId)];
+  }
+
+  @override
   Future<void> applyRemoteChange(SyncChange change) async {
     switch (change.entityType) {
       case 'species':
@@ -57,6 +73,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
         await _applyPlant(change);
       case 'entry':
         await _applyEntry(change);
+      case 'entry_photo':
+        await _applyEntryPhoto(change);
       case 'location':
         await _applyLocation(change);
       case 'soil':
@@ -79,6 +97,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
         return _db.plantsDao.changesSince(since, limit: limit);
       case 'entry':
         return _db.entriesDao.changesSince(since, limit: limit);
+      case 'entry_photo':
+        return _db.entryPhotosDao.changesSince(since, limit: limit);
       case 'location':
         return _db.locationsDao.changesSince(since, limit: limit);
       case 'soil':
@@ -112,6 +132,11 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'popularName': r.popularName,
           'defaultIrrigationFrequencyDays': r.defaultIrrigationFrequencyDays,
           'recommendedSoilIds': r.recommendedSoilTypes,
+          'light': r.light?.name,
+          'humidity': r.humidity?.name,
+          'petToxicity': r.petToxicity.name,
+          'floweringMonths': MonthSetConverter.toJson(r.floweringMonths),
+          'careNotes': r.careNotes,
           'createdAt': r.createdAt.toIso8601String(),
         };
       case 'plant':
@@ -134,6 +159,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'pesticideReapplicationDays': r.pesticideReapplicationDays,
           'status': r.status.name,
           'statusChangedAt': r.statusChangedAt?.toIso8601String(),
+          'parentPlantId': r.parentPlantId,
+          'coverPhotoId': r.coverPhotoId,
           'createdAt': r.createdAt.toIso8601String(),
         };
       case 'entry':
@@ -151,6 +178,19 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'type': r.type.name,
           'numericValue': r.numericValue,
           'extraData': r.extraData,
+          'createdAt': r.createdAt.toIso8601String(),
+        };
+      case 'entry_photo':
+        final r = row as EntryPhotosTableData;
+        entityId = r.id;
+        updatedAt = r.updatedAt;
+        deletedAt = r.deletedAt;
+        rev = r.localRev;
+        payload = {
+          'id': r.id,
+          'entryId': r.entryId,
+          'photoPath': r.photoPath,
+          'position': r.position,
           'createdAt': r.createdAt.toIso8601String(),
         };
       case 'location':
@@ -254,6 +294,12 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       defaultIrrigationFrequencyDays:
           Value(p['defaultIrrigationFrequencyDays'] as int?),
       recommendedSoilTypes: soilIds,
+      // Older clients don't send the care sheet: it stays empty.
+      light: Value(LightRequirement.fromName(p['light'] as String?)),
+      humidity: Value(HumidityLevel.fromName(p['humidity'] as String?)),
+      petToxicity: Value(PetToxicity.fromName(p['petToxicity'] as String?)),
+      floweringMonths: Value(MonthSetConverter.fromJson(p['floweringMonths'])),
+      careNotes: Value(p['careNotes'] as String?),
       createdAt: DateTime.parse(p['createdAt'] as String),
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),
@@ -305,6 +351,10 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       statusChangedAt: Value(p['statusChangedAt'] != null
           ? DateTime.parse(p['statusChangedAt'] as String)
           : null),
+      // Older clients don't send it: no known parent.
+      parentPlantId: Value(p['parentPlantId'] as String?),
+      // Older clients don't send it: back to the latest photo.
+      coverPhotoId: Value(p['coverPhotoId'] as String?),
       createdAt: DateTime.parse(p['createdAt'] as String),
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),
@@ -314,18 +364,22 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
   }
 
   Future<void> _applyEntry(SyncChange change) async {
+    final p = change.payload;
+    // An entry type this app version doesn't know (created by a newer
+    // client) can't be represented locally; skip it, as with reminders.
+    final entryType = EntryType.fromName(p['type'] as String?);
+    if (entryType == null) return;
     final existing = await _db.entriesDao.getById(change.entityId);
     if (!_incomingWins(change, existing?.updatedAt, existing?.deviceId)) {
       return;
     }
-    final p = change.payload;
     await _db.entriesDao.upsert(EntriesTableCompanion.insert(
       id: change.entityId,
       plantId: p['plantId'] as String,
       date: DateTime.parse(p['date'] as String),
       photoPath: Value(p['photoPath'] as String?),
       note: Value(p['note'] as String?),
-      type: EntryType.values.byName(p['type'] as String),
+      type: entryType,
       numericValue: Value((p['numericValue'] as num?)?.toDouble()),
       extraData: Value(p['extraData'] as String?),
       createdAt: DateTime.parse(p['createdAt'] as String),
@@ -335,7 +389,6 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       deviceId: Value(change.deviceId),
     ));
 
-    final entryType = EntryType.values.byName(p['type'] as String);
     if (change.deletedAt == null && entryType == EntryType.irrigation) {
       // Recomputing lastIrrigatedAt from entries is a locally-derived fact,
       // not itself remote data -- stamp it as a fresh local write (own
@@ -365,6 +418,28 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
             updatedAt: DateTime.now(), rev: rev);
       });
     }
+  }
+
+  Future<void> _applyEntryPhoto(SyncChange change) async {
+    final existing = await _db.entryPhotosDao.getById(change.entityId);
+    if (!_incomingWins(change, existing?.updatedAt, existing?.deviceId)) {
+      return;
+    }
+    final p = change.payload;
+    await _db.entryPhotosDao.upsert(EntryPhotosTableCompanion.insert(
+      id: change.entityId,
+      entryId: p['entryId'] as String,
+      // A tombstone comes with the sender's path, not a downloaded file.
+      photoPath: change.deletedAt != null && existing != null
+          ? existing.photoPath
+          : p['photoPath'] as String? ?? '',
+      position: Value(p['position'] as int? ?? 0),
+      createdAt: DateTime.parse(p['createdAt'] as String),
+      updatedAt: change.updatedAt,
+      deletedAt: Value(change.deletedAt),
+      localRev: const Value(0),
+      deviceId: Value(change.deviceId),
+    ));
   }
 
   Future<void> _applyLocation(SyncChange change) async {

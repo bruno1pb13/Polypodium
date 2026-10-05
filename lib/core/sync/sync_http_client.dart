@@ -3,14 +3,51 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:polypodium_core/polypodium_core.dart';
 
+import '../enums.dart';
 import 'sync_exceptions.dart';
+
+/// Declares every [EntryType] this build can parse (unless a backfill pull
+/// narrows it), so the server withholds the ones it can't. Without it the
+/// server assumes a pre-header release and only sends the original types
+/// (see Polypodium_server's docs/api.md).
+const entryTypesHeader = 'X-Polypodium-Entry-Types';
+
+/// Selects the server garden a sync or photo request acts on. Sent only for
+/// a workspace that targets a garden other than the account's personal one,
+/// so requests stay exactly as before for every other workspace.
+const gardenHeader = 'X-Polypodium-Garden';
+
+/// The [gardenHeader] entry for [gardenId], or nothing when it is null.
+Map<String, String> gardenHeaders(String? gardenId) =>
+    gardenId == null ? const {} : {gardenHeader: gardenId};
 
 class ChangesPage {
   final List<SyncChange> changes;
   final int nextCursor;
   final bool hasMore;
+
+  /// The entity restriction as echoed by the server; null when none was
+  /// asked for, or the server predates it and sent every entity.
+  final Set<String>? entities;
+
+  /// Every entity type the server stores; null when it predates reporting
+  /// them.
+  final Set<String>? supportedEntities;
   const ChangesPage(
-      {required this.changes, required this.nextCursor, required this.hasMore});
+      {required this.changes,
+      required this.nextCursor,
+      required this.hasMore,
+      this.entities,
+      this.supportedEntities});
+}
+
+class ReceiveResult {
+  final int appliedCount;
+
+  /// Entity types of the batch the server dropped instead of storing; null
+  /// when it predates reporting them.
+  final Set<String>? ignoredEntityTypes;
+  const ReceiveResult({required this.appliedCount, this.ignoredEntityTypes});
 }
 
 /// Pure HTTP transport for the sync protocol -- no storage or merge logic,
@@ -18,23 +55,37 @@ class ChangesPage {
 /// `/sync/changes` + `/sync/receive` + `/sync/ack` contract this client
 /// calls; see Polypodium_server's sync_handler.dart.
 class SyncHttpClient {
-  const SyncHttpClient();
+  const SyncHttpClient({this.gardenId});
+
+  /// Garden every request targets; null for the personal garden.
+  final String? gardenId;
 
   Future<ChangesPage> fetchChanges({
     required String serverUrl,
     required String token,
     required int since,
     int limit = 100,
+    Set<String>? entryTypes,
+    Set<String>? entities,
   }) async {
+    final query = 'since=$since&limit=$limit'
+        '${entities == null ? '' : '&entities=${entities.join(',')}'}';
     final response = await http
         .get(
-          Uri.parse('$serverUrl/api/v1/sync/changes?since=$since&limit=$limit'),
-          headers: _authHeaders(token),
+          Uri.parse('$serverUrl/api/v1/sync/changes?$query'),
+          headers: {
+            ..._authHeaders(token),
+            entryTypesHeader:
+                (entryTypes ?? EntryType.values.map((t) => t.name)).join(','),
+          },
         )
         .timeout(const Duration(seconds: 30));
 
     if (response.statusCode == 401) {
       throw const SessionExpiredException();
+    }
+    if (response.statusCode == 403 && gardenId != null) {
+      throw const GardenAccessDeniedException();
     }
     if (response.statusCode != 200) {
       throw const SyncReceiveException();
@@ -49,10 +100,12 @@ class SyncHttpClient {
       changes: changes,
       nextCursor: data['nextCursor'] as int,
       hasMore: data['hasMore'] as bool? ?? false,
+      entities: _stringSet(data['entities']),
+      supportedEntities: _stringSet(data['supportedEntities']),
     );
   }
 
-  Future<int> receiveChanges({
+  Future<ReceiveResult> receiveChanges({
     required String serverUrl,
     required String token,
     required String deviceId,
@@ -72,12 +125,18 @@ class SyncHttpClient {
     if (response.statusCode == 401) {
       throw const SessionExpiredException();
     }
+    if (response.statusCode == 403 && gardenId != null) {
+      throw const GardenAccessDeniedException();
+    }
     if (response.statusCode != 200) {
       throw const SyncSendException();
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
-    return data['appliedCount'] as int? ?? 0;
+    return ReceiveResult(
+      appliedCount: data['appliedCount'] as int? ?? 0,
+      ignoredEntityTypes: _stringSet(data['ignoredEntityTypes']),
+    );
   }
 
   /// Best-effort: failures here don't affect correctness, only the
@@ -100,5 +159,9 @@ class SyncHttpClient {
   Map<String, String> _authHeaders(String token) => {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
+        ...gardenHeaders(gardenId),
       };
+
+  static Set<String>? _stringSet(Object? json) =>
+      (json as List<dynamic>?)?.cast<String>().toSet();
 }

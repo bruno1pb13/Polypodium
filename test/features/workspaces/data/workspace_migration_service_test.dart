@@ -150,6 +150,11 @@ void main() {
         scientificName: 'Sci',
         popularName: 'Pop',
         recommendedSoilTypes: const [],
+        light: const Value(LightRequirement.partialShade),
+        humidity: const Value(HumidityLevel.high),
+        petToxicity: const Value(PetToxicity.toxic),
+        floweringMonths: const Value({3, 4}),
+        careNotes: const Value('Borrifar'),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       ));
@@ -161,6 +166,8 @@ void main() {
         acquisitionDate: DateTime(2026, 1, 1),
         status: const Value(PlantStatus.archived),
         statusChangedAt: Value(DateTime(2026, 1, 3)),
+        parentPlantId: const Value('mother'),
+        coverPhotoId: const Value('entry1'),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       ));
@@ -184,9 +191,16 @@ void main() {
       final entry = await target.entriesDao.getById('entry1');
 
       expect(species, isNotNull);
+      expect(species!.light, LightRequirement.partialShade);
+      expect(species.humidity, HumidityLevel.high);
+      expect(species.petToxicity, PetToxicity.toxic);
+      expect(species.floweringMonths, {3, 4});
+      expect(species.careNotes, 'Borrifar');
       expect(plant, isNotNull);
       expect(plant!.status, PlantStatus.archived);
       expect(plant.statusChangedAt, DateTime(2026, 1, 3));
+      expect(plant.parentPlantId, 'mother');
+      expect(plant.coverPhotoId, 'entry1');
       expect(entry, isNotNull);
     });
 
@@ -281,6 +295,53 @@ void main() {
       expect(entry!.photoPath, isNotNull);
       expect(entry.photoPath, isNot(sourcePhoto.path));
       expect(await File(entry.photoPath!).exists(), isTrue);
+    });
+
+    test('copies the extra photos of an entry', () async {
+      final sourcePhotoDir = await Directory.systemTemp.createTemp();
+      final targetPhotoDir = await Directory.systemTemp.createTemp();
+      Future<String> photo(String name) async {
+        final file = File(p.join(sourcePhotoDir.path, name));
+        await file.writeAsBytes([1]);
+        return file.path;
+      }
+
+      await source.entriesDao.insert(EntriesTableCompanion.insert(
+        id: 'entry1',
+        plantId: 'plant1',
+        date: DateTime(2026, 1, 2),
+        photoPath: Value(await photo('a.jpg')),
+        type: EntryType.observation,
+        createdAt: DateTime(2026, 1, 2),
+        updatedAt: DateTime(2026, 1, 2),
+      ));
+      for (final (id, name, deletedAt) in [
+        ('ph2', 'b.jpg', null),
+        ('ph3', 'c.jpg', DateTime(2026, 1, 3)),
+      ]) {
+        await source.entryPhotosDao.upsert(EntryPhotosTableCompanion.insert(
+          id: id,
+          entryId: 'entry1',
+          photoPath: await photo(name),
+          position: const Value(1),
+          createdAt: DateTime(2026, 1, 2),
+          updatedAt: DateTime(2026, 1, 2),
+          deletedAt: Value(deletedAt),
+        ));
+      }
+
+      await service.migrateData(
+        sourceDb: source,
+        targetDb: target,
+        targetPhotos: FakePhotoStorage(targetPhotoDir),
+      );
+
+      final migrated = await target.entryPhotosDao.getById('ph2');
+      expect(migrated!.entryId, 'entry1');
+      expect(p.dirname(migrated.photoPath), targetPhotoDir.path);
+      expect(await File(migrated.photoPath).exists(), isTrue);
+      expect(migrated.localRev, greaterThan(0));
+      expect(await target.entryPhotosDao.getById('ph3'), isNull);
     });
   });
 }

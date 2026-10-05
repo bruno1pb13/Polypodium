@@ -6,6 +6,7 @@ import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../entries/domain/entry_model.dart';
+import '../../../entries/presentation/widgets/harvest_format.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/plant_model.dart';
 import 'insights/growth_chart.dart';
@@ -48,7 +49,9 @@ class PlantInsightsView extends ConsumerWidget {
         .where((e) =>
             e.type == EntryType.fertilizer ||
             e.type == EntryType.pruning ||
-            e.type == EntryType.pesticide)
+            e.type == EntryType.pesticide ||
+            e.type == EntryType.repotting ||
+            e.type == EntryType.harvest)
         .toList();
     // Pest/chlorosis onsets also matter for the health trend (null severity
     // counts as active, matching plantAlertStatusProvider).
@@ -57,6 +60,7 @@ class PlantInsightsView extends ConsumerWidget {
             e.type == EntryType.fertilizer ||
             e.type == EntryType.pruning ||
             e.type == EntryType.pesticide ||
+            e.type == EntryType.repotting ||
             ((e.type == EntryType.pest || e.type == EntryType.chlorosis) &&
                 (e.numericValue ?? 1) > 0))
         .toList();
@@ -66,8 +70,19 @@ class PlantInsightsView extends ConsumerWidget {
     final hasAnyChart =
         heights.length >= 2 || healths.length >= 2 || intervals.isNotEmpty;
 
+    final harvested = harvestTotalsSummary(l10n, sorted);
+    final harvestCard = harvested == null
+        ? null
+        : InsightCard(
+            title: l10n.harvestTotalsTitle,
+            transparent: transparent,
+            palette: palette,
+            child: InsightHintText(l10n.harvestTotalsSummary(harvested),
+                palette: palette),
+          );
+
     if (!hasAnyChart) {
-      return Padding(
+      final empty = Padding(
         padding: const EdgeInsets.all(48),
         child: Center(
           child: Text(
@@ -76,6 +91,11 @@ class PlantInsightsView extends ConsumerWidget {
             style: TextStyle(color: context.glass.fgMuted, height: 1.4),
           ),
         ),
+      );
+      if (harvestCard == null) return empty;
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(children: [harvestCard, empty]),
       );
     }
 
@@ -157,6 +177,7 @@ class PlantInsightsView extends ConsumerWidget {
                   )
                 : InsightHintText(l10n.chartNeedTwoWaterings, palette: palette),
           ),
+          if (harvestCard != null) harvestCard,
         ],
       ),
     );

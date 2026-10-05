@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n.dart';
+import '../../../entries/presentation/providers/carencia_providers.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/plant_model.dart';
@@ -33,11 +34,13 @@ class PlantListItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pws = plantWithSpecies;
     final overdue = pws.needsWatering;
-    final photoAsync = ref.watch(latestPlantPhotoProvider(pws.plant.id));
+    final photoAsync = ref.watch(plantCoverPhotoProvider(pws.plant.id));
     final alertStatus =
         ref.watch(plantAlertStatusProvider(pws.plant.id)).value ??
             noPlantAlerts;
-    final statuses = plantListStatuses(context.l10n, pws, alertStatus);
+    final carencia = ref.watch(plantCarenciaProvider(pws.plant.id));
+    final statuses = plantListStatuses(context.l10n, pws, alertStatus,
+        carencia: carencia);
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
     final colorScheme = Theme.of(context).colorScheme;
 

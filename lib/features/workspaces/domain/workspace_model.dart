@@ -24,6 +24,14 @@ class Workspace {
   /// from before workspaces existed (see WorkspaceRepository.ensureBootstrapped).
   final String? dbFileNameOverride;
 
+  /// Server garden (jardim) this workspace syncs, sent as the
+  /// `X-Polypodium-Garden` header. Null means the account's personal garden,
+  /// which is also what servers predating gardens serve.
+  final String? gardenId;
+
+  /// Display name of [gardenId] when it was picked, for the workspace list.
+  final String? gardenName;
+
   static const String localId = 'local';
 
   const Workspace({
@@ -38,6 +46,8 @@ class Workspace {
     required this.createdAt,
     this.dbFileNameOverride,
     this.role,
+    this.gardenId,
+    this.gardenName,
   });
 
   factory Workspace.newLocal() => Workspace(
@@ -73,6 +83,8 @@ class Workspace {
     DateTime? createdAt,
     Object? dbFileNameOverride = const _Sentinel(),
     Object? role = const _Sentinel(),
+    Object? gardenId = const _Sentinel(),
+    Object? gardenName = const _Sentinel(),
   }) {
     return Workspace(
       id: id ?? this.id,
@@ -91,6 +103,9 @@ class Workspace {
           ? this.dbFileNameOverride
           : dbFileNameOverride as String?,
       role: role is _Sentinel ? this.role : role as String?,
+      gardenId: gardenId is _Sentinel ? this.gardenId : gardenId as String?,
+      gardenName:
+          gardenName is _Sentinel ? this.gardenName : gardenName as String?,
     );
   }
 
@@ -106,6 +121,8 @@ class Workspace {
         'createdAt': createdAt.toIso8601String(),
         'dbFileNameOverride': dbFileNameOverride,
         'role': role,
+        'gardenId': gardenId,
+        'gardenName': gardenName,
       };
 
   factory Workspace.fromJson(Map<String, dynamic> json) => Workspace(
@@ -122,6 +139,8 @@ class Workspace {
         createdAt: DateTime.parse(json['createdAt'] as String),
         dbFileNameOverride: json['dbFileNameOverride'] as String?,
         role: json['role'] as String?,
+        gardenId: json['gardenId'] as String?,
+        gardenName: json['gardenName'] as String?,
       );
 }
 

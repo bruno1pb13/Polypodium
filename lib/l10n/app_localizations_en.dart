@@ -499,6 +499,24 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String homeWidgetDueCount(int count) {
+    return '$count due today';
+  }
+
+  @override
+  String homeWidgetOverdue(int days) {
+    return '$days d late';
+  }
+
+  @override
+  String get homeWidgetToday => 'today';
+
+  @override
+  String homeWidgetMore(int count) {
+    return '+$count more';
+  }
+
+  @override
   String get deleteReminderTitle => 'Delete reminder?';
 
   @override
@@ -678,6 +696,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get historyFieldStatus => 'Status';
+
+  @override
+  String get historyFieldParent => 'Cutting of';
 
   @override
   String speciesSurvivalRate(int total, int percent, int alive) {
@@ -937,6 +958,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get entryTypeHistory => 'History';
 
   @override
+  String get entryTypeRepotting => 'Repotting';
+
+  @override
   String get newEntryTitle => 'New Entry';
 
   @override
@@ -980,6 +1004,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noteHintPesticide =>
       'Where was it applied? Any reaction from the plant?';
+
+  @override
+  String get noteHintRepotting => 'How were the roots? Was the plant divided?';
 
   @override
   String get noteHintDefault => 'Optional notes...';
@@ -1303,6 +1330,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String datasetUpdateError(String error) {
     return 'Error updating: $error';
   }
+
+  @override
+  String get speciesCareTitle => 'Species care';
+
+  @override
+  String get lightLabel => 'Light';
+
+  @override
+  String get lightFullSun => 'Full sun';
+
+  @override
+  String get lightPartialShade => 'Partial shade';
+
+  @override
+  String get lightIndirectBright => 'Bright indirect light';
+
+  @override
+  String get lightShade => 'Shade';
+
+  @override
+  String get humidityLabel => 'Humidity';
+
+  @override
+  String get humidityLow => 'Low';
+
+  @override
+  String get humidityMedium => 'Medium';
+
+  @override
+  String get humidityHigh => 'High';
+
+  @override
+  String get petToxicityLabel => 'Pet toxicity';
+
+  @override
+  String get petToxicityUnknown => 'Unknown';
+
+  @override
+  String get petToxicityNonToxic => 'Non-toxic';
+
+  @override
+  String get petToxicityToxic => 'Toxic';
+
+  @override
+  String get toxicToPetsBadge => 'Toxic to pets';
+
+  @override
+  String get floweringLabel => 'Flowering months';
+
+  @override
+  String floweringIn(String months) {
+    return 'Flowers in: $months';
+  }
+
+  @override
+  String get careNotesLabel => 'Care notes';
 
   @override
   String get soilSandy => 'Sandy';
@@ -1993,4 +2076,457 @@ class AppLocalizationsEn extends AppLocalizations {
   String chartWateringSemantics(int count, String summary) {
     return 'Watering chart: $count intervals between waterings. $summary';
   }
+
+  @override
+  String get repottingHint => 'The new pot and, if it changed, the soil.';
+
+  @override
+  String get potDiameterLabel => 'Pot diameter';
+
+  @override
+  String get potMaterialLabel => 'Pot material';
+
+  @override
+  String get potMaterialPlastic => 'Plastic';
+
+  @override
+  String get potMaterialClay => 'Clay';
+
+  @override
+  String get potMaterialCeramic => 'Ceramic';
+
+  @override
+  String get potMaterialFabric => 'Fabric';
+
+  @override
+  String get potMaterialOther => 'Other';
+
+  @override
+  String get newSoilLabel => 'New soil';
+
+  @override
+  String get newSoilHint => 'Also changes the plant\'s soil.';
+
+  @override
+  String get keepCurrentSoil => 'Keep the current soil';
+
+  @override
+  String potDiameterSummary(String diameter) {
+    return '$diameter cm pot';
+  }
+
+  @override
+  String get parentPlantLabel => 'Cutting of';
+
+  @override
+  String get parentPlantHelper => 'The plant this one was propagated from.';
+
+  @override
+  String get cuttingsLabel => 'Cuttings';
+
+  @override
+  String get createCutting => 'Create cutting';
+
+  @override
+  String cuttingNicknameSuggestion(String name) {
+    return '$name (cutting)';
+  }
+
+  @override
+  String get parentPlantRemoved => 'Removed plant';
+
+  @override
+  String carenciaUntil(String date) {
+    return 'Pre-harvest interval until $date';
+  }
+
+  @override
+  String carenciaBadge(String date) {
+    return 'Interval until $date';
+  }
+
+  @override
+  String carenciaDoNotHarvest(String date) {
+    return 'Do not harvest until $date';
+  }
+
+  @override
+  String carenciaDoNotHarvestProducts(String products) {
+    return 'Do not harvest — $products';
+  }
+
+  @override
+  String get entryTypeHarvest => 'Harvest';
+
+  @override
+  String get noteHintHarvest => 'Ripeness, quality, where it went...';
+
+  @override
+  String get harvestHint => 'How much was harvested.';
+
+  @override
+  String get harvestQuantityLabel => 'Quantity';
+
+  @override
+  String get harvestUnitLabel => 'Unit';
+
+  @override
+  String get harvestUnitG => 'g';
+
+  @override
+  String get harvestUnitKg => 'kg';
+
+  @override
+  String get harvestUnitUnits => 'units';
+
+  @override
+  String get harvestUnitBunches => 'bunches';
+
+  @override
+  String harvestAmountG(String quantity) {
+    return '$quantity g';
+  }
+
+  @override
+  String harvestAmountKg(String quantity) {
+    return '$quantity kg';
+  }
+
+  @override
+  String harvestAmountUnits(num count, String quantity) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$quantity units',
+      one: '$quantity unit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String harvestAmountBunches(num count, String quantity) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$quantity bunches',
+      one: '$quantity bunch',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get harvestDuringCarencia =>
+      'Harvested during the pre-harvest interval';
+
+  @override
+  String get harvestCarenciaDialogTitle =>
+      'Harvest during the pre-harvest interval?';
+
+  @override
+  String harvestCarenciaDialogBody(String date) {
+    return 'This plant is in the pre-harvest interval until $date. Harvesting now may leave pesticide residue.';
+  }
+
+  @override
+  String harvestCarenciaDialogBulkBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count plants are in the pre-harvest interval. Harvesting them now may leave pesticide residue:',
+      one:
+          '1 plant is in the pre-harvest interval. Harvesting it now may leave pesticide residue:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String harvestCarenciaPlantLine(String plant, String date) {
+    return '$plant: until $date';
+  }
+
+  @override
+  String carenciaProductsLine(String products) {
+    return 'Products: $products';
+  }
+
+  @override
+  String get harvestCarenciaQuestion =>
+      'Record the harvest anyway? It will be marked as made during the interval.';
+
+  @override
+  String get harvestCarenciaConfirm => 'Record anyway';
+
+  @override
+  String get harvestTotalsTitle => 'Harvests';
+
+  @override
+  String harvestTotalsSummary(String amounts) {
+    return 'Harvested in total: $amounts';
+  }
+
+  @override
+  String get setAsCover => 'Set as cover';
+
+  @override
+  String get useLatestAsCover => 'Use the latest photo as cover';
+
+  @override
+  String get coverBadge => 'Cover';
+
+  @override
+  String coverPhotoLabel(String date) {
+    return 'Cover photo from $date';
+  }
+
+  @override
+  String get photoOptionsHint => 'show photo options';
+
+  @override
+  String get coverPhotoUpdated => 'Cover updated';
+
+  @override
+  String get photosTitle => 'Photos';
+
+  @override
+  String photosCounter(int count, int max) {
+    return '$count of $max';
+  }
+
+  @override
+  String photoNumberLabel(int index, int total) {
+    return 'Photo $index of $total';
+  }
+
+  @override
+  String removePhotoNumber(int index) {
+    return 'Remove photo $index';
+  }
+
+  @override
+  String entryPhotoNumberLabel(int index, int total, String date) {
+    return 'Photo $index of $total from $date';
+  }
+
+  @override
+  String photoPosition(int index, int total) {
+    return '$index of $total';
+  }
+
+  @override
+  String get compareWithFirst => 'Compare with the first photo';
+
+  @override
+  String get compareWithOther => 'Compare with another photo';
+
+  @override
+  String get pickPhotoToCompare => 'Pick another photo to compare';
+
+  @override
+  String get comparisonTitle => 'Before and after';
+
+  @override
+  String comparisonBefore(String date) {
+    return 'Before · $date';
+  }
+
+  @override
+  String comparisonAfter(String date) {
+    return 'After · $date';
+  }
+
+  @override
+  String get comparisonSideBySide => 'Side by side';
+
+  @override
+  String get comparisonSlider => 'Slider';
+
+  @override
+  String get comparisonDivider => 'Divider between the photos';
+
+  @override
+  String get labelsGenerate => 'Generate labels';
+
+  @override
+  String labelsTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count labels',
+      one: '1 label',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String labelsPages(int pages) {
+    String _temp0 = intl.Intl.pluralLogic(
+      pages,
+      locale: localeName,
+      other: 'Fits on $pages A4 pages',
+      one: 'Fits on 1 A4 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get labelsSheetLayout => 'Sheet layout';
+
+  @override
+  String get labelsPresetA4x24 => '24 per sheet · 70 × 37 mm';
+
+  @override
+  String get labelsPresetA4x10 => '10 per sheet · 99 × 57 mm';
+
+  @override
+  String get labelsShowLocation => 'Show location';
+
+  @override
+  String get labelsShowAcquisitionDate => 'Show acquisition date';
+
+  @override
+  String labelsAcquiredOn(String date) {
+    return 'Since $date';
+  }
+
+  @override
+  String get labelsPrint => 'Print';
+
+  @override
+  String get labelsSharePdf => 'Share PDF';
+
+  @override
+  String get labelsSavePdf => 'Save PDF';
+
+  @override
+  String labelsSavedTo(String path) {
+    return 'Labels saved to $path';
+  }
+
+  @override
+  String labelsError(String error) {
+    return 'Couldn\'t create the labels: $error';
+  }
+
+  @override
+  String get labelsPreview => 'Label preview';
+
+  @override
+  String get labelScan => 'Scan label';
+
+  @override
+  String get labelScanHint => 'Point the camera at a plant label';
+
+  @override
+  String get labelScanCameraError => 'Couldn\'t open the camera';
+
+  @override
+  String get labelScanInvalid => 'This code isn\'t a Polypodium label';
+
+  @override
+  String get labelPlantNotFound => 'Plant not found in this space';
+
+  @override
+  String get gardenMembers => 'Garden members';
+
+  @override
+  String get gardenPersonal => 'Personal garden';
+
+  @override
+  String gardenOf(String email) {
+    return '$email\'s garden';
+  }
+
+  @override
+  String get gardenRoleOwner => 'Owner';
+
+  @override
+  String get gardenRoleMember => 'Member';
+
+  @override
+  String gardenYou(String email) {
+    return '$email (you)';
+  }
+
+  @override
+  String get gardenYouAreOwner => 'You own this garden';
+
+  @override
+  String get gardenYouAreMember => 'You are a member of this garden';
+
+  @override
+  String get gardenAddMember => 'Add member';
+
+  @override
+  String get gardenAddMemberHint =>
+      'The member needs an account on this server, created by its administrator.';
+
+  @override
+  String gardenMemberAdded(String email) {
+    return '$email added.';
+  }
+
+  @override
+  String gardenRemoveMemberTooltip(String email) {
+    return 'Remove $email';
+  }
+
+  @override
+  String get gardenRemoveMemberTitle => 'Remove member?';
+
+  @override
+  String gardenRemoveMemberBody(String email) {
+    return '$email will no longer sync this garden. What they recorded stays in it.';
+  }
+
+  @override
+  String get gardenRemove => 'Remove';
+
+  @override
+  String get gardenLeave => 'Leave garden';
+
+  @override
+  String get gardenLeaveBody =>
+      'This workspace will stop syncing with the garden. Its data stays on this device.';
+
+  @override
+  String get gardenLeft => 'You left the garden.';
+
+  @override
+  String get newSharedGarden => 'New shared garden';
+
+  @override
+  String get newSharedGardenBody =>
+      'Creates an empty garden on this server, in a new workspace. Add members to share it.';
+
+  @override
+  String get gardenNameLabel => 'Garden name';
+
+  @override
+  String get openGarden => 'Open another garden';
+
+  @override
+  String get pickGardenTitle => 'Which garden?';
+
+  @override
+  String get pickGardenBody =>
+      'This account takes part in shared gardens on this server. Each one syncs in its own workspace.';
+
+  @override
+  String get errorGardenAccessDenied =>
+      'You are no longer a member of this garden.';
+
+  @override
+  String get errorGardensUnsupported =>
+      'This server doesn\'t support shared gardens yet. Update it to use them.';
+
+  @override
+  String get errorGardenAccountNotFound =>
+      'No account with this e-mail on this server.';
+
+  @override
+  String get errorGardenAlreadyMember => 'This account is already a member.';
+
+  @override
+  String get gardenRetry => 'Try again';
 }

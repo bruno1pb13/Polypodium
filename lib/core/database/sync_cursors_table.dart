@@ -18,3 +18,47 @@ class SyncCursorsTable extends Table {
   @override
   Set<Column> get primaryKey => {peerId, direction};
 }
+
+/// Entry types this device has already declared to a peer on pull (see
+/// SyncOrchestrator's backfill). Lives next to the pull cursor because it
+/// qualifies it: rows of an undeclared type were withheld from everything
+/// behind that cursor.
+class SyncEntryTypesTable extends Table {
+  @override
+  String get tableName => 'sync_entry_types';
+
+  TextColumn get peerId => text()();
+  TextColumn get entryType => text()();
+
+  @override
+  Set<Column> get primaryKey => {peerId, entryType};
+}
+
+/// Entity types this device has already declared to a peer, i.e. applied on
+/// pull. Rows of a type an older release ignored were skipped behind the
+/// pull cursor all the same, so a release that starts applying a type
+/// fetches it once from the start (see SyncOrchestrator's backfill).
+class SyncEntityTypesTable extends Table {
+  @override
+  String get tableName => 'sync_entity_types';
+
+  TextColumn get peerId => text()();
+  TextColumn get entityType => text()();
+
+  @override
+  Set<Column> get primaryKey => {peerId, entityType};
+}
+
+/// Entity types a peer confirmed storing (see SyncOrchestrator's re-push).
+/// Lives next to the push cursor because it qualifies it: an older server
+/// dropped rows of a type it didn't know while that cursor moved past them.
+class SyncConfirmedEntityTypesTable extends Table {
+  @override
+  String get tableName => 'sync_confirmed_entity_types';
+
+  TextColumn get peerId => text()();
+  TextColumn get entityType => text()();
+
+  @override
+  Set<Column> get primaryKey => {peerId, entityType};
+}

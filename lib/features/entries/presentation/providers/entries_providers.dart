@@ -8,6 +8,7 @@ import '../../../plants/presentation/providers/plants_providers.dart';
 import '../../../reminders/domain/reminder_model.dart';
 import '../../../../core/enums.dart';
 import '../../data/entries_repository.dart';
+import '../../domain/entry_details.dart';
 import '../../domain/entry_model.dart';
 
 import '../../../../core/sync/sync_providers.dart';
@@ -68,10 +69,11 @@ final plantAlertStatusProvider =
   },
 );
 
-final latestPlantPhotoProvider =
+/// The plant's cover: the photo picked for it, or its latest photo.
+final plantCoverPhotoProvider =
     StreamProvider.autoDispose.family<String?, String>((ref, plantId) {
   final db = ref.watch(appDatabaseProvider);
-  return db.entriesDao.watchLatestPhotoPath(plantId);
+  return db.entriesDao.watchCoverPhotoPath(plantId);
 });
 
 @Riverpod(keepAlive: true)
@@ -100,6 +102,7 @@ class EntryMutations {
   /// Creates [entries] (typically one per plant, for bulk actions) and
   /// refreshes the affected plants' status, rescheduling notifications and
   /// triggering sync once for the whole batch instead of once per entry.
+  /// A repotting entry with a new soil moves its plant to that soil.
   Future<void> createMany(List<EntryModel> entries) async {
     if (entries.isEmpty) return;
     final entriesRepo = _ref.read(entriesRepositoryProvider);
@@ -120,7 +123,25 @@ class EntryMutations {
       }
     }
     if (needsReschedule) await plantsRepo.rescheduleNotifications();
+    for (final entry in entries) {
+      if (entry.type == EntryType.repotting) await _applyNewSoil(entry);
+    }
     _triggerSync();
+  }
+
+  /// Saves the plant with the soil picked on a repotting [entry], through
+  /// [PlantMutations.save] so the change gets its history entry and syncs
+  /// like an edit. Only done here, where the entry is created: a repotting
+  /// pulled by sync arrives with the plant row its device already updated.
+  Future<void> _applyNewSoil(EntryModel entry) async {
+    final details = entry.details;
+    if (details is! RepottingDetails) return;
+    final soilId = details.newSoilId;
+    if (soilId == null) return;
+    final plant =
+        await _ref.read(plantsRepositoryProvider).getById(entry.plantId);
+    if (plant == null || plant.soilId == soilId) return;
+    await _ref.read(plantMutationsProvider).save(plant.copyWith(soilId: soilId));
   }
 
   /// Records a plain irrigation entry, dated now, for each of [plantIds].

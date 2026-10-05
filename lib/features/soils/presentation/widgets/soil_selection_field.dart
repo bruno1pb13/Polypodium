@@ -11,12 +11,16 @@ class SoilSelectionField extends StatelessWidget {
   final bool isRecommended;
   final ValueChanged<SoilModel?> onSoilSelected;
 
+  /// Field label; defaults to the plant form's required "Soil type *".
+  final String? label;
+
   const SoilSelectionField({
     super.key,
     this.selectedSoil,
     this.errorText,
     this.isRecommended = false,
     required this.onSoilSelected,
+    this.label,
   });
 
   @override
@@ -79,7 +83,8 @@ class SoilSelectionField extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${context.l10n.soilTypeLabel} *${isRecommended ? ' ${context.l10n.recommendedSuffix}' : ''}',
+                        label ??
+                            '${context.l10n.soilTypeLabel} *${isRecommended ? ' ${context.l10n.recommendedSuffix}' : ''}',
                         style: TextStyle(
                           color: context.glass.fgMuted,
                           fontSize: 12,

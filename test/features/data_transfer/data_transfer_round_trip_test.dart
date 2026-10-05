@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 import 'package:polypodium/core/database/app_database.dart';
 import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/core/storage/photo_storage.dart';
@@ -140,6 +142,8 @@ void main() {
       acquisitionDate: t0,
       status: const Value(PlantStatus.donated),
       statusChangedAt: Value(t1),
+      parentPlantId: const Value('mother'),
+      coverPhotoId: const Value('entry1'),
       createdAt: t0,
       updatedAt: t1,
       localRev: const Value(2),
@@ -152,6 +156,69 @@ void main() {
     final plant = await target.plantsDao.getById('plant1');
     expect(plant!.status, PlantStatus.donated);
     expect(plant.statusChangedAt, t1);
+    expect(plant.parentPlantId, 'mother');
+    expect(plant.coverPhotoId, 'entry1');
+  });
+
+  test('the species care sheet survives the round trip', () async {
+    await source.speciesDao.upsert(SpeciesTableCompanion.insert(
+      id: 'species1',
+      scientificName: 'Dieffenbachia seguine',
+      popularName: 'Comigo-ninguém-pode',
+      recommendedSoilTypes: const [],
+      light: const Value(LightRequirement.partialShade),
+      humidity: const Value(HumidityLevel.high),
+      petToxicity: const Value(PetToxicity.toxic),
+      floweringMonths: const Value({9, 10}),
+      careNotes: const Value('Seiva irritante'),
+      createdAt: t0,
+      updatedAt: t0,
+      localRev: const Value(1),
+    ));
+
+    final bytes = await DataExportService(source).buildArchiveBytes();
+    await DataImportService(target, FakePhotoStorage()).importFromBytes(bytes);
+
+    final species = await target.speciesDao.getById('species1');
+    expect(species!.light, LightRequirement.partialShade);
+    expect(species.humidity, HumidityLevel.high);
+    expect(species.petToxicity, PetToxicity.toxic);
+    expect(species.floweringMonths, {9, 10});
+    expect(species.careNotes, 'Seiva irritante');
+  });
+
+  test('species from a backup without a care sheet import with it empty',
+      () async {
+    final backup = {
+      'format': DataExportService.formatName,
+      'version': DataExportService.formatVersion,
+      'exportedAt': t1.toIso8601String(),
+      'entities': {
+        'species': [
+          {
+            'id': 'species1',
+            'scientificName': 'Ficus lyrata',
+            'popularName': 'Figueira',
+            'defaultIrrigationFrequencyDays': null,
+            'recommendedSoilIds': ['loamy'],
+            'createdAt': t0.toIso8601String(),
+            'updatedAt': t0.toIso8601String(),
+            'deletedAt': null,
+          }
+        ],
+      },
+    };
+
+    await DataImportService(target, FakePhotoStorage())
+        .importFromBytes(Uint8List.fromList(utf8.encode(jsonEncode(backup))));
+
+    final species = await target.speciesDao.getById('species1');
+    expect(species!.scientificName, 'Ficus lyrata');
+    expect(species.light, isNull);
+    expect(species.humidity, isNull);
+    expect(species.petToxicity, PetToxicity.unknown);
+    expect(species.floweringMonths, isEmpty);
+    expect(species.careNotes, isNull);
   });
 
   test('plants from a backup without status are imported as active',
@@ -301,6 +368,184 @@ void main() {
 
     expect(summary.applied, greaterThanOrEqualTo(1));
     expect(await target.remindersDao.getAll(), isEmpty);
+  });
+
+  test('repotting entries survive the round trip; unknown types are skipped',
+      () async {
+    await seedSpecies(source, 'Ficus lyrata', t0);
+    await source.plantsDao.upsert(PlantsTableCompanion.insert(
+      id: 'plant1',
+      speciesId: 'species1',
+      nickname: 'Minha planta',
+      soilType: 'loamy',
+      acquisitionDate: t0,
+      createdAt: t0,
+      updatedAt: t0,
+      localRev: const Value(2),
+    ));
+    for (final id in ['e1', 'e2']) {
+      await source.entriesDao.upsert(EntriesTableCompanion.insert(
+        id: id,
+        plantId: 'plant1',
+        date: t1,
+        type: EntryType.repotting,
+        extraData: const Value('{"potMaterial":"fabric"}'),
+        createdAt: t1,
+        updatedAt: t1,
+        localRev: const Value(3),
+      ));
+    }
+    final bytes = await DataExportService(source).buildArchiveBytes();
+    final archive = ZipDecoder().decodeBytes(bytes);
+    final data = jsonDecode(utf8.decode(archive
+            .findFile(DataExportService.dataFileName)!
+            .content as List<int>)) as Map<String, dynamic>;
+    // As a newer version would write an entry type this one doesn't know.
+    final entries = (data['entities'] as Map<String, dynamic>)['entries']
+        as List<dynamic>;
+    (entries.firstWhere((e) => e['id'] == 'e2') as Map)['type'] = 'grafting';
+
+    final summary = await DataImportService(target, FakePhotoStorage())
+        .importFromBytes(Uint8List.fromList(utf8.encode(jsonEncode(data))));
+
+    expect(summary.skipped, greaterThanOrEqualTo(1));
+    final entry = await target.entriesDao.getById('e1');
+    expect(entry!.type, EntryType.repotting);
+    expect(entry.extraData, '{"potMaterial":"fabric"}');
+    expect(await target.entriesDao.getById('e2'), isNull);
+  });
+
+  group('entry photos', () {
+    late Directory dir;
+
+    setUp(() async {
+      dir = await Directory.systemTemp.createTemp();
+      await seedSpecies(source, 'Ficus lyrata', t0);
+      await source.plantsDao.upsert(PlantsTableCompanion.insert(
+        id: 'plant1',
+        speciesId: 'species1',
+        nickname: 'Minha planta',
+        soilType: 'loamy',
+        acquisitionDate: t0,
+        createdAt: t0,
+        updatedAt: t0,
+        localRev: const Value(2),
+      ));
+    });
+
+    tearDown(() => dir.delete(recursive: true));
+
+    Future<String> photo(String name) async {
+      final file = File(p.join(dir.path, name));
+      await file.writeAsBytes(utf8.encode(name));
+      return file.path;
+    }
+
+    Future<void> seedEntry() async {
+      await source.entriesDao.upsert(EntriesTableCompanion.insert(
+        id: 'e1',
+        plantId: 'plant1',
+        date: t1,
+        type: EntryType.observation,
+        photoPath: Value(await photo('1.jpg')),
+        createdAt: t1,
+        updatedAt: t1,
+        localRev: const Value(3),
+      ));
+      for (final (id, name, position, deletedAt) in [
+        ('ph2', '2.jpg', 1, null),
+        ('ph3', '3.png', 2, null),
+        ('gone', '4.jpg', 3, t1),
+      ]) {
+        await source.entryPhotosDao.upsert(EntryPhotosTableCompanion.insert(
+          id: id,
+          entryId: 'e1',
+          photoPath: await photo(name),
+          position: Value(position),
+          createdAt: t1,
+          updatedAt: t1,
+          deletedAt: Value(deletedAt),
+          localRev: Value(3 + position),
+        ));
+      }
+    }
+
+    test('every photo file goes into the archive and comes back', () async {
+      await seedEntry();
+      final bytes = await DataExportService(source).buildArchiveBytes();
+
+      final names = ZipDecoder()
+          .decodeBytes(bytes)
+          .files
+          .map((f) => f.name)
+          .where((n) => n.startsWith('photos/'));
+      // A deleted photo's file is not carried.
+      expect(names, unorderedEquals(['photos/1.jpg', 'photos/2.jpg', 'photos/3.png']));
+
+      await DataImportService(target, FakePhotoStorage())
+          .importFromBytes(bytes);
+
+      expect((await target.entriesDao.getById('e1'))!.photoPath,
+          '/restored/1.jpg');
+      final extra = await target.entryPhotosDao.getByEntries(['e1']);
+      expect(extra.map((r) => (r.id, r.photoPath, r.position)), [
+        ('ph2', '/restored/2.jpg', 1),
+        ('ph3', '/restored/3.png', 2),
+      ]);
+      expect(extra.first.localRev, greaterThan(0));
+      final tombstone = await target.entryPhotosDao.getById('gone');
+      expect(tombstone!.deletedAt, t1);
+    });
+
+    test('a backup without entry photos imports the first photo only',
+        () async {
+      await seedEntry();
+      final bytes = await DataExportService(source).buildArchiveBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
+      final data = jsonDecode(utf8.decode(archive
+          .findFile(DataExportService.dataFileName)!
+          .content as List<int>)) as Map<String, dynamic>;
+      (data['entities'] as Map<String, dynamic>).remove('entryPhotos');
+
+      await DataImportService(target, FakePhotoStorage())
+          .importFromBytes(Uint8List.fromList(utf8.encode(jsonEncode(data))));
+
+      expect((await target.entriesDao.getById('e1'))!.photoPath,
+          isNotNull);
+      expect(await target.entryPhotosDao.getByEntries(['e1']), isEmpty);
+    });
+  });
+
+  test('harvest entries survive the round trip', () async {
+    await seedSpecies(source, 'Solanum lycopersicum', t0);
+    await source.plantsDao.upsert(PlantsTableCompanion.insert(
+      id: 'plant1',
+      speciesId: 'species1',
+      nickname: 'Tomateiro',
+      soilType: 'loamy',
+      acquisitionDate: t0,
+      createdAt: t0,
+      updatedAt: t0,
+      localRev: const Value(2),
+    ));
+    const extra = '{"quantity":300.0,"unit":"g","duringCarencia":true}';
+    await source.entriesDao.upsert(EntriesTableCompanion.insert(
+      id: 'e1',
+      plantId: 'plant1',
+      date: t1,
+      type: EntryType.harvest,
+      extraData: const Value(extra),
+      createdAt: t1,
+      updatedAt: t1,
+      localRev: const Value(3),
+    ));
+    final bytes = await DataExportService(source).buildArchiveBytes();
+
+    await DataImportService(target, FakePhotoStorage()).importFromBytes(bytes);
+
+    final entry = await target.entriesDao.getById('e1');
+    expect(entry!.type, EntryType.harvest);
+    expect(entry.extraData, extra);
   });
 
   test('rejects files that are not a Polypodium backup', () async {

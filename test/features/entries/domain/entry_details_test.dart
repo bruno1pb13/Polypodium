@@ -49,8 +49,46 @@ void main() {
     ),
     (
       EntryType.pesticide,
+      '{"products":[{"defensivoId":"d1","name":"Neem","carenciaDays":3}]}',
+      PesticideDetails(products: [
+        PesticideProduct(defensivoId: 'd1', name: 'Neem', carenciaDays: 3),
+      ]),
+    ),
+    (
+      EntryType.pesticide,
       '{"recurrenceDays":7}',
       PesticideDetails(recurrenceDays: 7),
+    ),
+    (
+      EntryType.repotting,
+      '{"potDiameterCm":14.5,"potMaterial":"clay","newSoilId":"s1",'
+          '"newSoilName":"Substrato"}',
+      RepottingDetails(
+        potDiameterCm: 14.5,
+        potMaterial: PotMaterial.clay,
+        newSoilId: 's1',
+        newSoilName: 'Substrato',
+      ),
+    ),
+    (
+      EntryType.repotting,
+      '{"potMaterial":"fabric"}',
+      RepottingDetails(potMaterial: PotMaterial.fabric),
+    ),
+    (
+      EntryType.harvest,
+      '{"quantity":1.5,"unit":"kg"}',
+      HarvestDetails(quantity: 1.5, unit: HarvestUnit.kg),
+    ),
+    (
+      EntryType.harvest,
+      '{"quantity":300.0,"unit":"g","duringCarencia":true}',
+      HarvestDetails(quantity: 300, unit: HarvestUnit.g, duringCarencia: true),
+    ),
+    (
+      EntryType.harvest,
+      '{"unit":"bunches"}',
+      HarvestDetails(unit: HarvestUnit.bunches),
     ),
   ];
 
@@ -77,6 +115,8 @@ void main() {
       expect(const FertilizerDetails().encode(), isNull);
       expect(const PruningDetails().encode(), isNull);
       expect(const PesticideDetails().encode(), isNull);
+      expect(const RepottingDetails().encode(), isNull);
+      expect(const HarvestDetails().encode(), isNull);
     });
   });
 
@@ -109,6 +149,38 @@ void main() {
           EntryDetails.decode(EntryType.pruning, '{}'), const PruningDetails());
       expect(EntryDetails.decode(EntryType.pesticide, '{}'),
           const PesticideDetails());
+      expect(EntryDetails.decode(EntryType.repotting, '{}'),
+          const RepottingDetails());
+      expect(
+          EntryDetails.decode(EntryType.harvest, '{}'), const HarvestDetails());
+    });
+
+    test('harvest: unexpected types and unknown units are skipped', () {
+      expect(
+          EntryDetails.decode(EntryType.harvest,
+              '{"quantity":"2","unit":5,"duringCarencia":"yes"}'),
+          const HarvestDetails());
+      expect(
+          EntryDetails.decode(
+              EntryType.harvest, '{"quantity":2,"unit":"box","extra":1}'),
+          const HarvestDetails(quantity: 2));
+      expect(
+          EntryDetails.decode(
+              EntryType.harvest, '{"quantity":3,"unit":"units"}'),
+          const HarvestDetails(quantity: 3, unit: HarvestUnit.units));
+    });
+
+    test('repotting: unexpected types are skipped, unknown materials kept '
+        'as other', () {
+      expect(
+          EntryDetails.decode(EntryType.repotting,
+              '{"potDiameterCm":"14","potMaterial":3,"newSoilId":7}'),
+          const RepottingDetails());
+      expect(
+          EntryDetails.decode(EntryType.repotting,
+              '{"potDiameterCm":12,"potMaterial":"bamboo"}'),
+          const RepottingDetails(
+              potDiameterCm: 12, potMaterial: PotMaterial.other));
     });
 
     test('ignores fields of unexpected types', () {
@@ -127,6 +199,10 @@ void main() {
           EntryDetails.decode(EntryType.pesticide,
               '{"products":{"name":"A"},"recurrenceDays":"7"}'),
           const PesticideDetails());
+      expect(
+          EntryDetails.decode(EntryType.pesticide,
+              '{"products":[{"name":"A","carenciaDays":"7"}]}'),
+          const PesticideDetails(products: [PesticideProduct(name: 'A')]));
     });
 
     test('accepts numeric values encoded as int or double', () {
@@ -137,6 +213,11 @@ void main() {
               products: [FertilizerProduct(name: 'A', dose: 3.0)]));
       expect(EntryDetails.decode(EntryType.pesticide, '{"recurrenceDays":7.0}'),
           const PesticideDetails(recurrenceDays: 7));
+      expect(
+          EntryDetails.decode(EntryType.pesticide,
+              '{"products":[{"name":"A","carenciaDays":7.0}]}'),
+          const PesticideDetails(
+              products: [PesticideProduct(name: 'A', carenciaDays: 7)]));
     });
 
     test('ignores unknown keys', () {

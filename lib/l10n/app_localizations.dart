@@ -896,6 +896,30 @@ abstract class AppLocalizations {
   /// **'No care due in the next {days} days.'**
   String agendaAllCaughtUpHint(int days);
 
+  /// Home-screen widget header: overdue plus due-today tasks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} due today'**
+  String homeWidgetDueCount(int count);
+
+  /// No description provided for @homeWidgetOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} d late'**
+  String homeWidgetOverdue(int days);
+
+  /// No description provided for @homeWidgetToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get homeWidgetToday;
+
+  /// No description provided for @homeWidgetMore.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String homeWidgetMore(int count);
+
   /// No description provided for @deleteReminderTitle.
   ///
   /// In en, this message translates to:
@@ -1219,6 +1243,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Status'**
   String get historyFieldStatus;
+
+  /// No description provided for @historyFieldParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Cutting of'**
+  String get historyFieldParent;
 
   /// No description provided for @speciesSurvivalRate.
   ///
@@ -1652,6 +1682,12 @@ abstract class AppLocalizations {
   /// **'History'**
   String get entryTypeHistory;
 
+  /// No description provided for @entryTypeRepotting.
+  ///
+  /// In en, this message translates to:
+  /// **'Repotting'**
+  String get entryTypeRepotting;
+
   /// No description provided for @newEntryTitle.
   ///
   /// In en, this message translates to:
@@ -1723,6 +1759,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Where was it applied? Any reaction from the plant?'**
   String get noteHintPesticide;
+
+  /// No description provided for @noteHintRepotting.
+  ///
+  /// In en, this message translates to:
+  /// **'How were the roots? Was the plant divided?'**
+  String get noteHintRepotting;
 
   /// No description provided for @noteHintDefault.
   ///
@@ -2287,6 +2329,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error updating: {error}'**
   String datasetUpdateError(String error);
+
+  /// No description provided for @speciesCareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Species care'**
+  String get speciesCareTitle;
+
+  /// No description provided for @lightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get lightLabel;
+
+  /// No description provided for @lightFullSun.
+  ///
+  /// In en, this message translates to:
+  /// **'Full sun'**
+  String get lightFullSun;
+
+  /// No description provided for @lightPartialShade.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial shade'**
+  String get lightPartialShade;
+
+  /// No description provided for @lightIndirectBright.
+  ///
+  /// In en, this message translates to:
+  /// **'Bright indirect light'**
+  String get lightIndirectBright;
+
+  /// No description provided for @lightShade.
+  ///
+  /// In en, this message translates to:
+  /// **'Shade'**
+  String get lightShade;
+
+  /// No description provided for @humidityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Humidity'**
+  String get humidityLabel;
+
+  /// No description provided for @humidityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get humidityLow;
+
+  /// No description provided for @humidityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get humidityMedium;
+
+  /// No description provided for @humidityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get humidityHigh;
+
+  /// No description provided for @petToxicityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet toxicity'**
+  String get petToxicityLabel;
+
+  /// No description provided for @petToxicityUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get petToxicityUnknown;
+
+  /// No description provided for @petToxicityNonToxic.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-toxic'**
+  String get petToxicityNonToxic;
+
+  /// No description provided for @petToxicityToxic.
+  ///
+  /// In en, this message translates to:
+  /// **'Toxic'**
+  String get petToxicityToxic;
+
+  /// No description provided for @toxicToPetsBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Toxic to pets'**
+  String get toxicToPetsBadge;
+
+  /// No description provided for @floweringLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Flowering months'**
+  String get floweringLabel;
+
+  /// No description provided for @floweringIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Flowers in: {months}'**
+  String floweringIn(String months);
+
+  /// No description provided for @careNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Care notes'**
+  String get careNotesLabel;
 
   /// No description provided for @soilSandy.
   ///
@@ -3493,6 +3643,696 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Watering chart: {count} intervals between waterings. {summary}'**
   String chartWateringSemantics(int count, String summary);
+
+  /// No description provided for @repottingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The new pot and, if it changed, the soil.'**
+  String get repottingHint;
+
+  /// No description provided for @potDiameterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pot diameter'**
+  String get potDiameterLabel;
+
+  /// No description provided for @potMaterialLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pot material'**
+  String get potMaterialLabel;
+
+  /// No description provided for @potMaterialPlastic.
+  ///
+  /// In en, this message translates to:
+  /// **'Plastic'**
+  String get potMaterialPlastic;
+
+  /// No description provided for @potMaterialClay.
+  ///
+  /// In en, this message translates to:
+  /// **'Clay'**
+  String get potMaterialClay;
+
+  /// No description provided for @potMaterialCeramic.
+  ///
+  /// In en, this message translates to:
+  /// **'Ceramic'**
+  String get potMaterialCeramic;
+
+  /// No description provided for @potMaterialFabric.
+  ///
+  /// In en, this message translates to:
+  /// **'Fabric'**
+  String get potMaterialFabric;
+
+  /// No description provided for @potMaterialOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get potMaterialOther;
+
+  /// No description provided for @newSoilLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New soil'**
+  String get newSoilLabel;
+
+  /// No description provided for @newSoilHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Also changes the plant\'s soil.'**
+  String get newSoilHint;
+
+  /// No description provided for @keepCurrentSoil.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the current soil'**
+  String get keepCurrentSoil;
+
+  /// No description provided for @potDiameterSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{diameter} cm pot'**
+  String potDiameterSummary(String diameter);
+
+  /// No description provided for @parentPlantLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cutting of'**
+  String get parentPlantLabel;
+
+  /// No description provided for @parentPlantHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'The plant this one was propagated from.'**
+  String get parentPlantHelper;
+
+  /// No description provided for @cuttingsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cuttings'**
+  String get cuttingsLabel;
+
+  /// No description provided for @createCutting.
+  ///
+  /// In en, this message translates to:
+  /// **'Create cutting'**
+  String get createCutting;
+
+  /// No description provided for @cuttingNicknameSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (cutting)'**
+  String cuttingNicknameSuggestion(String name);
+
+  /// No description provided for @parentPlantRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed plant'**
+  String get parentPlantRemoved;
+
+  /// No description provided for @carenciaUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-harvest interval until {date}'**
+  String carenciaUntil(String date);
+
+  /// No description provided for @carenciaBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval until {date}'**
+  String carenciaBadge(String date);
+
+  /// No description provided for @carenciaDoNotHarvest.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not harvest until {date}'**
+  String carenciaDoNotHarvest(String date);
+
+  /// No description provided for @carenciaDoNotHarvestProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not harvest — {products}'**
+  String carenciaDoNotHarvestProducts(String products);
+
+  /// No description provided for @entryTypeHarvest.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvest'**
+  String get entryTypeHarvest;
+
+  /// No description provided for @noteHintHarvest.
+  ///
+  /// In en, this message translates to:
+  /// **'Ripeness, quality, where it went...'**
+  String get noteHintHarvest;
+
+  /// No description provided for @harvestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How much was harvested.'**
+  String get harvestHint;
+
+  /// No description provided for @harvestQuantityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get harvestQuantityLabel;
+
+  /// No description provided for @harvestUnitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get harvestUnitLabel;
+
+  /// No description provided for @harvestUnitG.
+  ///
+  /// In en, this message translates to:
+  /// **'g'**
+  String get harvestUnitG;
+
+  /// No description provided for @harvestUnitKg.
+  ///
+  /// In en, this message translates to:
+  /// **'kg'**
+  String get harvestUnitKg;
+
+  /// No description provided for @harvestUnitUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'units'**
+  String get harvestUnitUnits;
+
+  /// No description provided for @harvestUnitBunches.
+  ///
+  /// In en, this message translates to:
+  /// **'bunches'**
+  String get harvestUnitBunches;
+
+  /// No description provided for @harvestAmountG.
+  ///
+  /// In en, this message translates to:
+  /// **'{quantity} g'**
+  String harvestAmountG(String quantity);
+
+  /// No description provided for @harvestAmountKg.
+  ///
+  /// In en, this message translates to:
+  /// **'{quantity} kg'**
+  String harvestAmountKg(String quantity);
+
+  /// No description provided for @harvestAmountUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{quantity} unit} other{{quantity} units}}'**
+  String harvestAmountUnits(num count, String quantity);
+
+  /// No description provided for @harvestAmountBunches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{quantity} bunch} other{{quantity} bunches}}'**
+  String harvestAmountBunches(num count, String quantity);
+
+  /// No description provided for @harvestDuringCarencia.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvested during the pre-harvest interval'**
+  String get harvestDuringCarencia;
+
+  /// No description provided for @harvestCarenciaDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvest during the pre-harvest interval?'**
+  String get harvestCarenciaDialogTitle;
+
+  /// No description provided for @harvestCarenciaDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This plant is in the pre-harvest interval until {date}. Harvesting now may leave pesticide residue.'**
+  String harvestCarenciaDialogBody(String date);
+
+  /// No description provided for @harvestCarenciaDialogBulkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 plant is in the pre-harvest interval. Harvesting it now may leave pesticide residue:} other{{count} plants are in the pre-harvest interval. Harvesting them now may leave pesticide residue:}}'**
+  String harvestCarenciaDialogBulkBody(int count);
+
+  /// No description provided for @harvestCarenciaPlantLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{plant}: until {date}'**
+  String harvestCarenciaPlantLine(String plant, String date);
+
+  /// No description provided for @carenciaProductsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Products: {products}'**
+  String carenciaProductsLine(String products);
+
+  /// No description provided for @harvestCarenciaQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the harvest anyway? It will be marked as made during the interval.'**
+  String get harvestCarenciaQuestion;
+
+  /// No description provided for @harvestCarenciaConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Record anyway'**
+  String get harvestCarenciaConfirm;
+
+  /// No description provided for @harvestTotalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvests'**
+  String get harvestTotalsTitle;
+
+  /// No description provided for @harvestTotalsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvested in total: {amounts}'**
+  String harvestTotalsSummary(String amounts);
+
+  /// No description provided for @setAsCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as cover'**
+  String get setAsCover;
+
+  /// No description provided for @useLatestAsCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the latest photo as cover'**
+  String get useLatestAsCover;
+
+  /// No description provided for @coverBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get coverBadge;
+
+  /// No description provided for @coverPhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover photo from {date}'**
+  String coverPhotoLabel(String date);
+
+  /// No description provided for @photoOptionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'show photo options'**
+  String get photoOptionsHint;
+
+  /// No description provided for @coverPhotoUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover updated'**
+  String get coverPhotoUpdated;
+
+  /// No description provided for @photosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get photosTitle;
+
+  /// No description provided for @photosCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {max}'**
+  String photosCounter(int count, int max);
+
+  /// No description provided for @photoNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {index} of {total}'**
+  String photoNumberLabel(int index, int total);
+
+  /// No description provided for @removePhotoNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo {index}'**
+  String removePhotoNumber(int index);
+
+  /// No description provided for @entryPhotoNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {index} of {total} from {date}'**
+  String entryPhotoNumberLabel(int index, int total, String date);
+
+  /// No description provided for @photoPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'{index} of {total}'**
+  String photoPosition(int index, int total);
+
+  /// No description provided for @compareWithFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare with the first photo'**
+  String get compareWithFirst;
+
+  /// No description provided for @compareWithOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare with another photo'**
+  String get compareWithOther;
+
+  /// No description provided for @pickPhotoToCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick another photo to compare'**
+  String get pickPhotoToCompare;
+
+  /// No description provided for @comparisonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before and after'**
+  String get comparisonTitle;
+
+  /// No description provided for @comparisonBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before · {date}'**
+  String comparisonBefore(String date);
+
+  /// No description provided for @comparisonAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After · {date}'**
+  String comparisonAfter(String date);
+
+  /// No description provided for @comparisonSideBySide.
+  ///
+  /// In en, this message translates to:
+  /// **'Side by side'**
+  String get comparisonSideBySide;
+
+  /// No description provided for @comparisonSlider.
+  ///
+  /// In en, this message translates to:
+  /// **'Slider'**
+  String get comparisonSlider;
+
+  /// No description provided for @comparisonDivider.
+  ///
+  /// In en, this message translates to:
+  /// **'Divider between the photos'**
+  String get comparisonDivider;
+
+  /// No description provided for @labelsGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate labels'**
+  String get labelsGenerate;
+
+  /// No description provided for @labelsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 label} other{{count} labels}}'**
+  String labelsTitle(int count);
+
+  /// No description provided for @labelsPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{pages, plural, one{Fits on 1 A4 page} other{Fits on {pages} A4 pages}}'**
+  String labelsPages(int pages);
+
+  /// No description provided for @labelsSheetLayout.
+  ///
+  /// In en, this message translates to:
+  /// **'Sheet layout'**
+  String get labelsSheetLayout;
+
+  /// No description provided for @labelsPresetA4x24.
+  ///
+  /// In en, this message translates to:
+  /// **'24 per sheet · 70 × 37 mm'**
+  String get labelsPresetA4x24;
+
+  /// No description provided for @labelsPresetA4x10.
+  ///
+  /// In en, this message translates to:
+  /// **'10 per sheet · 99 × 57 mm'**
+  String get labelsPresetA4x10;
+
+  /// No description provided for @labelsShowLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Show location'**
+  String get labelsShowLocation;
+
+  /// No description provided for @labelsShowAcquisitionDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Show acquisition date'**
+  String get labelsShowAcquisitionDate;
+
+  /// No description provided for @labelsAcquiredOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Since {date}'**
+  String labelsAcquiredOn(String date);
+
+  /// No description provided for @labelsPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get labelsPrint;
+
+  /// No description provided for @labelsSharePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Share PDF'**
+  String get labelsSharePdf;
+
+  /// No description provided for @labelsSavePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Save PDF'**
+  String get labelsSavePdf;
+
+  /// No description provided for @labelsSavedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Labels saved to {path}'**
+  String labelsSavedTo(String path);
+
+  /// No description provided for @labelsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the labels: {error}'**
+  String labelsError(String error);
+
+  /// No description provided for @labelsPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Label preview'**
+  String get labelsPreview;
+
+  /// No description provided for @labelScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan label'**
+  String get labelScan;
+
+  /// No description provided for @labelScanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point the camera at a plant label'**
+  String get labelScanHint;
+
+  /// No description provided for @labelScanCameraError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the camera'**
+  String get labelScanCameraError;
+
+  /// No description provided for @labelScanInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This code isn\'t a Polypodium label'**
+  String get labelScanInvalid;
+
+  /// No description provided for @labelPlantNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant not found in this space'**
+  String get labelPlantNotFound;
+
+  /// No description provided for @gardenMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Garden members'**
+  String get gardenMembers;
+
+  /// No description provided for @gardenPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal garden'**
+  String get gardenPersonal;
+
+  /// No description provided for @gardenOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{email}\'s garden'**
+  String gardenOf(String email);
+
+  /// No description provided for @gardenRoleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get gardenRoleOwner;
+
+  /// No description provided for @gardenRoleMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get gardenRoleMember;
+
+  /// No description provided for @gardenYou.
+  ///
+  /// In en, this message translates to:
+  /// **'{email} (you)'**
+  String gardenYou(String email);
+
+  /// No description provided for @gardenYouAreOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'You own this garden'**
+  String get gardenYouAreOwner;
+
+  /// No description provided for @gardenYouAreMember.
+  ///
+  /// In en, this message translates to:
+  /// **'You are a member of this garden'**
+  String get gardenYouAreMember;
+
+  /// No description provided for @gardenAddMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Add member'**
+  String get gardenAddMember;
+
+  /// No description provided for @gardenAddMemberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The member needs an account on this server, created by its administrator.'**
+  String get gardenAddMemberHint;
+
+  /// No description provided for @gardenMemberAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{email} added.'**
+  String gardenMemberAdded(String email);
+
+  /// No description provided for @gardenRemoveMemberTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {email}'**
+  String gardenRemoveMemberTooltip(String email);
+
+  /// No description provided for @gardenRemoveMemberTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove member?'**
+  String get gardenRemoveMemberTitle;
+
+  /// No description provided for @gardenRemoveMemberBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{email} will no longer sync this garden. What they recorded stays in it.'**
+  String gardenRemoveMemberBody(String email);
+
+  /// No description provided for @gardenRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get gardenRemove;
+
+  /// No description provided for @gardenLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave garden'**
+  String get gardenLeave;
+
+  /// No description provided for @gardenLeaveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This workspace will stop syncing with the garden. Its data stays on this device.'**
+  String get gardenLeaveBody;
+
+  /// No description provided for @gardenLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'You left the garden.'**
+  String get gardenLeft;
+
+  /// No description provided for @newSharedGarden.
+  ///
+  /// In en, this message translates to:
+  /// **'New shared garden'**
+  String get newSharedGarden;
+
+  /// No description provided for @newSharedGardenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Creates an empty garden on this server, in a new workspace. Add members to share it.'**
+  String get newSharedGardenBody;
+
+  /// No description provided for @gardenNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Garden name'**
+  String get gardenNameLabel;
+
+  /// No description provided for @openGarden.
+  ///
+  /// In en, this message translates to:
+  /// **'Open another garden'**
+  String get openGarden;
+
+  /// No description provided for @pickGardenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Which garden?'**
+  String get pickGardenTitle;
+
+  /// No description provided for @pickGardenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This account takes part in shared gardens on this server. Each one syncs in its own workspace.'**
+  String get pickGardenBody;
+
+  /// No description provided for @errorGardenAccessDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'You are no longer a member of this garden.'**
+  String get errorGardenAccessDenied;
+
+  /// No description provided for @errorGardensUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This server doesn\'t support shared gardens yet. Update it to use them.'**
+  String get errorGardensUnsupported;
+
+  /// No description provided for @errorGardenAccountNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No account with this e-mail on this server.'**
+  String get errorGardenAccountNotFound;
+
+  /// No description provided for @errorGardenAlreadyMember.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is already a member.'**
+  String get errorGardenAlreadyMember;
+
+  /// No description provided for @gardenRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get gardenRetry;
 }
 
 class _AppLocalizationsDelegate

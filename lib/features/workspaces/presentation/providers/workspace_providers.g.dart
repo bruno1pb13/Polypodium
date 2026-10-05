@@ -86,7 +86,7 @@ final class WorkspacesNotifierProvider
 }
 
 String _$workspacesNotifierHash() =>
-    r'3fedef7ff1df31c1e6b123f6ec41622b784f1448';
+    r'eee84d1742e62be1ad57843645056622f1be67a6';
 
 abstract class _$WorkspacesNotifier extends $Notifier<List<Workspace>> {
   List<Workspace> build();

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/native.dart';
 import 'package:polypodium/core/database/app_database.dart';
+import 'package:polypodium/core/database/sync_cursors_dao.dart';
 import 'package:polypodium/core/enums.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 
@@ -335,7 +336,7 @@ void main() {
 
     final version =
         await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.read<int>('user_version'), 15);
+    expect(version.read<int>('user_version'), db.schemaVersion);
   });
 
   test('the v14 location fix stamps the deviceId on its writes', () async {
@@ -395,5 +396,301 @@ void main() {
     expect(plant!.deviceId, 'device-a');
     final location = await db.locationsDao.getById(plant.locationId!);
     expect(location!.deviceId, 'device-a');
+  });
+
+  test('migration from v15 adds an empty care sheet to species', () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE species (
+          id TEXT NOT NULL PRIMARY KEY,
+          scientific_name TEXT NOT NULL,
+          popular_name TEXT NOT NULL,
+          default_irrigation_frequency_days INTEGER NULL,
+          recommended_soil_types TEXT NOT NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          deleted_at INTEGER NULL,
+          local_rev INTEGER NOT NULL DEFAULT 0,
+          device_id TEXT NULL
+        )
+      ''');
+      raw.execute('''
+        INSERT INTO species (id, scientific_name, popular_name,
+          recommended_soil_types, created_at, updated_at, local_rev)
+        VALUES ('s1', 'Ficus lyrata', 'Figueira', '["loamy"]', 0, 0, 4)
+      ''');
+      raw.execute('PRAGMA user_version = 15');
+    }));
+
+    final species = await db.speciesDao.getById('s1');
+    expect(species!.scientificName, 'Ficus lyrata');
+    expect(species.recommendedSoilTypes, ['loamy']);
+    expect(species.light, isNull);
+    expect(species.humidity, isNull);
+    expect(species.petToxicity, PetToxicity.unknown);
+    expect(species.floweringMonths, isEmpty);
+    expect(species.careNotes, isNull);
+    // Not a local write: nothing to push.
+    expect(species.localRev, 4);
+
+    await db.speciesDao.upsert(species
+        .toCompanion(false)
+        .copyWith(
+          light: const Value(LightRequirement.shade),
+          petToxicity: const Value(PetToxicity.toxic),
+          floweringMonths: const Value({1, 12}),
+        ));
+    final updated = await db.speciesDao.getById('s1');
+    expect(updated!.light, LightRequirement.shade);
+    expect(updated.petToxicity, PetToxicity.toxic);
+    expect(updated.floweringMonths, {1, 12});
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
+  test('migration from v16 adds a null parent plant to plants', () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE plants (
+          id TEXT NOT NULL PRIMARY KEY,
+          species_id TEXT NOT NULL,
+          nickname TEXT NOT NULL,
+          soil_type TEXT NOT NULL,
+          irrigation_frequency_days INTEGER NULL,
+          acquisition_date INTEGER NOT NULL,
+          location_id TEXT NULL,
+          last_irrigated_at INTEGER NULL,
+          last_pesticide_applied_at INTEGER NULL,
+          pesticide_reapplication_days INTEGER NULL,
+          status TEXT NOT NULL DEFAULT 'active',
+          status_changed_at INTEGER NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          deleted_at INTEGER NULL,
+          local_rev INTEGER NOT NULL DEFAULT 0,
+          device_id TEXT NULL
+        )
+      ''');
+      raw.execute('''
+        INSERT INTO plants (id, species_id, nickname, soil_type,
+          acquisition_date, created_at, updated_at, local_rev)
+        VALUES ('p1', 's1', 'Old plant', 'loamy', 0, 0, 0, 5)
+      ''');
+      raw.execute('PRAGMA user_version = 16');
+    }));
+
+    final plant = await db.plantsDao.getById('p1');
+    expect(plant!.parentPlantId, isNull);
+    // Not a local write: nothing to push.
+    expect(plant.localRev, 5);
+
+    await db.plantsDao.upsert(plant
+        .toCompanion(false)
+        .copyWith(id: const Value('p2'), parentPlantId: const Value('p1')));
+    expect((await db.plantsDao.getById('p2'))!.parentPlantId, 'p1');
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
+  test('migration from v17 creates the declared entry types table, keeping '
+      'the cursors', () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE sync_cursors (
+          peer_id TEXT NOT NULL,
+          direction TEXT NOT NULL,
+          cursor INTEGER NOT NULL DEFAULT 0,
+          PRIMARY KEY (peer_id, direction)
+        )
+      ''');
+      raw.execute(
+          "INSERT INTO sync_cursors VALUES ('server', 'pull', 42)");
+      raw.execute('PRAGMA user_version = 17');
+    }));
+
+    final dao = db.syncCursorsDao;
+    expect(await dao.getCursor('server', 'pull'), 42);
+    expect(await dao.getDeclaredEntryTypes('server'), isNull);
+
+    await dao.addDeclaredEntryTypes('server', ['irrigation', 'repotting']);
+    expect(await dao.getDeclaredEntryTypes('server'),
+        {'irrigation', 'repotting'});
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
+  test('migration from v18 adds no cover photo to plants', () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE plants (
+          id TEXT NOT NULL PRIMARY KEY,
+          species_id TEXT NOT NULL,
+          nickname TEXT NOT NULL,
+          soil_type TEXT NOT NULL,
+          irrigation_frequency_days INTEGER NULL,
+          acquisition_date INTEGER NOT NULL,
+          location_id TEXT NULL,
+          last_irrigated_at INTEGER NULL,
+          last_pesticide_applied_at INTEGER NULL,
+          pesticide_reapplication_days INTEGER NULL,
+          status TEXT NOT NULL DEFAULT 'active',
+          status_changed_at INTEGER NULL,
+          parent_plant_id TEXT NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          deleted_at INTEGER NULL,
+          local_rev INTEGER NOT NULL DEFAULT 0,
+          device_id TEXT NULL
+        )
+      ''');
+      raw.execute('''
+        INSERT INTO plants (id, species_id, nickname, soil_type,
+          acquisition_date, created_at, updated_at, local_rev)
+        VALUES ('p1', 's1', 'Old plant', 'loamy', 0, 0, 0, 5)
+      ''');
+      raw.execute('PRAGMA user_version = 18');
+    }));
+
+    final plant = await db.plantsDao.getById('p1');
+    expect(plant!.coverPhotoId, isNull);
+    expect(plant.localRev, 5);
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
+  test('migration from v19 creates the entry photos and declared entity '
+      'types tables', () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE sync_cursors (
+          peer_id TEXT NOT NULL,
+          direction TEXT NOT NULL,
+          cursor INTEGER NOT NULL DEFAULT 0,
+          PRIMARY KEY (peer_id, direction)
+        )
+      ''');
+      raw.execute(
+          "INSERT INTO sync_cursors VALUES ('server', 'pull', 42)");
+      raw.execute('PRAGMA user_version = 19');
+    }));
+
+    expect(await db.syncCursorsDao.getCursor('server', 'pull'), 42);
+    expect(
+        await db.syncCursorsDao.getDeclaredEntityTypes('server'), isNull);
+    await db.entryPhotosDao.upsert(EntryPhotosTableCompanion.insert(
+      id: 'ph1',
+      entryId: 'e1',
+      photoPath: '/a.jpg',
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    ));
+    expect((await db.entryPhotosDao.getById('ph1'))!.position, 0);
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
+  test('migration from v20 creates the confirmed entity types table, keeping '
+      'the cursors', () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE sync_cursors (
+          peer_id TEXT NOT NULL,
+          direction TEXT NOT NULL,
+          cursor INTEGER NOT NULL DEFAULT 0,
+          PRIMARY KEY (peer_id, direction)
+        )
+      ''');
+      raw.execute(
+          "INSERT INTO sync_cursors VALUES ('server', 'push', 42)");
+      raw.execute('PRAGMA user_version = 20');
+    }));
+
+    final dao = db.syncCursorsDao;
+    expect(await dao.getCursor('server', 'push'), 42);
+    expect(await dao.getConfirmedEntityTypes('server'), isEmpty);
+    await dao.setCursor('server', '${syncDirectionRepushPrefix}reminder', 7);
+    await dao.confirmEntityTypes('server', ['plant', 'reminder']);
+    expect(await dao.getConfirmedEntityTypes('server'), {'plant', 'reminder'});
+    expect(
+        await dao.getCursor('server', '${syncDirectionRepushPrefix}reminder'),
+        0);
+    await dao.unconfirmEntityTypes('server', ['reminder']);
+    expect(await dao.getConfirmedEntityTypes('server'), {'plant'});
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
+  test('migrating from before v14 rebuilds plants with the parent column',
+      () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE plants (
+          id TEXT NOT NULL PRIMARY KEY,
+          species_id TEXT NOT NULL,
+          nickname TEXT NOT NULL,
+          soil_type TEXT NOT NULL,
+          irrigation_frequency_days INTEGER NULL,
+          acquisition_date INTEGER NOT NULL,
+          location TEXT NULL,
+          location_id TEXT NULL,
+          last_irrigated_at INTEGER NULL,
+          last_pesticide_applied_at INTEGER NULL,
+          pesticide_reapplication_days INTEGER NULL,
+          status TEXT NOT NULL DEFAULT 'active',
+          status_changed_at INTEGER NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          deleted_at INTEGER NULL,
+          local_rev INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      raw.execute('''
+        INSERT INTO plants (id, species_id, nickname, soil_type,
+          acquisition_date, created_at, updated_at)
+        VALUES ('p1', 's1', 'Old plant', 'loamy', 0, 0, 0)
+      ''');
+      raw.execute('PRAGMA user_version = 13');
+    }));
+
+    expect((await db.plantsDao.getById('p1'))!.parentPlantId, isNull);
+    final columns = await db.customSelect('PRAGMA table_info(plants)').get();
+    expect(columns.map((c) => c.read<String>('name')),
+        containsAll(['parent_plant_id', 'cover_photo_id']));
+  });
+
+  test('flowering months are stored as a bitmask', () async {
+    await db.into(db.speciesTable).insert(SpeciesTableCompanion.insert(
+          id: 's1',
+          scientificName: 'Sci',
+          popularName: 'Pop',
+          recommendedSoilTypes: const [],
+          floweringMonths: const Value({1, 3, 12}),
+          createdAt: DateTime(2026, 1, 1),
+          updatedAt: DateTime(2026, 1, 1),
+        ));
+
+    final raw = await db
+        .customSelect("SELECT flowering_months FROM species WHERE id = 's1'")
+        .getSingle();
+    expect(raw.read<int>('flowering_months'), 1 | 1 << 2 | 1 << 11);
   });
 }

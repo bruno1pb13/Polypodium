@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="agenda_widget_title" translatable="false">Polypodium</string>
+    <string name="agenda_widget_description">Plants that need care today</string>
+    <string name="agenda_widget_water">Watered</string>
+    <string name="agenda_widget_empty">Open Polypodium to load today\'s care.</string>
+</resources>

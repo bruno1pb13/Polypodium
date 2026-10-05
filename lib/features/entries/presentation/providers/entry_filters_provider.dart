@@ -7,6 +7,11 @@ part 'entry_filters_provider.g.dart';
 @riverpod
 class EntryFiltersNotifier extends _$EntryFiltersNotifier {
   static const _prefPrefix = 'entry_filters_';
+  static const _knownPrefix = 'entry_filters_known_';
+
+  /// Types that existed before saved filters recorded the known types.
+  static final _legacyTypes =
+      EntryType.values.where((t) => t.index <= EntryType.history.index);
 
   @override
   Set<EntryType> build(String plantId) {
@@ -19,11 +24,30 @@ class EntryFiltersNotifier extends _$EntryFiltersNotifier {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getStringList('$_prefPrefix$plantId');
     if (saved != null) {
-      final types = saved
-          .map((e) => EntryType.values.firstWhere((t) => t.name == e))
-          .toSet();
-      state = types;
+      final known = prefs
+              .getStringList('$_knownPrefix$plantId')
+              ?.map(EntryType.fromName)
+              .nonNulls
+              .toSet() ??
+          _legacyTypes.toSet();
+      // Types added after the filter was saved start out visible; names
+      // this version doesn't know are dropped.
+      state = {
+        ...saved.map(EntryType.fromName).nonNulls,
+        ...EntryType.values.where((t) => !known.contains(t)),
+      };
     }
+  }
+
+  Future<void> _save(SharedPreferences prefs, Set<EntryType> types) async {
+    await prefs.setStringList(
+      '$_prefPrefix$plantId',
+      types.map((e) => e.name).toList(),
+    );
+    await prefs.setStringList(
+      '$_knownPrefix$plantId',
+      EntryType.values.map((e) => e.name).toList(),
+    );
   }
 
   Future<void> toggleFilter(EntryType type) async {
@@ -38,19 +62,13 @@ class EntryFiltersNotifier extends _$EntryFiltersNotifier {
     state = newState;
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(
-      '$_prefPrefix$plantId',
-      newState.map((e) => e.name).toList(),
-    );
+    await _save(prefs, newState);
   }
 
   Future<void> selectAll() async {
     state = EntryType.values.toSet();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(
-      '$_prefPrefix$plantId',
-      EntryType.values.map((e) => e.name).toList(),
-    );
+    await _save(prefs, state);
   }
 }
 

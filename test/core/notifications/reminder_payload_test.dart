@@ -43,7 +43,7 @@ void main() {
           isNull);
       expect(
           ReminderPayload.decode(
-              '{"kind": "care", "plantIds": ["a"], "entryType": "repotting"}'),
+              '{"kind": "care", "plantIds": ["a"], "entryType": "grafting"}'),
           isNull);
     });
 

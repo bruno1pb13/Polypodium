@@ -31,6 +31,41 @@ enum EntryType {
   pesticide,
   other,
   history,
+  repotting,
+  harvest;
+
+  /// Unknown or missing names (rows written by a newer client) yield null;
+  /// callers skip such rows instead of failing.
+  static EntryType? fromName(String? name) =>
+      EntryType.values.asNameMap()[name];
+}
+
+/// Unit of a harvested quantity (see HarvestDetails). Persisted by name.
+enum HarvestUnit {
+  g,
+  kg,
+  units,
+  bunches;
+
+  /// Missing or unknown names (a newer client's unit) yield null: the
+  /// quantity is then shown without a unit.
+  static HarvestUnit? fromName(String? name) =>
+      HarvestUnit.values.asNameMap()[name];
+}
+
+/// Material of the pot a plant was moved to (see RepottingDetails).
+enum PotMaterial {
+  plastic,
+  clay,
+  ceramic,
+  fabric,
+  other;
+
+  /// Missing values mean "not informed"; unknown ones (a newer client's
+  /// material) are shown as [other].
+  static PotMaterial? fromName(String? name) => name == null
+      ? null
+      : PotMaterial.values.asNameMap()[name] ?? PotMaterial.other;
 }
 
 enum DefensivoCategory {
@@ -53,6 +88,36 @@ enum PlantStatus {
   /// fall back to [active].
   static PlantStatus fromName(String? name) =>
       PlantStatus.values.asNameMap()[name] ?? PlantStatus.active;
+}
+
+enum LightRequirement {
+  fullSun,
+  partialShade,
+  indirectBright,
+  shade;
+
+  /// Missing or unknown values (older clients, newer servers) mean "not
+  /// informed".
+  static LightRequirement? fromName(String? name) =>
+      LightRequirement.values.asNameMap()[name];
+}
+
+enum HumidityLevel {
+  low,
+  medium,
+  high;
+
+  static HumidityLevel? fromName(String? name) =>
+      HumidityLevel.values.asNameMap()[name];
+}
+
+enum PetToxicity {
+  unknown,
+  nonToxic,
+  toxic;
+
+  static PetToxicity fromName(String? name) =>
+      PetToxicity.values.asNameMap()[name] ?? PetToxicity.unknown;
 }
 
 enum PlantSortOption {
@@ -122,6 +187,50 @@ extension PlantStatusX on PlantStatus {
         PlantStatus.dead => '🥀',
         PlantStatus.donated => '🎁',
         PlantStatus.archived => '📦',
+      };
+}
+
+extension LightRequirementX on LightRequirement {
+  String label(AppLocalizations l10n) => switch (this) {
+        LightRequirement.fullSun => l10n.lightFullSun,
+        LightRequirement.partialShade => l10n.lightPartialShade,
+        LightRequirement.indirectBright => l10n.lightIndirectBright,
+        LightRequirement.shade => l10n.lightShade,
+      };
+
+  String get emoji => switch (this) {
+        LightRequirement.fullSun => '☀️',
+        LightRequirement.partialShade => '⛅',
+        LightRequirement.indirectBright => '🌤️',
+        LightRequirement.shade => '☁️',
+      };
+}
+
+extension HumidityLevelX on HumidityLevel {
+  String label(AppLocalizations l10n) => switch (this) {
+        HumidityLevel.low => l10n.humidityLow,
+        HumidityLevel.medium => l10n.humidityMedium,
+        HumidityLevel.high => l10n.humidityHigh,
+      };
+
+  String get emoji => switch (this) {
+        HumidityLevel.low => '🏜️',
+        HumidityLevel.medium => '💧',
+        HumidityLevel.high => '🌧️',
+      };
+}
+
+extension PetToxicityX on PetToxicity {
+  String label(AppLocalizations l10n) => switch (this) {
+        PetToxicity.unknown => l10n.petToxicityUnknown,
+        PetToxicity.nonToxic => l10n.petToxicityNonToxic,
+        PetToxicity.toxic => l10n.petToxicityToxic,
+      };
+
+  String get emoji => switch (this) {
+        PetToxicity.unknown => '❔',
+        PetToxicity.nonToxic => '🐾',
+        PetToxicity.toxic => '⚠️',
       };
 }
 
@@ -240,6 +349,8 @@ extension EntryTypeX on EntryType {
         EntryType.pesticide => l10n.entryTypePesticide,
         EntryType.other => l10n.entryTypeOther,
         EntryType.history => l10n.entryTypeHistory,
+        EntryType.repotting => l10n.entryTypeRepotting,
+        EntryType.harvest => l10n.entryTypeHarvest,
       };
 
   String get emoji => switch (this) {
@@ -253,6 +364,36 @@ extension EntryTypeX on EntryType {
         EntryType.pesticide => '🧪',
         EntryType.other => '📝',
         EntryType.history => '📜',
+        EntryType.repotting => '🪴',
+        EntryType.harvest => '🧺',
+      };
+}
+
+extension HarvestUnitX on HarvestUnit {
+  String label(AppLocalizations l10n) => switch (this) {
+        HarvestUnit.g => l10n.harvestUnitG,
+        HarvestUnit.kg => l10n.harvestUnitKg,
+        HarvestUnit.units => l10n.harvestUnitUnits,
+        HarvestUnit.bunches => l10n.harvestUnitBunches,
+      };
+
+  /// [quantity] already formatted for display, followed by the unit.
+  String amount(AppLocalizations l10n, double quantity, String formatted) =>
+      switch (this) {
+        HarvestUnit.g => l10n.harvestAmountG(formatted),
+        HarvestUnit.kg => l10n.harvestAmountKg(formatted),
+        HarvestUnit.units => l10n.harvestAmountUnits(quantity, formatted),
+        HarvestUnit.bunches => l10n.harvestAmountBunches(quantity, formatted),
+      };
+}
+
+extension PotMaterialX on PotMaterial {
+  String label(AppLocalizations l10n) => switch (this) {
+        PotMaterial.plastic => l10n.potMaterialPlastic,
+        PotMaterial.clay => l10n.potMaterialClay,
+        PotMaterial.ceramic => l10n.potMaterialCeramic,
+        PotMaterial.fabric => l10n.potMaterialFabric,
+        PotMaterial.other => l10n.potMaterialOther,
       };
 }
 

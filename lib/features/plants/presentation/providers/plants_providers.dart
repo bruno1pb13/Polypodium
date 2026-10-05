@@ -6,6 +6,7 @@ import '../../../../core/database/database_provider.dart';
 import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/notifications/notification_provider.dart';
+import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../data/plants_repository.dart';
@@ -96,7 +97,18 @@ class PlantMutations {
   }
 
   Future<void> delete(String plantId) async {
-    await _ref.read(plantsRepositoryProvider).delete(plantId);
+    final photoPaths =
+        await _ref.read(plantsRepositoryProvider).delete(plantId);
+    final photoStorage = _ref.read(photoStorageProvider);
+    for (final path in photoPaths) {
+      await photoStorage.deletePhoto(path);
+    }
+    _triggerSync();
+  }
+
+  /// Picks [photoId] as the plant's cover (null: back to the latest photo).
+  Future<void> setCoverPhoto(String plantId, String? photoId) async {
+    await _ref.read(plantsRepositoryProvider).setCoverPhoto(plantId, photoId);
     _triggerSync();
   }
 
@@ -129,6 +141,10 @@ class PlantMutations {
       sb.writeln('• ${l10n.historyFieldSoil}: ${soil?.name ?? l10n.unknown}');
       if (location != null) {
         sb.writeln('• ${l10n.historyFieldLocation}: ${location.name}');
+      }
+      if (next.parentPlantId != null) {
+        sb.writeln('• ${l10n.historyFieldParent}: '
+            '${await _plantName(next.parentPlantId, l10n)}');
       }
       sb.writeln(
           '• ${l10n.historyAcquiredOn}: ${dateFmt.format(next.acquisitionDate)}');
@@ -188,8 +204,21 @@ class PlantMutations {
           '${l10n.historyFieldStatus}: ${old.status.label(l10n)} → ${next.status.label(l10n)}');
     }
 
+    if (old.parentPlantId != next.parentPlantId) {
+      changes.add('${l10n.historyFieldParent}: '
+          '${await _plantName(old.parentPlantId, l10n)} → '
+          '${await _plantName(next.parentPlantId, l10n)}');
+    }
+
     if (changes.isEmpty) return null;
     return '${l10n.historyUpdatedHeader}\n${changes.map((c) => '• $c').join('\n')}';
+  }
+
+  /// Nickname of the plant [id] (deleted ones included), for history notes.
+  Future<String> _plantName(String? id, AppLocalizations l10n) async {
+    if (id == null) return l10n.none;
+    final plant = await _ref.read(plantsRepositoryProvider).getById(id);
+    return plant?.nickname ?? l10n.unknown;
   }
 
   /// Trigger immediate sync if logged in.

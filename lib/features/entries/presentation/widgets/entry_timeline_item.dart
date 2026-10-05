@@ -9,9 +9,11 @@ import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/widgets/emoji_text.dart';
 import '../../../../core/widgets/fullscreen_image_viewer.dart';
+import '../../../plants/presentation/widgets/plant_status.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/entry_details.dart';
 import '../../domain/entry_model.dart';
+import 'harvest_format.dart';
 import '../../../../core/theme/glass_colors.dart';
 
 class EntryTimelineItem extends ConsumerWidget {
@@ -100,8 +102,7 @@ class EntryTimelineItem extends ConsumerWidget {
                                         ? context.glass.fgMuted
                                         : Theme.of(context)
                                             .colorScheme
-                                            .onSurfaceVariant
-                                            .withValues(alpha: 0.7),
+                                            .onSurfaceVariant,
                                     fontSize: 12,
                                   ),
                                 ),
@@ -112,6 +113,15 @@ class EntryTimelineItem extends ConsumerWidget {
                             entry: entry,
                             transparent: transparencyEnabled,
                           ),
+                          if (entry.details
+                              case HarvestDetails(duringCarencia: true)) ...[
+                            const SizedBox(height: 6),
+                            PlantStatusChip(
+                              emoji: '⚠️',
+                              label: context.l10n.harvestDuringCarencia,
+                              tone: StatusTone.warning,
+                            ),
+                          ],
                           if (entry.note != null && entry.note!.isNotEmpty) ...[
                             const SizedBox(height: 6),
                             Text(
@@ -127,7 +137,10 @@ class EntryTimelineItem extends ConsumerWidget {
                               ),
                             ),
                           ],
-                          if (entry.photoPath != null) ...[
+                          if (entry.photos.length > 1) ...[
+                            const SizedBox(height: 10),
+                            _EntryPhotoStrip(entry: entry),
+                          ] else if (entry.photoPath != null) ...[
                             const SizedBox(height: 10),
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
@@ -196,6 +209,63 @@ class EntryTimelineItem extends ConsumerWidget {
   }
 }
 
+/// Thumbnails of an entry with several photos; each opens the fullscreen
+/// viewer, which swipes between them.
+class _EntryPhotoStrip extends StatelessWidget {
+  final EntryModel entry;
+
+  const _EntryPhotoStrip({required this.entry});
+
+  @override
+  Widget build(BuildContext context) {
+    final photos = entry.photos;
+    final paths = [for (final p in photos) p.path];
+    final date = DateFormat.yMd(context.l10n.localeName).format(entry.date);
+
+    // A scroll view that, unlike a ListView, reports its intrinsic height to
+    // the IntrinsicHeight around the timeline row.
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (var i = 0; i < photos.length; i++) ...[
+            if (i > 0) const SizedBox(width: 8),
+            Semantics(
+              container: true,
+              button: true,
+              image: true,
+              label: context.l10n
+                  .entryPhotoNumberLabel(i + 1, photos.length, date),
+              child: GestureDetector(
+                onTap: () => showFullscreenImageViewer(context, paths[i],
+                    gallery: paths),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox.square(
+                    dimension: 96,
+                    child: Image.file(
+                      File(paths[i]),
+                      fit: BoxFit.cover,
+                      excludeFromSemantics: true,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: context.glass.tint(0.1),
+                        child: Icon(
+                          Icons.broken_image_outlined,
+                          color: context.glass.outline,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 typedef _Summary = (String emoji, String text);
 
 /// Shows the structured data saved with an entry as a compact pill row.
@@ -257,6 +327,14 @@ class _EntryDataBadge extends StatelessWidget {
         ('✂️', _pruningLabel(l10n, details.reason)),
       EntryType.pesticide =>
         _pesticideSummary(l10n, details as PesticideDetails?, entry.date),
+      EntryType.repotting =>
+        _repottingSummary(l10n, details as RepottingDetails?),
+      EntryType.harvest
+          when details is HarvestDetails && details.quantity != null =>
+        (
+          EntryType.harvest.emoji,
+          formatHarvestAmount(l10n, details.quantity!, details.unit),
+        ),
       EntryType.observation when nv != null =>
         (
           _healthEmoji(nv.toInt()),
@@ -317,6 +395,19 @@ class _EntryDataBadge extends StatelessWidget {
     ];
     if (parts.isEmpty) return null;
     return ('🧪', parts.join(' · '));
+  }
+
+  _Summary? _repottingSummary(
+      AppLocalizations l10n, RepottingDetails? details) {
+    if (details == null) return null;
+    final diameter = details.potDiameterCm;
+    final parts = [
+      if (diameter != null) l10n.potDiameterSummary(_fmt(diameter)),
+      if (details.potMaterial != null) details.potMaterial!.label(l10n),
+      if (details.newSoilName case final soil? when soil.isNotEmpty) soil,
+    ];
+    if (parts.isEmpty) return null;
+    return (EntryType.repotting.emoji, parts.join(' · '));
   }
 
   String _fmt(double v) =>

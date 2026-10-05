@@ -9,6 +9,8 @@ mixin _$EntriesDaoMixin on DatabaseAccessor<AppDatabase> {
   $LocationsTableTable get locationsTable => attachedDatabase.locationsTable;
   $PlantsTableTable get plantsTable => attachedDatabase.plantsTable;
   $EntriesTableTable get entriesTable => attachedDatabase.entriesTable;
+  $EntryPhotosTableTable get entryPhotosTable =>
+      attachedDatabase.entryPhotosTable;
   EntriesDaoManager get managers => EntriesDaoManager(this);
 }
 
@@ -26,4 +28,7 @@ class EntriesDaoManager {
       $$PlantsTableTableTableManager(_db.attachedDatabase, _db.plantsTable);
   $$EntriesTableTableTableManager get entriesTable =>
       $$EntriesTableTableTableManager(_db.attachedDatabase, _db.entriesTable);
+  $$EntryPhotosTableTableTableManager get entryPhotosTable =>
+      $$EntryPhotosTableTableTableManager(
+          _db.attachedDatabase, _db.entryPhotosTable);
 }

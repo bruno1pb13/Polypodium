@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="agenda_widget_background">#F2F6FAF4</color>
+    <color name="agenda_widget_text">#1B2B1E</color>
+    <color name="agenda_widget_text_secondary">#56665A</color>
+    <color name="agenda_widget_accent">#2E6B34</color>
+    <color name="agenda_widget_button">#DCEBD9</color>
+</resources>

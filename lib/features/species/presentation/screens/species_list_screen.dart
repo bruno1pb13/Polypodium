@@ -9,6 +9,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/sync/sync_providers.dart';
 import '../../../../core/widgets/app_search_bar.dart';
 import '../../../plants/presentation/screens/plant_group_screen.dart';
+import '../../../plants/presentation/widgets/plant_status.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../data/external_species_repository.dart';
 import '../../domain/species_model.dart';
@@ -407,6 +408,8 @@ class _SpeciesListItem extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final pushCursor = ref.watch(pushCursorToServerProvider).value;
     final isPendingSync = pushCursor != null && species.localRev > pushCursor;
+    final light = species.light;
+    final isToxic = species.petToxicity == PetToxicity.toxic;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -487,6 +490,27 @@ class _SpeciesListItem extends ConsumerWidget {
                                       .withValues(alpha: 0.7),
                             ),
                           ),
+                          if (light != null || isToxic) ...[
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: [
+                                if (light != null)
+                                  PlantStatusChip(
+                                    emoji: light.emoji,
+                                    label: light.label(context.l10n),
+                                    tone: StatusTone.neutral,
+                                  ),
+                                if (isToxic)
+                                  PlantStatusChip(
+                                    emoji: PetToxicity.toxic.emoji,
+                                    label: context.l10n.toxicToPetsBadge,
+                                    tone: StatusTone.danger,
+                                  ),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
                     ),

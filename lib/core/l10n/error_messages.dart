@@ -14,6 +14,10 @@ String localizedErrorMessage(Object error, AppLocalizations l10n) {
     NotAuthenticatedException() => l10n.errorNotAuthenticated,
     ServerUnavailableException() => l10n.errorServerUnavailable,
     AdminForbiddenException() => l10n.errorAdminForbidden,
+    GardenAccessDeniedException() => l10n.errorGardenAccessDenied,
+    GardensUnsupportedException() => l10n.errorGardensUnsupported,
+    GardenAccountNotFoundException() => l10n.errorGardenAccountNotFound,
+    GardenAlreadyMemberException() => l10n.errorGardenAlreadyMember,
     AuthFailedException(:final serverMessage, :final isRegistration) =>
       serverMessage ??
           (isRegistration ? l10n.errorRegisterFailed : l10n.errorLoginFailed),

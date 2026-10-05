@@ -9,11 +9,15 @@ import '../../../../core/sync/sync_providers.dart';
 import '../../../admin/data/admin_client.dart';
 import '../../../admin/presentation/screens/server_admin_screen.dart';
 import '../../../plants/presentation/screens/home_screen.dart';
+import '../../data/garden_client.dart';
 import '../../data/workspace_auth_client.dart';
 import '../../data/workspace_migration_service.dart';
+import '../../domain/garden.dart';
 import '../../domain/workspace_model.dart';
 import '../providers/workspace_providers.dart';
+import '../widgets/garden_picker_dialog.dart';
 import '../widgets/workspace_login_dialog.dart';
+import 'garden_members_screen.dart';
 
 class WorkspacesScreen extends ConsumerWidget {
   const WorkspacesScreen({super.key});
@@ -51,6 +55,12 @@ class WorkspacesScreen extends ConsumerWidget {
               onDelete: () => _delete(context, ref, ws),
               onAdminPanel:
                   ws.isServerAdmin ? () => _openAdmin(context, ref, ws) : null,
+              onGardenMembers:
+                  ws.isLoggedIn ? () => _openMembers(context, ws) : null,
+              onOpenGarden:
+                  ws.isLoggedIn ? () => _openGarden(context, ref, ws) : null,
+              onNewGarden:
+                  ws.isLoggedIn ? () => _newGarden(context, ref, ws) : null,
             ),
           if (remotes.isEmpty)
             Padding(
@@ -101,6 +111,7 @@ class WorkspacesScreen extends ConsumerWidget {
                 serverUrl: serverUrl,
                 email: email,
                 password: password,
+                pickGarden: (gardens) => _pickGarden(context, gardens),
               );
           await ref
               .read(activeWorkspaceIdNotifierProvider.notifier)
@@ -138,6 +149,78 @@ class WorkspacesScreen extends ConsumerWidget {
       ),
     );
     if (created == true && context.mounted) _goHome(context);
+  }
+
+  Future<GardenChoice?> _pickGarden(
+      BuildContext context, List<Garden> gardens) async {
+    final picked = await showDialog<Garden>(
+      context: context,
+      builder: (_) => GardenPickerDialog(gardens: gardens),
+    );
+    if (picked == null || !context.mounted) return null;
+    return gardenChoiceFor(picked, context.l10n);
+  }
+
+  Future<void> _openMembers(BuildContext context, Workspace ws) async {
+    final left = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => GardenMembersScreen(workspace: ws)),
+    );
+    if (left == true && context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(context.l10n.gardenLeft)));
+    }
+  }
+
+  /// Opens another garden of the same account in its own workspace, reusing
+  /// this workspace's session.
+  Future<void> _openGarden(
+      BuildContext context, WidgetRef ref, Workspace ws) async {
+    final List<Garden> gardens;
+    try {
+      gardens = await const GardenClient()
+          .listGardens(serverUrl: ws.serverUrl!, token: ws.token!);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(localizedErrorMessage(e, context.l10n))));
+      }
+      return;
+    }
+    if (!context.mounted) return;
+    final picked = await showDialog<Garden>(
+      context: context,
+      builder: (_) => GardenPickerDialog(gardens: gardens),
+    );
+    if (picked == null || !context.mounted) return;
+    await ref
+        .read(workspacesNotifierProvider.notifier)
+        .openGardenWorkspace(ws, gardenChoiceFor(picked, context.l10n));
+    if (context.mounted) _goHome(context);
+  }
+
+  /// Creates an empty garden on [ws]'s server and switches to a new
+  /// workspace syncing it.
+  Future<void> _newGarden(
+      BuildContext context, WidgetRef ref, Workspace ws) async {
+    final name = await showDialog<String>(
+      context: context,
+      builder: (_) => const _NewGardenDialog(),
+    );
+    if (name == null || name.isEmpty || !context.mounted) return;
+    try {
+      final garden = await const GardenClient().createGarden(
+          serverUrl: ws.serverUrl!, token: ws.token!, name: name);
+      await ref
+          .read(workspacesNotifierProvider.notifier)
+          .openGardenWorkspace(ws, (id: garden.id, name: garden.name));
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(localizedErrorMessage(e, context.l10n))));
+      }
+      return;
+    }
+    if (context.mounted) _goHome(context);
   }
 
   Future<void> _reconnect(
@@ -272,6 +355,56 @@ class WorkspacesScreen extends ConsumerWidget {
   }
 }
 
+/// Asks for the new shared garden's name; pops it trimmed, or null.
+class _NewGardenDialog extends StatefulWidget {
+  const _NewGardenDialog();
+
+  @override
+  State<_NewGardenDialog> createState() => _NewGardenDialogState();
+}
+
+class _NewGardenDialogState extends State<_NewGardenDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.newSharedGarden),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(context.l10n.newSharedGardenBody),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            maxLength: 100,
+            decoration:
+                InputDecoration(labelText: context.l10n.gardenNameLabel),
+            onSubmitted: (v) => Navigator.pop(context, v.trim()),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _controller.text.trim()),
+          child: Text(context.l10n.create),
+        ),
+      ],
+    );
+  }
+}
+
 class _WorkspaceTile extends StatelessWidget {
   const _WorkspaceTile({
     required this.workspace,
@@ -282,6 +415,9 @@ class _WorkspaceTile extends StatelessWidget {
     this.onDisconnect,
     this.onDelete,
     this.onAdminPanel,
+    this.onGardenMembers,
+    this.onOpenGarden,
+    this.onNewGarden,
   });
 
   final Workspace workspace;
@@ -292,6 +428,9 @@ class _WorkspaceTile extends StatelessWidget {
   final VoidCallback? onDisconnect;
   final VoidCallback? onDelete;
   final VoidCallback? onAdminPanel;
+  final VoidCallback? onGardenMembers;
+  final VoidCallback? onOpenGarden;
+  final VoidCallback? onNewGarden;
 
   bool get _isLocal => workspace.type == WorkspaceType.local;
 
@@ -324,7 +463,10 @@ class _WorkspaceTile extends StatelessWidget {
       subtitle: Text(_isLocal
           ? context.l10n.dataOnlyOnDevice
           : (workspace.isLoggedIn
-              ? (workspace.userEmail ?? context.l10n.connected)
+              ? [
+                  workspace.userEmail ?? context.l10n.connected,
+                  if (workspace.gardenName != null) workspace.gardenName!,
+                ].join(' · ')
               : context.l10n.disconnected)),
       selected: isActive,
       onTap: onTap,
@@ -343,6 +485,12 @@ class _WorkspaceTile extends StatelessWidget {
                     onDelete?.call();
                   case 'admin':
                     onAdminPanel?.call();
+                  case 'members':
+                    onGardenMembers?.call();
+                  case 'openGarden':
+                    onOpenGarden?.call();
+                  case 'newGarden':
+                    onNewGarden?.call();
                 }
               },
               itemBuilder: (context) => [
@@ -356,6 +504,20 @@ class _WorkspaceTile extends StatelessWidget {
                   PopupMenuItem(
                       value: 'disconnect',
                       child: Text(context.l10n.disconnect)),
+                if (onGardenMembers != null) ...[
+                  const PopupMenuDivider(),
+                  PopupMenuItem(
+                      value: 'members',
+                      child: Text(context.l10n.gardenMembers)),
+                  if (onOpenGarden != null)
+                    PopupMenuItem(
+                        value: 'openGarden',
+                        child: Text(context.l10n.openGarden)),
+                  if (onNewGarden != null)
+                    PopupMenuItem(
+                        value: 'newGarden',
+                        child: Text(context.l10n.newSharedGarden)),
+                ],
                 if (onAdminPanel != null) ...[
                   const PopupMenuDivider(),
                   PopupMenuItem(

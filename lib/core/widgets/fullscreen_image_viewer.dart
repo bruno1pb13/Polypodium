@@ -7,16 +7,23 @@ import 'package:share_plus/share_plus.dart';
 import '../l10n/l10n.dart';
 
 /// Opens [imagePath] in a fullscreen viewer with zoom, save-to-gallery and
-/// share actions.
+/// share actions. With [gallery] (which holds [imagePath]) the viewer swipes
+/// between its images, starting at [imagePath].
 Future<void> showFullscreenImageViewer(
   BuildContext context,
-  String imagePath,
-) {
+  String imagePath, {
+  List<String>? gallery,
+}) {
+  final paths = gallery ?? [imagePath];
+  final index = paths.indexOf(imagePath);
   return Navigator.of(context).push(
     PageRouteBuilder(
       opaque: false,
       barrierColor: Colors.black,
-      pageBuilder: (_, __, ___) => FullscreenImageViewer(imagePath: imagePath),
+      pageBuilder: (_, __, ___) => FullscreenImageViewer(
+        imagePaths: paths,
+        initialIndex: index < 0 ? 0 : index,
+      ),
       transitionsBuilder: (_, animation, __, child) =>
           FadeTransition(opacity: animation, child: child),
     ),
@@ -24,9 +31,14 @@ Future<void> showFullscreenImageViewer(
 }
 
 class FullscreenImageViewer extends StatefulWidget {
-  final String imagePath;
+  final List<String> imagePaths;
+  final int initialIndex;
 
-  const FullscreenImageViewer({super.key, required this.imagePath});
+  const FullscreenImageViewer({
+    super.key,
+    required this.imagePaths,
+    this.initialIndex = 0,
+  });
 
   @override
   State<FullscreenImageViewer> createState() => _FullscreenImageViewerState();
@@ -34,6 +46,16 @@ class FullscreenImageViewer extends StatefulWidget {
 
 class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
   bool _saving = false;
+  late int _index = widget.initialIndex;
+  late final _pageController = PageController(initialPage: widget.initialIndex);
+
+  String get _imagePath => widget.imagePaths[_index];
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   Future<void> _save() async {
     if (_saving) return;
@@ -49,7 +71,7 @@ class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
         );
         return;
       }
-      await Gal.putImage(widget.imagePath, album: 'Polypodium');
+      await Gal.putImage(_imagePath, album: 'Polypodium');
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.imageSavedToGallery)),
       );
@@ -71,7 +93,7 @@ class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
     try {
       await SharePlus.instance.share(
         ShareParams(
-          files: [XFile(widget.imagePath)],
+          files: [XFile(_imagePath)],
           sharePositionOrigin:
               box != null ? (box.localToGlobal(Offset.zero) & box.size) : null,
         ),
@@ -93,6 +115,13 @@ class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
+        title: widget.imagePaths.length > 1
+            ? Text(
+                context.l10n.photoPosition(
+                    _index + 1, widget.imagePaths.length),
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              )
+            : null,
         leading: IconButton(
           icon: const Icon(Icons.close),
           tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
@@ -120,20 +149,25 @@ class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          return InteractiveViewer(
-            minScale: 1,
-            maxScale: 5,
-            child: SizedBox(
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              child: Image.file(
-                File(widget.imagePath),
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const Center(
-                  child: Icon(
-                    Icons.broken_image_outlined,
-                    color: Colors.white54,
-                    size: 64,
+          return PageView.builder(
+            controller: _pageController,
+            itemCount: widget.imagePaths.length,
+            onPageChanged: (i) => setState(() => _index = i),
+            itemBuilder: (context, i) => InteractiveViewer(
+              minScale: 1,
+              maxScale: 5,
+              child: SizedBox(
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                child: Image.file(
+                  File(widget.imagePaths[i]),
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Center(
+                    child: Icon(
+                      Icons.broken_image_outlined,
+                      color: Colors.white54,
+                      size: 64,
+                    ),
                   ),
                 ),
               ),

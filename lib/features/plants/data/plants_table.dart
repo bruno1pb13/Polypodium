@@ -39,6 +39,18 @@ class PlantsTable extends Table {
       .withDefault(const Constant('active'))();
   DateTimeColumn get statusChangedAt => dateTime().nullable()();
 
+  /// The plant this one was propagated from (a cutting/division), if any.
+  /// Plants are only soft-deleted, so a removed parent keeps its id here.
+  TextColumn get parentPlantId => text()
+      .nullable()
+      .references(PlantsTable, #id, onDelete: KeyAction.setNull)();
+
+  /// Photo picked as the plant's cover: the id of an entry (its main photo)
+  /// or of an entry_photos row. Ids, not paths, since each device stores a
+  /// synced photo under its own path. Null, or pointing at a photo that was
+  /// deleted, means the latest photo is used.
+  TextColumn get coverPhotoId => text().nullable()();
+
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();

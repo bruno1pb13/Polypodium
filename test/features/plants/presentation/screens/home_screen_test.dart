@@ -1,13 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/core/theme/app_theme.dart';
+import 'package:polypodium/features/entries/domain/carencia.dart';
+import 'package:polypodium/features/entries/presentation/providers/carencia_providers.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
+import 'package:polypodium/features/labels/data/label_scanner.dart';
+import 'package:polypodium/features/labels/presentation/screens/plant_labels_screen.dart';
+import 'package:polypodium/features/plants/data/plants_repository.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/plants/presentation/providers/plants_providers.dart';
 import 'package:polypodium/features/plants/presentation/screens/add_edit_plant_screen.dart';
 import 'package:polypodium/features/plants/presentation/screens/home_screen.dart';
+import 'package:polypodium/features/plants/presentation/screens/plant_detail_screen.dart';
+import 'package:polypodium/features/plants/presentation/widgets/plant_list_item.dart';
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
 import 'package:polypodium/features/species/domain/species_model.dart';
 import 'package:polypodium/features/species/presentation/providers/species_providers.dart';
@@ -48,6 +56,32 @@ class _FakeEntryMutations implements EntryMutations {
   @override
   Future<void> recordIrrigation(Iterable<String> plantIds) async =>
       irrigated.add(plantIds.toSet());
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeScanner implements LabelScanner {
+  _FakeScanner(this.code);
+  final String? code;
+  int scans = 0;
+
+  @override
+  bool get isSupported => true;
+
+  @override
+  Future<String?> scan(BuildContext context) async {
+    scans++;
+    return code;
+  }
+}
+
+class _FakePlantsRepository implements PlantsRepository {
+  _FakePlantsRepository(this.plants);
+  final Map<String, PlantModel> plants;
+
+  @override
+  Future<PlantModel?> getById(String id) async => plants[id];
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -114,7 +148,7 @@ void main() {
   late _FakeEntryMutations mutations;
 
   Future<void> pump(WidgetTester tester, List<PlantWithSpecies> plants,
-      {ThemeData? theme}) async {
+      {ThemeData? theme, LabelScanner? scanner}) async {
     tester.view.physicalSize = const Size(420, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -127,12 +161,19 @@ void main() {
             .overrideWith(_FakeTransparencyNotifier.new),
         activeWorkspaceProvider.overrideWithValue(Workspace.newLocal()),
         plantsWithSpeciesProvider.overrideWith((ref) async => plants),
+        plantsRepositoryProvider.overrideWithValue(
+            _FakePlantsRepository({for (final p in plants) p.plant.id: p.plant})),
+        if (scanner != null) labelScannerProvider.overrideWithValue(scanner),
         plantsNotifierProvider
             .overrideWith(() => _FakePlantsNotifier(plantCalls)),
         entryMutationsProvider.overrideWithValue(mutations),
-        latestPlantPhotoProvider.overrideWith((ref, id) => Stream.value(null)),
+        plantCoverPhotoProvider.overrideWith((ref, id) => Stream.value(null)),
         plantAlertStatusProvider
             .overrideWith((ref, id) => Stream.value(noPlantAlerts)),
+        plantCarenciaProvider.overrideWith((ref, id) => id == anturio.plant.id
+            ? CarenciaStatus(
+                until: DateTime(2026, 10, 12), productNames: const ['Neem'])
+            : null),
         // Watched by the add-plant screen opened from the FAB.
         speciesNotifierProvider.overrideWith(_EmptySpeciesNotifier.new),
         locationsNotifierProvider.overrideWith(_EmptyLocationsNotifier.new),
@@ -170,6 +211,18 @@ void main() {
     expect(find.text('Babosa'), findsNothing);
     expect(tester.getTopLeft(find.text('Samambaia')).dy,
         lessThan(tester.getTopLeft(find.text('Antúrio')).dy));
+  });
+
+  testWidgets('a plant in carência shows its badge', (tester) async {
+    await pump(tester, [samambaia, anturio]);
+
+    final badge = find.text('Carência até 12/10');
+    expect(badge, findsOneWidget);
+    expect(
+      find.descendant(
+          of: find.widgetWithText(PlantListItem, 'Antúrio'), matching: badge),
+      findsOneWidget,
+    );
   });
 
   testWidgets('search filters by nickname and species', (tester) async {
@@ -257,6 +310,72 @@ void main() {
     expect(find.text('Rega registrada em 2 plantas'), findsOneWidget);
     expect(find.text('Polypodium'), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsOneWidget);
+  });
+
+  testWidgets('the selection opens the label generator in list order',
+      (tester) async {
+    await pump(tester, [anturio, samambaia]);
+
+    await tester.longPress(find.text('Antúrio'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Samambaia'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Gerar etiquetas'));
+    await tester.pumpAndSettle();
+
+    final screen =
+        tester.widget<PlantLabelsScreen>(find.byType(PlantLabelsScreen));
+    expect(screen.plantIds, ['p1', 'p2']);
+
+    Navigator.of(tester.element(find.byType(PlantLabelsScreen))).pop();
+    await tester.pumpAndSettle();
+    expect(find.text('Polypodium'), findsOneWidget);
+  });
+
+  group('scan label', () {
+    for (final platform in TargetPlatform.values) {
+      final supported = CameraLabelScanner.platforms.contains(platform);
+      testWidgets(
+          '${supported ? 'offered' : 'hidden'} on ${platform.name}',
+          (tester) async {
+        debugDefaultTargetPlatformOverride = platform;
+        await pump(tester, [samambaia]);
+        expect(find.byTooltip('Escanear etiqueta'),
+            supported ? findsOneWidget : findsNothing);
+        debugDefaultTargetPlatformOverride = null;
+      });
+    }
+
+    testWidgets('says when the plant is not in this workspace',
+        (tester) async {
+      final scanner = _FakeScanner('polypodium://plant/elsewhere');
+      await pump(tester, [samambaia], scanner: scanner);
+
+      await tester.tap(find.byTooltip('Escanear etiqueta'));
+      await tester.pumpAndSettle();
+      expect(scanner.scans, 1);
+      expect(find.text('Planta não encontrada neste espaço'), findsOneWidget);
+      expect(find.byType(PlantDetailScreen), findsNothing);
+    });
+
+    testWidgets('rejects a code that is not a label', (tester) async {
+      await pump(tester, [samambaia],
+          scanner: _FakeScanner('https://example.com'));
+
+      await tester.tap(find.byTooltip('Escanear etiqueta'));
+      await tester.pumpAndSettle();
+      expect(find.text('Este código não é uma etiqueta do Polypodium'),
+          findsOneWidget);
+    });
+
+    testWidgets('backing out of the camera does nothing', (tester) async {
+      await pump(tester, [samambaia], scanner: _FakeScanner(null));
+
+      await tester.tap(find.byTooltip('Escanear etiqueta'));
+      await tester.pumpAndSettle();
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.text('Polypodium'), findsOneWidget);
+    });
   });
 
   testWidgets('cancelling the selection leaves selection mode', (tester) async {

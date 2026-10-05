@@ -267,6 +267,26 @@
       "days": {"type": "int"}
     }
   },
+  "homeWidgetDueCount": "{count} due today",
+  "@homeWidgetDueCount": {
+    "description": "Home-screen widget header: overdue plus due-today tasks.",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "homeWidgetOverdue": "{days} d late",
+  "@homeWidgetOverdue": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "homeWidgetToday": "today",
+  "homeWidgetMore": "+{count} more",
+  "@homeWidgetMore": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "deleteReminderTitle": "Delete reminder?",
   "deleteReminderBody": "The diary entries are kept; only the reminder is removed.",
 
@@ -345,6 +365,7 @@
   "plantInactiveHint": "No reminders while inactive. The diary is kept.",
   "showArchivedPlants": "Show archived",
   "historyFieldStatus": "Status",
+  "historyFieldParent": "Cutting of",
   "speciesSurvivalRate": "{total, plural, one{Survival: {percent}% ({alive} of {total} plant)} other{Survival: {percent}% ({alive} of {total} plants)}}",
   "@speciesSurvivalRate": {
     "placeholders": {
@@ -458,6 +479,7 @@
   "entryTypePesticide": "Pesticides",
   "entryTypeOther": "Other",
   "entryTypeHistory": "History",
+  "entryTypeRepotting": "Repotting",
 
   "newEntryTitle": "New Entry",
   "newBulkEntryTitle": "{count, plural, one{New entry ({count} plant)} other{New entry ({count} plants)}}",
@@ -476,6 +498,7 @@
   "noteHintChlorosis": "Which leaves are affected?",
   "noteHintPest": "Where was it found? Any treatment?",
   "noteHintPesticide": "Where was it applied? Any reaction from the plant?",
+  "noteHintRepotting": "How were the roots? Was the plant divided?",
   "noteHintDefault": "Optional notes...",
   "photoTitle": "Photo",
   "saveEntry": "Save entry",
@@ -613,6 +636,30 @@
       "error": {"type": "String"}
     }
   },
+
+  "speciesCareTitle": "Species care",
+  "lightLabel": "Light",
+  "lightFullSun": "Full sun",
+  "lightPartialShade": "Partial shade",
+  "lightIndirectBright": "Bright indirect light",
+  "lightShade": "Shade",
+  "humidityLabel": "Humidity",
+  "humidityLow": "Low",
+  "humidityMedium": "Medium",
+  "humidityHigh": "High",
+  "petToxicityLabel": "Pet toxicity",
+  "petToxicityUnknown": "Unknown",
+  "petToxicityNonToxic": "Non-toxic",
+  "petToxicityToxic": "Toxic",
+  "toxicToPetsBadge": "Toxic to pets",
+  "floweringLabel": "Flowering months",
+  "floweringIn": "Flowers in: {months}",
+  "@floweringIn": {
+    "placeholders": {
+      "months": {"type": "String"}
+    }
+  },
+  "careNotesLabel": "Care notes",
 
   "soilSandy": "Sandy",
   "soilClay": "Clay",
@@ -953,5 +1000,294 @@
       "count": {"type": "int"},
       "summary": {"type": "String"}
     }
-  }
+  },
+  "repottingHint": "The new pot and, if it changed, the soil.",
+  "potDiameterLabel": "Pot diameter",
+  "potMaterialLabel": "Pot material",
+  "potMaterialPlastic": "Plastic",
+  "potMaterialClay": "Clay",
+  "potMaterialCeramic": "Ceramic",
+  "potMaterialFabric": "Fabric",
+  "potMaterialOther": "Other",
+  "newSoilLabel": "New soil",
+  "newSoilHint": "Also changes the plant's soil.",
+  "keepCurrentSoil": "Keep the current soil",
+  "potDiameterSummary": "{diameter} cm pot",
+  "@potDiameterSummary": {
+    "placeholders": {
+      "diameter": {"type": "String"}
+    }
+  },
+  "parentPlantLabel": "Cutting of",
+  "parentPlantHelper": "The plant this one was propagated from.",
+  "cuttingsLabel": "Cuttings",
+  "createCutting": "Create cutting",
+  "cuttingNicknameSuggestion": "{name} (cutting)",
+  "@cuttingNicknameSuggestion": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "parentPlantRemoved": "Removed plant",
+  "carenciaUntil": "Pre-harvest interval until {date}",
+  "@carenciaUntil": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "carenciaBadge": "Interval until {date}",
+  "@carenciaBadge": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "carenciaDoNotHarvest": "Do not harvest until {date}",
+  "@carenciaDoNotHarvest": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "carenciaDoNotHarvestProducts": "Do not harvest — {products}",
+  "@carenciaDoNotHarvestProducts": {
+    "placeholders": {
+      "products": {"type": "String"}
+    }
+  },
+  "entryTypeHarvest": "Harvest",
+  "noteHintHarvest": "Ripeness, quality, where it went...",
+  "harvestHint": "How much was harvested.",
+  "harvestQuantityLabel": "Quantity",
+  "harvestUnitLabel": "Unit",
+  "harvestUnitG": "g",
+  "harvestUnitKg": "kg",
+  "harvestUnitUnits": "units",
+  "harvestUnitBunches": "bunches",
+  "harvestAmountG": "{quantity} g",
+  "@harvestAmountG": {
+    "placeholders": {
+      "quantity": {"type": "String"}
+    }
+  },
+  "harvestAmountKg": "{quantity} kg",
+  "@harvestAmountKg": {
+    "placeholders": {
+      "quantity": {"type": "String"}
+    }
+  },
+  "harvestAmountUnits": "{count, plural, one{{quantity} unit} other{{quantity} units}}",
+  "@harvestAmountUnits": {
+    "placeholders": {
+      "count": {"type": "num"},
+      "quantity": {"type": "String"}
+    }
+  },
+  "harvestAmountBunches": "{count, plural, one{{quantity} bunch} other{{quantity} bunches}}",
+  "@harvestAmountBunches": {
+    "placeholders": {
+      "count": {"type": "num"},
+      "quantity": {"type": "String"}
+    }
+  },
+  "harvestDuringCarencia": "Harvested during the pre-harvest interval",
+  "harvestCarenciaDialogTitle": "Harvest during the pre-harvest interval?",
+  "harvestCarenciaDialogBody": "This plant is in the pre-harvest interval until {date}. Harvesting now may leave pesticide residue.",
+  "@harvestCarenciaDialogBody": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "harvestCarenciaDialogBulkBody": "{count, plural, one{1 plant is in the pre-harvest interval. Harvesting it now may leave pesticide residue:} other{{count} plants are in the pre-harvest interval. Harvesting them now may leave pesticide residue:}}",
+  "@harvestCarenciaDialogBulkBody": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "harvestCarenciaPlantLine": "{plant}: until {date}",
+  "@harvestCarenciaPlantLine": {
+    "placeholders": {
+      "plant": {"type": "String"},
+      "date": {"type": "String"}
+    }
+  },
+  "carenciaProductsLine": "Products: {products}",
+  "@carenciaProductsLine": {
+    "placeholders": {
+      "products": {"type": "String"}
+    }
+  },
+  "harvestCarenciaQuestion": "Record the harvest anyway? It will be marked as made during the interval.",
+  "harvestCarenciaConfirm": "Record anyway",
+  "harvestTotalsTitle": "Harvests",
+  "harvestTotalsSummary": "Harvested in total: {amounts}",
+  "@harvestTotalsSummary": {
+    "placeholders": {
+      "amounts": {"type": "String"}
+    }
+  },
+  "setAsCover": "Set as cover",
+  "useLatestAsCover": "Use the latest photo as cover",
+  "coverBadge": "Cover",
+  "coverPhotoLabel": "Cover photo from {date}",
+  "@coverPhotoLabel": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "photoOptionsHint": "show photo options",
+  "coverPhotoUpdated": "Cover updated",
+  "photosTitle": "Photos",
+  "photosCounter": "{count} of {max}",
+  "@photosCounter": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "max": {"type": "int"}
+    }
+  },
+  "photoNumberLabel": "Photo {index} of {total}",
+  "@photoNumberLabel": {
+    "placeholders": {
+      "index": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "removePhotoNumber": "Remove photo {index}",
+  "@removePhotoNumber": {
+    "placeholders": {
+      "index": {"type": "int"}
+    }
+  },
+  "entryPhotoNumberLabel": "Photo {index} of {total} from {date}",
+  "@entryPhotoNumberLabel": {
+    "placeholders": {
+      "index": {"type": "int"},
+      "total": {"type": "int"},
+      "date": {"type": "String"}
+    }
+  },
+  "photoPosition": "{index} of {total}",
+  "@photoPosition": {
+    "placeholders": {
+      "index": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "compareWithFirst": "Compare with the first photo",
+  "compareWithOther": "Compare with another photo",
+  "pickPhotoToCompare": "Pick another photo to compare",
+  "comparisonTitle": "Before and after",
+  "comparisonBefore": "Before · {date}",
+  "@comparisonBefore": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "comparisonAfter": "After · {date}",
+  "@comparisonAfter": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "comparisonSideBySide": "Side by side",
+  "comparisonSlider": "Slider",
+  "comparisonDivider": "Divider between the photos",
+  "labelsGenerate": "Generate labels",
+  "labelsTitle": "{count, plural, one{1 label} other{{count} labels}}",
+  "@labelsTitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "labelsPages": "{pages, plural, one{Fits on 1 A4 page} other{Fits on {pages} A4 pages}}",
+  "@labelsPages": {
+    "placeholders": {
+      "pages": {"type": "int"}
+    }
+  },
+  "labelsSheetLayout": "Sheet layout",
+  "labelsPresetA4x24": "24 per sheet · 70 × 37 mm",
+  "labelsPresetA4x10": "10 per sheet · 99 × 57 mm",
+  "labelsShowLocation": "Show location",
+  "labelsShowAcquisitionDate": "Show acquisition date",
+  "labelsAcquiredOn": "Since {date}",
+  "@labelsAcquiredOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "labelsPrint": "Print",
+  "labelsSharePdf": "Share PDF",
+  "labelsSavePdf": "Save PDF",
+  "labelsSavedTo": "Labels saved to {path}",
+  "@labelsSavedTo": {
+    "placeholders": {
+      "path": {"type": "String"}
+    }
+  },
+  "labelsError": "Couldn't create the labels: {error}",
+  "@labelsError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "labelsPreview": "Label preview",
+  "labelScan": "Scan label",
+  "labelScanHint": "Point the camera at a plant label",
+  "labelScanCameraError": "Couldn't open the camera",
+  "labelScanInvalid": "This code isn't a Polypodium label",
+  "labelPlantNotFound": "Plant not found in this space",
+
+  "gardenMembers": "Garden members",
+  "gardenPersonal": "Personal garden",
+  "gardenOf": "{email}'s garden",
+  "@gardenOf": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "gardenRoleOwner": "Owner",
+  "gardenRoleMember": "Member",
+  "gardenYou": "{email} (you)",
+  "@gardenYou": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "gardenYouAreOwner": "You own this garden",
+  "gardenYouAreMember": "You are a member of this garden",
+  "gardenAddMember": "Add member",
+  "gardenAddMemberHint": "The member needs an account on this server, created by its administrator.",
+  "gardenMemberAdded": "{email} added.",
+  "@gardenMemberAdded": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "gardenRemoveMemberTooltip": "Remove {email}",
+  "@gardenRemoveMemberTooltip": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "gardenRemoveMemberTitle": "Remove member?",
+  "gardenRemoveMemberBody": "{email} will no longer sync this garden. What they recorded stays in it.",
+  "@gardenRemoveMemberBody": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "gardenRemove": "Remove",
+  "gardenLeave": "Leave garden",
+  "gardenLeaveBody": "This workspace will stop syncing with the garden. Its data stays on this device.",
+  "gardenLeft": "You left the garden.",
+  "newSharedGarden": "New shared garden",
+  "newSharedGardenBody": "Creates an empty garden on this server, in a new workspace. Add members to share it.",
+  "gardenNameLabel": "Garden name",
+  "openGarden": "Open another garden",
+  "pickGardenTitle": "Which garden?",
+  "pickGardenBody": "This account takes part in shared gardens on this server. Each one syncs in its own workspace.",
+  "errorGardenAccessDenied": "You are no longer a member of this garden.",
+  "errorGardensUnsupported": "This server doesn't support shared gardens yet. Update it to use them.",
+  "errorGardenAccountNotFound": "No account with this e-mail on this server.",
+  "errorGardenAlreadyMember": "This account is already a member.",
+  "gardenRetry": "Try again"
 }

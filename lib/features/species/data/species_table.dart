@@ -15,6 +15,20 @@ class SpeciesTable extends Table {
   TextColumn get recommendedSoilTypes =>
       text().map(const StringListConverter())();
 
+  TextColumn get light =>
+      text().nullable().map(const LightRequirementConverter())();
+  TextColumn get humidity =>
+      text().nullable().map(const HumidityLevelConverter())();
+  TextColumn get petToxicity => text()
+      .map(const PetToxicityConverter())
+      .withDefault(const Constant('unknown'))();
+
+  /// Bitmask of flowering months, see [MonthSetConverter].
+  IntColumn get floweringMonths => integer()
+      .map(const MonthSetConverter())
+      .withDefault(const Constant(0))();
+  TextColumn get careNotes => text().nullable()();
+
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();

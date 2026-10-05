@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../../core/enums.dart';
 import '../../../../../core/l10n/l10n.dart';
+import '../../../../entries/domain/carencia.dart';
 import '../../../domain/plant_model.dart';
 import '../plant_status.dart';
 
@@ -31,8 +32,9 @@ class PlantLifecycleBanner extends StatelessWidget {
 
 class PlantCareAlerts extends StatelessWidget {
   final PlantWithSpecies pws;
+  final CarenciaStatus? carencia;
 
-  const PlantCareAlerts({super.key, required this.pws});
+  const PlantCareAlerts({super.key, required this.pws, this.carencia});
 
   @override
   Widget build(BuildContext context) {
@@ -67,12 +69,27 @@ class PlantCareAlerts extends StatelessWidget {
           subtitle: l10n.nextPesticideInDays(-pesticideDays),
           tone: StatusTone.warning,
         ),
+      if (carencia case final carencia? when pws.plant.isActive)
+        _carenciaBanner(l10n, carencia),
     ];
 
     if (banners.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Column(children: banners),
+    );
+  }
+
+  Widget _carenciaBanner(AppLocalizations l10n, CarenciaStatus carencia) {
+    final date = DateFormat.Md(l10n.localeName).format(carencia.until);
+    return PlantStatusBanner(
+      emoji: carenciaEmoji,
+      title: l10n.carenciaUntil(date),
+      subtitle: carencia.productNames.isEmpty
+          ? l10n.carenciaDoNotHarvest(date)
+          : l10n.carenciaDoNotHarvestProducts(
+              carencia.productNames.join(', ')),
+      tone: StatusTone.warning,
     );
   }
 }

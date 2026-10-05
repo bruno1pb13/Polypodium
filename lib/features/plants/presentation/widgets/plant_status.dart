@@ -2,9 +2,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../entries/domain/carencia.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/plant_model.dart';
@@ -37,13 +39,17 @@ enum StatusTone {
 
 typedef PlantStatusBadge = ({String emoji, String label, StatusTone tone});
 
+/// Marks the carência (pre-harvest interval) of the applied defensivos.
+const carenciaEmoji = '⏳';
+
 /// Badges for the home list, most urgent first. A plant that is no longer
 /// active only shows its lifecycle status.
 List<PlantStatusBadge> plantListStatuses(
   AppLocalizations l10n,
   PlantWithSpecies pws,
-  PlantAlertStatus alerts,
-) {
+  PlantAlertStatus alerts, {
+  CarenciaStatus? carencia,
+}) {
   final status = pws.plant.status;
   if (!pws.plant.isActive) {
     return [
@@ -78,6 +84,13 @@ List<PlantStatusBadge> plantListStatuses(
         emoji: EntryType.chlorosis.emoji,
         label: l10n.entryTypeChlorosis,
         tone: StatusTone.forSeverity(alerts.chlorosisSeverity),
+      ),
+    if (carencia != null)
+      (
+        emoji: carenciaEmoji,
+        label: l10n.carenciaBadge(
+            DateFormat.Md(l10n.localeName).format(carencia.until)),
+        tone: StatusTone.warning,
       ),
     if (pws.pesticideUnderActiveControl && !pws.needsPesticideReapplication)
       (

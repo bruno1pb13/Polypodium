@@ -20,22 +20,40 @@ class EntriesRepository {
 
   Future<EntryModel?> getById(String id) async {
     final row = await _dao.getById(id);
-    return row == null ? null : _fromRow(row);
+    if (row == null) return null;
+    return _fromRow(row, await _db.entryPhotosDao.getByEntries([id]));
   }
 
   Future<List<EntryModel>> getByPlant(String plantId) async {
-    final rows = await _dao.getByPlant(plantId);
-    return rows.map(_fromRow).toList();
+    final rows = await _dao.getByPlantWithPhotos(plantId);
+    return [for (final (row, photos) in rows) _fromRow(row, photos)];
   }
 
   Stream<List<EntryModel>> watchByPlant(String plantId) =>
-      _dao.watchByPlant(plantId).map((rows) => rows.map(_fromRow).toList());
+      _dao.watchByPlantWithPhotos(plantId).map(
+          (rows) => [for (final (row, photos) in rows) _fromRow(row, photos)]);
 
+  /// Saves [entry] with its extra photos, each its own synced row written
+  /// after the entry so a peer applies them in that order.
   Future<void> create(EntryModel entry) async {
+    assert(entry.extraPhotos.isEmpty || entry.photoPath != null);
     await _db.transaction(() async {
+      final now = DateTime.now();
       final rev = await _db.syncMetaDao.nextRev();
-      await _dao
-          .insert(_toCompanion(entry, updatedAt: DateTime.now(), rev: rev));
+      await _dao.insert(_toCompanion(entry, updatedAt: now, rev: rev));
+      for (final (i, photo) in entry.extraPhotos.indexed) {
+        final photoRev = await _db.syncMetaDao.nextRev();
+        await _db.entryPhotosDao.upsert(EntryPhotosTableCompanion.insert(
+          id: photo.id,
+          entryId: entry.id,
+          photoPath: photo.path,
+          position: Value(i + 1),
+          createdAt: entry.createdAt,
+          updatedAt: now,
+          localRev: Value(photoRev),
+          deviceId: Value(_db.deviceId),
+        ));
+      }
     });
     await _enforceRetentionPolicy(entry.plantId);
   }
@@ -48,11 +66,13 @@ class EntriesRepository {
       throw StateError('History entries cannot be deleted.');
     }
     await _db.transaction(() async {
+      final now = DateTime.now();
       final rev = await _db.syncMetaDao.nextRev();
-      await _dao.softDelete(id, deletedAt: DateTime.now(), rev: rev);
+      await _dao.softDelete(id, deletedAt: now, rev: rev);
+      await _db.entryPhotosDao.softDeleteByEntry(id, deletedAt: now);
     });
-    if (entry?.photoPath != null) {
-      await _photoStorage.deletePhoto(entry!.photoPath!);
+    for (final photo in entry?.photos ?? const <EntryPhoto>[]) {
+      await _photoStorage.deletePhoto(photo.path);
     }
   }
 
@@ -77,16 +97,19 @@ class EntriesRepository {
     }
 
     final now = DateTime.now();
+    final photoPaths = <String>[];
     await _db.transaction(() async {
       for (final row in overflow) {
         final rev = await _db.syncMetaDao.nextRev();
         await _dao.softDelete(row.id, deletedAt: now, rev: rev);
+        if (row.photoPath != null) photoPaths.add(row.photoPath!);
+        final extra = await _db.entryPhotosDao
+            .softDeleteByEntry(row.id, deletedAt: now);
+        photoPaths.addAll(extra.map((p) => p.photoPath));
       }
     });
-    for (final row in overflow) {
-      if (row.photoPath != null) {
-        await _photoStorage.deletePhoto(row.photoPath!);
-      }
+    for (final path in photoPaths) {
+      await _photoStorage.deletePhoto(path);
     }
 
     // Remove any photos on disk that are no longer referenced by any entry
@@ -94,7 +117,9 @@ class EntriesRepository {
     await _photoStorage.cleanOrphanPhotos(referenced);
   }
 
-  static EntryModel _fromRow(EntriesTableData row) => EntryModel(
+  static EntryModel _fromRow(
+          EntriesTableData row, List<EntryPhotosTableData> photos) =>
+      EntryModel(
         id: row.id,
         plantId: row.plantId,
         date: row.date,
@@ -107,6 +132,13 @@ class EntriesRepository {
         updatedAt: row.updatedAt,
         deletedAt: row.deletedAt,
         localRev: row.localRev,
+        // Rows of an entry without its own photo can't be shown in order.
+        extraPhotos: row.photoPath == null
+            ? const []
+            : [
+                for (final p in photos)
+                  EntryPhoto(id: p.id, path: p.photoPath),
+              ],
       );
 
   EntriesTableCompanion _toCompanion(EntryModel m,

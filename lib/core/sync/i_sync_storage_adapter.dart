@@ -6,12 +6,23 @@ import 'package:polypodium_core/polypodium_core.dart';
 /// responsibility + dependency inversion -- the orchestrator depends on
 /// this abstraction, not on Drift directly).
 abstract interface class ISyncStorageAdapter {
+  /// Entity types [applyRemoteChange] applies; any other is ignored.
+  Set<String> get entityTypes;
+
   /// Local changes across every entity type (including tombstones -- sync
   /// must propagate deletes) with rev > [since], merge-sorted by rev, with
   /// at most [limit] returned. [deviceId] stamps who authored these
   /// changes on the wire (the adapter has no notion of device identity
   /// itself).
   Future<List<SyncChange>> localChangesSince(
+    int since, {
+    required int limit,
+    required String deviceId,
+  });
+
+  /// Same as [localChangesSince], for [entityType] only.
+  Future<List<SyncChange>> localChangesOfTypeSince(
+    String entityType,
     int since, {
     required int limit,
     required String deviceId,

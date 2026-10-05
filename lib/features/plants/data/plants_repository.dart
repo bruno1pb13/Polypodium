@@ -95,14 +95,32 @@ class PlantsRepository {
     if (reschedule) await rescheduleNotifications();
   }
 
-  Future<void> delete(String id) async {
+  /// Picks [photoId] (an entry or entry photo id; null to go back to the
+  /// latest photo) as the cover of [plantId].
+  Future<void> setCoverPhoto(String plantId, String? photoId) =>
+      _db.transaction(() async {
+        final rev = await _db.syncMetaDao.nextRev();
+        await _dao.updateCoverPhoto(plantId, photoId,
+            updatedAt: DateTime.now(), rev: rev);
+      });
+
+  /// Soft-deletes the plant with its entries, their photos and reminders.
+  /// Returns the photo files the deleted entries owned.
+  Future<List<String>> delete(String id) async {
     final now = DateTime.now();
+    final photoPaths = <String>[];
     await _db.transaction(() async {
       // Replicates the `KeyAction.cascade` FK behavior that only fires on a
       // real SQLite DELETE, which a soft-delete never triggers.
       final entryRev = await _db.syncMetaDao.nextRev();
-      await _db.entriesDao
+      final entries = await _db.entriesDao
           .softDeleteByPlant(id, deletedAt: now, rev: entryRev);
+      for (final entry in entries) {
+        if (entry.photoPath != null) photoPaths.add(entry.photoPath!);
+        final extra = await _db.entryPhotosDao
+            .softDeleteByEntry(entry.id, deletedAt: now);
+        photoPaths.addAll(extra.map((p) => p.photoPath));
+      }
       final reminderRev = await _db.syncMetaDao.nextRev();
       await _db.remindersDao
           .softDeleteByPlant(id, deletedAt: now, rev: reminderRev);
@@ -110,6 +128,7 @@ class PlantsRepository {
       await _dao.softDelete(id, deletedAt: now, rev: plantRev);
     });
     await rescheduleNotifications();
+    return photoPaths;
   }
 
   // ---------------------------------------------------------------------------
@@ -161,6 +180,8 @@ class PlantsRepository {
         pesticideReapplicationDays: row.pesticideReapplicationDays,
         status: row.status,
         statusChangedAt: row.statusChangedAt,
+        parentPlantId: row.parentPlantId,
+        coverPhotoId: row.coverPhotoId,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         deletedAt: row.deletedAt,
@@ -182,6 +203,8 @@ class PlantsRepository {
         pesticideReapplicationDays: Value(m.pesticideReapplicationDays),
         status: Value(m.status),
         statusChangedAt: Value(m.statusChangedAt),
+        parentPlantId: Value(m.parentPlantId),
+        coverPhotoId: Value(m.coverPhotoId),
         createdAt: m.createdAt,
         updatedAt: updatedAt,
         localRev: Value(rev),

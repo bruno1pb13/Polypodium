@@ -27,6 +27,7 @@ EntryModel _entry(
   EntryType type, {
   double? numericValue,
   String? photoPath,
+  String? extraData,
 }) =>
     EntryModel(
       id: id,
@@ -35,6 +36,7 @@ EntryModel _entry(
       type: type,
       numericValue: numericValue,
       photoPath: photoPath,
+      extraData: extraData,
       createdAt: date,
     );
 
@@ -60,12 +62,14 @@ PlantWithSpecies _pws() {
   );
 }
 
-Widget _wrap(Widget child, {bool transparent = true}) => ProviderScope(
+Widget _wrap(Widget child, {bool transparent = true, ThemeData? theme}) =>
+    ProviderScope(
       overrides: [
         transparencyEnabledNotifierProvider
             .overrideWith(() => _FakeTransparencyNotifier(transparent)),
       ],
       child: MaterialApp(
+        theme: theme,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(body: SingleChildScrollView(child: child)),
@@ -167,6 +171,60 @@ void main() {
 
       expect(find.byType(LineChart), findsOneWidget);
     });
+  });
+
+  group('harvest totals', () {
+    List<EntryModel> harvests() => [
+          _entry('c1', base, EntryType.harvest,
+              extraData: '{"quantity":1.25,"unit":"kg"}'),
+          _entry('c2', base.add(const Duration(days: 3)), EntryType.harvest,
+              extraData: '{"quantity":0.25,"unit":"kg"}'),
+          _entry('c3', base.add(const Duration(days: 4)), EntryType.harvest,
+              extraData: '{"quantity":300,"unit":"g"}'),
+          _entry('c4', base.add(const Duration(days: 5)), EntryType.harvest,
+              extraData: '{"quantity":3,"unit":"units","duringCarencia":true}'),
+          // Without a quantity or a unit: left out.
+          _entry('c5', base, EntryType.harvest, extraData: '{"unit":"kg"}'),
+          _entry('c6', base, EntryType.harvest, extraData: '{"quantity":9}'),
+        ];
+
+    testWidgets('sums the harvests per unit below the charts', (tester) async {
+      await tester.pumpWidget(_wrap(PlantInsightsView(
+          entries: [...richEntries(), ...harvests()], pws: _pws())));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LineChart), findsNWidgets(2));
+      expect(find.text('Harvests'), findsOneWidget);
+      expect(find.text('Harvested in total: 300 g · 1.5 kg · 3 units'),
+          findsOneWidget);
+    });
+
+    testWidgets('shows without chartable data, and not without harvests',
+        (tester) async {
+      await tester.pumpWidget(
+          _wrap(PlantInsightsView(entries: harvests(), pws: null)));
+      await tester.pumpAndSettle();
+      expect(find.text('Harvested in total: 300 g · 1.5 kg · 3 units'),
+          findsOneWidget);
+      expect(find.textContaining('No chart data yet'), findsOneWidget);
+
+      await tester.pumpWidget(
+          _wrap(PlantInsightsView(entries: richEntries(), pws: _pws())));
+      await tester.pumpAndSettle();
+      expect(find.text('Harvests'), findsNothing);
+    });
+
+    for (final (name, theme) in appThemes) {
+      testWidgets('is readable in the $name theme', (tester) async {
+        final semantics = tester.ensureSemantics();
+        await tester.pumpWidget(_wrap(
+            PlantInsightsView(entries: harvests(), pws: null),
+            theme: theme));
+        await tester.pumpAndSettle();
+        await expectReadableText(tester);
+        semantics.dispose();
+      });
+    }
   });
 
   group('PlantPhotosSliver', () {

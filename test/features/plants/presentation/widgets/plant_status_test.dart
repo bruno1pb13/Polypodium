@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:polypodium/core/enums.dart';
+import 'package:polypodium/features/entries/domain/carencia.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/plants/presentation/widgets/plant_status.dart';
@@ -7,6 +9,8 @@ import 'package:polypodium/features/species/domain/species_model.dart';
 import 'package:polypodium/l10n/app_localizations_pt.dart';
 
 void main() {
+  setUpAll(() => initializeDateFormatting('pt'));
+
   final l10n = AppLocalizationsPt();
   final now = DateTime.now();
 
@@ -117,6 +121,31 @@ void main() {
         StatusTone.warning,
         StatusTone.positive,
       ]);
+    });
+
+    test('carência is a warning with its end date', () {
+      final carencia = CarenciaStatus(
+          until: DateTime(2026, 10, 12), productNames: const ['Neem']);
+      final statuses = plantListStatuses(
+        l10n,
+        plant(daysSinceWatering: 5, daysSincePesticide: 2),
+        noPlantAlerts,
+        carencia: carencia,
+      );
+      expect(statuses.map((s) => s.label), [
+        l10n.waterBadge,
+        'Carência até 12/10',
+        l10n.pesticideActiveControlBadge,
+      ]);
+      expect(statuses[1].tone, StatusTone.warning);
+
+      // Not shown once the plant left the collection.
+      expect(
+        plantListStatuses(l10n, plant(status: PlantStatus.dead), noPlantAlerts,
+                carencia: carencia)
+            .map((s) => s.label),
+        [l10n.plantStatusDead],
+      );
     });
 
     test('an inactive plant only shows its lifecycle status', () {

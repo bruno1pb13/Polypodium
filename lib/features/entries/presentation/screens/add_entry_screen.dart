@@ -7,23 +7,29 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/storage/photo_picker.dart';
 import '../../../../core/storage/photo_storage.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../entries/domain/entry_details.dart';
 import '../../../entries/domain/entry_model.dart';
+import '../../../entries/presentation/providers/carencia_providers.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
+import '../../../soils/domain/soil_model.dart';
 import '../widgets/entry_forms/chlorosis_form.dart';
 import '../widgets/entry_forms/entry_form_widgets.dart';
 import '../widgets/entry_forms/entry_note_section.dart';
 import '../widgets/entry_forms/entry_photo_section.dart';
 import '../widgets/entry_forms/entry_type_selector.dart';
 import '../widgets/entry_forms/fertilizer_form.dart';
+import '../widgets/entry_forms/harvest_form.dart';
 import '../widgets/entry_forms/height_form.dart';
 import '../widgets/entry_forms/irrigation_form.dart';
 import '../widgets/entry_forms/observation_form.dart';
 import '../widgets/entry_forms/pest_form.dart';
 import '../widgets/entry_forms/pesticide_form.dart';
 import '../widgets/entry_forms/pruning_form.dart';
+import '../widgets/entry_forms/repotting_form.dart';
+import '../widgets/harvest_carencia_dialog.dart';
 import '../../../../core/theme/glass_colors.dart';
 
 class AddEntryScreen extends ConsumerStatefulWidget {
@@ -50,7 +56,9 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   final _pestTypeCtrl = TextEditingController();
 
   late EntryType _type = widget.initialType ?? EntryType.observation;
-  String? _photoPath;
+  // Saved copies of the picked photos, in order; the first one is the
+  // entry's own photo.
+  final List<String> _photoPaths = [];
 
   // Chlorosis
   int _chlorosisSeverity = 1;
@@ -78,6 +86,15 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   ];
   final _pesticideRecurrenceCtrl = TextEditingController();
 
+  // Repotting
+  final _potDiameterCtrl = TextEditingController();
+  PotMaterial? _potMaterial;
+  SoilModel? _newSoil;
+
+  // Harvest
+  final _harvestQuantityCtrl = TextEditingController();
+  HarvestUnit? _harvestUnit;
+
   bool _saving = false;
   bool _submitted = false;
   bool _showFieldErrors = false;
@@ -101,8 +118,12 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
       p.dispose();
     }
     _pesticideRecurrenceCtrl.dispose();
-    if (!_submitted && _photoPath != null) {
-      _photoStorage.deletePhoto(_photoPath!);
+    _potDiameterCtrl.dispose();
+    _harvestQuantityCtrl.dispose();
+    if (!_submitted) {
+      for (final path in _photoPaths) {
+        _photoStorage.deletePhoto(path);
+      }
     }
     super.dispose();
   }
@@ -165,12 +186,29 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                   defensivoId: p.selected!.id,
                   name: p.selected!.name,
                   dose: dose.isEmpty ? null : dose,
+                  carenciaDays: p.selected!.carenciaDays,
                 );
               })
               .toList(),
           recurrenceDays: double.tryParse(
                   _pesticideRecurrenceCtrl.text.replaceAll(',', '.'))
               ?.round(),
+        );
+      case EntryType.repotting:
+        final diameter =
+            double.tryParse(_potDiameterCtrl.text.replaceAll(',', '.'));
+        return RepottingDetails(
+          potDiameterCm: diameter != null && diameter > 0 ? diameter : null,
+          potMaterial: _potMaterial,
+          newSoilId: _newSoil?.id,
+          newSoilName: _newSoil?.name,
+        );
+      case EntryType.harvest:
+        final quantity =
+            double.tryParse(_harvestQuantityCtrl.text.replaceAll(',', '.'));
+        return HarvestDetails(
+          quantity: quantity != null && quantity > 0 ? quantity : null,
+          unit: _harvestUnit,
         );
       default:
         return null;
@@ -254,15 +292,13 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                 const SizedBox(height: 16),
                 EntryGlassCard(
                   child: EntryPhotoSection(
-                    photoPath: _photoPath,
-                    onRemove: () {
-                      final path = _photoPath;
-                      setState(() => _photoPath = null);
-                      if (path != null) {
-                        _photoStorage.deletePhoto(path);
-                      }
+                    photoPaths: _photoPaths,
+                    onRemove: (i) {
+                      final path = _photoPaths[i];
+                      setState(() => _photoPaths.removeAt(i));
+                      _photoStorage.deletePhoto(path);
                     },
-                    onPick: _pickPhoto,
+                    onPick: _pickPhotos,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -357,6 +393,18 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           }),
           onDefensivoSelected: (p, d) => setState(() => p.selected = d),
         ),
+      EntryType.repotting => RepottingForm(
+          diameterController: _potDiameterCtrl,
+          material: _potMaterial,
+          onMaterialChanged: (m) => setState(() => _potMaterial = m),
+          newSoil: _newSoil,
+          onSoilChanged: (soil) => setState(() => _newSoil = soil),
+        ),
+      EntryType.harvest => HarvestForm(
+          quantityController: _harvestQuantityCtrl,
+          unit: _harvestUnit,
+          onUnitChanged: (u) => setState(() => _harvestUnit = u),
+        ),
       _ => const SizedBox.shrink(),
     };
   }
@@ -366,15 +414,23 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     if (_showFieldErrors) setState(() {});
   }
 
-  Future<void> _pickPhoto(ImageSource source) async {
-    final picker = ImagePicker();
-    final xFile = await picker.pickImage(source: source, imageQuality: 85);
-    if (xFile == null) return;
-
-    final oldPath = _photoPath;
-    final savedPath = await _photoStorage.savePhoto(File(xFile.path));
-    setState(() => _photoPath = savedPath);
-    if (oldPath != null) await _photoStorage.deletePhoto(oldPath);
+  Future<void> _pickPhotos(ImageSource source) async {
+    final room = maxEntryPhotos - _photoPaths.length;
+    if (room <= 0) return;
+    final picked =
+        await ref.read(photoPickerProvider).pick(source, limit: room);
+    final saved = [
+      for (final path in picked.take(room))
+        await _photoStorage.savePhoto(File(path)),
+    ];
+    if (!mounted) {
+      // The screen is gone, along with the chance to save them.
+      for (final path in saved) {
+        await _photoStorage.deletePhoto(path);
+      }
+      return;
+    }
+    setState(() => _photoPaths.addAll(saved));
   }
 
   Future<void> _submit() async {
@@ -386,26 +442,60 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     setState(() => _saving = true);
     try {
       final now = DateTime.now();
+      final details = _details;
+
+      // Harvesting a plant still in carência needs a confirmation, and the
+      // entry keeps a mark of it.
+      var inCarencia = const <String>{};
+      if (_type == EntryType.harvest) {
+        final affected = await ref
+            .read(carenciaCheckerProvider)
+            .plantsInCarencia(widget.plantIds, now);
+        if (affected.isNotEmpty) {
+          if (!mounted) return;
+          // The dialog is modal; no spinner behind it.
+          setState(() => _saving = false);
+          final confirmed = await confirmHarvestDuringCarencia(
+            context,
+            affected,
+            bulk: widget.plantIds.length > 1,
+          );
+          if (!confirmed || !mounted) return;
+          setState(() => _saving = true);
+          inCarencia = {for (final p in affected) p.plantId};
+        }
+      }
+
       final note =
           _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim();
       final mutations = ref.read(entryMutationsProvider);
       final entries = <EntryModel>[];
       for (var i = 0; i < widget.plantIds.length; i++) {
         final plantId = widget.plantIds[i];
-        // Each entry owns its photo file (deleting an entry deletes the
-        // photo), so extra plants get their own copy of the picked photo.
-        final photoPath = i == 0 || _photoPath == null
-            ? _photoPath
-            : await _photoStorage.savePhoto(File(_photoPath!));
+        final entryDetails = details is HarvestDetails
+            ? details.copyWith(duringCarencia: inCarencia.contains(plantId))
+            : details;
+        // Each entry owns its photo files (deleting an entry deletes them),
+        // so extra plants get their own copies of the picked photos.
+        final photoPaths = i == 0
+            ? _photoPaths
+            : [
+                for (final path in _photoPaths)
+                  await _photoStorage.savePhoto(File(path)),
+              ];
         final entry = EntryModel(
           id: const Uuid().v4(),
           plantId: plantId,
           date: now,
-          photoPath: photoPath,
+          photoPath: photoPaths.firstOrNull,
+          extraPhotos: [
+            for (final path in photoPaths.skip(1))
+              EntryPhoto(id: const Uuid().v4(), path: path),
+          ],
           note: note,
           type: _type,
           numericValue: _numericValue,
-          extraData: _details?.encode(),
+          extraData: entryDetails?.encode(),
           createdAt: now,
         );
         entries.add(entry);

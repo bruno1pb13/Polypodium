@@ -22,6 +22,39 @@ class SyncSendException implements Exception {
   String toString() => 'SyncSendException';
 }
 
+/// The server refused a workspace's garden: the account was removed from it
+/// (or left it on another device).
+class GardenAccessDeniedException implements Exception {
+  const GardenAccessDeniedException();
+
+  @override
+  String toString() => 'GardenAccessDeniedException';
+}
+
+/// The server predates shared gardens (`/gardens` doesn't exist).
+class GardensUnsupportedException implements Exception {
+  const GardensUnsupportedException();
+
+  @override
+  String toString() => 'GardensUnsupportedException';
+}
+
+/// Adding a garden member by an e-mail that has no account on the server.
+class GardenAccountNotFoundException implements Exception {
+  const GardenAccountNotFoundException();
+
+  @override
+  String toString() => 'GardenAccountNotFoundException';
+}
+
+/// Adding a garden member who already belongs to it.
+class GardenAlreadyMemberException implements Exception {
+  const GardenAlreadyMemberException();
+
+  @override
+  String toString() => 'GardenAlreadyMemberException';
+}
+
 class NotAuthenticatedException implements Exception {
   const NotAuthenticatedException();
 

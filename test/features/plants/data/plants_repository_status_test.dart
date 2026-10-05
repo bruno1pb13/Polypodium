@@ -71,6 +71,21 @@ void main() {
     expect(loaded.isActive, isFalse);
   });
 
+  test('parentPlantId round-trips and survives a soft-deleted parent',
+      () async {
+    await repo.save(plant('mother'));
+    await repo.save(plant('cutting').copyWith(parentPlantId: 'mother'));
+    expect((await repo.getById('cutting'))!.parentPlantId, 'mother');
+
+    await repo.delete('mother');
+    final cutting = (await repo.getAll()).single;
+    expect(cutting.id, 'cutting');
+    expect(cutting.parentPlantId, 'mother');
+
+    await repo.save(cutting.copyWith(parentPlantId: null));
+    expect((await repo.getById('cutting'))!.parentPlantId, isNull);
+  });
+
   test('new plants default to active', () async {
     await repo.save(plant('p1'));
 

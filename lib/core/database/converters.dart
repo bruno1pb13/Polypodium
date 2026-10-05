@@ -54,8 +54,71 @@ class EntryTypeConverter extends TypeConverter<EntryType, String> {
   const EntryTypeConverter();
 
   @override
-  EntryType fromSql(String fromDb) => EntryType.values.byName(fromDb);
+  // Unknown names never reach the table (sync and backup import skip them),
+  // but a bad row must not break every query of its plant.
+  EntryType fromSql(String fromDb) =>
+      EntryType.fromName(fromDb) ?? EntryType.other;
 
   @override
   String toSql(EntryType value) => value.name;
+}
+
+class LightRequirementConverter
+    extends TypeConverter<LightRequirement?, String?> {
+  const LightRequirementConverter();
+
+  @override
+  LightRequirement? fromSql(String? fromDb) =>
+      LightRequirement.fromName(fromDb);
+
+  @override
+  String? toSql(LightRequirement? value) => value?.name;
+}
+
+class HumidityLevelConverter extends TypeConverter<HumidityLevel?, String?> {
+  const HumidityLevelConverter();
+
+  @override
+  HumidityLevel? fromSql(String? fromDb) => HumidityLevel.fromName(fromDb);
+
+  @override
+  String? toSql(HumidityLevel? value) => value?.name;
+}
+
+class PetToxicityConverter extends TypeConverter<PetToxicity, String> {
+  const PetToxicityConverter();
+
+  @override
+  PetToxicity fromSql(String fromDb) => PetToxicity.fromName(fromDb);
+
+  @override
+  String toSql(PetToxicity value) => value.name;
+}
+
+/// A set of months (1–12) as a bitmask, bit `m - 1` set for month `m`. Sync
+/// payloads and backups carry the months as a plain list instead
+/// ([toJson]/[fromJson]).
+class MonthSetConverter extends TypeConverter<Set<int>, int> {
+  const MonthSetConverter();
+
+  @override
+  Set<int> fromSql(int fromDb) => {
+        for (var m = 1; m <= 12; m++)
+          if (fromDb & (1 << (m - 1)) != 0) m,
+      };
+
+  @override
+  int toSql(Set<int> value) => value
+      .where((m) => m >= 1 && m <= 12)
+      .fold(0, (mask, m) => mask | (1 << (m - 1)));
+
+  static List<int> toJson(Set<int> months) => months.toList()..sort();
+
+  /// Missing (older payloads) or invalid entries are dropped.
+  static Set<int> fromJson(Object? json) => json is List
+      ? {
+          for (final m in json)
+            if (m is int && m >= 1 && m <= 12) m,
+        }
+      : {};
 }
