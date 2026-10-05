@@ -569,6 +569,40 @@ void main() {
     expect(version.read<int>('user_version'), db.schemaVersion);
   });
 
+  test('migration from v19 creates the entry photos and declared entity '
+      'types tables', () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE sync_cursors (
+          peer_id TEXT NOT NULL,
+          direction TEXT NOT NULL,
+          cursor INTEGER NOT NULL DEFAULT 0,
+          PRIMARY KEY (peer_id, direction)
+        )
+      ''');
+      raw.execute(
+          "INSERT INTO sync_cursors VALUES ('server', 'pull', 42)");
+      raw.execute('PRAGMA user_version = 19');
+    }));
+
+    expect(await db.syncCursorsDao.getCursor('server', 'pull'), 42);
+    expect(
+        await db.syncCursorsDao.getDeclaredEntityTypes('server'), isNull);
+    await db.entryPhotosDao.upsert(EntryPhotosTableCompanion.insert(
+      id: 'ph1',
+      entryId: 'e1',
+      photoPath: '/a.jpg',
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    ));
+    expect((await db.entryPhotosDao.getById('ph1'))!.position, 0);
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
   test('migrating from before v14 rebuilds plants with the parent column',
       () async {
     await db.close();

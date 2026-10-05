@@ -5,7 +5,10 @@ import '../../../core/enums.dart';
 
 part 'entries_dao.g.dart';
 
-@DriftAccessor(tables: [EntriesTable])
+/// An entry with its photos after the first, in order.
+typedef EntryWithPhotos = (EntriesTableData, List<EntryPhotosTableData>);
+
+@DriftAccessor(tables: [EntriesTable, EntryPhotosTable])
 class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
   EntriesDao(super.db);
 
@@ -23,6 +26,41 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
             ..where((t) => t.plantId.equals(plantId) & t.deletedAt.isNull())
             ..orderBy([(t) => OrderingTerm.desc(t.date)]))
           .watch();
+
+  /// Active entries of [plantId], newest first, with their active photos.
+  Future<List<EntryWithPhotos>> getByPlantWithPhotos(String plantId) =>
+      _byPlantWithPhotos(plantId).get().then(_groupPhotos);
+
+  Stream<List<EntryWithPhotos>> watchByPlantWithPhotos(String plantId) =>
+      _byPlantWithPhotos(plantId).watch().map(_groupPhotos);
+
+  JoinedSelectStatement<HasResultSet, dynamic> _byPlantWithPhotos(
+          String plantId) =>
+      select(entriesTable).join([
+        leftOuterJoin(
+            entryPhotosTable,
+            entryPhotosTable.entryId.equalsExp(entriesTable.id) &
+                entryPhotosTable.deletedAt.isNull()),
+      ])
+        ..where(entriesTable.plantId.equals(plantId) &
+            entriesTable.deletedAt.isNull())
+        ..orderBy([
+          OrderingTerm.desc(entriesTable.date),
+          OrderingTerm.asc(entriesTable.id),
+          OrderingTerm.asc(entryPhotosTable.position),
+        ]);
+
+  List<EntryWithPhotos> _groupPhotos(List<TypedResult> rows) {
+    final grouped = <String, EntryWithPhotos>{};
+    for (final row in rows) {
+      final entry = row.readTable(entriesTable);
+      final photos =
+          (grouped[entry.id] ??= (entry, <EntryPhotosTableData>[])).$2;
+      final photo = row.readTableOrNull(entryPhotosTable);
+      if (photo != null) photos.add(photo);
+    }
+    return grouped.values.toList();
+  }
 
   /// Unfiltered by [deletedAt] -- used by sync apply logic and by
   /// [EntriesRepository.delete] to inspect an entry (including an
@@ -110,11 +148,16 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
     return rows.map((r) => r.photoPath!).toList();
   }
 
+  /// Files of every active photo, the entries' own and their extra ones.
   Future<List<String>> getAllPhotoPaths() async {
     final rows = await (select(entriesTable)
           ..where((t) => t.photoPath.isNotNull() & t.deletedAt.isNull()))
         .get();
-    return rows.map((r) => r.photoPath!).toList();
+    final extra = await attachedDatabase.entryPhotosDao.getAll();
+    return [
+      ...rows.map((r) => r.photoPath!),
+      ...extra.map((r) => r.photoPath),
+    ];
   }
 
   Future<String?> getLatestPhotoPath(String plantId) async {
@@ -130,10 +173,15 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
   }
 
   /// Path of the plant's cover photo: the one picked in
-  /// `plants.cover_photo_id` while it still exists among the plant's live
-  /// entries, else the latest photo.
+  /// `plants.cover_photo_id` (an entry photo or an entry's own photo) while
+  /// it still exists among the plant's live entries, else the latest photo.
   Stream<String?> watchCoverPhotoPath(String plantId) => customSelect(
         'SELECT COALESCE('
+        '(SELECT ep.photo_path FROM entry_photos ep '
+        'JOIN entries e ON e.id = ep.entry_id '
+        'WHERE ep.id = (SELECT cover_photo_id FROM plants WHERE id = ?1) '
+        'AND e.plant_id = ?1 AND ep.deleted_at IS NULL '
+        'AND e.deleted_at IS NULL), '
         '(SELECT e.photo_path FROM entries e '
         'WHERE e.id = (SELECT cover_photo_id FROM plants WHERE id = ?1) '
         'AND e.plant_id = ?1 AND e.photo_path IS NOT NULL '
@@ -143,7 +191,11 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
         'AND deleted_at IS NULL ORDER BY date DESC LIMIT 1)'
         ') AS path',
         variables: [Variable.withString(plantId)],
-        readsFrom: {entriesTable, attachedDatabase.plantsTable},
+        readsFrom: {
+          entriesTable,
+          entryPhotosTable,
+          attachedDatabase.plantsTable,
+        },
       ).watchSingle().map((row) => row.read<String?>('path'));
 
   /// Returns active entries beyond [keepCount] (oldest first) using a SQL

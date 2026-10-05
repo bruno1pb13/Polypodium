@@ -18,6 +18,10 @@ class EntryModel {
   final DateTime? deletedAt;
   final int localRev;
 
+  /// Photos after the first ([photoPath]), in order. Only an entry with a
+  /// [photoPath] has them.
+  final List<EntryPhoto> extraPhotos;
+
   const EntryModel({
     required this.id,
     required this.plantId,
@@ -31,14 +35,17 @@ class EntryModel {
     DateTime? updatedAt,
     this.deletedAt,
     this.localRev = 0,
+    this.extraPhotos = const [],
   }) : updatedAt = updatedAt ?? createdAt;
 
   EntryDetails? get details => EntryDetails.decode(type, extraData);
 
   /// The entry's photos in order. The first one is [photoPath] and shares
   /// the entry's id.
-  List<EntryPhoto> get photos =>
-      [if (photoPath != null) EntryPhoto(id: id, path: photoPath!)];
+  List<EntryPhoto> get photos => [
+        if (photoPath != null) EntryPhoto(id: id, path: photoPath!),
+        ...extraPhotos,
+      ];
 
   EntryModel copyWith({
     String? id,
@@ -53,6 +60,7 @@ class EntryModel {
     DateTime? updatedAt,
     Object? deletedAt = _sentinel,
     int? localRev,
+    List<EntryPhoto>? extraPhotos,
   }) =>
       EntryModel(
         id: id ?? this.id,
@@ -71,6 +79,7 @@ class EntryModel {
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt == _sentinel ? this.deletedAt : deletedAt as DateTime?,
         localRev: localRev ?? this.localRev,
+        extraPhotos: extraPhotos ?? this.extraPhotos,
       );
 }
 

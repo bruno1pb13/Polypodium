@@ -74,6 +74,7 @@ class WorkspaceMigrationService {
     await _migrateDefensivos(sourceDb, targetDb);
     await _migratePlants(sourceDb, targetDb);
     await _migrateEntries(sourceDb, targetDb, targetPhotos);
+    await _migrateEntryPhotos(sourceDb, targetDb, targetPhotos);
     await _migrateReminders(sourceDb, targetDb);
   }
 
@@ -222,6 +223,34 @@ class WorkspaceMigrationService {
           type: row.type,
           numericValue: Value(row.numericValue),
           extraData: Value(row.extraData),
+          createdAt: row.createdAt,
+          updatedAt: DateTime.now(),
+          localRev: Value(rev),
+          deviceId: Value(target.deviceId),
+        ));
+      });
+    }
+  }
+
+  /// Same file copy as [_migrateEntries]; a photo whose file is gone is
+  /// left behind.
+  Future<void> _migrateEntryPhotos(
+    AppDatabase source,
+    AppDatabase target,
+    PhotoStorage targetPhotos,
+  ) async {
+    for (final row in await source.entryPhotosDao.getAll()) {
+      final file = File(row.photoPath);
+      if (!await file.exists()) continue;
+      final photoPath = await targetPhotos.savePhoto(file);
+
+      await target.transaction(() async {
+        final rev = await target.syncMetaDao.nextRev();
+        await target.entryPhotosDao.upsert(EntryPhotosTableCompanion.insert(
+          id: row.id,
+          entryId: row.entryId,
+          photoPath: photoPath,
+          position: Value(row.position),
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),

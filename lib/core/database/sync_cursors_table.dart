@@ -33,3 +33,18 @@ class SyncEntryTypesTable extends Table {
   @override
   Set<Column> get primaryKey => {peerId, entryType};
 }
+
+/// Entity types this device has already declared to a peer, i.e. applied on
+/// pull. Rows of a type an older release ignored were skipped behind the
+/// pull cursor all the same, so a release that starts applying a type
+/// fetches it once from the start (see SyncOrchestrator's backfill).
+class SyncEntityTypesTable extends Table {
+  @override
+  String get tableName => 'sync_entity_types';
+
+  TextColumn get peerId => text()();
+  TextColumn get entityType => text()();
+
+  @override
+  Set<Column> get primaryKey => {peerId, entityType};
+}

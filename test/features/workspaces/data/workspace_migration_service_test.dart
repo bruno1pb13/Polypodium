@@ -296,5 +296,52 @@ void main() {
       expect(entry.photoPath, isNot(sourcePhoto.path));
       expect(await File(entry.photoPath!).exists(), isTrue);
     });
+
+    test('copies the extra photos of an entry', () async {
+      final sourcePhotoDir = await Directory.systemTemp.createTemp();
+      final targetPhotoDir = await Directory.systemTemp.createTemp();
+      Future<String> photo(String name) async {
+        final file = File(p.join(sourcePhotoDir.path, name));
+        await file.writeAsBytes([1]);
+        return file.path;
+      }
+
+      await source.entriesDao.insert(EntriesTableCompanion.insert(
+        id: 'entry1',
+        plantId: 'plant1',
+        date: DateTime(2026, 1, 2),
+        photoPath: Value(await photo('a.jpg')),
+        type: EntryType.observation,
+        createdAt: DateTime(2026, 1, 2),
+        updatedAt: DateTime(2026, 1, 2),
+      ));
+      for (final (id, name, deletedAt) in [
+        ('ph2', 'b.jpg', null),
+        ('ph3', 'c.jpg', DateTime(2026, 1, 3)),
+      ]) {
+        await source.entryPhotosDao.upsert(EntryPhotosTableCompanion.insert(
+          id: id,
+          entryId: 'entry1',
+          photoPath: await photo(name),
+          position: const Value(1),
+          createdAt: DateTime(2026, 1, 2),
+          updatedAt: DateTime(2026, 1, 2),
+          deletedAt: Value(deletedAt),
+        ));
+      }
+
+      await service.migrateData(
+        sourceDb: source,
+        targetDb: target,
+        targetPhotos: FakePhotoStorage(targetPhotoDir),
+      );
+
+      final migrated = await target.entryPhotosDao.getById('ph2');
+      expect(migrated!.entryId, 'entry1');
+      expect(p.dirname(migrated.photoPath), targetPhotoDir.path);
+      expect(await File(migrated.photoPath).exists(), isTrue);
+      expect(migrated.localRev, greaterThan(0));
+      expect(await target.entryPhotosDao.getById('ph3'), isNull);
+    });
   });
 }

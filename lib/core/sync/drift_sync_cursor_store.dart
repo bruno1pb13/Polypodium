@@ -44,6 +44,32 @@ class DriftSyncCursorStore implements ISyncCursorStore {
   Future<void> completeBackfill(String peerId, Set<String> entryTypes) =>
       _dao.completeBackfill(peerId, entryTypes);
 
+  @override
+  Future<Set<String>?> getDeclaredEntityTypes(String peerId) =>
+      _dao.getDeclaredEntityTypes(peerId);
+
+  @override
+  Future<void> addDeclaredEntityTypes(String peerId, Set<String> types) =>
+      _dao.addDeclaredEntityTypes(peerId, types);
+
+  @override
+  Future<int> getEntityBackfillCursor(String peerId, Set<String> entityTypes) =>
+      _dao.getCursor(peerId, _entityBackfillDirection(entityTypes));
+
+  @override
+  Future<void> setEntityBackfillCursor(
+          String peerId, Set<String> entityTypes, int cursor) =>
+      _dao.setCursor(peerId, _entityBackfillDirection(entityTypes), cursor);
+
+  @override
+  Future<void> completeEntityBackfill(
+          String peerId, Set<String> entityTypes) =>
+      _dao.completeEntityBackfill(peerId, entityTypes);
+
   String _backfillDirection(Set<String> entryTypes) =>
       syncDirectionBackfillPrefix + (entryTypes.toList()..sort()).join(',');
+
+  String _entityBackfillDirection(Set<String> entityTypes) =>
+      syncDirectionEntityBackfillPrefix +
+      (entityTypes.toList()..sort()).join(',');
 }

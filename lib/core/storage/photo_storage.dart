@@ -17,12 +17,22 @@ class PhotoStorage {
     return dir;
   }
 
+  /// A new file in [dir] named after the current time. Several photos saved
+  /// within the same millisecond (one entry's photos, copied for each plant
+  /// of a bulk entry) get a suffix instead of overwriting each other.
+  File _newFile(Directory dir, String ext) {
+    final stamp = DateTime.now().millisecondsSinceEpoch;
+    var dest = File(p.join(dir.path, '$stamp$ext'));
+    for (var i = 1; dest.existsSync(); i++) {
+      dest = File(p.join(dir.path, '${stamp}_$i$ext'));
+    }
+    return dest;
+  }
+
   /// Copies [sourceFile] into app storage and returns the saved path.
   Future<String> savePhoto(File sourceFile) async {
     final dir = await _photosDir();
-    final fileName =
-        '${DateTime.now().millisecondsSinceEpoch}${p.extension(sourceFile.path)}';
-    final dest = File(p.join(dir.path, fileName));
+    final dest = _newFile(dir, p.extension(sourceFile.path));
     await sourceFile.copy(dest.path);
     return dest.path;
   }
@@ -35,9 +45,7 @@ class PhotoStorage {
   /// Saves raw [bytes] as a new photo file and returns the saved path.
   Future<String> savePhotoBytes(List<int> bytes, String fileName) async {
     final dir = await _photosDir();
-    final ext = p.extension(fileName);
-    final name = '${DateTime.now().millisecondsSinceEpoch}$ext';
-    final dest = File(p.join(dir.path, name));
+    final dest = _newFile(dir, p.extension(fileName));
     await dest.writeAsBytes(bytes);
     return dest.path;
   }

@@ -11,6 +11,8 @@ import '../../features/defensivos/data/defensivos_dao.dart';
 import '../../features/defensivos/data/defensivos_table.dart';
 import '../../features/entries/data/entries_dao.dart';
 import '../../features/entries/data/entries_table.dart';
+import '../../features/entries/data/entry_photos_dao.dart';
+import '../../features/entries/data/entry_photos_table.dart';
 import '../../features/locations/data/locations_dao.dart';
 import '../../features/locations/data/locations_table.dart';
 import '../../features/plants/data/plants_dao.dart';
@@ -29,6 +31,7 @@ import 'sync_meta_table.dart';
 
 export '../../features/defensivos/data/defensivos_table.dart';
 export '../../features/entries/data/entries_table.dart';
+export '../../features/entries/data/entry_photos_table.dart';
 export '../../features/locations/data/locations_table.dart';
 export '../../features/plants/data/plants_table.dart';
 export '../../features/reminders/data/reminders_table.dart';
@@ -44,6 +47,7 @@ part 'app_database.g.dart';
     SpeciesTable,
     PlantsTable,
     EntriesTable,
+    EntryPhotosTable,
     LocationsTable,
     SoilsTable,
     DefensivosTable,
@@ -51,6 +55,7 @@ part 'app_database.g.dart';
     SyncMetaTable,
     SyncCursorsTable,
     SyncEntryTypesTable,
+    SyncEntityTypesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -67,11 +72,12 @@ class AppDatabase extends _$AppDatabase {
   final String? deviceId;
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
   late final EntriesDao entriesDao = EntriesDao(this);
+  late final EntryPhotosDao entryPhotosDao = EntryPhotosDao(this);
   late final LocationsDao locationsDao = LocationsDao(this);
   late final SoilsDao soilsDao = SoilsDao(this);
   late final DefensivosDao defensivosDao = DefensivosDao(this);
@@ -232,6 +238,11 @@ class AppDatabase extends _$AppDatabase {
                 !columns.contains(plantsTable.coverPhotoId.name)) {
               await m.addColumn(plantsTable, plantsTable.coverPhotoId);
             }
+          }
+          if (from < 20) {
+            // Several photos per entry; the entity type they sync as is new.
+            await m.createTable(entryPhotosTable);
+            await m.createTable(syncEntityTypesTable);
           }
         },
       );

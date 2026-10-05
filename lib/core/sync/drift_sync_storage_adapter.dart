@@ -24,9 +24,13 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
     'location',
     'plant',
     'entry',
+    'entry_photo',
     'defensivo',
     'reminder',
   ];
+
+  @override
+  Set<String> get entityTypes => _entityTypes.toSet();
 
   @override
   Future<List<SyncChange>> localChangesSince(
@@ -58,6 +62,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
         await _applyPlant(change);
       case 'entry':
         await _applyEntry(change);
+      case 'entry_photo':
+        await _applyEntryPhoto(change);
       case 'location':
         await _applyLocation(change);
       case 'soil':
@@ -80,6 +86,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
         return _db.plantsDao.changesSince(since, limit: limit);
       case 'entry':
         return _db.entriesDao.changesSince(since, limit: limit);
+      case 'entry_photo':
+        return _db.entryPhotosDao.changesSince(since, limit: limit);
       case 'location':
         return _db.locationsDao.changesSince(since, limit: limit);
       case 'soil':
@@ -159,6 +167,19 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'type': r.type.name,
           'numericValue': r.numericValue,
           'extraData': r.extraData,
+          'createdAt': r.createdAt.toIso8601String(),
+        };
+      case 'entry_photo':
+        final r = row as EntryPhotosTableData;
+        entityId = r.id;
+        updatedAt = r.updatedAt;
+        deletedAt = r.deletedAt;
+        rev = r.localRev;
+        payload = {
+          'id': r.id,
+          'entryId': r.entryId,
+          'photoPath': r.photoPath,
+          'position': r.position,
           'createdAt': r.createdAt.toIso8601String(),
         };
       case 'location':
@@ -386,6 +407,28 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
             updatedAt: DateTime.now(), rev: rev);
       });
     }
+  }
+
+  Future<void> _applyEntryPhoto(SyncChange change) async {
+    final existing = await _db.entryPhotosDao.getById(change.entityId);
+    if (!_incomingWins(change, existing?.updatedAt, existing?.deviceId)) {
+      return;
+    }
+    final p = change.payload;
+    await _db.entryPhotosDao.upsert(EntryPhotosTableCompanion.insert(
+      id: change.entityId,
+      entryId: p['entryId'] as String,
+      // A tombstone comes with the sender's path, not a downloaded file.
+      photoPath: change.deletedAt != null && existing != null
+          ? existing.photoPath
+          : p['photoPath'] as String? ?? '',
+      position: Value(p['position'] as int? ?? 0),
+      createdAt: DateTime.parse(p['createdAt'] as String),
+      updatedAt: change.updatedAt,
+      deletedAt: Value(change.deletedAt),
+      localRev: const Value(0),
+      deviceId: Value(change.deviceId),
+    ));
   }
 
   Future<void> _applyLocation(SyncChange change) async {

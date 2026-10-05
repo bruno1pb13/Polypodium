@@ -19,4 +19,17 @@ abstract interface class ISyncCursorStore {
 
   /// Marks [entryTypes] declared and drops the backfill cursors.
   Future<void> completeBackfill(String peerId, Set<String> entryTypes);
+
+  /// Entity types already applied on pull from [peerId], or null when this
+  /// device never recorded any.
+  Future<Set<String>?> getDeclaredEntityTypes(String peerId);
+  Future<void> addDeclaredEntityTypes(String peerId, Set<String> types);
+
+  /// Cursor of the backfill pull fetching [entityTypes] (0 if none yet).
+  Future<int> getEntityBackfillCursor(String peerId, Set<String> entityTypes);
+  Future<void> setEntityBackfillCursor(
+      String peerId, Set<String> entityTypes, int cursor);
+
+  /// Marks [entityTypes] declared and drops their backfill cursors.
+  Future<void> completeEntityBackfill(String peerId, Set<String> entityTypes);
 }

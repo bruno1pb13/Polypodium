@@ -104,14 +104,23 @@ class PlantsRepository {
             updatedAt: DateTime.now(), rev: rev);
       });
 
-  Future<void> delete(String id) async {
+  /// Soft-deletes the plant with its entries, their photos and reminders.
+  /// Returns the photo files the deleted entries owned.
+  Future<List<String>> delete(String id) async {
     final now = DateTime.now();
+    final photoPaths = <String>[];
     await _db.transaction(() async {
       // Replicates the `KeyAction.cascade` FK behavior that only fires on a
       // real SQLite DELETE, which a soft-delete never triggers.
       final entryRev = await _db.syncMetaDao.nextRev();
-      await _db.entriesDao
+      final entries = await _db.entriesDao
           .softDeleteByPlant(id, deletedAt: now, rev: entryRev);
+      for (final entry in entries) {
+        if (entry.photoPath != null) photoPaths.add(entry.photoPath!);
+        final extra = await _db.entryPhotosDao
+            .softDeleteByEntry(entry.id, deletedAt: now);
+        photoPaths.addAll(extra.map((p) => p.photoPath));
+      }
       final reminderRev = await _db.syncMetaDao.nextRev();
       await _db.remindersDao
           .softDeleteByPlant(id, deletedAt: now, rev: reminderRev);
@@ -119,6 +128,7 @@ class PlantsRepository {
       await _dao.softDelete(id, deletedAt: now, rev: plantRev);
     });
     await rescheduleNotifications();
+    return photoPaths;
   }
 
   // ---------------------------------------------------------------------------

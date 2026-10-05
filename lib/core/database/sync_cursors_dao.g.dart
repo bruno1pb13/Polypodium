@@ -8,6 +8,8 @@ mixin _$SyncCursorsDaoMixin on DatabaseAccessor<AppDatabase> {
       attachedDatabase.syncCursorsTable;
   $SyncEntryTypesTableTable get syncEntryTypesTable =>
       attachedDatabase.syncEntryTypesTable;
+  $SyncEntityTypesTableTable get syncEntityTypesTable =>
+      attachedDatabase.syncEntityTypesTable;
   SyncCursorsDaoManager get managers => SyncCursorsDaoManager(this);
 }
 
@@ -20,4 +22,7 @@ class SyncCursorsDaoManager {
   $$SyncEntryTypesTableTableTableManager get syncEntryTypesTable =>
       $$SyncEntryTypesTableTableTableManager(
           _db.attachedDatabase, _db.syncEntryTypesTable);
+  $$SyncEntityTypesTableTableTableManager get syncEntityTypesTable =>
+      $$SyncEntityTypesTableTableTableManager(
+          _db.attachedDatabase, _db.syncEntityTypesTable);
 }

@@ -103,7 +103,7 @@ class _FakeServer {
   }
 
   List<Uri> get backfillPulls =>
-      pulls.where((u) => u.queryParameters.containsKey('entities')).toList();
+      pulls.where((u) => u.queryParameters['entities'] == 'entry').toList();
 }
 
 SyncChange _entry(String id, String type, int rev, {String? photoKey}) =>
@@ -191,7 +191,8 @@ void main() {
     expect(backfills, hasLength(1));
     expect(backfills.single.queryParameters['since'], '0');
     expect(backfills.single.queryParameters['entities'], 'entry');
-    expect(server.declaredTypes.last, newTypes);
+    expect(server.declaredTypes[server.pulls.indexOf(backfills.single)],
+        newTypes);
 
     final r1 = await db.entriesDao.getById('r1');
     expect(r1!.type, EntryType.repotting);

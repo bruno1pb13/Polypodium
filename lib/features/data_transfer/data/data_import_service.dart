@@ -79,8 +79,10 @@ class DataImportService {
     // photoPath must be known at upsert time. If the transaction fails, the
     // stray files are reclaimed by the existing orphan-photo cleanup.
     final entryRows = rowsOf('entries');
+    // Backups made before schema v20 have no such section.
+    final entryPhotoRows = rowsOf('entryPhotos');
     final photoPaths = <String, String>{};
-    for (final row in entryRows) {
+    for (final row in [...entryRows, ...entryPhotoRows]) {
       final photoFile = row['photoFile'] as String?;
       if (photoFile == null) continue;
       final fileBytes = parsed.photos[photoFile];
@@ -142,6 +144,13 @@ class DataImportService {
                 row['type'] == EntryType.pesticide.name) {
               pesticidePlantIds.add(row['plantId'] as String);
             }
+          } else {
+            skipped++;
+          }
+        }
+        for (final row in entryPhotoRows) {
+          if (await _applyEntryPhoto(row, photoPaths)) {
+            applied++;
           } else {
             skipped++;
           }
@@ -418,6 +427,34 @@ class DataImportService {
       type: type,
       numericValue: Value((row['numericValue'] as num?)?.toDouble()),
       extraData: Value(row['extraData'] as String?),
+      createdAt: DateTime.parse(row['createdAt'] as String),
+      updatedAt: updatedAt,
+      deletedAt: Value(_deletedAt(row)),
+      localRev: Value(rev),
+      deviceId: Value(_db.deviceId),
+    ));
+    return true;
+  }
+
+  Future<bool> _applyEntryPhoto(
+      Map<String, dynamic> row, Map<String, String> photoPaths) async {
+    final existing = await _db.entryPhotosDao.getById(row['id'] as String);
+    final updatedAt = _updatedAt(row);
+    if (!_incomingWins(
+        row, updatedAt, existing?.updatedAt, existing?.deviceId)) {
+      return false;
+    }
+    // Same photo fallback as entries.
+    final photoFile = row['photoFile'] as String?;
+    final photoPath =
+        (photoFile != null ? photoPaths[photoFile] : null) ??
+            row['photoPath'] as String;
+    final rev = await _db.syncMetaDao.nextRev();
+    await _db.entryPhotosDao.upsert(EntryPhotosTableCompanion.insert(
+      id: row['id'] as String,
+      entryId: row['entryId'] as String,
+      photoPath: photoPath,
+      position: Value(row['position'] as int? ?? 0),
       createdAt: DateTime.parse(row['createdAt'] as String),
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),

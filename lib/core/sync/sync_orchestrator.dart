@@ -23,6 +23,21 @@ const legacyEntryTypes = {
   'history',
 };
 
+/// Entity types every release before `entry_photo` applied on pull.
+const legacyEntityTypes = {
+  'species',
+  'soil',
+  'location',
+  'plant',
+  'entry',
+  'defensivo',
+  'reminder',
+};
+
+/// Entities whose payload carries a photo file through the photo side
+/// channel (`photoPath` locally, `photoKey` on the wire).
+const _photoEntityTypes = {'entry', 'entry_photo'};
+
 class SyncResult {
   final int pulled;
   final int pushed;
@@ -60,6 +75,7 @@ class SyncOrchestrator {
   }) async {
     // Before the pull, which moves the cursor the first record depends on.
     final newEntryTypes = await _undeclaredEntryTypes();
+    final newEntities = await _undeclaredEntityTypes();
     var pulled = await _pull(
         serverUrl: serverUrl, token: token, deviceId: deviceId);
     final pushed = await _push(
@@ -67,6 +83,10 @@ class SyncOrchestrator {
     if (newEntryTypes.isNotEmpty) {
       pulled += await _backfill(
           serverUrl: serverUrl, token: token, entryTypes: newEntryTypes);
+    }
+    if (newEntities.isNotEmpty) {
+      pulled += await _backfillEntities(
+          serverUrl: serverUrl, token: token, entityTypes: newEntities);
     }
     return SyncResult(pulled: pulled, pushed: pushed);
   }
@@ -126,7 +146,7 @@ class SyncOrchestrator {
     required Set<String> entryTypes,
   }) async {
     const entities = {'entry'};
-    final (:applied, :completed) = await _pullPages(
+    final (:applied, :completed, echoed: _) = await _pullPages(
       serverUrl: serverUrl,
       token: token,
       since: await _cursors.getBackfillCursor(_serverPeerId, entryTypes),
@@ -142,10 +162,53 @@ class SyncOrchestrator {
     return applied;
   }
 
+  // -- entity backfill: same idea for whole entity types an older release
+  //    ignored on pull (no-op in its applyRemoteChange) while its cursor
+  //    moved past them. ------------------------------------------------------
+
+  /// Entity types this build applies that weren't declared to the server
+  /// yet. With nothing recorded, a device that already pulled is assumed to
+  /// have applied the legacy set, and a fresh one has nothing to catch up on.
+  Future<Set<String>> _undeclaredEntityTypes() async {
+    final current = _storage.entityTypes;
+    var declared = await _cursors.getDeclaredEntityTypes(_serverPeerId);
+    if (declared == null) {
+      declared = await _cursors.getPullCursor(_serverPeerId) > 0
+          ? legacyEntityTypes.intersection(current)
+          : current;
+      await _cursors.addDeclaredEntityTypes(_serverPeerId, declared);
+    }
+    return current.difference(declared);
+  }
+
+  Future<int> _backfillEntities({
+    required String serverUrl,
+    required String token,
+    required Set<String> entityTypes,
+  }) async {
+    final (:applied, :completed, :echoed) = await _pullPages(
+      serverUrl: serverUrl,
+      token: token,
+      since:
+          await _cursors.getEntityBackfillCursor(_serverPeerId, entityTypes),
+      entities: entityTypes,
+      onApplied: (cursor) => _cursors.setEntityBackfillCursor(
+          _serverPeerId, entityTypes, cursor),
+    );
+    // A server that doesn't echo the restriction predates it, and with it
+    // these entity types: there's nothing to recover. One that echoes only
+    // part of them doesn't store the rest yet, and may once updated.
+    if (completed && (echoed == null || echoed.containsAll(entityTypes))) {
+      await _cursors.completeEntityBackfill(_serverPeerId, entityTypes);
+    }
+    return applied;
+  }
+
   /// Pulls pages from [since], applying each change and reporting the rev
   /// of the last one applied per page to [onApplied]. Not [completed] when
-  /// cut short by a failed photo download.
-  Future<({int applied, bool completed})> _pullPages({
+  /// cut short by a failed photo download. [echoed] is the entity
+  /// restriction as the server echoed it (null without one).
+  Future<({int applied, bool completed, Set<String>? echoed})> _pullPages({
     required String serverUrl,
     required String token,
     required int since,
@@ -164,7 +227,7 @@ class SyncOrchestrator {
           entryTypes: entryTypes,
           entities: entities);
       if (entities != null && page.entities == null) {
-        return (applied: total, completed: true);
+        return (applied: total, completed: true, echoed: null);
       }
 
       var appliedCount = 0;
@@ -183,9 +246,11 @@ class SyncOrchestrator {
       }
 
       if (appliedCount < page.changes.length) {
-        return (applied: total, completed: false);
+        return (applied: total, completed: false, echoed: page.entities);
       }
-      if (!page.hasMore) return (applied: total, completed: true);
+      if (!page.hasMore) {
+        return (applied: total, completed: true, echoed: page.entities);
+      }
     }
   }
 
@@ -235,7 +300,7 @@ class SyncOrchestrator {
 
   Future<SyncChange?> _resolveIncomingPhoto(
       String serverUrl, String token, SyncChange change) async {
-    if (change.entityType != 'entry') return change;
+    if (!_photoEntityTypes.contains(change.entityType)) return change;
     final photoKey = change.payload['photoKey'] as String?;
     if (photoKey == null) return change;
 
@@ -259,7 +324,10 @@ class SyncOrchestrator {
 
   Future<SyncChange?> _prepareOutgoingPhoto(
       String serverUrl, String token, SyncChange change) async {
-    if (change.entityType != 'entry' || change.deletedAt != null) return change;
+    if (!_photoEntityTypes.contains(change.entityType) ||
+        change.deletedAt != null) {
+      return change;
+    }
     final photoPath = change.payload['photoPath'] as String?;
     if (photoPath == null) return change;
 

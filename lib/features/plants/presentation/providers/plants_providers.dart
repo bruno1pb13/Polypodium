@@ -6,6 +6,7 @@ import '../../../../core/database/database_provider.dart';
 import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/notifications/notification_provider.dart';
+import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../data/plants_repository.dart';
@@ -96,7 +97,12 @@ class PlantMutations {
   }
 
   Future<void> delete(String plantId) async {
-    await _ref.read(plantsRepositoryProvider).delete(plantId);
+    final photoPaths =
+        await _ref.read(plantsRepositoryProvider).delete(plantId);
+    final photoStorage = _ref.read(photoStorageProvider);
+    for (final path in photoPaths) {
+      await photoStorage.deletePhoto(path);
+    }
     _triggerSync();
   }
 

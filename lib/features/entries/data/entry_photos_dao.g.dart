@@ -1,9 +1,9 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'entries_dao.dart';
+part of 'entry_photos_dao.dart';
 
 // ignore_for_file: type=lint
-mixin _$EntriesDaoMixin on DatabaseAccessor<AppDatabase> {
+mixin _$EntryPhotosDaoMixin on DatabaseAccessor<AppDatabase> {
   $SpeciesTableTable get speciesTable => attachedDatabase.speciesTable;
   $SoilsTableTable get soilsTable => attachedDatabase.soilsTable;
   $LocationsTableTable get locationsTable => attachedDatabase.locationsTable;
@@ -11,12 +11,12 @@ mixin _$EntriesDaoMixin on DatabaseAccessor<AppDatabase> {
   $EntriesTableTable get entriesTable => attachedDatabase.entriesTable;
   $EntryPhotosTableTable get entryPhotosTable =>
       attachedDatabase.entryPhotosTable;
-  EntriesDaoManager get managers => EntriesDaoManager(this);
+  EntryPhotosDaoManager get managers => EntryPhotosDaoManager(this);
 }
 
-class EntriesDaoManager {
-  final _$EntriesDaoMixin _db;
-  EntriesDaoManager(this._db);
+class EntryPhotosDaoManager {
+  final _$EntryPhotosDaoMixin _db;
+  EntryPhotosDaoManager(this._db);
   $$SpeciesTableTableTableManager get speciesTable =>
       $$SpeciesTableTableTableManager(_db.attachedDatabase, _db.speciesTable);
   $$SoilsTableTableTableManager get soilsTable =>
