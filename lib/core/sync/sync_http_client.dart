@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:polypodium_core/polypodium_core.dart';
 
-import 'models/entity_change.dart';
 import 'sync_exceptions.dart';
 
 class ChangesPage {
-  final List<EntityChange> changes;
+  final List<SyncChange> changes;
   final int nextCursor;
   final bool hasMore;
   const ChangesPage(
@@ -42,7 +42,7 @@ class SyncHttpClient {
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     final changes = (data['changes'] as List<dynamic>)
-        .map((c) => EntityChange.fromJson(c as Map<String, dynamic>))
+        .map((c) => SyncChange.fromJson(c as Map<String, dynamic>))
         .toList();
 
     return ChangesPage(
@@ -56,7 +56,7 @@ class SyncHttpClient {
     required String serverUrl,
     required String token,
     required String deviceId,
-    required List<EntityChange> changes,
+    required List<SyncChange> changes,
   }) async {
     final response = await http
         .post(

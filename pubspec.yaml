@@ -35,6 +35,10 @@ dependencies:
   file_selector: ^1.0.3
   battery_plus: ^6.2.1
   fl_chart: ^1.2.0
+  polypodium_core:
+    git:
+      url: https://github.com/bruno1pb13/polypodium_core.git
+      ref: v0.1.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1

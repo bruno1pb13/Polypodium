@@ -1,4 +1,5 @@
 import '../../../core/enums.dart';
+import 'entry_details.dart';
 
 class EntryModel {
   final String id;
@@ -9,7 +10,8 @@ class EntryModel {
   final EntryType type;
   // Numeric measurement: height in cm, chlorosis severity (1–3), etc.
   final double? numericValue;
-  // JSON string for extra structured fields (e.g. pest type)
+  // JSON string for extra structured fields (e.g. pest type); read and
+  // build it through [details] / [EntryDetails.encode].
   final String? extraData;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -30,6 +32,8 @@ class EntryModel {
     this.deletedAt,
     this.localRev = 0,
   }) : updatedAt = updatedAt ?? createdAt;
+
+  EntryDetails? get details => EntryDetails.decode(type, extraData);
 
   EntryModel copyWith({
     String? id,

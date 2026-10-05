@@ -148,4 +148,48 @@ void main() {
     expect((await reminders.getById('r1'))!.deletedAt, isNotNull);
     expect(notifications.lastReminders, isEmpty);
   });
+
+  group('refreshPesticideStatus', () {
+    Future<void> pesticideEntry(String id, DateTime date, String? extraData) =>
+        db.entriesDao.insert(EntriesTableCompanion.insert(
+          id: id,
+          plantId: 'p1',
+          date: date,
+          type: EntryType.pesticide,
+          extraData: Value(extraData),
+          createdAt: date,
+          updatedAt: date,
+        ));
+
+    test('tracks recurrenceDays of the latest application', () async {
+      await repo.save(plant('p1'));
+      final applied = DateTime(2026, 2, 1);
+      await pesticideEntry(
+          'e1',
+          applied,
+          '{"products":[{"defensivoId":"d1","name":"Neem","dose":"5 ml/L"}],'
+              '"recurrenceDays":14}');
+
+      await repo.refreshPesticideStatus('p1');
+
+      final loaded = await repo.getById('p1');
+      expect(loaded!.lastPesticideAppliedAt, applied);
+      expect(loaded.pesticideReapplicationDays, 14);
+    });
+
+    test('a newer application without recurrence clears the reminder',
+        () async {
+      await repo.save(plant('p1'));
+      await pesticideEntry('e1', DateTime(2026, 2, 1), '{"recurrenceDays":7}');
+      final latest = DateTime(2026, 2, 10);
+      await pesticideEntry('e2', latest,
+          '{"products":[{"defensivoId":"d1","name":"Neem"}]}');
+
+      await repo.refreshPesticideStatus('p1');
+
+      final loaded = await repo.getById('p1');
+      expect(loaded!.lastPesticideAppliedAt, latest);
+      expect(loaded.pesticideReapplicationDays, isNull);
+    });
+  });
 }

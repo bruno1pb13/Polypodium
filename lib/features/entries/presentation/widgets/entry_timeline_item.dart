@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
@@ -10,6 +9,7 @@ import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/widgets/fullscreen_image_viewer.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
+import '../../domain/entry_details.dart';
 import '../../domain/entry_model.dart';
 
 class EntryTimelineItem extends ConsumerWidget {
@@ -218,22 +218,22 @@ class _EntryDataBadge extends StatelessWidget {
 
   String? _summaryText(AppLocalizations l10n) {
     final nv = entry.numericValue;
-    final extra = entry.extraData != null
-        ? (jsonDecode(entry.extraData!) as Map<String, dynamic>)
-        : null;
+    final details = entry.details;
 
     return switch (entry.type) {
       EntryType.height when nv != null => '📏 ${_fmt(nv)} cm',
       EntryType.chlorosis when nv != null => nv.toInt() == 0
           ? '💚 ${l10n.chlorosisCured}'
           : '🟡 ${_severityLabel(l10n, nv.toInt())}',
-      EntryType.pest => _pestSummary(l10n, extra, nv),
+      EntryType.pest => _pestSummary(l10n, details as PestDetails?, nv),
       EntryType.irrigation when nv != null =>
         '💧 ${_irrigationLabel(l10n, nv.toInt())}',
-      EntryType.fertilizer => _fertilizerSummary(l10n, extra),
-      EntryType.pruning when extra != null =>
-        '✂️ ${_pruningLabel(l10n, extra['reason'] as String?)}',
-      EntryType.pesticide => _pesticideSummary(l10n, extra, entry.date),
+      EntryType.fertilizer =>
+        _fertilizerSummary(l10n, details as FertilizerDetails?),
+      EntryType.pruning when details is PruningDetails =>
+        '✂️ ${_pruningLabel(l10n, details.reason)}',
+      EntryType.pesticide =>
+        _pesticideSummary(l10n, details as PesticideDetails?, entry.date),
       EntryType.observation when nv != null =>
         '${_healthEmoji(nv.toInt())} ${l10n.healthSummary(nv.toInt())} — ${_healthLabel(l10n, nv.toInt())}',
       _ => null,
@@ -241,9 +241,9 @@ class _EntryDataBadge extends StatelessWidget {
   }
 
   String? _pestSummary(
-      AppLocalizations l10n, Map<String, dynamic>? extra, double? nv) {
+      AppLocalizations l10n, PestDetails? details, double? nv) {
     if (nv != null && nv.toInt() == 0) return '✅ ${l10n.pestEradicated}';
-    final pestType = extra?['pestType'] as String?;
+    final pestType = details?.pestType;
     final parts = [
       if (pestType != null && pestType.isNotEmpty) pestType,
       if (nv != null) _severityLabel(l10n, nv.toInt()),
@@ -253,33 +253,26 @@ class _EntryDataBadge extends StatelessWidget {
   }
 
   String? _fertilizerSummary(
-      AppLocalizations l10n, Map<String, dynamic>? extra) {
-    if (extra == null) return null;
-    // New format: {"products": [{"name": "...", "dose": X}, ...]}
-    final products = extra['products'] as List<dynamic>?;
-    if (products != null && products.isNotEmpty) {
-      if (products.length == 1) {
-        final p = products[0] as Map<String, dynamic>;
-        final name = p['name'] as String? ?? '';
-        final dose = p['dose'];
-        final dosePart =
-            dose != null ? ' · ${_fmt((dose as num).toDouble())} ml' : '';
-        return '🌱 $name$dosePart';
-      }
-      return '🌱 ${l10n.productsCount(products.length)}';
+      AppLocalizations l10n, FertilizerDetails? details) {
+    final products = details?.products ?? const [];
+    if (products.isEmpty) return null;
+    if (products.length == 1) {
+      final p = products.single;
+      final dosePart = p.dose != null ? ' · ${_fmt(p.dose!)} ml' : '';
+      return '🌱 ${p.name}$dosePart';
     }
-    return null;
+    return '🌱 ${l10n.productsCount(products.length)}';
   }
 
   String? _pesticideSummary(
-      AppLocalizations l10n, Map<String, dynamic>? extra, DateTime date) {
-    if (extra == null) return null;
-    final products = extra['products'] as List<dynamic>?;
-    final recurrenceDays = (extra['recurrenceDays'] as num?)?.toInt();
+      AppLocalizations l10n, PesticideDetails? details, DateTime date) {
+    if (details == null) return null;
+    final products = details.products;
+    final recurrenceDays = details.recurrenceDays;
 
     final productsPart = switch (products) {
-      null || [] => null,
-      [final p] => (p as Map<String, dynamic>)['name'] as String?,
+      [] => null,
+      [final p] => p.name,
       _ => l10n.productsCount(products.length),
     };
 

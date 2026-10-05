@@ -1,10 +1,9 @@
-import 'dart:convert';
-
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/enums.dart';
 import '../../../core/notifications/notification_service.dart';
+import '../../entries/domain/entry_details.dart';
 import '../../reminders/data/reminders_repository.dart';
 import '../../reminders/domain/reminder_model.dart';
 import '../../species/data/species_repository.dart';
@@ -86,8 +85,7 @@ class PlantsRepository {
         plantId, EntryType.pesticide);
     final recurrenceDays = last == null
         ? null
-        : (jsonDecode(last.extraData ?? '{}')
-            as Map<String, dynamic>)['recurrenceDays'] as int?;
+        : PesticideDetails.recurrenceDaysOf(last.extraData);
     await _db.transaction(() async {
       final rev = await _db.syncMetaDao.nextRev();
       await _dao.updateLastPesticideApplication(
