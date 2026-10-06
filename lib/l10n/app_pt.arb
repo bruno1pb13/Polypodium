@@ -714,6 +714,8 @@
   "labelScanCameraError": "Não foi possível abrir a câmera",
   "labelScanInvalid": "Este código não é uma etiqueta do Polypodium",
   "labelPlantNotFound": "Planta não encontrada neste espaço",
+  "plantShortCode": "Código {code}",
+  "plantShortCodeHint": "Impresso na etiqueta. Digite na busca de plantas para encontrá-la sem o QR code",
 
   "gardenMembers": "Membros do jardim",
   "gardenPersonal": "Jardim pessoal",

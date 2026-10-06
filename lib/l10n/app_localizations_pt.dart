@@ -2448,6 +2448,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get labelPlantNotFound => 'Planta não encontrada neste espaço';
 
   @override
+  String plantShortCode(String code) {
+    return 'Código $code';
+  }
+
+  @override
+  String get plantShortCodeHint =>
+      'Impresso na etiqueta. Digite na busca de plantas para encontrá-la sem o QR code';
+
+  @override
   String get gardenMembers => 'Membros do jardim';
 
   @override

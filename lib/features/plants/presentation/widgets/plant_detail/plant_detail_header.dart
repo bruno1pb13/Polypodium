@@ -68,6 +68,24 @@ class PlantDetailHeader extends ConsumerWidget {
                     ),
                   ),
                 ],
+                const SizedBox(height: 4),
+                Semantics(
+                  label: context.l10n.plantShortCode(plant.shortCode),
+                  excludeSemantics: true,
+                  child: Tooltip(
+                    message: context.l10n.plantShortCodeHint,
+                    child: SelectableText(
+                      '#${plant.shortCode}',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                        color: context.glass.fgFaint,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

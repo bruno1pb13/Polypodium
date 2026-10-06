@@ -1240,6 +1240,13 @@
   "labelScanCameraError": "Couldn't open the camera",
   "labelScanInvalid": "This code isn't a Polypodium label",
   "labelPlantNotFound": "Plant not found in this space",
+  "plantShortCode": "Code {code}",
+  "@plantShortCode": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "plantShortCodeHint": "Printed on the label. Type it in the plant search to find this plant without the QR code",
 
   "gardenMembers": "Garden members",
   "gardenPersonal": "Personal garden",

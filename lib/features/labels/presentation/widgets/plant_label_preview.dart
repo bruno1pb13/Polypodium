@@ -27,10 +27,13 @@ class PlantLabelPreview extends StatelessWidget {
     final width = preset.widthMm * _pointsPerMm;
     final height = preset.heightMm * _pointsPerMm;
     const padding = 4 * _pointsPerMm;
-    final qrSize =
-        [height - 2 * padding, width * 0.42].reduce((a, b) => a < b ? a : b);
     final large = preset == LabelSheetPreset.a4x10;
     final body = large ? 9.0 : 7.0;
+    final codeSize = body + 1;
+    // The short code goes under the QR code.
+    final codeHeight = codeSize * 1.4 + 2;
+    final qrSize = [height - 2 * padding - codeHeight, width * 0.42]
+        .reduce((a, b) => a < b ? a : b);
 
     Widget line(String? text,
         {required double size,
@@ -78,9 +81,25 @@ class PlantLabelPreview extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  SizedBox.square(
-                    dimension: qrSize,
-                    child: CustomPaint(painter: QrPainter(label.link)),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox.square(
+                        dimension: qrSize,
+                        child: CustomPaint(painter: QrPainter(label.link)),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '#${label.shortCode}',
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: codeSize,
+                          height: 1.2,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(width: padding),
                   Expanded(
