@@ -9,6 +9,8 @@ import '../../../../core/sync/sync_providers.dart';
 import '../../../../core/widgets/app_search_bar.dart';
 import '../../../plants/presentation/screens/plant_group_screen.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
+import '../../../weather/presentation/providers/weather_providers.dart';
+import '../../../weather/presentation/widgets/location_weather_summary.dart';
 import '../../domain/location_model.dart';
 import '../providers/locations_providers.dart';
 import '../providers/locations_search_providers.dart';
@@ -27,6 +29,7 @@ class _LocationsListScreenState extends ConsumerState<LocationsListScreen> {
 
   Future<void> _refresh() async {
     ref.invalidate(locationsNotifierProvider);
+    ref.invalidate(serverWeatherEnabledProvider);
     try {
       await ref.read(filteredSortedLocationsProvider.future);
     } catch (_) {}
@@ -325,6 +328,13 @@ class _LocationListItem extends ConsumerWidget {
                               ),
                             ),
                           ],
+                          LocationWeatherSummary(
+                            location: location,
+                            color: transparencyEnabled
+                                ? context.glass.fgMuted
+                                : colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.7),
+                          ),
                         ],
                       ),
                     ),

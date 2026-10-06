@@ -7,6 +7,7 @@ import '../domain/account_info.dart';
 import '../domain/server_data_settings.dart';
 import '../domain/server_status.dart';
 import '../domain/server_user.dart';
+import '../domain/server_weather_status.dart';
 
 /// Talks to a Polypodium server's admin endpoints (`/api/v1/admin/*`).
 /// Every call needs a token belonging to an account with role == 'admin' --
@@ -49,6 +50,7 @@ class AdminClient {
     required String token,
     bool? allowMemberExport,
     bool? allowMemberImport,
+    bool? weatherEnabled,
   }) async {
     final response = await http
         .patch(
@@ -59,12 +61,39 @@ class AdminClient {
               'allowMemberExport': allowMemberExport,
             if (allowMemberImport != null)
               'allowMemberImport': allowMemberImport,
+            if (weatherEnabled != null) 'weatherEnabled': weatherEnabled,
           }),
         )
         .timeout(const Duration(seconds: 15));
     _checkStatus(response, 200);
     return ServerDataSettings.fromJson(
         jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  Future<ServerWeatherStatus> weatherStatus({
+    required String serverUrl,
+    required String token,
+  }) async {
+    final response = await http
+        .get(Uri.parse('$serverUrl/api/v1/admin/weather'),
+            headers: _authHeaders(token))
+        .timeout(const Duration(seconds: 10));
+    _checkStatus(response, 200);
+    return ServerWeatherStatus.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// Makes the server fetch every region's forecast now instead of waiting
+  /// for its daily schedule.
+  Future<void> refreshWeather({
+    required String serverUrl,
+    required String token,
+  }) async {
+    final response = await http
+        .post(Uri.parse('$serverUrl/api/v1/admin/weather/refresh'),
+            headers: _authHeaders(token))
+        .timeout(const Duration(seconds: 120));
+    _checkStatus(response, 200);
   }
 
   Future<ServerStatus> status({

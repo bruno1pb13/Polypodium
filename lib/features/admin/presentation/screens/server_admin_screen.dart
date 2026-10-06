@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/l10n/l10n.dart';
@@ -24,12 +25,14 @@ class ServerAdminScreen extends ConsumerWidget {
         onRefresh: () async {
           ref.invalidate(serverStatusProvider(workspace));
           ref.invalidate(serverDataSettingsNotifierProvider(workspace));
+          ref.invalidate(serverWeatherStatusProvider(workspace));
           ref.invalidate(serverUsersNotifierProvider(workspace));
         },
         child: ListView(
           children: [
             _StatusCard(statusAsync: statusAsync),
             _DataSettingsCard(workspace: workspace),
+            _WeatherCard(workspace: workspace),
             const Divider(height: 1),
             usersAsync.when(
               data: (users) => Column(
@@ -299,6 +302,120 @@ class _DataSettingsCard extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(localizedErrorMessage(e, context.l10n))));
       }
+    }
+  }
+}
+
+/// Server-side weather forecasts. Hidden on servers that predate the
+/// feature (their settings carry no `weatherEnabled`).
+class _WeatherCard extends ConsumerStatefulWidget {
+  const _WeatherCard({required this.workspace});
+
+  final Workspace workspace;
+
+  @override
+  ConsumerState<_WeatherCard> createState() => _WeatherCardState();
+}
+
+class _WeatherCardState extends ConsumerState<_WeatherCard> {
+  bool _busy = false;
+
+  Workspace get _workspace => widget.workspace;
+
+  @override
+  Widget build(BuildContext context) {
+    final settings =
+        ref.watch(serverDataSettingsNotifierProvider(_workspace)).value;
+    if (settings == null || !settings.supportsWeather) {
+      return const SizedBox.shrink();
+    }
+    final enabled = settings.weatherEnabled!;
+
+    return Card(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Text(context.l10n.weatherForecastTitle,
+                  style: Theme.of(context).textTheme.titleMedium),
+            ),
+            SwitchListTile(
+              title: Text(context.l10n.weatherFetchForLocations),
+              subtitle: Text(context.l10n.weatherFetchSubtitle),
+              value: enabled,
+              onChanged: _busy
+                  ? null
+                  : (value) => _run(() => ref
+                      .read(serverDataSettingsNotifierProvider(_workspace)
+                          .notifier)
+                      .setWeatherEnabled(value)),
+            ),
+            if (enabled) _buildStatus(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatus(BuildContext context) {
+    final statusAsync = ref.watch(serverWeatherStatusProvider(_workspace));
+    return ListTile(
+      leading: const Icon(Icons.cloud_outlined),
+      title: statusAsync.when(
+        data: (status) => Text(context.l10n.weatherRegions(status.regionCount)),
+        loading: () => const LinearProgressIndicator(),
+        error: (e, _) => Text(localizedErrorMessage(e, context.l10n)),
+      ),
+      subtitle: statusAsync.whenOrNull(data: (status) {
+        final last = status.lastFetchedAt;
+        final lines = [
+          last == null
+              ? context.l10n.weatherNeverFetched
+              : context.l10n.weatherLastFetched(DateFormat.yMd(
+                      Localizations.localeOf(context).toString())
+                  .add_Hm()
+                  .format(last)),
+          if (status.failingRegionCount > 0)
+            context.l10n.weatherFailingRegions(status.failingRegionCount),
+        ];
+        return Text(lines.join('\n'));
+      }),
+      trailing: IconButton(
+        icon: _busy
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2))
+            : const Icon(Icons.refresh),
+        tooltip: context.l10n.weatherRefreshNow,
+        onPressed: _busy
+            ? null
+            : () => _run(() async {
+                  await ref.read(adminClientProvider).refreshWeather(
+                        serverUrl: _workspace.serverUrl!,
+                        token: _workspace.token!,
+                      );
+                  ref.invalidate(serverWeatherStatusProvider(_workspace));
+                }),
+      ),
+    );
+  }
+
+  Future<void> _run(Future<void> Function() action) async {
+    setState(() => _busy = true);
+    try {
+      await action();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(localizedErrorMessage(e, context.l10n))));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 }
