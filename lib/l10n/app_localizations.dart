@@ -4550,11 +4550,35 @@ abstract class AppLocalizations {
   /// **'Add your first plant to follow its care, health and activity here.'**
   String get dashboardEmptyBody;
 
-  /// No description provided for @activityEmpty.
+  /// No description provided for @activityRangeMonth.
   ///
   /// In en, this message translates to:
-  /// **'Nothing logged yet. Every care you record shows up here.'**
-  String get activityEmpty;
+  /// **'30 days'**
+  String get activityRangeMonth;
+
+  /// No description provided for @activityRangeQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'3 months'**
+  String get activityRangeQuarter;
+
+  /// No description provided for @activityRangeYear.
+  ///
+  /// In en, this message translates to:
+  /// **'1 year'**
+  String get activityRangeYear;
+
+  /// No description provided for @activityRangeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged in this period.'**
+  String get activityRangeEmpty;
+
+  /// No description provided for @activityTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Waterings: {waterings} · Other: {care}'**
+  String activityTooltip(int waterings, int care);
 }
 
 class _AppLocalizationsDelegate

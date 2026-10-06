@@ -2680,6 +2680,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add your first plant to follow its care, health and activity here.';
 
   @override
-  String get activityEmpty =>
-      'Nothing logged yet. Every care you record shows up here.';
+  String get activityRangeMonth => '30 days';
+
+  @override
+  String get activityRangeQuarter => '3 months';
+
+  @override
+  String get activityRangeYear => '1 year';
+
+  @override
+  String get activityRangeEmpty => 'Nothing logged in this period.';
+
+  @override
+  String activityTooltip(int waterings, int care) {
+    return 'Waterings: $waterings · Other: $care';
+  }
 }

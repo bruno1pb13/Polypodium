@@ -29,13 +29,23 @@ class ActivityChartCard extends ConsumerWidget {
     return DashboardCard(
       title: l10n.activityChartTitle(chartDays),
       trailing: activity.streakDays > 1
-          ? Text(
-              '🔥 ${l10n.activityStreak(activity.streakDays)}',
-              style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w600,
-                color: palette.ink,
-              ),
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.local_fire_department_outlined,
+                    size: 16, color: palette.ink),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    l10n.activityStreak(activity.streakDays),
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: palette.ink,
+                    ),
+                  ),
+                ),
+              ],
             )
           : null,
       child: Column(
@@ -52,8 +62,7 @@ class ActivityChartCard extends ConsumerWidget {
           else ...[
             Semantics(
               container: true,
-              label: l10n.activityChartLabel(
-                  waterings, care, chartDays),
+              label: l10n.activityChartLabel(waterings, care, chartDays),
               child: ExcludeSemantics(
                 child: _ActivityChart(activity: chart, palette: palette),
               ),
@@ -113,7 +122,7 @@ class _ActivityChart extends StatelessWidget {
                 final day = activity[group.x];
                 return BarTooltipItem(
                   '${weekday.format(day.day)} ${dayMonth.format(day.day)}\n'
-                  '💧 ${day.irrigation}   🌱 ${day.care}',
+                  '${context.l10n.activityTooltip(day.irrigation, day.care)}',
                   TextStyle(color: palette.tooltipInk, fontSize: 12),
                 );
               },

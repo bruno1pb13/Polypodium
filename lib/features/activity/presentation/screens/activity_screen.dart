@@ -16,7 +16,7 @@ import '../widgets/activity_chart_card.dart';
 const _maxContentWidth = 720.0;
 
 /// What was logged in the garden: entries per day of the last [chartDays]
-/// days and every entry, grouped by day.
+/// days and the entries of the selected [ActivityRange], grouped by day.
 class ActivityScreen extends ConsumerWidget {
   const ActivityScreen({super.key});
 
@@ -81,20 +81,25 @@ class ActivityScreen extends ConsumerWidget {
                 ),
               ),
               data: (activity) {
-                if (activity.days.isEmpty) return const _EmptyState();
+                final items = <Widget>[
+                  const _RangeSelector(),
+                  ActivityChartCard(activity: activity),
+                  if (activity.days.isEmpty)
+                    const _EmptyRange()
+                  else
+                    for (final day in activity.days) _DayCard(day: day),
+                ];
                 return LayoutBuilder(
                   builder: (context, constraints) => ListView.separated(
                     padding: EdgeInsets.symmetric(
-                      horizontal: ((constraints.maxWidth - _maxContentWidth) /
-                                  2)
-                              .clamp(0, double.infinity) +
-                          16,
+                      horizontal:
+                          ((constraints.maxWidth - _maxContentWidth) / 2)
+                                  .clamp(0, double.infinity) +
+                              16,
                     ).copyWith(top: 8, bottom: 32),
-                    itemCount: activity.days.length + 1,
+                    itemCount: items.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (_, i) => i == 0
-                        ? ActivityChartCard(activity: activity)
-                        : _DayCard(day: activity.days[i - 1]),
+                    itemBuilder: (_, i) => items[i],
                   ),
                 );
               },
@@ -142,10 +147,7 @@ class _DayCard extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 9),
                 child: Row(
                   children: [
-                    ExcludeSemantics(
-                      child: Text(item.entry.type.emoji,
-                          style: const TextStyle(fontSize: 18)),
-                    ),
+                    _EntryTypeIcon(type: item.entry.type),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -195,26 +197,104 @@ class _DayCard extends ConsumerWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+/// Picks how far back the screen loads entries.
+class _RangeSelector extends ConsumerWidget {
+  const _RangeSelector();
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.timeline, size: 64, color: context.glass.tint(0.4)),
-            const SizedBox(height: 16),
-            Text(
-              context.l10n.activityEmpty,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.glass.fg, fontSize: 16),
-            ),
-          ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final range = ref.watch(activityRangeNotifierProvider);
+
+    return SegmentedButton<ActivityRange>(
+      showSelectedIcon: false,
+      style: SegmentedButton.styleFrom(
+        foregroundColor: context.glass.fg,
+        selectedForegroundColor: Theme.of(context).colorScheme.onPrimary,
+        selectedBackgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: context.glass.scrim(0.3),
+        side: BorderSide(color: context.glass.outline),
+      ),
+      segments: [
+        ButtonSegment(
+          value: ActivityRange.month,
+          label: Text(l10n.activityRangeMonth),
         ),
+        ButtonSegment(
+          value: ActivityRange.quarter,
+          label: Text(l10n.activityRangeQuarter),
+        ),
+        ButtonSegment(
+          value: ActivityRange.year,
+          label: Text(l10n.activityRangeYear),
+        ),
+      ],
+      selected: {range},
+      onSelectionChanged: (s) =>
+          ref.read(activityRangeNotifierProvider.notifier).set(s.single),
+    );
+  }
+}
+
+/// Icon of an entry type in a tinted square; waterings in the water hue.
+class _EntryTypeIcon extends ConsumerWidget {
+  final EntryType type;
+
+  const _EntryTypeIcon({required this.type});
+
+  static IconData _icon(EntryType type) => switch (type) {
+        EntryType.irrigation => Icons.water_drop_outlined,
+        EntryType.fertilizer => Icons.eco_outlined,
+        EntryType.pruning => Icons.content_cut,
+        EntryType.observation => Icons.visibility_outlined,
+        EntryType.height => Icons.straighten,
+        EntryType.chlorosis => Icons.invert_colors_outlined,
+        EntryType.pest => Icons.bug_report_outlined,
+        EntryType.pesticide => Icons.science_outlined,
+        EntryType.other => Icons.notes,
+        EntryType.history => Icons.history,
+        EntryType.repotting => Icons.yard_outlined,
+        EntryType.harvest => Icons.shopping_basket_outlined,
+      };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final palette = dashboardPalette(context, ref);
+    final color = type == EntryType.irrigation ? palette.water : palette.growth;
+
+    // The row's text already names the type.
+    return ExcludeSemantics(
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.18),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(_icon(type), size: 18, color: color),
+      ),
+    );
+  }
+}
+
+class _EmptyRange extends ConsumerWidget {
+  const _EmptyRange();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final palette = dashboardPalette(context, ref);
+    return DashboardCard(
+      child: Row(
+        children: [
+          Icon(Icons.timeline, color: palette.inkSoft),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              context.l10n.activityRangeEmpty,
+              style: TextStyle(fontSize: 14, color: palette.ink),
+            ),
+          ),
+        ],
       ),
     );
   }

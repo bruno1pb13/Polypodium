@@ -47,6 +47,22 @@ class GardenActivity {
 /// How many days the activity chart shows.
 const chartDays = 14;
 
+/// How far back the activity screen loads entries. Every range covers the
+/// chart's [chartDays].
+enum ActivityRange {
+  month(30),
+  quarter(90),
+  year(365);
+
+  const ActivityRange(this.days);
+
+  final int days;
+
+  /// Local midnight of the first day in the range ending [now].
+  DateTime start(DateTime now) =>
+      DateTime(now.year, now.month, now.day - (days - 1));
+}
+
 /// Builds the activity of [plants] from [entries] (every plant's, newest
 /// first). Entries of plants not in [plants] are left out.
 GardenActivity buildGardenActivity({
@@ -73,8 +89,7 @@ GardenActivity buildGardenActivity({
 
     final ago = today.difference(day).inDays;
     if (ago < 0) continue;
-    final bucket =
-        e.type == EntryType.irrigation ? irrigationByDay : careByDay;
+    final bucket = e.type == EntryType.irrigation ? irrigationByDay : careByDay;
     bucket[ago] = (bucket[ago] ?? 0) + 1;
   }
 

@@ -27,11 +27,13 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
             ..orderBy([(t) => OrderingTerm.desc(t.date)]))
           .watch();
 
-  /// Active entries of every plant, newest first.
-  Stream<List<EntriesTableData>> watchAll() => (select(entriesTable)
-        ..where((t) => t.deletedAt.isNull())
-        ..orderBy([(t) => OrderingTerm.desc(t.date)]))
-      .watch();
+  /// Active entries of every plant dated on or after [since], newest first.
+  Stream<List<EntriesTableData>> watchSince(DateTime since) =>
+      (select(entriesTable)
+            ..where((t) =>
+                t.date.isBiggerOrEqualValue(since) & t.deletedAt.isNull())
+            ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+          .watch();
 
   /// Active entries of every plant whose type is one of [types], newest
   /// first.

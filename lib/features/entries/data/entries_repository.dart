@@ -33,9 +33,10 @@ class EntriesRepository {
       _dao.watchByPlantWithPhotos(plantId).map(
           (rows) => [for (final (row, photos) in rows) _fromRow(row, photos)]);
 
-  /// Entries of every plant, newest first, without their extra photos.
-  Stream<List<EntryModel>> watchAll() => _dao
-      .watchAll()
+  /// Entries of every plant dated on or after [since], newest first,
+  /// without their extra photos.
+  Stream<List<EntryModel>> watchSince(DateTime since) => _dao
+      .watchSince(since)
       .map((rows) => [for (final row in rows) _fromRow(row, const [])]);
 
   /// Entries of every plant of one of [types], newest first, without their

@@ -31,8 +31,7 @@ void main() {
       );
 
   var nextId = 0;
-  EntryModel entry(String plantId, EntryType type, DateTime date) =>
-      EntryModel(
+  EntryModel entry(String plantId, EntryType type, DateTime date) => EntryModel(
         id: 'e${nextId++}',
         plantId: plantId,
         date: date,
@@ -62,8 +61,7 @@ void main() {
     expect(activity.chart[chartDays - 3].care, 1);
   });
 
-  test('groups every entry by day, newest first, skipping unknown plants',
-      () {
+  test('groups every entry by day, newest first, skipping unknown plants', () {
     final activity = build([
       entry('a', EntryType.fertilizer, daysAgo(0, hour: 9)),
       entry('a', EntryType.irrigation, daysAgo(0, hour: 8)),

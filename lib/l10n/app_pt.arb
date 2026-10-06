@@ -775,5 +775,9 @@
   "activityYesterday": "Ontem",
   "dashboardEmptyTitle": "Boas-vindas ao seu jardim",
   "dashboardEmptyBody": "Cadastre sua primeira planta para acompanhar cuidados, saúde e atividade aqui.",
-  "activityEmpty": "Nenhum registro ainda. Cada cuidado registrado aparece aqui."
+  "activityRangeMonth": "30 dias",
+  "activityRangeQuarter": "3 meses",
+  "activityRangeYear": "1 ano",
+  "activityRangeEmpty": "Nenhum registro nesse período.",
+  "activityTooltip": "Regas: {waterings} · Outros: {care}"
 }

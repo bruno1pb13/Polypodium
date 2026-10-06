@@ -2683,6 +2683,19 @@ class AppLocalizationsPt extends AppLocalizations {
       'Cadastre sua primeira planta para acompanhar cuidados, saúde e atividade aqui.';
 
   @override
-  String get activityEmpty =>
-      'Nenhum registro ainda. Cada cuidado registrado aparece aqui.';
+  String get activityRangeMonth => '30 dias';
+
+  @override
+  String get activityRangeQuarter => '3 meses';
+
+  @override
+  String get activityRangeYear => '1 ano';
+
+  @override
+  String get activityRangeEmpty => 'Nenhum registro nesse período.';
+
+  @override
+  String activityTooltip(int waterings, int care) {
+    return 'Regas: $waterings · Outros: $care';
+  }
 }

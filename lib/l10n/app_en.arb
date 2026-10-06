@@ -1333,5 +1333,10 @@
   "activityYesterday": "Yesterday",
   "dashboardEmptyTitle": "Welcome to your garden",
   "dashboardEmptyBody": "Add your first plant to follow its care, health and activity here.",
-  "activityEmpty": "Nothing logged yet. Every care you record shows up here."
+  "activityRangeMonth": "30 days",
+  "activityRangeQuarter": "3 months",
+  "activityRangeYear": "1 year",
+  "activityRangeEmpty": "Nothing logged in this period.",
+  "activityTooltip": "Waterings: {waterings} · Other: {care}",
+  "@activityTooltip": {"placeholders": {"waterings": {"type": "int"}, "care": {"type": "int"}}}
 }
