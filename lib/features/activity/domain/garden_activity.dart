@@ -1,20 +1,20 @@
-import '../../../core/enums.dart';
 import '../../entries/domain/entry_model.dart';
 import '../../plants/domain/plant_model.dart';
 
-/// Entries logged on one calendar day, split into waterings and other care.
+/// How many entries were logged on one calendar day.
 class DayActivity {
   final DateTime day;
-  final int irrigation;
-  final int care;
+  final int count;
+
+  /// Shade of the day in the heatmap: 0 for no entries, then 1–4 as
+  /// [count] approaches the busiest day of the range.
+  final int level;
 
   const DayActivity({
     required this.day,
-    required this.irrigation,
-    required this.care,
+    required this.count,
+    required this.level,
   });
-
-  int get total => irrigation + care;
 }
 
 /// An entry together with the plant it belongs to.
@@ -23,12 +23,11 @@ typedef ActivityEntry = ({EntryModel entry, PlantWithSpecies plant});
 /// The entries of one calendar day, newest first.
 typedef ActivityDay = ({DateTime day, List<ActivityEntry> entries});
 
-/// The garden's logging history: a per-day chart of the last [chartDays]
-/// days, the streak and every entry grouped by day.
+/// The garden's logging history within a range of days: entries per day for
+/// the heatmap, the streak and every entry grouped by day.
 class GardenActivity {
-  /// One item per day of the last [chartDays] days, oldest first; the last
-  /// one is today.
-  final List<DayActivity> chart;
+  /// One item per day of the range, oldest first; the last one is today.
+  final List<DayActivity> heatmap;
 
   /// Consecutive days with at least one entry, ending today (or yesterday,
   /// while nothing was logged today yet).
@@ -38,17 +37,22 @@ class GardenActivity {
   final List<ActivityDay> days;
 
   const GardenActivity({
-    required this.chart,
+    required this.heatmap,
     required this.streakDays,
     required this.days,
   });
+
+  /// Entries in the range.
+  int get totalEntries => heatmap.fold(0, (sum, d) => sum + d.count);
+
+  /// Days of the range with at least one entry.
+  int get activeDays => heatmap.where((d) => d.count > 0).length;
 }
 
-/// How many days the activity chart shows.
-const chartDays = 14;
+/// How many shades above "no entries" the heatmap uses.
+const heatmapLevels = 4;
 
-/// How far back the activity screen loads entries. Every range covers the
-/// chart's [chartDays].
+/// How far back the activity screen loads entries.
 enum ActivityRange {
   month(30),
   quarter(90),
@@ -63,19 +67,20 @@ enum ActivityRange {
       DateTime(now.year, now.month, now.day - (days - 1));
 }
 
-/// Builds the activity of [plants] from [entries] (every plant's, newest
-/// first). Entries of plants not in [plants] are left out.
+/// Builds the activity of [plants] over the last [rangeDays] days from
+/// [entries] (every plant's, newest first). Entries of plants not in
+/// [plants] are left out.
 GardenActivity buildGardenActivity({
   required List<PlantWithSpecies> plants,
   required List<EntryModel> entries,
+  required int rangeDays,
   DateTime? now,
 }) {
   final clock = now ?? DateTime.now();
   final today = DateTime(clock.year, clock.month, clock.day);
   final byId = {for (final p in plants) p.plant.id: p};
 
-  final irrigationByDay = <int, int>{};
-  final careByDay = <int, int>{};
+  final countByDay = <int, int>{};
   final days = <ActivityDay>[];
   for (final e in entries) {
     final plant = byId[e.plantId];
@@ -87,26 +92,34 @@ GardenActivity buildGardenActivity({
     }
     days.last.entries.add((entry: e, plant: plant));
 
-    final ago = today.difference(day).inDays;
-    if (ago < 0) continue;
-    final bucket = e.type == EntryType.irrigation ? irrigationByDay : careByDay;
-    bucket[ago] = (bucket[ago] ?? 0) + 1;
+    // On UTC midnights so a DST change doesn't shave a day off.
+    final ago = DateTime.utc(today.year, today.month, today.day)
+        .difference(DateTime.utc(day.year, day.month, day.day))
+        .inDays;
+    if (ago >= 0) countByDay[ago] = (countByDay[ago] ?? 0) + 1;
   }
 
-  bool loggedOn(int ago) =>
-      (irrigationByDay[ago] ?? 0) + (careByDay[ago] ?? 0) > 0;
+  bool loggedOn(int ago) => (countByDay[ago] ?? 0) > 0;
   var streak = 0;
   for (var ago = loggedOn(0) ? 0 : 1; loggedOn(ago); ago++) {
     streak++;
   }
 
+  var busiest = 0;
+  for (var ago = 0; ago < rangeDays; ago++) {
+    final count = countByDay[ago] ?? 0;
+    if (count > busiest) busiest = count;
+  }
+  int level(int count) =>
+      count == 0 ? 0 : (count * heatmapLevels / busiest).ceil();
+
   return GardenActivity(
-    chart: [
-      for (var ago = chartDays - 1; ago >= 0; ago--)
+    heatmap: [
+      for (var ago = rangeDays - 1; ago >= 0; ago--)
         DayActivity(
           day: DateTime(today.year, today.month, today.day - ago),
-          irrigation: irrigationByDay[ago] ?? 0,
-          care: careByDay[ago] ?? 0,
+          count: countByDay[ago] ?? 0,
+          level: level(countByDay[ago] ?? 0),
         ),
     ],
     streakDays: streak,

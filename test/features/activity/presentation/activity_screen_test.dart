@@ -75,7 +75,7 @@ void main() {
     entry('e1', EntryType.irrigation, daysAgo(0, hour: 8)),
     entry('e2', EntryType.fertilizer, daysAgo(1), note: 'NPK 10-10-10'),
     entry('e3', EntryType.pruning, daysAgo(2)),
-  ]);
+  ], rangeDays: 30);
 
   Future<void> pump(WidgetTester tester, GardenActivity activity) async {
     tester.view.physicalSize = const Size(420, 900);
@@ -103,11 +103,10 @@ void main() {
     await pump(tester, activity);
 
     expect(find.text('Atividade'), findsOneWidget);
-    expect(find.text('Últimos 14 dias'), findsOneWidget);
+    expect(find.text('3 registros'), findsOneWidget);
+    expect(find.text('Menos'), findsOneWidget);
     expect(find.text('3 dias seguidos'), findsOneWidget);
     expect(find.text('30 dias'), findsOneWidget);
-    expect(find.text('Regas (1)'), findsOneWidget);
-    expect(find.text('Outros cuidados (2)'), findsOneWidget);
     expect(find.text('Hoje'), findsWidgets);
     expect(find.text('Ontem'), findsOneWidget);
     expect(find.text('08:00'), findsOneWidget);
@@ -115,7 +114,8 @@ void main() {
   });
 
   testWidgets('says when the period has no entries', (tester) async {
-    await pump(tester, buildGardenActivity(plants: [hera], entries: const []));
+    await pump(tester,
+        buildGardenActivity(plants: [hera], entries: const [], rangeDays: 30));
 
     expect(find.text('Nenhum registro nesse período.'), findsOneWidget);
   });
@@ -146,6 +146,22 @@ void main() {
     await tester.tap(find.text('1 ano'));
     await tester.pumpAndSettle();
     expect(repo.since.last, DateTime(today.year, today.month, today.day - 364));
+  });
+
+  testWidgets('a year scrolls the heatmap, showing today first',
+      (tester) async {
+    await pump(
+        tester,
+        buildGardenActivity(plants: [
+          hera
+        ], entries: [
+          entry('e1', EntryType.irrigation, daysAgo(0)),
+        ], rangeDays: 365));
+
+    final scroll = tester.state<ScrollableState>(find.byWidgetPredicate(
+        (w) => w is Scrollable && w.axisDirection == AxisDirection.left));
+    expect(scroll.position.pixels, 0);
+    expect(scroll.position.maxScrollExtent, greaterThan(0));
   });
 
   group('accessibility', () {

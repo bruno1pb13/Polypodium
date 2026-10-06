@@ -28,7 +28,12 @@ Stream<List<EntryModel>> gardenEntriesInRange(Ref ref) {
 /// The garden's logging history, rebuilt as plants and entries change.
 @riverpod
 Future<GardenActivity> gardenActivity(Ref ref) async {
+  final range = ref.watch(activityRangeNotifierProvider);
   final plants = ref.watch(plantsWithSpeciesProvider.future);
   final entries = ref.watch(gardenEntriesInRangeProvider.future);
-  return buildGardenActivity(plants: await plants, entries: await entries);
+  return buildGardenActivity(
+    plants: await plants,
+    entries: await entries,
+    rangeDays: range.days,
+  );
 }

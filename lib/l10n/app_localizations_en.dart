@@ -2634,11 +2634,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navActivity => 'Activity';
 
   @override
-  String activityChartTitle(int days) {
-    return 'Last $days days';
-  }
-
-  @override
   String activityStreak(int days) {
     String _temp0 = intl.Intl.pluralLogic(
       days,
@@ -2648,20 +2643,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get activityWaterings => 'Waterings';
-
-  @override
-  String get activityOtherCare => 'Other care';
-
-  @override
-  String activityChartLabel(int waterings, int care, int days) {
-    return '$waterings waterings and $care other entries in the last $days days';
-  }
-
-  @override
-  String get activityChartEmpty => 'Nothing logged on these days.';
 
   @override
   String get dashboardYourGarden => 'Your garden';
@@ -2692,7 +2673,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activityRangeEmpty => 'Nothing logged in this period.';
 
   @override
-  String activityTooltip(int waterings, int care) {
-    return 'Waterings: $waterings · Other: $care';
+  String activityHeatmapTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries',
+      one: '1 entry',
+      zero: 'No entries',
+    );
+    return '$_temp0';
   }
+
+  @override
+  String activityHeatmapLabel(int count, int days, int range) {
+    return '$count entries on $days of the last $range days';
+  }
+
+  @override
+  String activityDayTooltip(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries',
+      one: '1 entry',
+      zero: 'No entries',
+    );
+    return '$_temp0 · $date';
+  }
+
+  @override
+  String get activityLess => 'Less';
+
+  @override
+  String get activityMore => 'More';
 }

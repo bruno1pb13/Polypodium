@@ -4484,41 +4484,11 @@ abstract class AppLocalizations {
   /// **'Activity'**
   String get navActivity;
 
-  /// No description provided for @activityChartTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Last {days} days'**
-  String activityChartTitle(int days);
-
   /// No description provided for @activityStreak.
   ///
   /// In en, this message translates to:
   /// **'{days, plural, one{1 day in a row} other{{days} days in a row}}'**
   String activityStreak(int days);
-
-  /// No description provided for @activityWaterings.
-  ///
-  /// In en, this message translates to:
-  /// **'Waterings'**
-  String get activityWaterings;
-
-  /// No description provided for @activityOtherCare.
-  ///
-  /// In en, this message translates to:
-  /// **'Other care'**
-  String get activityOtherCare;
-
-  /// No description provided for @activityChartLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'{waterings} waterings and {care} other entries in the last {days} days'**
-  String activityChartLabel(int waterings, int care, int days);
-
-  /// No description provided for @activityChartEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing logged on these days.'**
-  String get activityChartEmpty;
 
   /// No description provided for @dashboardYourGarden.
   ///
@@ -4574,11 +4544,35 @@ abstract class AppLocalizations {
   /// **'Nothing logged in this period.'**
   String get activityRangeEmpty;
 
-  /// No description provided for @activityTooltip.
+  /// No description provided for @activityHeatmapTitle.
   ///
   /// In en, this message translates to:
-  /// **'Waterings: {waterings} · Other: {care}'**
-  String activityTooltip(int waterings, int care);
+  /// **'{count, plural, =0{No entries} one{1 entry} other{{count} entries}}'**
+  String activityHeatmapTitle(int count);
+
+  /// No description provided for @activityHeatmapLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries on {days} of the last {range} days'**
+  String activityHeatmapLabel(int count, int days, int range);
+
+  /// No description provided for @activityDayTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No entries} one{1 entry} other{{count} entries}} · {date}'**
+  String activityDayTooltip(int count, String date);
+
+  /// No description provided for @activityLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get activityLess;
+
+  /// No description provided for @activityMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get activityMore;
 }
 
 class _AppLocalizationsDelegate

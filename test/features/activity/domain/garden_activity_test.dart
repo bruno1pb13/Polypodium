@@ -42,23 +42,30 @@ void main() {
   GardenActivity build(List<EntryModel> entries) => buildGardenActivity(
         plants: [plant('a')],
         entries: entries,
+        rangeDays: 30,
         now: now,
       );
 
-  test('charts the last days, waterings apart from other care', () {
+  test('maps entries per day over the range, shaded by the busiest day', () {
     final activity = build([
       entry('a', EntryType.fertilizer, daysAgo(0, hour: 9)),
       entry('a', EntryType.irrigation, daysAgo(0, hour: 8)),
+      entry('a', EntryType.irrigation, daysAgo(0, hour: 7)),
+      entry('a', EntryType.irrigation, daysAgo(0, hour: 6)),
       entry('a', EntryType.pruning, daysAgo(2)),
       entry('a', EntryType.irrigation, daysAgo(20)),
     ]);
 
-    expect(activity.chart, hasLength(chartDays));
-    expect(activity.chart.first.day, daysAgo(chartDays - 1, hour: 0));
-    expect(activity.chart.last.day, today);
-    expect(activity.chart.last.irrigation, 1);
-    expect(activity.chart.last.care, 1);
-    expect(activity.chart[chartDays - 3].care, 1);
+    expect(activity.heatmap, hasLength(30));
+    expect(activity.heatmap.first.day, daysAgo(29, hour: 0));
+    expect(activity.heatmap.last.day, today);
+    expect(activity.heatmap.last.count, 4);
+    expect(activity.heatmap.last.level, heatmapLevels);
+    expect(activity.heatmap[27].count, 1);
+    expect(activity.heatmap[27].level, 1);
+    expect(activity.heatmap[28].level, 0);
+    expect(activity.totalEntries, 6);
+    expect(activity.activeDays, 3);
   });
 
   test('groups every entry by day, newest first, skipping unknown plants', () {

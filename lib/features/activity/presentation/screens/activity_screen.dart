@@ -10,13 +10,13 @@ import '../../../dashboard/presentation/widgets/dashboard_card.dart';
 import '../../../plants/presentation/screens/plant_detail_screen.dart';
 import '../../domain/garden_activity.dart';
 import '../providers/activity_providers.dart';
-import '../widgets/activity_chart_card.dart';
+import '../widgets/activity_heatmap_card.dart';
 
 /// Content wider than this is centered instead of stretched.
 const _maxContentWidth = 720.0;
 
-/// What was logged in the garden: entries per day of the last [chartDays]
-/// days and the entries of the selected [ActivityRange], grouped by day.
+/// What was logged in the garden within the selected [ActivityRange]: a
+/// heatmap of entries per day and the entries themselves, grouped by day.
 class ActivityScreen extends ConsumerWidget {
   const ActivityScreen({super.key});
 
@@ -83,7 +83,7 @@ class ActivityScreen extends ConsumerWidget {
               data: (activity) {
                 final items = <Widget>[
                   const _RangeSelector(),
-                  ActivityChartCard(activity: activity),
+                  ActivityHeatmapCard(activity: activity),
                   if (activity.days.isEmpty)
                     const _EmptyRange()
                   else
