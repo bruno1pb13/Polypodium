@@ -67,10 +67,13 @@ pw.Widget _label(
 ) {
   // Also the QR code's quiet zone, about 4 modules.
   final padding = 4 * PdfPageFormat.mm;
-  final qrSize =
-      [height - 2 * padding, width * 0.42].reduce((a, b) => a < b ? a : b);
   final large = options.preset == LabelSheetPreset.a4x10;
   final body = large ? 9.0 : 7.0;
+  final codeSize = body + 1;
+  // The short code goes under the QR code.
+  final codeHeight = codeSize * 1.4 + 2;
+  final qrSize = [height - 2 * padding - codeHeight, width * 0.42]
+      .reduce((a, b) => a < b ? a : b);
 
   pw.Widget line(String? text,
       {double? size,
@@ -101,13 +104,27 @@ pw.Widget _label(
     ),
     child: pw.Row(
       children: [
-        pw.BarcodeWidget(
-          barcode: pw.Barcode.qrCode(
-              errorCorrectLevel: pw.BarcodeQRCorrectionLevel.medium),
-          data: label.link,
-          width: qrSize,
-          height: qrSize,
-          drawText: false,
+        pw.Column(
+          mainAxisAlignment: pw.MainAxisAlignment.center,
+          children: [
+            pw.BarcodeWidget(
+              barcode: pw.Barcode.qrCode(
+                  errorCorrectLevel: pw.BarcodeQRCorrectionLevel.medium),
+              data: label.link,
+              width: qrSize,
+              height: qrSize,
+              drawText: false,
+            ),
+            pw.SizedBox(height: 2),
+            pw.Text(
+              '#${label.shortCode}',
+              style: pw.TextStyle(
+                font: pw.Font.courierBold(),
+                fontSize: codeSize,
+                lineSpacing: 0,
+              ),
+            ),
+          ],
         ),
         pw.SizedBox(width: padding),
         pw.Expanded(

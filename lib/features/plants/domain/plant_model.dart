@@ -56,6 +56,10 @@ class PlantModel {
 
   bool get isActive => status == PlantStatus.active;
 
+  /// Printed on the plant's label and shown on its screen, so it can be
+  /// searched for without scanning the QR code. See [plantShortCode].
+  String get shortCode => plantShortCode(id);
+
   PlantModel copyWith({
     String? id,
     String? speciesId,
@@ -207,4 +211,25 @@ class PlantWithSpecies {
     final daysSince = calendarDaysBetween(lastApplied);
     return daysSince < pesticideActiveControlWindowDays;
   }
+}
+
+/// Number of characters in [plantShortCode].
+const plantShortCodeLength = 6;
+
+/// A plant's short code: the first [plantShortCodeLength] characters of its
+/// id (hex digits, for a UUID), uppercase, e.g. `3F9A1C`. Derived from the
+/// id, so it is the same on every device and needs no storage or sync.
+String plantShortCode(String id) {
+  final compact = id.replaceAll('-', '').toUpperCase();
+  return compact.length <= plantShortCodeLength
+      ? compact
+      : compact.substring(0, plantShortCodeLength);
+}
+
+/// Whether [query] (already normalized: lowercase) looks for the plant with
+/// [shortCode]. A leading `#` is optional; at least 4 characters are
+/// needed, so short queries keep matching names only.
+bool matchesPlantShortCode(String query, String shortCode) {
+  final code = query.trim().replaceFirst('#', '');
+  return code.length >= 4 && shortCode.toLowerCase().startsWith(code);
 }

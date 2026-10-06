@@ -7,6 +7,7 @@ import '../../species/domain/species_model.dart';
 class PlantLabel {
   const PlantLabel({
     required this.plantId,
+    required this.shortCode,
     required this.nickname,
     this.popularName,
     this.scientificName,
@@ -21,6 +22,7 @@ class PlantLabel {
   }) =>
       PlantLabel(
         plantId: plant.id,
+        shortCode: plant.shortCode,
         nickname: plant.nickname,
         popularName: species?.popularName,
         scientificName: species?.scientificName,
@@ -29,6 +31,9 @@ class PlantLabel {
       );
 
   final String plantId;
+
+  /// Printed under the names, for finding the plant without the QR code.
+  final String shortCode;
   final String nickname;
   final String? popularName;
   final String? scientificName;

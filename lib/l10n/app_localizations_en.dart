@@ -2444,6 +2444,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labelPlantNotFound => 'Plant not found in this space';
 
   @override
+  String plantShortCode(String code) {
+    return 'Code $code';
+  }
+
+  @override
+  String get plantShortCodeHint =>
+      'Printed on the label. Type it in the plant search to find this plant without the QR code';
+
+  @override
   String get gardenMembers => 'Garden members';
 
   @override

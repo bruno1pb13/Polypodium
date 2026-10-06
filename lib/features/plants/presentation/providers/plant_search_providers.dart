@@ -62,7 +62,8 @@ Future<List<PlantWithSpecies>> filteredSortedPlants(Ref ref) async {
     filtered = filtered.where((p) =>
         p.plant.nickname.normalize().contains(query) ||
         p.species.popularName.normalize().contains(query) ||
-        p.species.scientificName.normalize().contains(query));
+        p.species.scientificName.normalize().contains(query) ||
+        matchesPlantShortCode(query, p.plant.shortCode));
   }
 
   final sorted = filtered.toList();

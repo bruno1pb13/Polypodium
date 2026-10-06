@@ -8,6 +8,7 @@ List<PlantLabel> _labels(int count) => [
       for (var i = 0; i < count; i++)
         PlantLabel(
           plantId: 'plant-$i',
+          shortCode: 'AB12C$i',
           nickname: 'Samambaia $i',
           popularName: 'Samambaia-de-metro',
           scientificName: 'Nephrolepis exaltata',
@@ -59,6 +60,8 @@ void main() {
     expect(full, contains('Nephrolepis exaltata'));
     expect(full, contains('Varanda'));
     expect(full, contains('Desde 12/3/2024'));
+    expect(full, contains('#AB12C0'));
+    expect(full, contains('#AB12C1'));
 
     final bare = _text(await _build(labels,
         const LabelOptions(showLocation: false, showAcquisitionDate: false)));
@@ -71,11 +74,12 @@ void main() {
     final pdf = _text(await _build([
       PlantLabel(
         plantId: 'p',
+        shortCode: 'P',
         nickname: 'Jiboia 🌿 “da sala”',
         acquisitionDate: DateTime(2024),
       ),
     ], const LabelOptions()));
-    expect(pdf, 'Jiboia "da sala"');
+    expect(pdf, '#P Jiboia "da sala"');
   });
 
   test('pdfSafeText keeps Portuguese accents', () {

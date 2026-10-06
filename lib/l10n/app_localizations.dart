@@ -4190,6 +4190,18 @@ abstract class AppLocalizations {
   /// **'Plant not found in this space'**
   String get labelPlantNotFound;
 
+  /// No description provided for @plantShortCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code {code}'**
+  String plantShortCode(String code);
+
+  /// No description provided for @plantShortCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Printed on the label. Type it in the plant search to find this plant without the QR code'**
+  String get plantShortCodeHint;
+
   /// No description provided for @gardenMembers.
   ///
   /// In en, this message translates to:
