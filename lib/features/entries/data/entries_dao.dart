@@ -35,6 +35,22 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
             ..orderBy([(t) => OrderingTerm.desc(t.date)]))
           .watch();
 
+  /// Plant and date of every active entry dated on or after [since]: just
+  /// what a per-day count needs, without loading whole rows.
+  Stream<List<(String, DateTime)>> watchDatesSince(DateTime since) {
+    final query = selectOnly(entriesTable)
+      ..addColumns([entriesTable.plantId, entriesTable.date])
+      ..where(entriesTable.date.isBiggerOrEqualValue(since) &
+          entriesTable.deletedAt.isNull());
+    return query.watch().map((rows) => [
+          for (final row in rows)
+            (
+              row.read(entriesTable.plantId)!,
+              row.read(entriesTable.date)!,
+            ),
+        ]);
+  }
+
   /// Active entries of every plant whose type is one of [types], newest
   /// first.
   Stream<List<EntriesTableData>> watchOfTypes(Iterable<EntryType> types) =>

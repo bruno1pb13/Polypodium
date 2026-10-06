@@ -85,6 +85,9 @@ class EntryModel {
 
 const Object _sentinel = Object();
 
+/// When an entry of a plant was logged, without the rest of the entry.
+typedef EntryDate = ({String plantId, DateTime date});
+
 /// One photo of an entry, identified by an id that stays the same on every
 /// device (its local [path] doesn't).
 class EntryPhoto {

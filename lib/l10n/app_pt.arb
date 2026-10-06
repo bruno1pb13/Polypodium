@@ -774,7 +774,7 @@
   "activityRangeQuarter": "3 meses",
   "activityRangeYear": "1 ano",
   "activityRangeEmpty": "Nenhum registro nesse período.",
-  "activityHeatmapTitle": "{count, plural, =0{Nenhum registro} one{1 registro} other{{count} registros}}",
+  "activityHeatmapTitle": "{count, plural, =0{Nenhum registro no último ano} one{1 registro no último ano} other{{count} registros no último ano}}",
   "activityHeatmapLabel": "{count} registros em {days} dos últimos {range} dias",
   "activityDayTooltip": "{count, plural, =0{Nenhum registro} one{1 registro} other{{count} registros}} · {date}",
   "activityLess": "Menos",

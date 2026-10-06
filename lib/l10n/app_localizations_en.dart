@@ -2677,9 +2677,9 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count entries',
-      one: '1 entry',
-      zero: 'No entries',
+      other: '$count entries in the last year',
+      one: '1 entry in the last year',
+      zero: 'No entries in the last year',
     );
     return '$_temp0';
   }

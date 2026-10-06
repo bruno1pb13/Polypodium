@@ -1330,7 +1330,7 @@
   "activityRangeQuarter": "3 months",
   "activityRangeYear": "1 year",
   "activityRangeEmpty": "Nothing logged in this period.",
-  "activityHeatmapTitle": "{count, plural, =0{No entries} one{1 entry} other{{count} entries}}",
+  "activityHeatmapTitle": "{count, plural, =0{No entries in the last year} one{1 entry in the last year} other{{count} entries in the last year}}",
   "@activityHeatmapTitle": {"placeholders": {"count": {"type": "int"}}},
   "activityHeatmapLabel": "{count} entries on {days} of the last {range} days",
   "@activityHeatmapLabel": {"placeholders": {"count": {"type": "int"}, "days": {"type": "int"}, "range": {"type": "int"}}},

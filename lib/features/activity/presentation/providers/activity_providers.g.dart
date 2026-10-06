@@ -106,6 +106,48 @@ final class GardenEntriesInRangeProvider extends $FunctionalProvider<
 String _$gardenEntriesInRangeHash() =>
     r'4fe0976f10eb6012472b7925a9b1f05e79dfbaaf';
 
+/// Plant and date of every entry of the last [heatmapDays] days, for the
+/// heatmap.
+
+@ProviderFor(gardenEntryDates)
+final gardenEntryDatesProvider = GardenEntryDatesProvider._();
+
+/// Plant and date of every entry of the last [heatmapDays] days, for the
+/// heatmap.
+
+final class GardenEntryDatesProvider extends $FunctionalProvider<
+        AsyncValue<List<EntryDate>>, List<EntryDate>, Stream<List<EntryDate>>>
+    with $FutureModifier<List<EntryDate>>, $StreamProvider<List<EntryDate>> {
+  /// Plant and date of every entry of the last [heatmapDays] days, for the
+  /// heatmap.
+  GardenEntryDatesProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'gardenEntryDatesProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$gardenEntryDatesHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<EntryDate>> $createElement(
+          $ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<EntryDate>> create(Ref ref) {
+    return gardenEntryDates(ref);
+  }
+}
+
+String _$gardenEntryDatesHash() => r'6ee4704966d830233fbb0f1bf5d4d6568174e759';
+
 /// The garden's logging history, rebuilt as plants and entries change.
 
 @ProviderFor(gardenActivity)
@@ -143,4 +185,4 @@ final class GardenActivityProvider extends $FunctionalProvider<
   }
 }
 
-String _$gardenActivityHash() => r'df1a3f8b1d18fcfe4151ea05cb28e55ad056c4ea';
+String _$gardenActivityHash() => r'37dbfd77969da9ae782dd09b479cab9b5ed01a29';

@@ -39,14 +39,18 @@ void main() {
         createdAt: date,
       );
 
+  List<EntryDate> datesOf(List<EntryModel> entries) => [
+        for (final e in entries) (plantId: e.plantId, date: e.date),
+      ];
+
   GardenActivity build(List<EntryModel> entries) => buildGardenActivity(
         plants: [plant('a')],
         entries: entries,
-        rangeDays: 30,
+        entryDates: datesOf(entries),
         now: now,
       );
 
-  test('maps entries per day over the range, shaded by the busiest day', () {
+  test('maps a year of entries per day, shaded by the busiest day', () {
     final activity = build([
       entry('a', EntryType.fertilizer, daysAgo(0, hour: 9)),
       entry('a', EntryType.irrigation, daysAgo(0, hour: 8)),
@@ -56,16 +60,35 @@ void main() {
       entry('a', EntryType.irrigation, daysAgo(20)),
     ]);
 
-    expect(activity.heatmap, hasLength(30));
-    expect(activity.heatmap.first.day, daysAgo(29, hour: 0));
+    expect(activity.heatmap, hasLength(heatmapDays));
+    expect(activity.heatmap.first.day, daysAgo(heatmapDays - 1, hour: 0));
     expect(activity.heatmap.last.day, today);
     expect(activity.heatmap.last.count, 4);
     expect(activity.heatmap.last.level, heatmapLevels);
-    expect(activity.heatmap[27].count, 1);
-    expect(activity.heatmap[27].level, 1);
-    expect(activity.heatmap[28].level, 0);
+    expect(activity.heatmap[heatmapDays - 3].count, 1);
+    expect(activity.heatmap[heatmapDays - 3].level, 1);
+    expect(activity.heatmap[heatmapDays - 2].level, 0);
     expect(activity.totalEntries, 6);
     expect(activity.activeDays, 3);
+  });
+
+  test('the heatmap and streak come from the dates, not the listed range', () {
+    final older = [
+      entry('a', EntryType.irrigation, daysAgo(0)),
+      entry('a', EntryType.irrigation, daysAgo(1)),
+      entry('a', EntryType.irrigation, daysAgo(200)),
+    ];
+    final activity = buildGardenActivity(
+      plants: [plant('a')],
+      entries: const [],
+      entryDates: datesOf(older),
+      now: now,
+    );
+
+    expect(activity.days, isEmpty);
+    expect(activity.totalEntries, 3);
+    expect(activity.heatmap[heatmapDays - 201].count, 1);
+    expect(activity.streakDays, 2);
   });
 
   test('groups every entry by day, newest first, skipping unknown plants', () {

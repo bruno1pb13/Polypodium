@@ -39,6 +39,12 @@ class EntriesRepository {
       .watchSince(since)
       .map((rows) => [for (final row in rows) _fromRow(row, const [])]);
 
+  /// Plant and date of every entry dated on or after [since].
+  Stream<List<EntryDate>> watchDatesSince(DateTime since) =>
+      _dao.watchDatesSince(since).map((rows) => [
+            for (final (plantId, date) in rows) (plantId: plantId, date: date),
+          ]);
+
   /// Entries of every plant of one of [types], newest first, without their
   /// extra photos.
   Stream<List<EntryModel>> watchOfTypes(Iterable<EntryType> types) => _dao

@@ -4547,7 +4547,7 @@ abstract class AppLocalizations {
   /// No description provided for @activityHeatmapTitle.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{No entries} one{1 entry} other{{count} entries}}'**
+  /// **'{count, plural, =0{No entries in the last year} one{1 entry in the last year} other{{count} entries in the last year}}'**
   String activityHeatmapTitle(int count);
 
   /// No description provided for @activityHeatmapLabel.

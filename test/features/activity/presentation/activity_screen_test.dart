@@ -24,6 +24,14 @@ class _FakeTransparencyNotifier extends TransparencyEnabledNotifier {
 class _FakeEntriesRepository implements EntriesRepository {
   final since = <DateTime>[];
 
+  final datesSince = <DateTime>[];
+
+  @override
+  Stream<List<EntryDate>> watchDatesSince(DateTime since) {
+    datesSince.add(since);
+    return Stream.value(const []);
+  }
+
   @override
   Stream<List<EntryModel>> watchSince(DateTime since) {
     this.since.add(since);
@@ -69,13 +77,19 @@ void main() {
         createdAt: date,
       );
 
-  final activity = buildGardenActivity(plants: [
-    hera
-  ], entries: [
+  GardenActivity activityOf(List<EntryModel> entries) => buildGardenActivity(
+        plants: [hera],
+        entries: entries,
+        entryDates: [
+          for (final e in entries) (plantId: e.plantId, date: e.date),
+        ],
+      );
+
+  final activity = activityOf([
     entry('e1', EntryType.irrigation, daysAgo(0, hour: 8)),
     entry('e2', EntryType.fertilizer, daysAgo(1), note: 'NPK 10-10-10'),
     entry('e3', EntryType.pruning, daysAgo(2)),
-  ], rangeDays: 30);
+  ]);
 
   Future<void> pump(WidgetTester tester, GardenActivity activity) async {
     tester.view.physicalSize = const Size(420, 900);
@@ -103,7 +117,7 @@ void main() {
     await pump(tester, activity);
 
     expect(find.text('Atividade'), findsOneWidget);
-    expect(find.text('3 registros'), findsOneWidget);
+    expect(find.text('3 registros no último ano'), findsOneWidget);
     expect(find.text('Menos'), findsOneWidget);
     expect(find.text('3 dias seguidos'), findsOneWidget);
     expect(find.text('30 dias'), findsOneWidget);
@@ -114,8 +128,10 @@ void main() {
   });
 
   testWidgets('says when the period has no entries', (tester) async {
-    await pump(tester,
-        buildGardenActivity(plants: [hera], entries: const [], rangeDays: 30));
+    await pump(
+        tester,
+        buildGardenActivity(
+            plants: [hera], entries: const [], entryDates: const []));
 
     expect(find.text('Nenhum registro nesse período.'), findsOneWidget);
   });
@@ -146,17 +162,13 @@ void main() {
     await tester.tap(find.text('1 ano'));
     await tester.pumpAndSettle();
     expect(repo.since.last, DateTime(today.year, today.month, today.day - 364));
+    // The heatmap always covers a year, whatever the period.
+    expect(repo.datesSince.toSet(),
+        {DateTime(today.year, today.month, today.day - 364)});
   });
 
-  testWidgets('a year scrolls the heatmap, showing today first',
-      (tester) async {
-    await pump(
-        tester,
-        buildGardenActivity(plants: [
-          hera
-        ], entries: [
-          entry('e1', EntryType.irrigation, daysAgo(0)),
-        ], rangeDays: 365));
+  testWidgets('the year heatmap scrolls, showing today first', (tester) async {
+    await pump(tester, activity);
 
     final scroll = tester.state<ScrollableState>(find.byWidgetPredicate(
         (w) => w is Scrollable && w.axisDirection == AxisDirection.left));

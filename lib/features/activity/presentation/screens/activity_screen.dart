@@ -15,8 +15,8 @@ import '../widgets/activity_heatmap_card.dart';
 /// Content wider than this is centered instead of stretched.
 const _maxContentWidth = 720.0;
 
-/// What was logged in the garden within the selected [ActivityRange]: a
-/// heatmap of entries per day and the entries themselves, grouped by day.
+/// What was logged in the garden: a heatmap of entries per day over the
+/// last year and the entries of the selected [ActivityRange], grouped by day.
 class ActivityScreen extends ConsumerWidget {
   const ActivityScreen({super.key});
 
@@ -82,8 +82,9 @@ class ActivityScreen extends ConsumerWidget {
               ),
               data: (activity) {
                 final items = <Widget>[
-                  const _RangeSelector(),
                   ActivityHeatmapCard(activity: activity),
+                  // Filters only the list below; the heatmap is always a year.
+                  const _RangeSelector(),
                   if (activity.days.isEmpty)
                     const _EmptyRange()
                   else
