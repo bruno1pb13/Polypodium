@@ -6,6 +6,7 @@ import '../../../../core/database/database_provider.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../plants/presentation/providers/plants_providers.dart';
 import '../../../reminders/domain/reminder_model.dart';
+import '../../../reminders/presentation/providers/reminders_providers.dart';
 import '../../../../core/enums.dart';
 import '../../data/entries_repository.dart';
 import '../../domain/entry_details.dart';
@@ -103,13 +104,23 @@ class EntryMutations {
   /// refreshes the affected plants' status, rescheduling notifications and
   /// triggering sync once for the whole batch instead of once per entry.
   /// A repotting entry with a new soil moves its plant to that soil.
-  Future<void> createMany(List<EntryModel> entries) async {
+  ///
+  /// With [reminderIntervalDays], entries of a [reminderEntryTypes] type also
+  /// set their plant's recurring reminder for that type to that interval
+  /// (see [RemindersRepository.setInterval]).
+  Future<void> createMany(List<EntryModel> entries,
+      {int? reminderIntervalDays}) async {
     if (entries.isEmpty) return;
     final entriesRepo = _ref.read(entriesRepositoryProvider);
     final plantsRepo = _ref.read(plantsRepositoryProvider);
     var needsReschedule = false;
     for (final entry in entries) {
       await entriesRepo.create(entry);
+      if (reminderIntervalDays != null &&
+          reminderEntryTypes.contains(entry.type)) {
+        await _ref.read(remindersRepositoryProvider).setInterval(
+            entry.plantId, entry.type, reminderIntervalDays);
+      }
       if (entry.type == EntryType.irrigation) {
         await plantsRepo.refreshPlantStatus(entry.plantId, reschedule: false);
         needsReschedule = true;

@@ -13,6 +13,9 @@ const reminderEntryTypes = [
   EntryType.repotting,
 ];
 
+/// Longest interval a recurring reminder accepts.
+const maxReminderIntervalDays = 365;
+
 class ReminderModel {
   final String id;
   final String plantId;

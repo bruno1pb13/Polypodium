@@ -15,16 +15,22 @@ import 'package:polypodium/features/entries/presentation/providers/entries_provi
 import 'package:polypodium/features/entries/presentation/screens/add_entry_screen.dart';
 import 'package:polypodium/features/soils/domain/soil_model.dart';
 import 'package:polypodium/features/soils/presentation/providers/soils_search_providers.dart';
+import 'package:polypodium/features/reminders/domain/reminder_model.dart';
+import 'package:polypodium/features/reminders/presentation/providers/reminders_providers.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
 
 import '../../../helpers/accessibility.dart';
 
 class _FakeEntryMutations implements EntryMutations {
   final created = <List<EntryModel>>[];
+  final reminderIntervals = <int?>[];
 
   @override
-  Future<void> createMany(List<EntryModel> entries) async =>
-      created.add(entries);
+  Future<void> createMany(List<EntryModel> entries,
+      {int? reminderIntervalDays}) async {
+    created.add(entries);
+    reminderIntervals.add(reminderIntervalDays);
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -68,7 +74,8 @@ void main() {
   Future<void> pump(WidgetTester tester, AddEntryScreen screen,
       {Size size = const Size(800, 3000),
       ThemeData? theme,
-      List<PlantCarencia> inCarencia = const []}) async {
+      List<PlantCarencia> inCarencia = const [],
+      List<ReminderStatus> reminders = const []}) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -80,6 +87,9 @@ void main() {
     await tester.pumpWidget(ProviderScope(
       overrides: [
         entryMutationsProvider.overrideWithValue(mutations),
+        for (final id in ['p1', 'p2'])
+          plantRemindersProvider(id)
+              .overrideWith((ref) => Stream.value(reminders)),
         carenciaCheckerProvider.overrideWithValue(carenciaChecker),
         photoStorageProvider
             .overrideWithValue(PhotoStorage(baseDirName: 'test_photos')),
@@ -384,6 +394,102 @@ void main() {
     expect(entries.map((e) => e.numericValue), [2, 2]);
     expect(entries.map((e) => e.type).toSet(), {EntryType.irrigation});
     expect(entries[0].id, isNot(entries[1].id));
+  });
+
+  group('reminder interval', () {
+    ReminderStatus existing(EntryType type, int days, {bool enabled = true}) =>
+        ReminderStatus(
+          reminder: ReminderModel(
+            id: 'r-${type.name}',
+            plantId: 'p1',
+            entryType: type,
+            intervalDays: days,
+            enabled: enabled,
+            createdAt: DateTime(2026, 1, 1),
+          ),
+        );
+
+    final reminderField = field('Repetir a cada (opcional)');
+
+    testWidgets('is offered for reminder types only', (tester) async {
+      await pump(tester, AddEntryScreen(plantId: 'p1'));
+      // Observation is the default type, and has reminders.
+      expect(reminderField, findsOneWidget);
+      for (final (type, label) in [
+        (EntryType.fertilizer, 'Fertilização'),
+        (EntryType.pruning, 'Poda'),
+        (EntryType.repotting, 'Replantio'),
+      ]) {
+        await selectType(tester, type, label);
+        expect(reminderField, findsOneWidget, reason: label);
+      }
+      await selectType(tester, EntryType.irrigation, 'Irrigação');
+      expect(reminderField, findsNothing);
+    });
+
+    testWidgets('saves the typed interval with the entry', (tester) async {
+      await pump(tester,
+          AddEntryScreen(plantId: 'p1', initialType: EntryType.pruning));
+      await tester.enterText(reminderField, '45');
+      await save(tester);
+
+      expect(mutations.created.single.single.type, EntryType.pruning);
+      expect(mutations.reminderIntervals.single, 45);
+    });
+
+    testWidgets('blank leaves the reminder alone', (tester) async {
+      await pump(tester,
+          AddEntryScreen(plantId: 'p1', initialType: EntryType.pruning));
+      await save(tester);
+
+      expect(mutations.reminderIntervals.single, isNull);
+    });
+
+    testWidgets('is prefilled with the enabled reminder of the type',
+        (tester) async {
+      await pump(tester,
+          AddEntryScreen(plantId: 'p1', initialType: EntryType.fertilizer),
+          reminders: [
+            existing(EntryType.fertilizer, 30),
+            existing(EntryType.pruning, 90, enabled: false),
+          ]);
+      expect(tester.widget<TextField>(reminderField).controller!.text, '30');
+
+      // Switching type swaps the prefill; a paused reminder isn't offered,
+      // so saving as is won't silently resume it.
+      await selectType(tester, EntryType.pruning, 'Poda');
+      expect(tester.widget<TextField>(reminderField).controller!.text, '');
+    });
+
+    testWidgets('an out-of-range interval blocks saving', (tester) async {
+      await pump(tester,
+          AddEntryScreen(plantId: 'p1', initialType: EntryType.fertilizer));
+      await tester.enterText(reminderField, '400');
+      await save(tester);
+
+      expect(mutations.created, isEmpty);
+      expect(find.text('Informe um número de dias entre 1 e 365'),
+          findsOneWidget);
+    });
+
+    testWidgets('bulk applies to every plant without prefilling',
+        (tester) async {
+      await pump(
+        tester,
+        const AddEntryScreen.bulk(
+          plantIds: ['p1', 'p2'],
+          initialType: EntryType.fertilizer,
+        ),
+        reminders: [existing(EntryType.fertilizer, 30)],
+      );
+      expect(tester.widget<TextField>(reminderField).controller!.text, '');
+      await tester.enterText(reminderField, '20');
+      await tester.tap(find.text('Salvar para 2 plantas'));
+      await tester.pumpAndSettle();
+
+      expect(mutations.created.single, hasLength(2));
+      expect(mutations.reminderIntervals.single, 20);
+    });
   });
 
   group('harvest', () {

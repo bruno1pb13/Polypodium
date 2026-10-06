@@ -10,16 +10,22 @@ import 'package:polypodium/core/storage/photo_storage_provider.dart';
 import 'package:polypodium/features/entries/domain/entry_model.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/entries/presentation/screens/add_entry_screen.dart';
+import 'package:polypodium/features/reminders/domain/reminder_model.dart';
+import 'package:polypodium/features/reminders/presentation/providers/reminders_providers.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
 
 import '../../../helpers/accessibility.dart';
 
 class _FakeEntryMutations implements EntryMutations {
   final created = <List<EntryModel>>[];
+  final reminderIntervals = <int?>[];
 
   @override
-  Future<void> createMany(List<EntryModel> entries) async =>
-      created.add(entries);
+  Future<void> createMany(List<EntryModel> entries,
+      {int? reminderIntervalDays}) async {
+    created.add(entries);
+    reminderIntervals.add(reminderIntervalDays);
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -62,6 +68,7 @@ class _FakePhotoStorage implements PhotoStorage {
 }
 
 void main() {
+  const reminders = <ReminderStatus>[];
   late _FakeEntryMutations mutations;
   late _FakePhotoPicker picker;
   late _FakePhotoStorage storage;
@@ -78,6 +85,9 @@ void main() {
     await tester.pumpWidget(ProviderScope(
       overrides: [
         entryMutationsProvider.overrideWithValue(mutations),
+        for (final id in ['p1', 'p2'])
+          plantRemindersProvider(id)
+              .overrideWith((ref) => Stream.value(reminders)),
         photoPickerProvider.overrideWithValue(picker),
         photoStorageProvider.overrideWithValue(storage),
       ],

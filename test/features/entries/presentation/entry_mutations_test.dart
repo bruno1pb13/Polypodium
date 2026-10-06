@@ -7,17 +7,23 @@ import 'package:polypodium/features/entries/domain/entry_model.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/plants/data/plants_repository.dart';
 import 'package:polypodium/features/plants/presentation/providers/plants_providers.dart';
+import 'package:polypodium/features/reminders/data/reminders_repository.dart';
+import 'package:polypodium/features/reminders/presentation/providers/reminders_providers.dart';
 
 class MockPlantsRepository extends Mock implements PlantsRepository {}
 
 class MockEntriesRepository extends Mock implements EntriesRepository {}
 
+class MockRemindersRepository extends Mock implements RemindersRepository {}
+
 void main() {
   late MockPlantsRepository plantsRepo;
   late MockEntriesRepository entriesRepo;
+  late MockRemindersRepository remindersRepo;
   late ProviderContainer container;
 
   setUpAll(() {
+    registerFallbackValue(EntryType.other);
     registerFallbackValue(EntryModel(
       id: '',
       plantId: '',
@@ -30,6 +36,9 @@ void main() {
   setUp(() {
     plantsRepo = MockPlantsRepository();
     entriesRepo = MockEntriesRepository();
+    remindersRepo = MockRemindersRepository();
+    when(() => remindersRepo.setInterval(any(), any(), any()))
+        .thenAnswer((_) async => true);
     when(() => entriesRepo.create(any())).thenAnswer((_) async {});
     when(() => plantsRepo.refreshPlantStatus(any(),
         reschedule: any(named: 'reschedule'))).thenAnswer((_) async {});
@@ -40,6 +49,7 @@ void main() {
     container = ProviderContainer(overrides: [
       plantsRepositoryProvider.overrideWithValue(plantsRepo),
       entriesRepositoryProvider.overrideWithValue(entriesRepo),
+      remindersRepositoryProvider.overrideWithValue(remindersRepo),
     ]);
   });
 
@@ -104,5 +114,45 @@ void main() {
     await container.read(entryMutationsProvider).delete('e1');
 
     verify(() => plantsRepo.rescheduleNotifications()).called(1);
+  });
+
+  test('a reminder interval sets the reminder of each reminder-type entry',
+      () async {
+    EntryModel entry(String plantId, EntryType type) => EntryModel(
+          id: '$plantId-${type.name}',
+          plantId: plantId,
+          date: DateTime(2026),
+          type: type,
+          createdAt: DateTime(2026),
+        );
+
+    await container.read(entryMutationsProvider).createMany([
+      entry('p1', EntryType.fertilizer),
+      entry('p2', EntryType.fertilizer),
+    ], reminderIntervalDays: 20);
+
+    verify(() => remindersRepo.setInterval('p1', EntryType.fertilizer, 20))
+        .called(1);
+    verify(() => remindersRepo.setInterval('p2', EntryType.fertilizer, 20))
+        .called(1);
+    verify(() => plantsRepo.rescheduleNotifications()).called(1);
+
+    // Types without recurring reminders ignore it.
+    await container
+        .read(entryMutationsProvider)
+        .createMany([entry('p1', EntryType.pest)], reminderIntervalDays: 20);
+    verifyNever(() => remindersRepo.setInterval(any(), EntryType.pest, any()));
+  });
+
+  test('without an interval the reminders are left alone', () async {
+    await container.read(entryMutationsProvider).create(EntryModel(
+          id: 'e1',
+          plantId: 'p1',
+          date: DateTime(2026),
+          type: EntryType.pruning,
+          createdAt: DateTime(2026),
+        ));
+
+    verifyNever(() => remindersRepo.setInterval(any(), any(), any()));
   });
 }

@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/enums.dart';
 import '../domain/reminder_model.dart';
 import 'reminders_dao.dart';
 
@@ -36,6 +38,30 @@ class RemindersRepository {
       await _dao
           .upsert(_toCompanion(reminder, updatedAt: DateTime.now(), rev: rev));
     });
+  }
+
+  /// Makes [plantId]'s reminder for [type] repeat every [intervalDays],
+  /// creating it when missing. An existing one is re-enabled, since setting
+  /// an interval from a diary entry means the user wants the care tracked.
+  /// Returns whether anything changed.
+  Future<bool> setInterval(
+      String plantId, EntryType type, int intervalDays) async {
+    final row = await _dao.getActiveByPlantAndType(plantId, type);
+    final existing = row == null ? null : _fromRow(row);
+    if (existing != null &&
+        existing.intervalDays == intervalDays &&
+        existing.enabled) {
+      return false;
+    }
+    await save(existing?.copyWith(intervalDays: intervalDays, enabled: true) ??
+        ReminderModel(
+          id: const Uuid().v4(),
+          plantId: plantId,
+          entryType: type,
+          intervalDays: intervalDays,
+          createdAt: DateTime.now(),
+        ));
+    return true;
   }
 
   Future<void> delete(String id) async {

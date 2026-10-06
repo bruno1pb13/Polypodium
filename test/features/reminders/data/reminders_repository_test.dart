@@ -161,4 +161,54 @@ void main() {
     // The oldest non-protected entry was purged instead.
     expect((await db.entriesDao.getById('obs0'))?.deletedAt, isNotNull);
   });
+
+  group('setInterval', () {
+    test('creates the reminder when the plant has none of the type',
+        () async {
+      expect(await repo.setInterval('plant1', EntryType.pruning, 45), isTrue);
+
+      final status = (await repo.getAllStatuses()).single;
+      expect(status.reminder.plantId, 'plant1');
+      expect(status.reminder.entryType, EntryType.pruning);
+      expect(status.reminder.intervalDays, 45);
+      expect(status.reminder.enabled, isTrue);
+    });
+
+    test('updates and re-enables the existing one', () async {
+      await repo.save(reminder('r1', intervalDays: 30));
+      await repo.save((await repo.getById('r1'))!.copyWith(enabled: false));
+
+      expect(
+          await repo.setInterval('plant1', EntryType.fertilizer, 15), isTrue);
+
+      final saved = (await repo.getAllStatuses()).single.reminder;
+      expect(saved.id, 'r1');
+      expect(saved.intervalDays, 15);
+      expect(saved.enabled, isTrue);
+    });
+
+    test('is a no-op when nothing changes', () async {
+      await repo.save(reminder('r1', intervalDays: 30));
+      final rev = (await repo.getById('r1'))!.localRev;
+
+      expect(
+          await repo.setInterval('plant1', EntryType.fertilizer, 30), isFalse);
+      expect((await repo.getById('r1'))!.localRev, rev);
+    });
+
+    test('ignores deleted reminders and other plants', () async {
+      await repo.save(reminder('r1'));
+      await repo.delete('r1');
+      await repo.save(reminder('r2', plantId: 'plant2'));
+
+      await repo.setInterval('plant1', EntryType.fertilizer, 10);
+
+      final statuses = await repo.getAllStatuses();
+      expect(statuses, hasLength(2));
+      final plant1 =
+          statuses.singleWhere((s) => s.reminder.plantId == 'plant1').reminder;
+      expect(plant1.id, isNot('r1'));
+      expect(plant1.intervalDays, 10);
+    });
+  });
 }

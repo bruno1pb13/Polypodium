@@ -414,7 +414,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get remindersEmpty =>
-      'Nenhum lembrete recorrente. Adicione um para adubação, poda ou uma observação periódica.';
+      'Nenhum lembrete recorrente. Adicione um aqui ou preencha \"Repetir a cada\" ao registrar adubação, poda, replantio ou defensivo.';
 
   @override
   String get addReminder => 'Adicionar lembrete';
@@ -1106,6 +1106,23 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get pesticideRecurrenceHint =>
       'Deixe em branco para não criar lembrete de reaplicação.';
+
+  @override
+  String get entryReminderLabel => 'Repetir a cada (opcional)';
+
+  @override
+  String get entryReminderHint =>
+      'Cria ou atualiza o lembrete deste cuidado, que aparece em Lembretes e na agenda. Deixe em branco para não alterar.';
+
+  @override
+  String get pesticideReminderInfoTitle => 'Reaplicação de defensivo';
+
+  @override
+  String get pesticideReminderInfoBody =>
+      'Este lembrete vem do último registro de defensivo. Para mudá-lo, registre uma nova aplicação com outro intervalo, ou sem intervalo para encerrá-lo.';
+
+  @override
+  String get pesticideReminderRecord => 'Registrar aplicação';
 
   @override
   String get daysSuffix => 'dias';
