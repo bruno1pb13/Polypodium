@@ -219,22 +219,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           : AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              centerTitle: true,
               iconTheme: IconThemeData(color: context.glass.fg),
               title: MediaQuery.sizeOf(context).width >= kWideBreakpoint
                   ? null
                   : Text(
-                      'Polypodium',
+                      context.l10n.navMyPlants,
                       style: TextStyle(
-                        fontFamily: 'CormorantGaramond',
                         fontWeight: FontWeight.w600,
-                        fontSize: 28,
-                        letterSpacing: 0.5,
                         color: context.glass.fg,
                         shadows: [
                           Shadow(
                             color: context.glass.shadow(Colors.black45),
-                            offset: Offset(0, 2),
                             blurRadius: 4,
                           ),
                         ],
@@ -264,7 +259,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
               ],
             ),
-      drawer: MediaQuery.sizeOf(context).width >= kWideBreakpoint
+      // Opened from the dashboard, it goes back there instead.
+      drawer: MediaQuery.sizeOf(context).width >= kWideBreakpoint ||
+              Navigator.canPop(context)
           ? null
           : const AppDrawer(),
       body: Stack(

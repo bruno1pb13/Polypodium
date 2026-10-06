@@ -2546,4 +2546,164 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gardenRetry => 'Try again';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get dashboardGoodMorning => 'Good morning';
+
+  @override
+  String get dashboardGoodAfternoon => 'Good afternoon';
+
+  @override
+  String get dashboardGoodEvening => 'Good evening';
+
+  @override
+  String dashboardSummaryDue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count care tasks due today',
+      one: '1 care task due today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardSummaryClear => 'Everything is up to date 🌿';
+
+  @override
+  String get dashboardTodayTitle => 'Today\'s care';
+
+  @override
+  String get dashboardSeeAgenda => 'See agenda';
+
+  @override
+  String dashboardMoreTasks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count more tasks',
+      one: '+1 more task',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardNothingDue => 'Nothing due today.';
+
+  @override
+  String dashboardUpcoming(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tasks in the coming days',
+      one: '1 task in the coming days',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardHealthTitle => 'Garden health';
+
+  @override
+  String get dashboardHealthy => 'healthy';
+
+  @override
+  String dashboardHealthyLabel(int percent) {
+    return '$percent% of the plants are healthy';
+  }
+
+  @override
+  String get dashboardAllHealthy => 'Every plant is doing well.';
+
+  @override
+  String get dashboardNeedWater => 'Need water';
+
+  @override
+  String get dashboardWithPests => 'With pests';
+
+  @override
+  String get dashboardWithChlorosis => 'With chlorosis';
+
+  @override
+  String get dashboardPesticideDue => 'Pesticide due';
+
+  @override
+  String get navActivity => 'Activity';
+
+  @override
+  String activityStreak(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days in a row',
+      one: '1 day in a row',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardYourGarden => 'Your garden';
+
+  @override
+  String get dashboardSeeAll => 'See all';
+
+  @override
+  String get activityYesterday => 'Yesterday';
+
+  @override
+  String get dashboardEmptyTitle => 'Welcome to your garden';
+
+  @override
+  String get dashboardEmptyBody =>
+      'Add your first plant to follow its care, health and activity here.';
+
+  @override
+  String get activityRangeMonth => '30 days';
+
+  @override
+  String get activityRangeQuarter => '3 months';
+
+  @override
+  String get activityRangeYear => '1 year';
+
+  @override
+  String get activityRangeEmpty => 'Nothing logged in this period.';
+
+  @override
+  String activityHeatmapTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries in the last year',
+      one: '1 entry in the last year',
+      zero: 'No entries in the last year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityHeatmapLabel(int count, int days, int range) {
+    return '$count entries on $days of the last $range days';
+  }
+
+  @override
+  String activityDayTooltip(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries',
+      one: '1 entry',
+      zero: 'No entries',
+    );
+    return '$_temp0 · $date';
+  }
+
+  @override
+  String get activityLess => 'Less';
+
+  @override
+  String get activityMore => 'More';
 }

@@ -4363,6 +4363,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try again'**
   String get gardenRetry;
+
+  /// No description provided for @navHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @dashboardGoodMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get dashboardGoodMorning;
+
+  /// No description provided for @dashboardGoodAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon'**
+  String get dashboardGoodAfternoon;
+
+  /// No description provided for @dashboardGoodEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening'**
+  String get dashboardGoodEvening;
+
+  /// No description provided for @dashboardSummaryDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 care task due today} other{{count} care tasks due today}}'**
+  String dashboardSummaryDue(int count);
+
+  /// No description provided for @dashboardSummaryClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is up to date 🌿'**
+  String get dashboardSummaryClear;
+
+  /// No description provided for @dashboardTodayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s care'**
+  String get dashboardTodayTitle;
+
+  /// No description provided for @dashboardSeeAgenda.
+  ///
+  /// In en, this message translates to:
+  /// **'See agenda'**
+  String get dashboardSeeAgenda;
+
+  /// No description provided for @dashboardMoreTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{+1 more task} other{+{count} more tasks}}'**
+  String dashboardMoreTasks(int count);
+
+  /// No description provided for @dashboardNothingDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing due today.'**
+  String get dashboardNothingDue;
+
+  /// No description provided for @dashboardUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 task in the coming days} other{{count} tasks in the coming days}}'**
+  String dashboardUpcoming(int count);
+
+  /// No description provided for @dashboardHealthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Garden health'**
+  String get dashboardHealthTitle;
+
+  /// No description provided for @dashboardHealthy.
+  ///
+  /// In en, this message translates to:
+  /// **'healthy'**
+  String get dashboardHealthy;
+
+  /// No description provided for @dashboardHealthyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the plants are healthy'**
+  String dashboardHealthyLabel(int percent);
+
+  /// No description provided for @dashboardAllHealthy.
+  ///
+  /// In en, this message translates to:
+  /// **'Every plant is doing well.'**
+  String get dashboardAllHealthy;
+
+  /// No description provided for @dashboardNeedWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Need water'**
+  String get dashboardNeedWater;
+
+  /// No description provided for @dashboardWithPests.
+  ///
+  /// In en, this message translates to:
+  /// **'With pests'**
+  String get dashboardWithPests;
+
+  /// No description provided for @dashboardWithChlorosis.
+  ///
+  /// In en, this message translates to:
+  /// **'With chlorosis'**
+  String get dashboardWithChlorosis;
+
+  /// No description provided for @dashboardPesticideDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pesticide due'**
+  String get dashboardPesticideDue;
+
+  /// No description provided for @navActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get navActivity;
+
+  /// No description provided for @activityStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, one{1 day in a row} other{{days} days in a row}}'**
+  String activityStreak(int days);
+
+  /// No description provided for @dashboardYourGarden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your garden'**
+  String get dashboardYourGarden;
+
+  /// No description provided for @dashboardSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get dashboardSeeAll;
+
+  /// No description provided for @activityYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get activityYesterday;
+
+  /// No description provided for @dashboardEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to your garden'**
+  String get dashboardEmptyTitle;
+
+  /// No description provided for @dashboardEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first plant to follow its care, health and activity here.'**
+  String get dashboardEmptyBody;
+
+  /// No description provided for @activityRangeMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'30 days'**
+  String get activityRangeMonth;
+
+  /// No description provided for @activityRangeQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'3 months'**
+  String get activityRangeQuarter;
+
+  /// No description provided for @activityRangeYear.
+  ///
+  /// In en, this message translates to:
+  /// **'1 year'**
+  String get activityRangeYear;
+
+  /// No description provided for @activityRangeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged in this period.'**
+  String get activityRangeEmpty;
+
+  /// No description provided for @activityHeatmapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No entries in the last year} one{1 entry in the last year} other{{count} entries in the last year}}'**
+  String activityHeatmapTitle(int count);
+
+  /// No description provided for @activityHeatmapLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries on {days} of the last {range} days'**
+  String activityHeatmapLabel(int count, int days, int range);
+
+  /// No description provided for @activityDayTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No entries} one{1 entry} other{{count} entries}} · {date}'**
+  String activityDayTooltip(int count, String date);
+
+  /// No description provided for @activityLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get activityLess;
+
+  /// No description provided for @activityMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get activityMore;
 }
 
 class _AppLocalizationsDelegate

@@ -2549,4 +2549,164 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get gardenRetry => 'Tentar novamente';
+
+  @override
+  String get navHome => 'Início';
+
+  @override
+  String get dashboardGoodMorning => 'Bom dia';
+
+  @override
+  String get dashboardGoodAfternoon => 'Boa tarde';
+
+  @override
+  String get dashboardGoodEvening => 'Boa noite';
+
+  @override
+  String dashboardSummaryDue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cuidados para hoje',
+      one: '1 cuidado para hoje',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardSummaryClear => 'Tudo em dia por aqui 🌿';
+
+  @override
+  String get dashboardTodayTitle => 'Cuidados de hoje';
+
+  @override
+  String get dashboardSeeAgenda => 'Ver agenda';
+
+  @override
+  String dashboardMoreTasks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count tarefas',
+      one: '+1 tarefa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardNothingDue => 'Nada pendente para hoje.';
+
+  @override
+  String dashboardUpcoming(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tarefas nos próximos dias',
+      one: '1 tarefa nos próximos dias',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardHealthTitle => 'Saúde do jardim';
+
+  @override
+  String get dashboardHealthy => 'saudáveis';
+
+  @override
+  String dashboardHealthyLabel(int percent) {
+    return '$percent% das plantas estão saudáveis';
+  }
+
+  @override
+  String get dashboardAllHealthy => 'Todas as plantas estão bem.';
+
+  @override
+  String get dashboardNeedWater => 'Precisam de água';
+
+  @override
+  String get dashboardWithPests => 'Com pragas';
+
+  @override
+  String get dashboardWithChlorosis => 'Com clorose';
+
+  @override
+  String get dashboardPesticideDue => 'Reaplicar defensivo';
+
+  @override
+  String get navActivity => 'Atividade';
+
+  @override
+  String activityStreak(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days dias seguidos',
+      one: '1 dia seguido',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardYourGarden => 'Seu jardim';
+
+  @override
+  String get dashboardSeeAll => 'Ver todas';
+
+  @override
+  String get activityYesterday => 'Ontem';
+
+  @override
+  String get dashboardEmptyTitle => 'Boas-vindas ao seu jardim';
+
+  @override
+  String get dashboardEmptyBody =>
+      'Cadastre sua primeira planta para acompanhar cuidados, saúde e atividade aqui.';
+
+  @override
+  String get activityRangeMonth => '30 dias';
+
+  @override
+  String get activityRangeQuarter => '3 meses';
+
+  @override
+  String get activityRangeYear => '1 ano';
+
+  @override
+  String get activityRangeEmpty => 'Nenhum registro nesse período.';
+
+  @override
+  String activityHeatmapTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count registros no último ano',
+      one: '1 registro no último ano',
+      zero: 'Nenhum registro no último ano',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityHeatmapLabel(int count, int days, int range) {
+    return '$count registros em $days dos últimos $range dias';
+  }
+
+  @override
+  String activityDayTooltip(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count registros',
+      one: '1 registro',
+      zero: 'Nenhum registro',
+    );
+    return '$_temp0 · $date';
+  }
+
+  @override
+  String get activityLess => 'Menos';
+
+  @override
+  String get activityMore => 'Mais';
 }

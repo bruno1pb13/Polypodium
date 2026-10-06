@@ -8,7 +8,7 @@ import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../../core/sync/sync_providers.dart';
 import '../../../admin/data/admin_client.dart';
 import '../../../admin/presentation/screens/server_admin_screen.dart';
-import '../../../plants/presentation/screens/home_screen.dart';
+import '../../../dashboard/presentation/screens/dashboard_screen.dart';
 import '../../data/garden_client.dart';
 import '../../data/workspace_auth_client.dart';
 import '../../data/workspace_migration_service.dart';
@@ -82,7 +82,7 @@ class WorkspacesScreen extends ConsumerWidget {
 
   void _goHome(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      MaterialPageRoute(builder: (_) => const DashboardScreen()),
       (route) => false,
     );
   }
