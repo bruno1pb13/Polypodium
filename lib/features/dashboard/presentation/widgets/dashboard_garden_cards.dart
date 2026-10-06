@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,13 +17,29 @@ import 'dashboard_card.dart';
 const _spotlightShown = 12;
 
 /// Horizontal strip of plant photos, those needing attention first.
-class DashboardGardenCarousel extends ConsumerWidget {
+class DashboardGardenCarousel extends ConsumerStatefulWidget {
   final GardenOverview overview;
 
   const DashboardGardenCarousel({super.key, required this.overview});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardGardenCarousel> createState() =>
+      _DashboardGardenCarouselState();
+}
+
+class _DashboardGardenCarouselState
+    extends ConsumerState<DashboardGardenCarousel> {
+  final _scroll = ScrollController();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final overview = widget.overview;
     final l10n = context.l10n;
     final plants = overview.spotlight.take(_spotlightShown).toList();
     // Photo plus two lines of text, which grow with the font scale.
@@ -45,14 +62,28 @@ class DashboardGardenCarousel extends ConsumerWidget {
         ),
       ),
       padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
-      child: SizedBox(
-        height: height,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.only(right: 16),
-          itemCount: plants.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 12),
-          itemBuilder: (_, i) => _PlantTile(pws: plants[i]),
+      // Mice and trackpads drag the strip too: on desktop a horizontal list
+      // can't be scrolled otherwise. The scrollbar shows there is more.
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(
+          dragDevices: PointerDeviceKind.values.toSet(),
+        ),
+        child: Scrollbar(
+          controller: _scroll,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: SizedBox(
+              height: height,
+              child: ListView.separated(
+                controller: _scroll,
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.only(right: 16),
+                itemCount: plants.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (_, i) => _PlantTile(pws: plants[i]),
+              ),
+            ),
+          ),
         ),
       ),
     );

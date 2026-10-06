@@ -46,42 +46,47 @@ class DashboardCard extends ConsumerWidget {
               color: transparent ? context.glass.tint(0.1) : Colors.transparent,
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (title != null) ...[
-                LayoutBuilder(
-                  builder: (context, constraints) => Row(
-                    children: [
-                      Expanded(
-                        child: Semantics(
-                          header: true,
-                          child: Text(
-                            title!,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                              color: palette.ink,
+          // Ink of the InkWells inside paints here, within the rounded clip,
+          // instead of on the Scaffold behind the card.
+          child: Material(
+            type: MaterialType.transparency,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (title != null) ...[
+                  LayoutBuilder(
+                    builder: (context, constraints) => Row(
+                      children: [
+                        Expanded(
+                          child: Semantics(
+                            header: true,
+                            child: Text(
+                              title!,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                                color: palette.ink,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      // Capped so large fonts wrap it instead of pushing the
-                      // title out.
-                      if (trailing != null)
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                              maxWidth: constraints.maxWidth / 2),
-                          child: trailing!,
-                        ),
-                    ],
+                        // Capped so large fonts wrap it instead of pushing the
+                        // title out.
+                        if (trailing != null)
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                                maxWidth: constraints.maxWidth / 2),
+                            child: trailing!,
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
+                ],
+                child,
               ],
-              child,
-            ],
+            ),
           ),
         ),
       ),

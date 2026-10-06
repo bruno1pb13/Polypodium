@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -166,6 +167,28 @@ void main() {
     expect(find.text('Tudo em dia por aqui 🌿'), findsOneWidget);
     expect(find.text('Boas-vindas ao seu jardim'), findsOneWidget);
     expect(find.text('Cuidados de hoje'), findsNothing);
+  });
+
+  testWidgets('the plant strip scrolls with a mouse drag', (tester) async {
+    final many = [for (var i = 0; i < 10; i++) plant('Planta $i')];
+    await pump(
+      tester,
+      buildGardenOverview(
+          plants: many, tasks: const [], conditionEntries: const []),
+      plants: many,
+      size: const Size(1400, 1000),
+    );
+
+    final strip = find.byWidgetPredicate(
+        (w) => w is Scrollable && w.axisDirection == AxisDirection.right);
+    double offset() => tester.state<ScrollableState>(strip).position.pixels;
+    expect(offset(), 0);
+
+    await tester.dragFrom(
+        tester.getCenter(find.text('Planta 3')), const Offset(-300, 0),
+        kind: PointerDeviceKind.mouse);
+    await tester.pumpAndSettle();
+    expect(offset(), greaterThan(0));
   });
 
   testWidgets('pairs the cards side by side when wide', (tester) async {
