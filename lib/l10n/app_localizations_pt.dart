@@ -2577,20 +2577,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get dashboardSummaryClear => 'Tudo em dia por aqui 🌿';
 
   @override
-  String get dashboardStatPlants => 'Plantas';
-
-  @override
-  String get dashboardStatSpecies => 'Espécies';
-
-  @override
-  String get dashboardStatLocations => 'Locais';
-
-  @override
-  String dashboardStatEntries(int days) {
-    return 'Registros em $days dias';
-  }
-
-  @override
   String get dashboardTodayTitle => 'Cuidados de hoje';
 
   @override
@@ -2648,15 +2634,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get dashboardPesticideDue => 'Reaplicar defensivo';
 
   @override
-  String get dashboardActivityTitle => 'Atividade';
+  String get navActivity => 'Atividade';
 
   @override
-  String dashboardLastDays(int days) {
+  String activityChartTitle(int days) {
     return 'Últimos $days dias';
   }
 
   @override
-  String dashboardStreak(int days) {
+  String activityStreak(int days) {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
@@ -2667,19 +2653,18 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get dashboardWaterings => 'Regas';
+  String get activityWaterings => 'Regas';
 
   @override
-  String get dashboardOtherCare => 'Outros cuidados';
+  String get activityOtherCare => 'Outros cuidados';
 
   @override
-  String dashboardActivityChartLabel(int waterings, int care, int days) {
+  String activityChartLabel(int waterings, int care, int days) {
     return '$waterings regas e $care outros registros nos últimos $days dias';
   }
 
   @override
-  String get dashboardNoActivity =>
-      'Nenhum registro recente. Cada cuidado registrado aparece aqui.';
+  String get activityChartEmpty => 'Nada registrado nesses dias.';
 
   @override
   String get dashboardYourGarden => 'Seu jardim';
@@ -2688,16 +2673,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get dashboardSeeAll => 'Ver todas';
 
   @override
-  String get dashboardByLocation => 'Por local';
-
-  @override
-  String get dashboardNoLocation => 'Sem local';
-
-  @override
-  String get dashboardRecentTitle => 'Atividade recente';
-
-  @override
-  String get dashboardYesterday => 'Ontem';
+  String get activityYesterday => 'Ontem';
 
   @override
   String get dashboardEmptyTitle => 'Boas-vindas ao seu jardim';
@@ -2705,4 +2681,8 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get dashboardEmptyBody =>
       'Cadastre sua primeira planta para acompanhar cuidados, saúde e atividade aqui.';
+
+  @override
+  String get activityEmpty =>
+      'Nenhum registro ainda. Cada cuidado registrado aparece aqui.';
 }

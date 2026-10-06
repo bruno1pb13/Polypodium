@@ -7,7 +7,6 @@ import 'package:polypodium/features/dashboard/domain/garden_overview.dart';
 import 'package:polypodium/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:polypodium/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:polypodium/features/dashboard/presentation/widgets/dashboard_card.dart';
-import 'package:polypodium/features/entries/domain/entry_model.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/locations/domain/location_model.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
@@ -83,29 +82,15 @@ void main() {
         daysRelative: daysRelative,
       );
 
-  EntryModel entry(String id, String plantId, EntryType type, DateTime date) =>
-      EntryModel(
-        id: id,
-        plantId: plantId,
-        date: date,
-        type: type,
-        createdAt: date,
-      );
-
   final garden = [samambaia, jiboia, hera];
   final overview = buildGardenOverview(
     plants: garden,
     tasks: [waterTask(samambaia, 2), waterTask(jiboia, 1)],
-    recentEntries: [
-      entry('e1', 'Hera', EntryType.irrigation, daysAgo(0)),
-      entry('e2', 'Hera', EntryType.fertilizer, daysAgo(1)),
-    ],
     conditionEntries: const [],
   );
   final empty = buildGardenOverview(
     plants: const [],
     tasks: const [],
-    recentEntries: const [],
     conditionEntries: const [],
   );
 
@@ -146,19 +131,19 @@ void main() {
     await pump(tester, overview);
 
     expect(find.text('2 cuidados para hoje'), findsOneWidget);
-    expect(find.text('Plantas'), findsOneWidget);
+    // No headline numbers, plants per location or activity.
+    expect(find.text('Plantas'), findsNothing);
+    expect(find.text('Por local'), findsNothing);
+    expect(find.text('Atividade recente'), findsNothing);
     expect(find.text('Cuidados de hoje'), findsOneWidget);
     expect(find.text('Irrigação • Atrasado há 2 dias'), findsOneWidget);
     expect(find.text('Saúde do jardim'), findsOneWidget);
     expect(find.text('33%'), findsOneWidget);
     expect(find.text('Precisam de água'), findsOneWidget);
 
-    await tester.scrollUntilVisible(find.text('Atividade recente'), 300,
+    await tester.scrollUntilVisible(find.text('Seu jardim'), 300,
         scrollable: find.byType(Scrollable).first);
-    expect(find.text('Seu jardim'), findsOneWidget);
-    expect(find.text('Por local'), findsOneWidget);
-    expect(find.text('Regas (1)'), findsOneWidget);
-    expect(find.text('Outros cuidados (1)'), findsOneWidget);
+    expect(find.text('Hera'), findsOneWidget);
   });
 
   testWidgets('waters a single plant or all the due ones', (tester) async {
@@ -201,7 +186,7 @@ void main() {
           (tester) async {
         setTextScale(tester, scale);
         await pump(tester, overview);
-        await tester.scrollUntilVisible(find.text('Atividade recente'), 300,
+        await tester.scrollUntilVisible(find.text('Seu jardim'), 300,
             scrollable: find.byType(Scrollable).first);
       });
     }

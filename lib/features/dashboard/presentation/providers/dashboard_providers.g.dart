@@ -8,48 +8,6 @@ part of 'dashboard_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Entries of every plant from the last [activityWindowDays] days.
-
-@ProviderFor(recentGardenEntries)
-final recentGardenEntriesProvider = RecentGardenEntriesProvider._();
-
-/// Entries of every plant from the last [activityWindowDays] days.
-
-final class RecentGardenEntriesProvider extends $FunctionalProvider<
-        AsyncValue<List<EntryModel>>,
-        List<EntryModel>,
-        Stream<List<EntryModel>>>
-    with $FutureModifier<List<EntryModel>>, $StreamProvider<List<EntryModel>> {
-  /// Entries of every plant from the last [activityWindowDays] days.
-  RecentGardenEntriesProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'recentGardenEntriesProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
-
-  @override
-  String debugGetCreateSourceHash() => _$recentGardenEntriesHash();
-
-  @$internal
-  @override
-  $StreamProviderElement<List<EntryModel>> $createElement(
-          $ProviderPointer pointer) =>
-      $StreamProviderElement(pointer);
-
-  @override
-  Stream<List<EntryModel>> create(Ref ref) {
-    return recentGardenEntries(ref);
-  }
-}
-
-String _$recentGardenEntriesHash() =>
-    r'09cea2b849ce151620a35dd05878708c302d92e6';
-
 /// Pest and chlorosis entries of every plant, to tell which are active.
 
 @ProviderFor(gardenConditionEntries)
@@ -132,4 +90,4 @@ final class GardenOverviewProvider extends $FunctionalProvider<
   }
 }
 
-String _$gardenOverviewHash() => r'af823696875fcba94de56a3af70cbda5dc81f9ff';
+String _$gardenOverviewHash() => r'd24f8c36240c846108ab4a8da6a9b6e21eb114dd';

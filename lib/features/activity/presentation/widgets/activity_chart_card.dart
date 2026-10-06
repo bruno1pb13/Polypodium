@@ -5,35 +5,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
-import '../../../../core/utils/date_utils.dart';
-import '../../../plants/presentation/screens/plant_detail_screen.dart';
 import '../../../plants/presentation/widgets/insights/insight_chart_helpers.dart';
 import '../../../plants/presentation/widgets/insights/insight_palette.dart';
-import '../../domain/garden_overview.dart';
-import 'dashboard_card.dart';
+import '../../../dashboard/presentation/widgets/dashboard_card.dart';
+import '../../domain/garden_activity.dart';
 
 /// Entries per day of the last [chartDays] days, waterings stacked under
 /// the other care, with the logging streak.
-class DashboardActivityCard extends ConsumerWidget {
-  final GardenOverview overview;
+class ActivityChartCard extends ConsumerWidget {
+  final GardenActivity activity;
 
-  const DashboardActivityCard({super.key, required this.overview});
+  const ActivityChartCard({super.key, required this.activity});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final palette = dashboardPalette(context, ref);
-    final activity = overview.activity;
-    final waterings = activity.fold(0, (sum, d) => sum + d.irrigation);
-    final care = activity.fold(0, (sum, d) => sum + d.care);
+    final chart = activity.chart;
+    final waterings = chart.fold(0, (sum, d) => sum + d.irrigation);
+    final care = chart.fold(0, (sum, d) => sum + d.care);
 
     return DashboardCard(
-      title: l10n.dashboardActivityTitle,
-      trailing: overview.streakDays > 1
+      title: l10n.activityChartTitle(chartDays),
+      trailing: activity.streakDays > 1
           ? Text(
-              '🔥 ${l10n.dashboardStreak(overview.streakDays)}',
+              '🔥 ${l10n.activityStreak(activity.streakDays)}',
               style: TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
@@ -44,26 +41,21 @@ class DashboardActivityCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.dashboardLastDays(chartDays),
-            style: TextStyle(fontSize: 12, color: palette.inkSoft),
-          ),
-          const SizedBox(height: 8),
           if (waterings + care == 0)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Text(
-                l10n.dashboardNoActivity,
+                l10n.activityChartEmpty,
                 style: TextStyle(fontSize: 13, color: palette.inkSoft),
               ),
             )
           else ...[
             Semantics(
               container: true,
-              label: l10n.dashboardActivityChartLabel(
+              label: l10n.activityChartLabel(
                   waterings, care, chartDays),
               child: ExcludeSemantics(
-                child: _ActivityChart(activity: activity, palette: palette),
+                child: _ActivityChart(activity: chart, palette: palette),
               ),
             ),
             const SizedBox(height: 8),
@@ -73,11 +65,11 @@ class DashboardActivityCard extends ConsumerWidget {
               children: [
                 _Legend(
                     color: palette.water,
-                    label: '${l10n.dashboardWaterings} ($waterings)',
+                    label: '${l10n.activityWaterings} ($waterings)',
                     palette: palette),
                 _Legend(
                     color: palette.growth,
-                    label: '${l10n.dashboardOtherCare} ($care)',
+                    label: '${l10n.activityOtherCare} ($care)',
                     palette: palette),
               ],
             ),
@@ -224,81 +216,6 @@ class _Legend extends StatelessWidget {
               style: TextStyle(fontSize: 12, color: palette.inkSoft)),
         ),
       ],
-    );
-  }
-}
-
-/// The newest entries of the whole garden.
-class DashboardRecentCard extends ConsumerWidget {
-  final GardenOverview overview;
-
-  const DashboardRecentCard({super.key, required this.overview});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final palette = dashboardPalette(context, ref);
-    final dayMonth = DateFormat.MMMd(l10n.localeName);
-
-    String when(DateTime date) => switch (calendarDaysBetween(date)) {
-          0 => l10n.agendaToday,
-          1 => l10n.dashboardYesterday,
-          _ => dayMonth.format(date),
-        };
-
-    return DashboardCard(
-      title: l10n.dashboardRecentTitle,
-      child: Column(
-        children: [
-          for (final (i, item) in overview.recent.indexed) ...[
-            if (i > 0) Divider(height: 1, color: palette.grid),
-            InkWell(
-              borderRadius: BorderRadius.circular(10),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      PlantDetailScreen(plantId: item.plant.plant.id),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 9),
-                child: Row(
-                  children: [
-                    ExcludeSemantics(
-                      child: Text(item.entry.type.emoji,
-                          style: const TextStyle(fontSize: 18)),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text.rich(
-                        TextSpan(children: [
-                          TextSpan(
-                            text: item.plant.plant.nickname,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          TextSpan(
-                            text: ' · ${item.entry.type.label(l10n)}',
-                            style: TextStyle(color: palette.inkSoft),
-                          ),
-                        ]),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 13.5, color: palette.ink),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      when(item.entry.date),
-                      style: TextStyle(fontSize: 12, color: palette.inkSoft),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
     );
   }
 }

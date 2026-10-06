@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../l10n/l10n.dart';
+import '../../features/activity/presentation/screens/activity_screen.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
 import '../../features/agenda/presentation/widgets/agenda_badge.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
@@ -30,6 +31,7 @@ class _AppShellState extends State<AppShell> {
     context.l10n.navHome,
     context.l10n.navMyPlants,
     context.l10n.navAgenda,
+    context.l10n.navActivity,
     context.l10n.navSpecies,
     context.l10n.navLocations,
     context.l10n.navSoils,
@@ -40,6 +42,7 @@ class _AppShellState extends State<AppShell> {
     Icons.home_outlined,
     Icons.local_florist_outlined,
     Icons.event_note_outlined,
+    Icons.timeline_outlined,
     Icons.eco_outlined,
     Icons.location_on_outlined,
     Icons.terrain_outlined,
@@ -50,6 +53,7 @@ class _AppShellState extends State<AppShell> {
     Icons.home,
     Icons.local_florist,
     Icons.event_note,
+    Icons.timeline,
     Icons.eco,
     Icons.location_on,
     Icons.terrain,
@@ -61,11 +65,12 @@ class _AppShellState extends State<AppShell> {
     0 => const DashboardScreen(),
     1 => const HomeScreen(),
     2 => const AgendaScreen(),
-    3 => const SpeciesListScreen(),
-    4 => const LocationsListScreen(),
-    5 => const SoilsListScreen(),
-    6 => const DefensivosListScreen(),
-    7 => const SettingsScreen(),
+    3 => const ActivityScreen(),
+    4 => const SpeciesListScreen(),
+    5 => const LocationsListScreen(),
+    6 => const SoilsListScreen(),
+    7 => const DefensivosListScreen(),
+    8 => const SettingsScreen(),
     _ => const DashboardScreen(),
   };
 

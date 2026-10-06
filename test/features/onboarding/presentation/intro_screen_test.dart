@@ -33,7 +33,6 @@ void main() {
         gardenOverviewProvider.overrideWith((ref) async => buildGardenOverview(
             plants: const [],
             tasks: const [],
-            recentEntries: const [],
             conditionEntries: const [])),
       ],
       child: const MaterialApp(

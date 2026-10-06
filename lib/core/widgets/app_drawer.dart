@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../l10n/l10n.dart';
+import '../../features/activity/presentation/screens/activity_screen.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
 import '../../features/agenda/presentation/widgets/agenda_badge.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
@@ -89,101 +90,119 @@ class AppDrawer extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                   child: WorkspaceSelector(dark: true),
                 ),
-                _DrawerItem(
-                  icon: Icons.home_outlined,
-                  label: context.l10n.navHome,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                          builder: (_) => const DashboardScreen()),
-                      (route) => false,
-                    );
-                  },
+                // Scrolls on short screens instead of overflowing.
+                Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: [
+                      _DrawerItem(
+                        icon: Icons.home_outlined,
+                        label: context.l10n.navHome,
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (_) => const DashboardScreen()),
+                            (route) => false,
+                          );
+                        },
+                      ),
+                      _DrawerItem(
+                        icon: Icons.local_florist_outlined,
+                        label: context.l10n.navMyPlants,
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const HomeScreen()),
+                          );
+                        },
+                      ),
+                      _DrawerItem(
+                        icon: Icons.event_note_outlined,
+                        label: context.l10n.navAgenda,
+                        trailing: const AgendaBadge(),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const AgendaScreen()),
+                          );
+                        },
+                      ),
+                      _DrawerItem(
+                        icon: Icons.timeline_outlined,
+                        label: context.l10n.navActivity,
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ActivityScreen()),
+                          );
+                        },
+                      ),
+                      _DrawerItem(
+                        icon: Icons.eco_outlined,
+                        label: context.l10n.navSpecies,
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const SpeciesListScreen()),
+                          );
+                        },
+                      ),
+                      _DrawerItem(
+                        icon: Icons.location_on_outlined,
+                        label: context.l10n.navLocations,
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const LocationsListScreen()),
+                          );
+                        },
+                      ),
+                      _DrawerItem(
+                        icon: Icons.terrain_outlined,
+                        label: context.l10n.navSoils,
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const SoilsListScreen()),
+                          );
+                        },
+                      ),
+                      _DrawerItem(
+                        icon: Icons.science_outlined,
+                        label: context.l10n.navDefensivos,
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const DefensivosListScreen()),
+                          );
+                        },
+                      ),
+                      _DrawerItem(
+                        icon: Icons.settings_outlined,
+                        label: context.l10n.navSettings,
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                _DrawerItem(
-                  icon: Icons.local_florist_outlined,
-                  label: context.l10n.navMyPlants,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const HomeScreen()),
-                    );
-                  },
-                ),
-                _DrawerItem(
-                  icon: Icons.event_note_outlined,
-                  label: context.l10n.navAgenda,
-                  trailing: const AgendaBadge(),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const AgendaScreen()),
-                    );
-                  },
-                ),
-                _DrawerItem(
-                  icon: Icons.eco_outlined,
-                  label: context.l10n.navSpecies,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const SpeciesListScreen()),
-                    );
-                  },
-                ),
-                _DrawerItem(
-                  icon: Icons.location_on_outlined,
-                  label: context.l10n.navLocations,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const LocationsListScreen()),
-                    );
-                  },
-                ),
-                _DrawerItem(
-                  icon: Icons.terrain_outlined,
-                  label: context.l10n.navSoils,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const SoilsListScreen()),
-                    );
-                  },
-                ),
-                _DrawerItem(
-                  icon: Icons.science_outlined,
-                  label: context.l10n.navDefensivos,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const DefensivosListScreen()),
-                    );
-                  },
-                ),
-                _DrawerItem(
-                  icon: Icons.settings_outlined,
-                  label: context.l10n.navSettings,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                    );
-                  },
-                ),
-                const Spacer(),
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Text(

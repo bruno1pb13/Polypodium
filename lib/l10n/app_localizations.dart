@@ -4400,30 +4400,6 @@ abstract class AppLocalizations {
   /// **'Everything is up to date 🌿'**
   String get dashboardSummaryClear;
 
-  /// No description provided for @dashboardStatPlants.
-  ///
-  /// In en, this message translates to:
-  /// **'Plants'**
-  String get dashboardStatPlants;
-
-  /// No description provided for @dashboardStatSpecies.
-  ///
-  /// In en, this message translates to:
-  /// **'Species'**
-  String get dashboardStatSpecies;
-
-  /// No description provided for @dashboardStatLocations.
-  ///
-  /// In en, this message translates to:
-  /// **'Locations'**
-  String get dashboardStatLocations;
-
-  /// No description provided for @dashboardStatEntries.
-  ///
-  /// In en, this message translates to:
-  /// **'Entries in {days} days'**
-  String dashboardStatEntries(int days);
-
   /// No description provided for @dashboardTodayTitle.
   ///
   /// In en, this message translates to:
@@ -4502,47 +4478,47 @@ abstract class AppLocalizations {
   /// **'Pesticide due'**
   String get dashboardPesticideDue;
 
-  /// No description provided for @dashboardActivityTitle.
+  /// No description provided for @navActivity.
   ///
   /// In en, this message translates to:
   /// **'Activity'**
-  String get dashboardActivityTitle;
+  String get navActivity;
 
-  /// No description provided for @dashboardLastDays.
+  /// No description provided for @activityChartTitle.
   ///
   /// In en, this message translates to:
   /// **'Last {days} days'**
-  String dashboardLastDays(int days);
+  String activityChartTitle(int days);
 
-  /// No description provided for @dashboardStreak.
+  /// No description provided for @activityStreak.
   ///
   /// In en, this message translates to:
   /// **'{days, plural, one{1 day in a row} other{{days} days in a row}}'**
-  String dashboardStreak(int days);
+  String activityStreak(int days);
 
-  /// No description provided for @dashboardWaterings.
+  /// No description provided for @activityWaterings.
   ///
   /// In en, this message translates to:
   /// **'Waterings'**
-  String get dashboardWaterings;
+  String get activityWaterings;
 
-  /// No description provided for @dashboardOtherCare.
+  /// No description provided for @activityOtherCare.
   ///
   /// In en, this message translates to:
   /// **'Other care'**
-  String get dashboardOtherCare;
+  String get activityOtherCare;
 
-  /// No description provided for @dashboardActivityChartLabel.
+  /// No description provided for @activityChartLabel.
   ///
   /// In en, this message translates to:
   /// **'{waterings} waterings and {care} other entries in the last {days} days'**
-  String dashboardActivityChartLabel(int waterings, int care, int days);
+  String activityChartLabel(int waterings, int care, int days);
 
-  /// No description provided for @dashboardNoActivity.
+  /// No description provided for @activityChartEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Nothing logged recently. Every care you record shows up here.'**
-  String get dashboardNoActivity;
+  /// **'Nothing logged on these days.'**
+  String get activityChartEmpty;
 
   /// No description provided for @dashboardYourGarden.
   ///
@@ -4556,29 +4532,11 @@ abstract class AppLocalizations {
   /// **'See all'**
   String get dashboardSeeAll;
 
-  /// No description provided for @dashboardByLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'By location'**
-  String get dashboardByLocation;
-
-  /// No description provided for @dashboardNoLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'No location'**
-  String get dashboardNoLocation;
-
-  /// No description provided for @dashboardRecentTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Recent activity'**
-  String get dashboardRecentTitle;
-
-  /// No description provided for @dashboardYesterday.
+  /// No description provided for @activityYesterday.
   ///
   /// In en, this message translates to:
   /// **'Yesterday'**
-  String get dashboardYesterday;
+  String get activityYesterday;
 
   /// No description provided for @dashboardEmptyTitle.
   ///
@@ -4591,6 +4549,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add your first plant to follow its care, health and activity here.'**
   String get dashboardEmptyBody;
+
+  /// No description provided for @activityEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged yet. Every care you record shows up here.'**
+  String get activityEmpty;
 }
 
 class _AppLocalizationsDelegate

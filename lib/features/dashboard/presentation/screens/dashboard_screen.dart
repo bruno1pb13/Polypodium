@@ -10,15 +10,11 @@ import '../../../../core/theme/glass_colors.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../../../core/widgets/app_shell.dart';
 import '../../../labels/data/label_scanner.dart';
-import '../../../locations/presentation/screens/locations_list_screen.dart';
 import '../../../plants/presentation/providers/plants_providers.dart';
 import '../../../plants/presentation/screens/add_edit_plant_screen.dart';
-import '../../../plants/presentation/screens/home_screen.dart';
-import '../../../species/presentation/screens/species_list_screen.dart';
 import '../../../workspaces/presentation/providers/workspace_providers.dart';
 import '../../domain/garden_overview.dart';
 import '../providers/dashboard_providers.dart';
-import '../widgets/dashboard_activity_cards.dart';
 import '../widgets/dashboard_card.dart';
 import '../widgets/dashboard_care_cards.dart';
 import '../widgets/dashboard_garden_cards.dart';
@@ -30,8 +26,8 @@ const _maxContentWidth = 960.0;
 /// From this content width on, cards pair up side by side.
 const _twoColumnWidth = 720.0;
 
-/// The app's start screen: today's care, garden health, recent activity and
-/// a glimpse of the plants, each leading to its full screen.
+/// The app's start screen: today's care, garden health and a glimpse of the
+/// plants, each leading to its full screen.
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
@@ -181,7 +177,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 data: (overview) => _DashboardBody(
                   overview: overview,
                   hasAnyPlant: hasAnyPlant,
-                  push: _push,
                 ),
               ),
             ),
@@ -200,17 +195,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 class _DashboardBody extends StatelessWidget {
   final GardenOverview overview;
   final bool hasAnyPlant;
-  final void Function(Widget screen) push;
 
   const _DashboardBody({
     required this.overview,
     required this.hasAnyPlant,
-    required this.push,
   });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     const gap = SizedBox(height: 12);
 
     return LayoutBuilder(builder: (context, constraints) {
@@ -236,33 +228,6 @@ class _DashboardBody extends StatelessWidget {
         if (!hasAnyPlant)
           const _WelcomeCard()
         else ...[
-          DashboardStatTiles(stats: [
-            (
-              icon: Icons.local_florist_outlined,
-              value: overview.activeCount,
-              label: l10n.dashboardStatPlants,
-              onTap: () => push(const HomeScreen()),
-            ),
-            (
-              icon: Icons.eco_outlined,
-              value: overview.speciesCount,
-              label: l10n.dashboardStatSpecies,
-              onTap: () => push(const SpeciesListScreen()),
-            ),
-            (
-              icon: Icons.location_on_outlined,
-              value: overview.locationCount,
-              label: l10n.dashboardStatLocations,
-              onTap: () => push(const LocationsListScreen()),
-            ),
-            (
-              icon: Icons.edit_note,
-              value: overview.entriesInWindow,
-              label: l10n.dashboardStatEntries(activityWindowDays),
-              onTap: null,
-            ),
-          ]),
-          gap,
           pair(
             DashboardTodayCard(overview: overview),
             overview.activeCount > 0
@@ -272,17 +237,6 @@ class _DashboardBody extends StatelessWidget {
           if (overview.spotlight.isNotEmpty) ...[
             gap,
             DashboardGardenCarousel(overview: overview),
-          ],
-          gap,
-          pair(
-            DashboardActivityCard(overview: overview),
-            overview.byLocation.isNotEmpty
-                ? DashboardLocationsCard(overview: overview)
-                : null,
-          ),
-          if (overview.recent.isNotEmpty) ...[
-            gap,
-            DashboardRecentCard(overview: overview),
           ],
         ],
       ];
