@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../l10n/l10n.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
 import '../../features/agenda/presentation/widgets/agenda_badge.dart';
+import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/plants/presentation/screens/home_screen.dart';
 import '../../features/species/presentation/screens/species_list_screen.dart';
 import '../../features/locations/presentation/screens/locations_list_screen.dart';
@@ -12,7 +13,7 @@ import '../../features/workspaces/presentation/widgets/workspace_selector.dart';
 
 const double kWideBreakpoint = 720.0;
 const double _kSidebarWidth = 240.0;
-const int _kAgendaIndex = 1;
+const int _kAgendaIndex = 2;
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -26,6 +27,7 @@ class _AppShellState extends State<AppShell> {
   final _contentKey = GlobalKey<NavigatorState>();
 
   List<String> _labels(BuildContext context) => [
+    context.l10n.navHome,
     context.l10n.navMyPlants,
     context.l10n.navAgenda,
     context.l10n.navSpecies,
@@ -36,6 +38,7 @@ class _AppShellState extends State<AppShell> {
   ];
   static const _icons = [
     Icons.home_outlined,
+    Icons.local_florist_outlined,
     Icons.event_note_outlined,
     Icons.eco_outlined,
     Icons.location_on_outlined,
@@ -45,6 +48,7 @@ class _AppShellState extends State<AppShell> {
   ];
   static const _selectedIcons = [
     Icons.home,
+    Icons.local_florist,
     Icons.event_note,
     Icons.eco,
     Icons.location_on,
@@ -54,14 +58,15 @@ class _AppShellState extends State<AppShell> {
   ];
 
   Widget _screen(int index) => switch (index) {
-    0 => const HomeScreen(),
-    1 => const AgendaScreen(),
-    2 => const SpeciesListScreen(),
-    3 => const LocationsListScreen(),
-    4 => const SoilsListScreen(),
-    5 => const DefensivosListScreen(),
-    6 => const SettingsScreen(),
-    _ => const HomeScreen(),
+    0 => const DashboardScreen(),
+    1 => const HomeScreen(),
+    2 => const AgendaScreen(),
+    3 => const SpeciesListScreen(),
+    4 => const LocationsListScreen(),
+    5 => const SoilsListScreen(),
+    6 => const DefensivosListScreen(),
+    7 => const SettingsScreen(),
+    _ => const DashboardScreen(),
   };
 
   void _onSelected(int index) {
@@ -81,7 +86,7 @@ class _AppShellState extends State<AppShell> {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < kWideBreakpoint) {
-          return const HomeScreen();
+          return const DashboardScreen();
         }
 
         return Scaffold(

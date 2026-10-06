@@ -4363,6 +4363,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try again'**
   String get gardenRetry;
+
+  /// No description provided for @navHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @dashboardGoodMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get dashboardGoodMorning;
+
+  /// No description provided for @dashboardGoodAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon'**
+  String get dashboardGoodAfternoon;
+
+  /// No description provided for @dashboardGoodEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening'**
+  String get dashboardGoodEvening;
+
+  /// No description provided for @dashboardSummaryDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 care task due today} other{{count} care tasks due today}}'**
+  String dashboardSummaryDue(int count);
+
+  /// No description provided for @dashboardSummaryClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is up to date 🌿'**
+  String get dashboardSummaryClear;
+
+  /// No description provided for @dashboardStatPlants.
+  ///
+  /// In en, this message translates to:
+  /// **'Plants'**
+  String get dashboardStatPlants;
+
+  /// No description provided for @dashboardStatSpecies.
+  ///
+  /// In en, this message translates to:
+  /// **'Species'**
+  String get dashboardStatSpecies;
+
+  /// No description provided for @dashboardStatLocations.
+  ///
+  /// In en, this message translates to:
+  /// **'Locations'**
+  String get dashboardStatLocations;
+
+  /// No description provided for @dashboardStatEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Entries in {days} days'**
+  String dashboardStatEntries(int days);
+
+  /// No description provided for @dashboardTodayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s care'**
+  String get dashboardTodayTitle;
+
+  /// No description provided for @dashboardSeeAgenda.
+  ///
+  /// In en, this message translates to:
+  /// **'See agenda'**
+  String get dashboardSeeAgenda;
+
+  /// No description provided for @dashboardMoreTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{+1 more task} other{+{count} more tasks}}'**
+  String dashboardMoreTasks(int count);
+
+  /// No description provided for @dashboardNothingDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing due today.'**
+  String get dashboardNothingDue;
+
+  /// No description provided for @dashboardUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 task in the coming days} other{{count} tasks in the coming days}}'**
+  String dashboardUpcoming(int count);
+
+  /// No description provided for @dashboardHealthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Garden health'**
+  String get dashboardHealthTitle;
+
+  /// No description provided for @dashboardHealthy.
+  ///
+  /// In en, this message translates to:
+  /// **'healthy'**
+  String get dashboardHealthy;
+
+  /// No description provided for @dashboardHealthyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the plants are healthy'**
+  String dashboardHealthyLabel(int percent);
+
+  /// No description provided for @dashboardAllHealthy.
+  ///
+  /// In en, this message translates to:
+  /// **'Every plant is doing well.'**
+  String get dashboardAllHealthy;
+
+  /// No description provided for @dashboardNeedWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Need water'**
+  String get dashboardNeedWater;
+
+  /// No description provided for @dashboardWithPests.
+  ///
+  /// In en, this message translates to:
+  /// **'With pests'**
+  String get dashboardWithPests;
+
+  /// No description provided for @dashboardWithChlorosis.
+  ///
+  /// In en, this message translates to:
+  /// **'With chlorosis'**
+  String get dashboardWithChlorosis;
+
+  /// No description provided for @dashboardPesticideDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pesticide due'**
+  String get dashboardPesticideDue;
+
+  /// No description provided for @dashboardActivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get dashboardActivityTitle;
+
+  /// No description provided for @dashboardLastDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Last {days} days'**
+  String dashboardLastDays(int days);
+
+  /// No description provided for @dashboardStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, one{1 day in a row} other{{days} days in a row}}'**
+  String dashboardStreak(int days);
+
+  /// No description provided for @dashboardWaterings.
+  ///
+  /// In en, this message translates to:
+  /// **'Waterings'**
+  String get dashboardWaterings;
+
+  /// No description provided for @dashboardOtherCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Other care'**
+  String get dashboardOtherCare;
+
+  /// No description provided for @dashboardActivityChartLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{waterings} waterings and {care} other entries in the last {days} days'**
+  String dashboardActivityChartLabel(int waterings, int care, int days);
+
+  /// No description provided for @dashboardNoActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged recently. Every care you record shows up here.'**
+  String get dashboardNoActivity;
+
+  /// No description provided for @dashboardYourGarden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your garden'**
+  String get dashboardYourGarden;
+
+  /// No description provided for @dashboardSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get dashboardSeeAll;
+
+  /// No description provided for @dashboardByLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'By location'**
+  String get dashboardByLocation;
+
+  /// No description provided for @dashboardNoLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'No location'**
+  String get dashboardNoLocation;
+
+  /// No description provided for @dashboardRecentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent activity'**
+  String get dashboardRecentTitle;
+
+  /// No description provided for @dashboardYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get dashboardYesterday;
+
+  /// No description provided for @dashboardEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to your garden'**
+  String get dashboardEmptyTitle;
+
+  /// No description provided for @dashboardEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first plant to follow its care, health and activity here.'**
+  String get dashboardEmptyBody;
 }
 
 class _AppLocalizationsDelegate

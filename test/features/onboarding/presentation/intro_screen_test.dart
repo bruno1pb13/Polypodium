@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:polypodium/features/dashboard/domain/garden_overview.dart';
+import 'package:polypodium/features/dashboard/presentation/providers/dashboard_providers.dart';
+import 'package:polypodium/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:polypodium/features/onboarding/presentation/screens/intro_screen.dart';
 import 'package:polypodium/features/plants/presentation/providers/plants_providers.dart';
-import 'package:polypodium/features/plants/presentation/screens/home_screen.dart';
 import 'package:polypodium/features/settings/data/settings_repository.dart';
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
 import 'package:polypodium/features/workspaces/domain/workspace_model.dart';
@@ -16,7 +18,7 @@ void main() {
 
   Future<void> pump(WidgetTester tester) async {
     // Below the wide breakpoint, so the app shell opened at the end is just
-    // the Home.
+    // the dashboard.
     tester.view.physicalSize = const Size(600, 1200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -28,6 +30,11 @@ void main() {
         settingsRepositoryProvider.overrideWithValue(SettingsRepository(prefs)),
         activeWorkspaceProvider.overrideWithValue(Workspace.newLocal()),
         plantsWithSpeciesProvider.overrideWith((ref) async => const []),
+        gardenOverviewProvider.overrideWith((ref) async => buildGardenOverview(
+            plants: const [],
+            tasks: const [],
+            recentEntries: const [],
+            conditionEntries: const [])),
       ],
       child: const MaterialApp(
         locale: Locale('pt'),
@@ -68,8 +75,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(prefs.getBool('intro_seen'), isTrue);
     expect(find.byType(IntroScreen), findsNothing);
-    expect(find.byType(HomeScreen), findsOneWidget);
-    expect(find.text('Nenhuma planta cadastrada'), findsOneWidget);
+    expect(find.byType(DashboardScreen), findsOneWidget);
+    expect(find.text('Boas-vindas ao seu jardim'), findsOneWidget);
   });
 
   testWidgets('skipping marks the intro as seen', (tester) async {
@@ -81,6 +88,6 @@ void main() {
     // Skipping is not an opt-in to reminders.
     expect(prefs.getBool('notifications_enabled'), isFalse);
     expect(find.byType(IntroScreen), findsNothing);
-    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(DashboardScreen), findsOneWidget);
   });
 }

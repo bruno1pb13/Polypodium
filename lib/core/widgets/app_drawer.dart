@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/l10n.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
 import '../../features/agenda/presentation/widgets/agenda_badge.dart';
+import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/plants/presentation/screens/home_screen.dart';
 import '../../features/species/presentation/screens/species_list_screen.dart';
 import '../../features/locations/presentation/screens/locations_list_screen.dart';
@@ -90,12 +91,24 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.home_outlined,
-                  label: context.l10n.navMyPlants,
+                  label: context.l10n.navHome,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const HomeScreen()),
+                      MaterialPageRoute(
+                          builder: (_) => const DashboardScreen()),
                       (route) => false,
+                    );
+                  },
+                ),
+                _DrawerItem(
+                  icon: Icons.local_florist_outlined,
+                  label: context.l10n.navMyPlants,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HomeScreen()),
                     );
                   },
                 ),

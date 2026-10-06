@@ -2546,4 +2546,160 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gardenRetry => 'Try again';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get dashboardGoodMorning => 'Good morning';
+
+  @override
+  String get dashboardGoodAfternoon => 'Good afternoon';
+
+  @override
+  String get dashboardGoodEvening => 'Good evening';
+
+  @override
+  String dashboardSummaryDue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count care tasks due today',
+      one: '1 care task due today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardSummaryClear => 'Everything is up to date 🌿';
+
+  @override
+  String get dashboardStatPlants => 'Plants';
+
+  @override
+  String get dashboardStatSpecies => 'Species';
+
+  @override
+  String get dashboardStatLocations => 'Locations';
+
+  @override
+  String dashboardStatEntries(int days) {
+    return 'Entries in $days days';
+  }
+
+  @override
+  String get dashboardTodayTitle => 'Today\'s care';
+
+  @override
+  String get dashboardSeeAgenda => 'See agenda';
+
+  @override
+  String dashboardMoreTasks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count more tasks',
+      one: '+1 more task',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardNothingDue => 'Nothing due today.';
+
+  @override
+  String dashboardUpcoming(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tasks in the coming days',
+      one: '1 task in the coming days',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardHealthTitle => 'Garden health';
+
+  @override
+  String get dashboardHealthy => 'healthy';
+
+  @override
+  String dashboardHealthyLabel(int percent) {
+    return '$percent% of the plants are healthy';
+  }
+
+  @override
+  String get dashboardAllHealthy => 'Every plant is doing well.';
+
+  @override
+  String get dashboardNeedWater => 'Need water';
+
+  @override
+  String get dashboardWithPests => 'With pests';
+
+  @override
+  String get dashboardWithChlorosis => 'With chlorosis';
+
+  @override
+  String get dashboardPesticideDue => 'Pesticide due';
+
+  @override
+  String get dashboardActivityTitle => 'Activity';
+
+  @override
+  String dashboardLastDays(int days) {
+    return 'Last $days days';
+  }
+
+  @override
+  String dashboardStreak(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days in a row',
+      one: '1 day in a row',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardWaterings => 'Waterings';
+
+  @override
+  String get dashboardOtherCare => 'Other care';
+
+  @override
+  String dashboardActivityChartLabel(int waterings, int care, int days) {
+    return '$waterings waterings and $care other entries in the last $days days';
+  }
+
+  @override
+  String get dashboardNoActivity =>
+      'Nothing logged recently. Every care you record shows up here.';
+
+  @override
+  String get dashboardYourGarden => 'Your garden';
+
+  @override
+  String get dashboardSeeAll => 'See all';
+
+  @override
+  String get dashboardByLocation => 'By location';
+
+  @override
+  String get dashboardNoLocation => 'No location';
+
+  @override
+  String get dashboardRecentTitle => 'Recent activity';
+
+  @override
+  String get dashboardYesterday => 'Yesterday';
+
+  @override
+  String get dashboardEmptyTitle => 'Welcome to your garden';
+
+  @override
+  String get dashboardEmptyBody =>
+      'Add your first plant to follow its care, health and activity here.';
 }

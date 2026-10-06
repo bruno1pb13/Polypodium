@@ -205,7 +205,7 @@ void main() {
   testWidgets('lists the active plants by watering needs', (tester) async {
     await pump(tester, [anturio, samambaia, babosa]);
 
-    expect(find.text('Polypodium'), findsOneWidget);
+    expect(find.text('Minhas Plantas'), findsOneWidget);
     expect(find.text('Samambaia'), findsOneWidget);
     expect(find.text('Antúrio'), findsOneWidget);
     expect(find.text('Babosa'), findsNothing);
@@ -308,7 +308,7 @@ void main() {
       {'p1', 'p2'}
     ]);
     expect(find.text('Rega registrada em 2 plantas'), findsOneWidget);
-    expect(find.text('Polypodium'), findsOneWidget);
+    expect(find.text('Minhas Plantas'), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 
@@ -329,7 +329,7 @@ void main() {
 
     Navigator.of(tester.element(find.byType(PlantLabelsScreen))).pop();
     await tester.pumpAndSettle();
-    expect(find.text('Polypodium'), findsOneWidget);
+    expect(find.text('Minhas Plantas'), findsOneWidget);
   });
 
   group('scan label', () {
@@ -374,7 +374,7 @@ void main() {
       await tester.tap(find.byTooltip('Escanear etiqueta'));
       await tester.pumpAndSettle();
       expect(find.byType(SnackBar), findsNothing);
-      expect(find.text('Polypodium'), findsOneWidget);
+      expect(find.text('Minhas Plantas'), findsOneWidget);
     });
   });
 
@@ -385,13 +385,13 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Samambaia'));
     await tester.pumpAndSettle();
-    expect(find.text('Polypodium'), findsOneWidget);
+    expect(find.text('Minhas Plantas'), findsOneWidget);
 
     await tester.longPress(find.text('Samambaia'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Cancelar seleção'));
     await tester.pumpAndSettle();
-    expect(find.text('Polypodium'), findsOneWidget);
+    expect(find.text('Minhas Plantas'), findsOneWidget);
     expect(mutations.irrigated, isEmpty);
   });
 
@@ -415,7 +415,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(plantCalls,
         unorderedEquals(['status p1 archived', 'status p2 archived']));
-    expect(find.text('Polypodium'), findsOneWidget);
+    expect(find.text('Minhas Plantas'), findsOneWidget);
   });
 
   testWidgets('bulk delete can delete or be cancelled', (tester) async {
@@ -470,7 +470,7 @@ void main() {
       testWidgets('text follows the $name theme', (tester) async {
         await pump(tester, [samambaia], theme: theme);
 
-        expect(textColor(tester, 'Polypodium'), glass.fg);
+        expect(textColor(tester, 'Minhas Plantas'), glass.fg);
         expect(textColor(tester, 'Samambaia'), glass.fg);
         expect(textColor(tester, 'Espécie p1'), glass.fgMuted);
       });
@@ -479,7 +479,7 @@ void main() {
     testWidgets('dark keeps the white foregrounds', (tester) async {
       await pump(tester, [samambaia], theme: AppTheme.dark);
 
-      expect(textColor(tester, 'Polypodium'), Colors.white);
+      expect(textColor(tester, 'Minhas Plantas'), Colors.white);
       expect(textColor(tester, 'Samambaia'), Colors.white);
       expect(textColor(tester, 'Espécie p1'), Colors.white70);
     });

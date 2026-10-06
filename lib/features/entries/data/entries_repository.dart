@@ -33,6 +33,18 @@ class EntriesRepository {
       _dao.watchByPlantWithPhotos(plantId).map(
           (rows) => [for (final (row, photos) in rows) _fromRow(row, photos)]);
 
+  /// Entries of every plant dated on or after [since], newest first,
+  /// without their extra photos.
+  Stream<List<EntryModel>> watchSince(DateTime since) => _dao
+      .watchSince(since)
+      .map((rows) => [for (final row in rows) _fromRow(row, const [])]);
+
+  /// Entries of every plant of one of [types], newest first, without their
+  /// extra photos.
+  Stream<List<EntryModel>> watchOfTypes(Iterable<EntryType> types) => _dao
+      .watchOfTypes(types)
+      .map((rows) => [for (final row in rows) _fromRow(row, const [])]);
+
   /// Saves [entry] with its extra photos, each its own synced row written
   /// after the entry so a peer applies them in that order.
   Future<void> create(EntryModel entry) async {
