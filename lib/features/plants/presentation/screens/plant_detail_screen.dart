@@ -214,7 +214,7 @@ class PlantDetailScreen extends ConsumerWidget {
                     // ignored, so they aren't offered either.
                     if (plant.isActive)
                       SliverToBoxAdapter(
-                        child: PlantRemindersCard(plantId: plantId),
+                        child: PlantRemindersCard(plant: plant),
                       ),
                     SliverToBoxAdapter(
                       child: PlantDetailViewSelector(plantId: plantId),

@@ -411,7 +411,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get remindersEmpty =>
-      'No recurring reminders. Add one for fertilizing, pruning or a periodic check.';
+      'No recurring reminders. Add one here, or fill in \"Repeat every\" when recording fertilizing, pruning, repotting or pesticide.';
 
   @override
   String get addReminder => 'Add reminder';
@@ -1100,6 +1100,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pesticideRecurrenceHint =>
       'Leave blank to skip the reapplication reminder.';
+
+  @override
+  String get entryReminderLabel => 'Repeat every (optional)';
+
+  @override
+  String get entryReminderHint =>
+      'Creates or updates this care\'s reminder, shown under Reminders and in the agenda. Leave blank to keep it as is.';
+
+  @override
+  String get pesticideReminderInfoTitle => 'Pesticide reapplication';
+
+  @override
+  String get pesticideReminderInfoBody =>
+      'This reminder comes from the latest pesticide entry. To change it, record a new application with another interval, or with none to end it.';
+
+  @override
+  String get pesticideReminderRecord => 'Record application';
 
   @override
   String get daysSuffix => 'days';

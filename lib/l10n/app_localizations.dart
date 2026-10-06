@@ -773,7 +773,7 @@ abstract class AppLocalizations {
   /// No description provided for @remindersEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No recurring reminders. Add one for fertilizing, pruning or a periodic check.'**
+  /// **'No recurring reminders. Add one here, or fill in \"Repeat every\" when recording fertilizing, pruning, repotting or pesticide.'**
   String get remindersEmpty;
 
   /// No description provided for @addReminder.
@@ -1933,6 +1933,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Leave blank to skip the reapplication reminder.'**
   String get pesticideRecurrenceHint;
+
+  /// No description provided for @entryReminderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat every (optional)'**
+  String get entryReminderLabel;
+
+  /// No description provided for @entryReminderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Creates or updates this care\'s reminder, shown under Reminders and in the agenda. Leave blank to keep it as is.'**
+  String get entryReminderHint;
+
+  /// No description provided for @pesticideReminderInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pesticide reapplication'**
+  String get pesticideReminderInfoTitle;
+
+  /// No description provided for @pesticideReminderInfoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This reminder comes from the latest pesticide entry. To change it, record a new application with another interval, or with none to end it.'**
+  String get pesticideReminderInfoBody;
+
+  /// No description provided for @pesticideReminderRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Record application'**
+  String get pesticideReminderRecord;
 
   /// No description provided for @daysSuffix.
   ///

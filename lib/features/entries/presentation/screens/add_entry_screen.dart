@@ -14,6 +14,8 @@ import '../../../entries/domain/entry_details.dart';
 import '../../../entries/domain/entry_model.dart';
 import '../../../entries/presentation/providers/carencia_providers.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
+import '../../../reminders/domain/reminder_model.dart';
+import '../../../reminders/presentation/providers/reminders_providers.dart';
 import '../../../soils/domain/soil_model.dart';
 import '../widgets/entry_forms/chlorosis_form.dart';
 import '../widgets/entry_forms/entry_form_widgets.dart';
@@ -95,6 +97,12 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   final _harvestQuantityCtrl = TextEditingController();
   HarvestUnit? _harvestUnit;
 
+  // Recurring reminder of the care being recorded (reminderEntryTypes only).
+  // Prefilled with the plant's current enabled reminder of that type; a
+  // single plant only, since bulk plants may each have a different one.
+  final _reminderCtrl = TextEditingController();
+  Map<EntryType, ReminderModel>? _existingReminders;
+
   bool _saving = false;
   bool _submitted = false;
   bool _showFieldErrors = false;
@@ -104,6 +112,38 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   void initState() {
     super.initState();
     _photoStorage = ref.read(photoStorageProvider);
+    if (widget.plantIds.length == 1) {
+      ref.listenManual(plantRemindersProvider(widget.plantIds.single),
+          (_, next) {
+        final statuses = next.value;
+        if (statuses == null) return;
+        final firstLoad = _existingReminders == null;
+        _existingReminders = {
+          for (final s in statuses)
+            if (s.reminder.enabled) s.reminder.entryType: s.reminder,
+        };
+        if (firstLoad && _reminderCtrl.text.isEmpty) _prefillReminder();
+      }, fireImmediately: true);
+    }
+  }
+
+  void _prefillReminder() {
+    final days = _existingReminders?[_type]?.intervalDays;
+    _reminderCtrl.text = days == null ? '' : '$days';
+  }
+
+  bool get _hasReminderField => reminderEntryTypes.contains(_type);
+
+  /// The typed reminder interval, rounded; null when blank.
+  int? get _reminderIntervalDays => _hasReminderField
+      ? double.tryParse(_reminderCtrl.text.replaceAll(',', '.'))?.round()
+      : null;
+
+  bool get _hasReminderError {
+    final days = _reminderIntervalDays;
+    return _reminderCtrl.text.trim().isNotEmpty &&
+        _hasReminderField &&
+        (days == null || days < 1 || days > maxReminderIntervalDays);
   }
 
   @override
@@ -120,6 +160,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     _pesticideRecurrenceCtrl.dispose();
     _potDiameterCtrl.dispose();
     _harvestQuantityCtrl.dispose();
+    _reminderCtrl.dispose();
     if (!_submitted) {
       for (final path in _photoPaths) {
         _photoStorage.deletePhoto(path);
@@ -278,12 +319,24 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                     onSelected: (t) => setState(() {
                       _type = t;
                       _showFieldErrors = false;
+                      _prefillReminder();
                     }),
                   ),
                 ),
                 if (hasTypeCard) ...[
                   const SizedBox(height: 16),
-                  EntryGlassCard(child: _buildTypeSpecificContent()),
+                  EntryGlassCard(
+                    child: _hasReminderField
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildTypeSpecificContent(),
+                              const SizedBox(height: 16),
+                              _buildReminderField(),
+                            ],
+                          )
+                        : _buildTypeSpecificContent(),
+                  ),
                 ],
                 const SizedBox(height: 16),
                 EntryGlassCard(
@@ -409,6 +462,28 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     };
   }
 
+  Widget _buildReminderField() {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        EntryNumericField(
+          controller: _reminderCtrl,
+          label: l10n.entryReminderLabel,
+          suffix: l10n.daysSuffix,
+          hint: '30',
+          hasError: _showFieldErrors && _hasReminderError,
+          errorText: _showFieldErrors && _hasReminderError
+              ? l10n.reminderIntervalInvalid
+              : null,
+          onChanged: _refreshFieldErrors,
+        ),
+        const SizedBox(height: 4),
+        EntryHintText(l10n.entryReminderHint),
+      ],
+    );
+  }
+
   // Re-validates a required field as it is typed, once errors are shown.
   void _refreshFieldErrors(String _) {
     if (_showFieldErrors) setState(() {});
@@ -434,7 +509,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   }
 
   Future<void> _submit() async {
-    if (_hasRequiredFieldError) {
+    if (_hasRequiredFieldError || _hasReminderError) {
       setState(() => _showFieldErrors = true);
       return;
     }
@@ -500,7 +575,8 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
         );
         entries.add(entry);
       }
-      await mutations.createMany(entries);
+      await mutations.createMany(entries,
+          reminderIntervalDays: _reminderIntervalDays);
       _submitted = true;
       if (mounted) Navigator.pop(context);
     } finally {

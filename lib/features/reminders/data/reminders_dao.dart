@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/enums.dart';
 
 part 'reminders_dao.g.dart';
 
@@ -41,6 +42,18 @@ class RemindersDao extends DatabaseAccessor<AppDatabase>
 
   Future<List<RemindersTableData>> getAll() =>
       (select(remindersTable)..where((t) => t.deletedAt.isNull())).get();
+
+  /// The active reminder of [plantId] for [type], if any (the card offers
+  /// one reminder per type).
+  Future<RemindersTableData?> getActiveByPlantAndType(
+          String plantId, EntryType type) =>
+      (select(remindersTable)
+            ..where((t) =>
+                t.plantId.equals(plantId) &
+                t.entryType.equalsValue(type) &
+                t.deletedAt.isNull())
+            ..limit(1))
+          .getSingleOrNull();
 
   /// Unfiltered by [deletedAt] -- used by sync/backup merge logic.
   Future<RemindersTableData?> getById(String id) =>

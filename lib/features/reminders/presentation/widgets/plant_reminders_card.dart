@@ -9,6 +9,9 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/widgets/emoji_text.dart';
+import '../../../../core/utils/date_utils.dart';
+import '../../../entries/presentation/screens/add_entry_screen.dart';
+import '../../../plants/domain/plant_model.dart';
 import '../../../plants/presentation/widgets/plant_status.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/reminder_model.dart';
@@ -17,17 +20,21 @@ import '../../../../core/theme/glass_colors.dart';
 
 /// Glass card on the plant detail screen listing the plant's recurring care
 /// reminders, with their next due date, and letting the user add, edit,
-/// pause or delete them.
+/// pause or delete them. Also lists the pesticide reapplication set on the
+/// latest pesticide entry, which is managed from the diary instead.
 class PlantRemindersCard extends ConsumerWidget {
-  final String plantId;
+  final PlantModel plant;
 
-  const PlantRemindersCard({super.key, required this.plantId});
+  const PlantRemindersCard({super.key, required this.plant});
+
+  String get plantId => plant.id;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transparent = ref.watch(transparencyEnabledNotifierProvider);
     final statuses = ref.watch(plantRemindersProvider(plantId)).value;
     if (statuses == null) return const SizedBox.shrink();
+    final pesticide = _PesticideReminder.of(plant);
 
     final l10n = context.l10n;
     final usedTypes = {for (final s in statuses) s.reminder.entryType};
@@ -86,7 +93,7 @@ class PlantRemindersCard extends ConsumerWidget {
                       ),
                   ],
                 ),
-                if (statuses.isEmpty)
+                if (statuses.isEmpty && pesticide == null)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(32, 0, 8, 8),
                     child: Text(
@@ -94,9 +101,23 @@ class PlantRemindersCard extends ConsumerWidget {
                       style: TextStyle(fontSize: 13, color: secondary),
                     ),
                   ),
+                if (pesticide != null)
+                  _ReminderRow(
+                    entryType: EntryType.pesticide,
+                    intervalDays: pesticide.intervalDays,
+                    lastDoneAt: pesticide.lastAppliedAt,
+                    dueDate: pesticide.dueDate,
+                    enabled: true,
+                    transparent: transparent,
+                    onTap: () => _showPesticideInfo(context),
+                  ),
                 for (final status in statuses)
                   _ReminderRow(
-                    status: status,
+                    entryType: status.reminder.entryType,
+                    intervalDays: status.reminder.intervalDays,
+                    lastDoneAt: status.lastDoneAt,
+                    dueDate: status.dueDate,
+                    enabled: status.reminder.enabled,
                     transparent: transparent,
                     onTap: () => showDialog<void>(
                       context: context,
@@ -114,15 +135,77 @@ class PlantRemindersCard extends ConsumerWidget {
       ),
     );
   }
+
+  /// The pesticide reminder is derived from the latest pesticide entry, so
+  /// there is nothing to edit here: explain where it comes from and offer to
+  /// record a new application.
+  Future<void> _showPesticideInfo(BuildContext context) async {
+    final l10n = context.l10n;
+    final record = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.pesticideReminderInfoTitle),
+        content: Text(l10n.pesticideReminderInfoBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(MaterialLocalizations.of(ctx).closeButtonLabel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.pesticideReminderRecord),
+          ),
+        ],
+      ),
+    );
+    if (record != true || !context.mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddEntryScreen(
+            plantId: plantId, initialType: EntryType.pesticide),
+      ),
+    );
+  }
+}
+
+/// The plant's pending pesticide reapplication, as set on its latest
+/// pesticide entry (see PlantsRepository.refreshPesticideStatus).
+class _PesticideReminder {
+  final int intervalDays;
+  final DateTime lastAppliedAt;
+
+  const _PesticideReminder(this.intervalDays, this.lastAppliedAt);
+
+  static _PesticideReminder? of(PlantModel plant) {
+    final days = plant.pesticideReapplicationDays;
+    final last = plant.lastPesticideAppliedAt;
+    if (days == null || last == null) return null;
+    return _PesticideReminder(days, last);
+  }
+
+  /// Same calendar-day math as [ReminderStatus.dueDate] and the agenda.
+  DateTime get dueDate {
+    final anchor = lastAppliedAt.toLocal();
+    return DateTime(anchor.year, anchor.month, anchor.day + intervalDays);
+  }
 }
 
 class _ReminderRow extends StatelessWidget {
-  final ReminderStatus status;
+  final EntryType entryType;
+  final int intervalDays;
+  final DateTime? lastDoneAt;
+  final DateTime dueDate;
+  final bool enabled;
   final bool transparent;
   final VoidCallback onTap;
 
   const _ReminderRow({
-    required this.status,
+    required this.entryType,
+    required this.intervalDays,
+    required this.lastDoneAt,
+    required this.dueDate,
+    required this.enabled,
     required this.transparent,
     required this.onTap,
   });
@@ -130,18 +213,17 @@ class _ReminderRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final reminder = status.reminder;
     final dateFormat = DateFormat.Md(l10n.localeName);
-    final lastDone = status.lastDoneAt;
+    final lastDone = lastDoneAt;
     final subtitle = [
-      l10n.reminderEvery(reminder.intervalDays),
+      l10n.reminderEvery(intervalDays),
       lastDone == null
           ? l10n.reminderNeverDone
           : l10n.reminderLastDone(dateFormat.format(lastDone)),
     ].join(' · ');
 
-    final days = status.daysRelative();
-    final chip = !reminder.enabled
+    final days = calendarDaysBetween(dueDate);
+    final chip = !enabled
         ? PlantStatusChip(label: l10n.reminderPaused, tone: StatusTone.neutral)
         : days > 0
             ? PlantStatusChip(
@@ -151,7 +233,7 @@ class _ReminderRow extends StatelessWidget {
                     label: l10n.dueToday, tone: StatusTone.warning)
                 : PlantStatusChip(
                     label: l10n
-                        .reminderNextDate(dateFormat.format(status.dueDate)),
+                        .reminderNextDate(dateFormat.format(dueDate)),
                     tone: StatusTone.positive,
                   );
 
@@ -167,7 +249,7 @@ class _ReminderRow extends StatelessWidget {
               width: 20,
               child: ExcludeSemantics(
                 child: Text(
-                  reminder.entryType.emoji,
+                  entryType.emoji,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 15),
                 ),
@@ -179,7 +261,7 @@ class _ReminderRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    reminder.entryType.label(l10n),
+                    entryType.label(l10n),
                     style: TextStyle(
                       color: transparent ? context.glass.fg : null,
                       fontWeight: FontWeight.w500,
@@ -229,8 +311,6 @@ class ReminderDialog extends ConsumerStatefulWidget {
 }
 
 class _ReminderDialogState extends ConsumerState<ReminderDialog> {
-  static const _maxIntervalDays = 365;
-
   final _formKey = GlobalKey<FormState>();
   late EntryType _type;
   late bool _enabled;
@@ -333,7 +413,9 @@ class _ReminderDialogState extends ConsumerState<ReminderDialog> {
                   InputDecoration(labelText: l10n.reminderIntervalLabel),
               validator: (value) {
                 final days = int.tryParse(value?.trim() ?? '');
-                return days == null || days < 1 || days > _maxIntervalDays
+                return days == null ||
+                        days < 1 ||
+                        days > maxReminderIntervalDays
                     ? l10n.reminderIntervalInvalid
                     : null;
               },
