@@ -5,6 +5,7 @@ import '../../data/admin_client.dart';
 import '../../domain/server_data_settings.dart';
 import '../../domain/server_status.dart';
 import '../../domain/server_user.dart';
+import '../../domain/server_weather_status.dart';
 
 part 'admin_providers.g.dart';
 
@@ -48,6 +49,25 @@ class ServerDataSettingsNotifier extends _$ServerDataSettingsNotifier {
         );
     state = AsyncData(settings);
   }
+
+  Future<void> setWeatherEnabled(bool enabled) async {
+    final settings = await ref.read(adminClientProvider).updateDataSettings(
+          serverUrl: workspace.serverUrl!,
+          token: workspace.token!,
+          weatherEnabled: enabled,
+        );
+    state = AsyncData(settings);
+    ref.invalidate(serverWeatherStatusProvider(workspace));
+  }
+}
+
+@riverpod
+Future<ServerWeatherStatus> serverWeatherStatus(Ref ref, Workspace workspace) {
+  final client = ref.watch(adminClientProvider);
+  return client.weatherStatus(
+    serverUrl: workspace.serverUrl!,
+    token: workspace.token!,
+  );
 }
 
 @riverpod

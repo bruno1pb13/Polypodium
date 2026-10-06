@@ -168,7 +168,7 @@ final class ServerDataSettingsNotifierProvider extends $AsyncNotifierProvider<
 }
 
 String _$serverDataSettingsNotifierHash() =>
-    r'737a02b0ca9449a89b661a66288b4d9b18fa1a6e';
+    r'9ae856609383848285ca1835ea3d9304d5dd259a';
 
 final class ServerDataSettingsNotifierFamily extends $Family
     with
@@ -220,6 +220,86 @@ abstract class _$ServerDataSettingsNotifier
               _$args,
             ));
   }
+}
+
+@ProviderFor(serverWeatherStatus)
+final serverWeatherStatusProvider = ServerWeatherStatusFamily._();
+
+final class ServerWeatherStatusProvider extends $FunctionalProvider<
+        AsyncValue<ServerWeatherStatus>,
+        ServerWeatherStatus,
+        FutureOr<ServerWeatherStatus>>
+    with
+        $FutureModifier<ServerWeatherStatus>,
+        $FutureProvider<ServerWeatherStatus> {
+  ServerWeatherStatusProvider._(
+      {required ServerWeatherStatusFamily super.from,
+      required Workspace super.argument})
+      : super(
+          retry: null,
+          name: r'serverWeatherStatusProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$serverWeatherStatusHash();
+
+  @override
+  String toString() {
+    return r'serverWeatherStatusProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<ServerWeatherStatus> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<ServerWeatherStatus> create(Ref ref) {
+    final argument = this.argument as Workspace;
+    return serverWeatherStatus(
+      ref,
+      argument,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ServerWeatherStatusProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$serverWeatherStatusHash() =>
+    r'00655acfea822616ef34d4a639d9c3df45dba760';
+
+final class ServerWeatherStatusFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<ServerWeatherStatus>, Workspace> {
+  ServerWeatherStatusFamily._()
+      : super(
+          retry: null,
+          name: r'serverWeatherStatusProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  ServerWeatherStatusProvider call(
+    Workspace workspace,
+  ) =>
+      ServerWeatherStatusProvider._(argument: workspace, from: this);
+
+  @override
+  String toString() => r'serverWeatherStatusProvider';
 }
 
 @ProviderFor(ServerUsersNotifier)

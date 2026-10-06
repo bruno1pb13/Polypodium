@@ -13,7 +13,9 @@ import '../../../../core/l10n/l10n.dart';
 /// server has no accounts yet, the credentials step switches to a
 /// registration form and calls [onRegister] instead; on success, if
 /// [hasLocalDataToMigrate] resolves true, a final step offers to send the
-/// local workspace's data to the server via [onMigrate].
+/// local workspace's data to the server via [onMigrate]. Before that, when
+/// [supportsWeather] reports the server can fetch weather forecasts, a step
+/// asks the new admin whether to turn that on ([onEnableWeather]).
 class WorkspaceLoginDialog extends StatefulWidget {
   const WorkspaceLoginDialog({
     super.key,
@@ -27,6 +29,8 @@ class WorkspaceLoginDialog extends StatefulWidget {
     this.onRegister,
     this.hasLocalDataToMigrate,
     this.onMigrate,
+    this.supportsWeather,
+    this.onEnableWeather,
   });
 
   final String title;
@@ -57,6 +61,13 @@ class WorkspaceLoginDialog extends StatefulWidget {
   /// Sends the local workspace's data to the server just registered on.
   final Future<void> Function()? onMigrate;
 
+  /// Whether the server just registered on offers weather forecasts.
+  /// Checked right after [onRegister] succeeds.
+  final Future<bool> Function()? supportsWeather;
+
+  /// Turns weather forecasts on for the server just registered on.
+  final Future<void> Function()? onEnableWeather;
+
   @override
   State<WorkspaceLoginDialog> createState() => _WorkspaceLoginDialogState();
 }
@@ -72,7 +83,12 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
   final _confirmPasswordController = TextEditingController();
   final _workspaceNameController = TextEditingController();
 
-  late int _step = widget.serverUrlEditable ? 0 : 1;
+  static const _stepServer = 0;
+  static const _stepCredentials = 1;
+  static const _stepWeather = 2;
+  static const _stepMigrate = 3;
+
+  late int _step = widget.serverUrlEditable ? _stepServer : _stepCredentials;
   bool _loading = false;
   bool _obscurePassword = true;
   bool _isRegisterMode = false;
@@ -104,7 +120,7 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
       if (mounted) {
         setState(() {
           _isRegisterMode = !hasUsers;
-          _step = 1;
+          _step = _stepCredentials;
           _loading = false;
         });
       }
@@ -142,15 +158,17 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
           _emailController.text.trim(),
           _passwordController.text,
         );
-        final hasLocalData = widget.hasLocalDataToMigrate != null &&
-            await widget.hasLocalDataToMigrate!();
-        if (hasLocalData && mounted) {
-          setState(() {
-            _step = 2;
-            _loading = false;
-          });
+        if (await _offersWeather()) {
+          if (mounted) {
+            setState(() {
+              _step = _stepWeather;
+              _loading = false;
+            });
+          }
           return;
         }
+        await _continueToMigrateOrClose();
+        return;
       } else {
         await widget.onSubmit(
           url,
@@ -176,6 +194,57 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
         });
       }
     }
+  }
+
+  /// Failing to ask the server is no reason to fail the registration that
+  /// already succeeded: the admin screen can turn weather on later.
+  Future<bool> _offersWeather() async {
+    if (widget.supportsWeather == null || widget.onEnableWeather == null) {
+      return false;
+    }
+    try {
+      return await widget.supportsWeather!();
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// After the first account exists: offers migrating local data when there
+  /// is any, otherwise closes the dialog.
+  Future<void> _continueToMigrateOrClose() async {
+    final hasLocalData = widget.hasLocalDataToMigrate != null &&
+        await widget.hasLocalDataToMigrate!();
+    if (!mounted) return;
+    if (hasLocalData) {
+      setState(() {
+        _step = _stepMigrate;
+        _loading = false;
+        _error = null;
+      });
+    } else {
+      Navigator.pop(context, true);
+    }
+  }
+
+  Future<void> _answerWeather(bool enable) async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    if (enable) {
+      try {
+        await widget.onEnableWeather!();
+      } on Exception catch (e) {
+        if (mounted) {
+          setState(() {
+            _error = localizedErrorMessage(e, context.l10n);
+            _loading = false;
+          });
+        }
+        return;
+      }
+    }
+    await _continueToMigrateOrClose();
   }
 
   Future<void> _migrate() async {
@@ -206,20 +275,23 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
   @override
   Widget build(BuildContext context) {
     final title = switch (_step) {
-      0 => context.l10n.serverAddressTitle,
-      1 => _isRegisterMode
+      _stepServer => context.l10n.serverAddressTitle,
+      _stepCredentials => _isRegisterMode
           ? context.l10n.createFirstAccountTitle
           : widget.title,
+      _stepWeather => context.l10n.weatherSetupTitle,
       _ => context.l10n.migrateLocalDataTitle,
     };
     final content = switch (_step) {
-      0 => _buildServerStep(),
-      1 => _buildCredStep(),
+      _stepServer => _buildServerStep(),
+      _stepCredentials => _buildCredStep(),
+      _stepWeather => _buildWeatherStep(),
       _ => _buildMigrateStep(),
     };
     final actions = switch (_step) {
-      0 => _serverActions(),
-      1 => _credActions(),
+      _stepServer => _serverActions(),
+      _stepCredentials => _credActions(),
+      _stepWeather => _weatherActions(),
       _ => _migrateActions(),
     };
     return AlertDialog(title: Text(title), content: content, actions: actions);
@@ -421,6 +493,22 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
     ];
   }
 
+  Widget _buildWeatherStep() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(context.l10n.weatherSetupBody),
+        const SizedBox(height: 12),
+        Text(
+          context.l10n.weatherSetupPrivacy,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        if (_error != null) _buildErrorRow(),
+      ],
+    );
+  }
+
   Widget _buildMigrateStep() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -475,7 +563,7 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
               ? null
               : () => widget.serverUrlEditable
                   ? setState(() {
-                      _step = 0;
+                      _step = _stepServer;
                       _error = null;
                     })
                   : Navigator.pop(context),
@@ -493,6 +581,22 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
               : Text(_isRegisterMode
                   ? context.l10n.createAccount
                   : context.l10n.signIn),
+        ),
+      ];
+
+  List<Widget> _weatherActions() => [
+        TextButton(
+          onPressed: _loading ? null : () => _answerWeather(false),
+          child: Text(context.l10n.notNow),
+        ),
+        FilledButton(
+          onPressed: _loading ? null : () => _answerWeather(true),
+          child: _loading
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2))
+              : Text(context.l10n.weatherSetupEnable),
         ),
       ];
 

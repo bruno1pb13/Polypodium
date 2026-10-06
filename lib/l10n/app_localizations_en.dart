@@ -2715,4 +2715,116 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get activityMore => 'More';
+
+  @override
+  String get weatherForecastTitle => 'Weather forecast';
+
+  @override
+  String get weatherFetchForLocations => 'Fetch forecasts for locations';
+
+  @override
+  String get weatherFetchSubtitle =>
+      'Locations with coordinates get a daily forecast. Nearby locations share a single lookup.';
+
+  @override
+  String weatherRegions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count regions',
+      one: '1 region',
+      zero: 'No regions yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weatherNeverFetched => 'Not fetched yet';
+
+  @override
+  String weatherLastFetched(String date) {
+    return 'Last update: $date';
+  }
+
+  @override
+  String weatherFailingRegions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count regions failed their last fetch',
+      one: '1 region failed its last fetch',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weatherRefreshNow => 'Update now';
+
+  @override
+  String get weatherSetupTitle => 'Weather forecast';
+
+  @override
+  String get weatherSetupBody =>
+      'This server can fetch the weather forecast every day for locations that have coordinates. Turn it on? You can change this later in the server administration.';
+
+  @override
+  String get weatherSetupPrivacy =>
+      'The approximate coordinates of your locations are sent to the Open-Meteo service.';
+
+  @override
+  String get weatherSetupEnable => 'Turn on';
+
+  @override
+  String get weatherToday => 'Today';
+
+  @override
+  String get weatherClear => 'Clear sky';
+
+  @override
+  String get weatherPartlyCloudy => 'Partly cloudy';
+
+  @override
+  String get weatherCloudy => 'Overcast';
+
+  @override
+  String get weatherFog => 'Fog';
+
+  @override
+  String get weatherDrizzle => 'Drizzle';
+
+  @override
+  String get weatherRain => 'Rain';
+
+  @override
+  String get weatherSnow => 'Snow';
+
+  @override
+  String get weatherShowers => 'Rain showers';
+
+  @override
+  String get weatherThunderstorm => 'Thunderstorm';
+
+  @override
+  String get seasonSpring => 'Spring';
+
+  @override
+  String get seasonSummer => 'Summer';
+
+  @override
+  String get seasonAutumn => 'Autumn';
+
+  @override
+  String get seasonWinter => 'Winter';
+
+  @override
+  String seasonNextIn(String season, String next, int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+      zero: 'less than a day',
+    );
+    return '$season · $next in $_temp0';
+  }
 }

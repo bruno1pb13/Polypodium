@@ -4585,6 +4585,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More'**
   String get activityMore;
+
+  /// No description provided for @weatherForecastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather forecast'**
+  String get weatherForecastTitle;
+
+  /// No description provided for @weatherFetchForLocations.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch forecasts for locations'**
+  String get weatherFetchForLocations;
+
+  /// No description provided for @weatherFetchSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Locations with coordinates get a daily forecast. Nearby locations share a single lookup.'**
+  String get weatherFetchSubtitle;
+
+  /// No description provided for @weatherRegions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No regions yet} one{1 region} other{{count} regions}}'**
+  String weatherRegions(int count);
+
+  /// No description provided for @weatherNeverFetched.
+  ///
+  /// In en, this message translates to:
+  /// **'Not fetched yet'**
+  String get weatherNeverFetched;
+
+  /// No description provided for @weatherLastFetched.
+  ///
+  /// In en, this message translates to:
+  /// **'Last update: {date}'**
+  String weatherLastFetched(String date);
+
+  /// No description provided for @weatherFailingRegions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 region failed its last fetch} other{{count} regions failed their last fetch}}'**
+  String weatherFailingRegions(int count);
+
+  /// No description provided for @weatherRefreshNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update now'**
+  String get weatherRefreshNow;
+
+  /// No description provided for @weatherSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather forecast'**
+  String get weatherSetupTitle;
+
+  /// No description provided for @weatherSetupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This server can fetch the weather forecast every day for locations that have coordinates. Turn it on? You can change this later in the server administration.'**
+  String get weatherSetupBody;
+
+  /// No description provided for @weatherSetupPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'The approximate coordinates of your locations are sent to the Open-Meteo service.'**
+  String get weatherSetupPrivacy;
+
+  /// No description provided for @weatherSetupEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on'**
+  String get weatherSetupEnable;
+
+  /// No description provided for @weatherToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get weatherToday;
+
+  /// No description provided for @weatherClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear sky'**
+  String get weatherClear;
+
+  /// No description provided for @weatherPartlyCloudy.
+  ///
+  /// In en, this message translates to:
+  /// **'Partly cloudy'**
+  String get weatherPartlyCloudy;
+
+  /// No description provided for @weatherCloudy.
+  ///
+  /// In en, this message translates to:
+  /// **'Overcast'**
+  String get weatherCloudy;
+
+  /// No description provided for @weatherFog.
+  ///
+  /// In en, this message translates to:
+  /// **'Fog'**
+  String get weatherFog;
+
+  /// No description provided for @weatherDrizzle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drizzle'**
+  String get weatherDrizzle;
+
+  /// No description provided for @weatherRain.
+  ///
+  /// In en, this message translates to:
+  /// **'Rain'**
+  String get weatherRain;
+
+  /// No description provided for @weatherSnow.
+  ///
+  /// In en, this message translates to:
+  /// **'Snow'**
+  String get weatherSnow;
+
+  /// No description provided for @weatherShowers.
+  ///
+  /// In en, this message translates to:
+  /// **'Rain showers'**
+  String get weatherShowers;
+
+  /// No description provided for @weatherThunderstorm.
+  ///
+  /// In en, this message translates to:
+  /// **'Thunderstorm'**
+  String get weatherThunderstorm;
+
+  /// No description provided for @seasonSpring.
+  ///
+  /// In en, this message translates to:
+  /// **'Spring'**
+  String get seasonSpring;
+
+  /// No description provided for @seasonSummer.
+  ///
+  /// In en, this message translates to:
+  /// **'Summer'**
+  String get seasonSummer;
+
+  /// No description provided for @seasonAutumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Autumn'**
+  String get seasonAutumn;
+
+  /// No description provided for @seasonWinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Winter'**
+  String get seasonWinter;
+
+  /// No description provided for @seasonNextIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{season} · {next} in {days, plural, =0{less than a day} one{1 day} other{{days} days}}'**
+  String seasonNextIn(String season, String next, int days);
 }
 
 class _AppLocalizationsDelegate

@@ -9,6 +9,9 @@ import 'package:polypodium/features/locations/presentation/providers/locations_p
 import 'package:polypodium/features/locations/presentation/screens/add_edit_location_screen.dart';
 import 'package:polypodium/features/locations/presentation/screens/locations_list_screen.dart';
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
+import 'package:polypodium/features/weather/domain/location_weather.dart';
+import 'package:polypodium/features/weather/domain/season.dart';
+import 'package:polypodium/features/weather/presentation/providers/weather_providers.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
 
 class _FakeTransparencyNotifier extends TransparencyEnabledNotifier {
@@ -52,7 +55,8 @@ void main() {
   late List<LocationModel> saved;
   late List<String> deleted;
 
-  Future<void> pump(WidgetTester tester, List<LocationModel> locations) async {
+  Future<void> pump(WidgetTester tester, List<LocationModel> locations,
+      {Map<String, LocationWeather?> weather = const {}}) async {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -67,6 +71,8 @@ void main() {
             () => _FakeLocationsNotifier(locations, saved, deleted)),
         pushCursorToServerProvider.overrideWith((ref) async => null),
         locationServiceProvider.overrideWithValue(_FakeLocationService()),
+        locationWeatherProvider
+            .overrideWith((ref, id) async => weather[id]),
       ],
       child: const MaterialApp(
         locale: Locale('pt'),
@@ -168,5 +174,69 @@ void main() {
     await tester.tap(find.text('Deletar'));
     await tester.pumpAndSettle();
     expect(deleted, ['l2']);
+  });
+
+  testWidgets('shows the season and the server forecast for located places',
+      (tester) async {
+    final today = DateTime.now();
+    String day(int offset) =>
+        DailyWeather.dateKey(today.add(Duration(days: offset)));
+    await pump(tester, [
+      ...locations,
+      LocationModel(
+        id: 'l3',
+        name: 'Horta',
+        latitude: -23.55,
+        longitude: -46.63,
+        createdAt: DateTime(2024, 1, 3),
+      ),
+      LocationModel(
+        id: 'l4',
+        name: 'Estufa',
+        latitude: 48.85,
+        longitude: 2.35,
+        createdAt: DateTime(2024, 1, 4),
+      ),
+    ], weather: {
+      'l3': LocationWeather(daily: [
+        DailyWeather(date: day(-1), temperatureMax: 30, temperatureMin: 20),
+        DailyWeather(
+          date: day(0),
+          weatherCode: 61,
+          temperatureMax: 24.4,
+          temperatureMin: 16.2,
+          precipitationProbabilityMax: 70,
+          precipitationSum: 4.25,
+        ),
+        DailyWeather(date: day(1), weatherCode: 0, temperatureMax: 27),
+        DailyWeather(date: day(2), weatherCode: 3),
+        DailyWeather(date: day(3), weatherCode: 3),
+        DailyWeather(date: day(4), weatherCode: 3),
+      ]),
+    });
+
+    const names = {
+      Season.spring: 'Primavera',
+      Season.summer: 'Verão',
+      Season.autumn: 'Outono',
+      Season.winter: 'Inverno',
+    };
+    // Opposite hemispheres are in opposite seasons.
+    final south = seasonAt(today, -23.55);
+    final north = seasonAt(today, 48.85);
+    expect(find.textContaining('${names[south.current]} · '), findsOneWidget);
+    expect(find.textContaining('${names[north.current]} · '), findsOneWidget);
+    expect(find.textContaining(names[south.next]!.toLowerCase()),
+        findsOneWidget);
+
+    expect(find.text('Hoje 24°/16°'), findsOneWidget);
+    expect(find.text('70% · 4,3 mm'), findsOneWidget);
+    expect(find.textContaining('27°/–'), findsOneWidget);
+    // Yesterday is not shown, and only three upcoming days are.
+    expect(find.textContaining('30°/20°'), findsNothing);
+    expect(find.byIcon(Icons.cloud_outlined), findsNWidgets(2));
+
+    // Without coordinates there is neither season nor forecast.
+    expect(find.textContaining('Hoje'), findsOneWidget);
   });
 }

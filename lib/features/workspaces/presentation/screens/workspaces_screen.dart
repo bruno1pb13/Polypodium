@@ -97,6 +97,9 @@ class WorkspacesScreen extends ConsumerWidget {
   Future<void> _addRemote(BuildContext context, WidgetRef ref) async {
     const authClient = WorkspaceAuthClient();
     const migrationService = WorkspaceMigrationService();
+    const adminClient = AdminClient();
+    // The account onRegister just created, for the weather step after it.
+    Workspace? registered;
 
     final created = await showDialog<bool>(
       context: context,
@@ -126,9 +129,22 @@ class WorkspacesScreen extends ConsumerWidget {
                 email: email,
                 password: password,
               );
+          registered = ws;
           await ref
               .read(activeWorkspaceIdNotifierProvider.notifier)
               .setActive(ws.id);
+        },
+        supportsWeather: () async {
+          final ws = registered;
+          if (ws == null) return false;
+          final settings = await adminClient.getDataSettings(
+              serverUrl: ws.serverUrl!, token: ws.token!);
+          return settings.supportsWeather;
+        },
+        onEnableWeather: () async {
+          final ws = registered!;
+          await adminClient.updateDataSettings(
+              serverUrl: ws.serverUrl!, token: ws.token!, weatherEnabled: true);
         },
         hasLocalDataToMigrate: () => migrationService.hasPendingLocalData(
           ref.read(workspacesNotifierProvider.notifier).getById(
