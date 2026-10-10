@@ -115,4 +115,37 @@ class PlantsDao extends DatabaseAccessor<AppDatabase> with _$PlantsDaoMixin {
     ));
     return rows.map((r) => r.id).toList();
   }
+
+  /// Live plants in the pot [potId].
+  Future<List<PlantsTableData>> getByPot(String potId) => (select(plantsTable)
+        ..where((t) => t.potId.equals(potId) & t.deletedAt.isNull())
+        ..orderBy([(t) => OrderingTerm.asc(t.nickname)]))
+      .get();
+
+  /// Puts the plant in [potId] (null: out of any pot). With [locationId]
+  /// present, also moves it there.
+  Future<void> updatePot(String id, String? potId,
+          {Value<String?> locationId = const Value.absent(),
+          required DateTime updatedAt,
+          required int rev}) =>
+      (update(plantsTable)..where((t) => t.id.equals(id))).write(
+        PlantsTableCompanion(
+          potId: Value(potId),
+          locationId: locationId,
+          updatedAt: Value(updatedAt),
+          localRev: Value(rev),
+          deviceId: Value(attachedDatabase.deviceId),
+        ),
+      );
+
+  Future<void> updateLocation(String id, String? locationId,
+          {required DateTime updatedAt, required int rev}) =>
+      (update(plantsTable)..where((t) => t.id.equals(id))).write(
+        PlantsTableCompanion(
+          locationId: Value(locationId),
+          updatedAt: Value(updatedAt),
+          localRev: Value(rev),
+          deviceId: Value(attachedDatabase.deviceId),
+        ),
+      );
 }

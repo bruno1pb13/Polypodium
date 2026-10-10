@@ -68,6 +68,18 @@ enum PotMaterial {
       : PotMaterial.values.asNameMap()[name] ?? PotMaterial.other;
 }
 
+/// What kind of container a pot row is (see PotsTable). Persisted by name.
+enum PotKind {
+  pot,
+  planter,
+  bed,
+  other;
+
+  /// Missing or unknown names (a newer client's kind) are shown as [other].
+  static PotKind fromName(String? name) =>
+      PotKind.values.asNameMap()[name] ?? PotKind.other;
+}
+
 enum DefensivoCategory {
   insecticide,
   fungicide,
@@ -394,6 +406,22 @@ extension PotMaterialX on PotMaterial {
         PotMaterial.ceramic => l10n.potMaterialCeramic,
         PotMaterial.fabric => l10n.potMaterialFabric,
         PotMaterial.other => l10n.potMaterialOther,
+      };
+}
+
+extension PotKindX on PotKind {
+  String label(AppLocalizations l10n) => switch (this) {
+        PotKind.pot => l10n.potKindPot,
+        PotKind.planter => l10n.potKindPlanter,
+        PotKind.bed => l10n.potKindBed,
+        PotKind.other => l10n.potKindOther,
+      };
+
+  String get emoji => switch (this) {
+        PotKind.pot => '🪴',
+        PotKind.planter => '🌿',
+        PotKind.bed => '🟫',
+        PotKind.other => '📦',
       };
 }
 

@@ -17,6 +17,8 @@ import '../../features/locations/data/locations_dao.dart';
 import '../../features/locations/data/locations_table.dart';
 import '../../features/plants/data/plants_dao.dart';
 import '../../features/plants/data/plants_table.dart';
+import '../../features/pots/data/pots_dao.dart';
+import '../../features/pots/data/pots_table.dart';
 import '../../features/reminders/data/reminders_dao.dart';
 import '../../features/reminders/data/reminders_table.dart';
 import '../../features/species/data/species_dao.dart';
@@ -34,6 +36,7 @@ export '../../features/entries/data/entries_table.dart';
 export '../../features/entries/data/entry_photos_table.dart';
 export '../../features/locations/data/locations_table.dart';
 export '../../features/plants/data/plants_table.dart';
+export '../../features/pots/data/pots_table.dart';
 export '../../features/reminders/data/reminders_table.dart';
 export '../../features/soils/data/soils_table.dart';
 export '../../features/species/data/species_table.dart';
@@ -50,6 +53,7 @@ part 'app_database.g.dart';
     EntryPhotosTable,
     LocationsTable,
     SoilsTable,
+    PotsTable,
     DefensivosTable,
     RemindersTable,
     SyncMetaTable,
@@ -73,7 +77,7 @@ class AppDatabase extends _$AppDatabase {
   final String? deviceId;
 
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -81,6 +85,7 @@ class AppDatabase extends _$AppDatabase {
   late final EntryPhotosDao entryPhotosDao = EntryPhotosDao(this);
   late final LocationsDao locationsDao = LocationsDao(this);
   late final SoilsDao soilsDao = SoilsDao(this);
+  late final PotsDao potsDao = PotsDao(this);
   late final DefensivosDao defensivosDao = DefensivosDao(this);
   late final RemindersDao remindersDao = RemindersDao(this);
   late final SyncMetaDao syncMetaDao = SyncMetaDao(this);
@@ -202,6 +207,7 @@ class AppDatabase extends _$AppDatabase {
                 newColumns: [
               plantsTable.parentPlantId,
               plantsTable.coverPhotoId,
+              plantsTable.potId,
             ]));
           }
           if (from < 16) {
@@ -247,6 +253,16 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 21) {
             await m.createTable(syncConfirmedEntityTypesTable);
+          }
+          if (from < 22) {
+            // Pots, several plants per pot. The v14 rebuild above already
+            // creates the plant column.
+            await m.createTable(potsTable);
+            final columns = await _columnNames(plantsTable);
+            if (columns.isNotEmpty &&
+                !columns.contains(plantsTable.potId.name)) {
+              await m.addColumn(plantsTable, plantsTable.potId);
+            }
           }
         },
       );

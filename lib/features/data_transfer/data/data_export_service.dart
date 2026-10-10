@@ -36,6 +36,7 @@ class DataExportService {
     final species = await _db.select(_db.speciesTable).get();
     final soils = await _db.select(_db.soilsTable).get();
     final locations = await _db.select(_db.locationsTable).get();
+    final pots = await _db.select(_db.potsTable).get();
     final plants = await _db.select(_db.plantsTable).get();
     final entries = await _db.select(_db.entriesTable).get();
     final entryPhotos = await _db.select(_db.entryPhotosTable).get();
@@ -137,6 +138,23 @@ class DataExportService {
               'deviceId': r.deviceId,
             }
         ],
+        // Releases without pots skip the section, and the plants' potId.
+        'pots': [
+          for (final r in pots)
+            {
+              'id': r.id,
+              'name': r.name,
+              'kind': r.kind.name,
+              'diameterCm': r.diameterCm,
+              'material': r.material?.name,
+              'locationId': r.locationId,
+              'notes': r.notes,
+              'createdAt': r.createdAt.toIso8601String(),
+              'updatedAt': r.updatedAt.toIso8601String(),
+              'deletedAt': r.deletedAt?.toIso8601String(),
+              'deviceId': r.deviceId,
+            }
+        ],
         'plants': [
           for (final r in plants)
             {
@@ -155,6 +173,7 @@ class DataExportService {
               'statusChangedAt': r.statusChangedAt?.toIso8601String(),
               'parentPlantId': r.parentPlantId,
               'coverPhotoId': r.coverPhotoId,
+              'potId': r.potId,
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),

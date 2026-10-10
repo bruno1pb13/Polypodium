@@ -28,6 +28,9 @@ class PlantModel {
   /// Photo chosen as cover (an entry or entry photo id); see
   /// PlantsTable.coverPhotoId.
   final String? coverPhotoId;
+
+  /// The pot the plant is in, if any; see PlantsTable.potId.
+  final String? potId;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -48,6 +51,7 @@ class PlantModel {
     this.statusChangedAt,
     this.parentPlantId,
     this.coverPhotoId,
+    this.potId,
     required this.createdAt,
     DateTime? updatedAt,
     this.deletedAt,
@@ -75,6 +79,7 @@ class PlantModel {
     Object? statusChangedAt = _sentinel,
     Object? parentPlantId = _sentinel,
     Object? coverPhotoId = _sentinel,
+    Object? potId = _sentinel,
     DateTime? createdAt,
     DateTime? updatedAt,
     Object? deletedAt = _sentinel,
@@ -110,6 +115,7 @@ class PlantModel {
         coverPhotoId: coverPhotoId == _sentinel
             ? this.coverPhotoId
             : coverPhotoId as String?,
+        potId: potId == _sentinel ? this.potId : potId as String?,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt == _sentinel ? this.deletedAt : deletedAt as DateTime?,

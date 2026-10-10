@@ -254,6 +254,33 @@ void main() {
       expect((await db.plantsDao.getById('plant1'))!.coverPhotoId, isNull);
     });
 
+    test('the pot round-trips; older clients send none', () async {
+      await db.plantsDao.upsert(PlantsTableCompanion.insert(
+        id: 'plant1',
+        speciesId: 'species1',
+        nickname: 'Planta',
+        soilType: 'sandy',
+        acquisitionDate: DateTime(2026, 1, 1),
+        potId: const Value('pot1'),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+        localRev: const Value(1),
+      ));
+      final change = (await adapter.localChangesSince(0,
+              limit: 100, deviceId: 'device-1'))
+          .single;
+      expect(change.payload['potId'], 'pot1');
+
+      final other = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(other.close);
+      await DriftSyncStorageAdapter(other)
+          .applyRemoteChange(SyncChange.fromJson(change.toJson()));
+      expect((await other.plantsDao.getById('plant1'))!.potId, 'pot1');
+
+      await adapter.applyRemoteChange(plantChange(plantPayload()));
+      expect((await db.plantsDao.getById('plant1'))!.potId, isNull);
+    });
+
     test('falls back to active for an unknown value', () async {
       await adapter.applyRemoteChange(
           plantChange({...plantPayload(), 'status': 'composted'}));
@@ -346,6 +373,81 @@ void main() {
       expect(row.humidity, isNull);
       expect(row.petToxicity, PetToxicity.unknown);
       expect(row.floweringMonths, {4});
+    });
+  });
+
+  group('pots (wire name bed)', () {
+    test('round-trip through localChangesSince/applyRemoteChange', () async {
+      await db.potsDao.upsert(PotsTableCompanion.insert(
+        id: 'pot1',
+        name: 'Jardineira da varanda',
+        kind: const Value(PotKind.planter),
+        diameterCm: const Value(60),
+        material: const Value(PotMaterial.clay),
+        locationId: const Value('loc1'),
+        notes: const Value('Sol da tarde'),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 2),
+        localRev: const Value(1),
+      ));
+
+      final change = (await adapter.localChangesSince(0,
+              limit: 100, deviceId: 'device-1'))
+          .single;
+      expect(change.entityType, 'bed');
+      expect(change.entityId, 'pot1');
+      expect(change.payload['kind'], 'planter');
+      expect(change.payload['material'], 'clay');
+
+      final other = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(other.close);
+      await DriftSyncStorageAdapter(other)
+          .applyRemoteChange(SyncChange.fromJson(change.toJson()));
+      final pot = (await other.potsDao.getById('pot1'))!;
+      expect(pot.name, 'Jardineira da varanda');
+      expect(pot.kind, PotKind.planter);
+      expect(pot.diameterCm, 60);
+      expect(pot.material, PotMaterial.clay);
+      expect(pot.locationId, 'loc1');
+      expect(pot.notes, 'Sol da tarde');
+      expect(pot.updatedAt, DateTime(2026, 1, 2));
+      expect(pot.deviceId, 'device-1');
+      expect(pot.localRev, 0);
+    });
+
+    test('are listed as an entity type', () {
+      expect(adapter.entityTypes, contains('bed'));
+    });
+
+    test('an older update loses (LWW) and a tombstone applies', () async {
+      SyncChange potChange(DateTime updatedAt, {DateTime? deletedAt}) =>
+          SyncChange(
+            entityType: 'bed',
+            entityId: 'pot1',
+            payload: {
+              'id': 'pot1',
+              'name': 'v${updatedAt.month}',
+              'kind': 'bucket',
+              'createdAt': DateTime(2026, 1, 1).toIso8601String(),
+            },
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            deviceId: 'device-2',
+            rev: 1,
+          );
+
+      await adapter.applyRemoteChange(potChange(DateTime(2026, 3, 1)));
+      await adapter.applyRemoteChange(potChange(DateTime(2026, 2, 1)));
+      final pot = (await db.potsDao.getById('pot1'))!;
+      expect(pot.name, 'v3');
+      // Unknown kinds from a newer client read as other.
+      expect(pot.kind, PotKind.other);
+      expect(pot.material, isNull);
+
+      await adapter.applyRemoteChange(potChange(DateTime(2026, 4, 1),
+          deletedAt: DateTime(2026, 4, 1)));
+      expect((await db.potsDao.getById('pot1'))!.deletedAt, isNotNull);
+      expect(await db.potsDao.getAll(), isEmpty);
     });
   });
 

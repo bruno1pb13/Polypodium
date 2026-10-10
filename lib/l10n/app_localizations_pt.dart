@@ -2830,4 +2830,231 @@ class AppLocalizationsPt extends AppLocalizations {
     );
     return '$season · $next em $_temp0';
   }
+
+  @override
+  String get navPots => 'Vasos';
+
+  @override
+  String get potKindPot => 'Vaso';
+
+  @override
+  String get potKindPlanter => 'Jardineira';
+
+  @override
+  String get potKindBed => 'Canteiro';
+
+  @override
+  String get potKindOther => 'Outro';
+
+  @override
+  String get potKindLabel => 'Tipo';
+
+  @override
+  String get addPot => 'Adicionar vaso';
+
+  @override
+  String get editPot => 'Editar vaso';
+
+  @override
+  String get newPotTitle => 'Novo vaso';
+
+  @override
+  String get potNameLabel => 'Nome';
+
+  @override
+  String get potNameHint => 'Ex.: Vaso azul grande';
+
+  @override
+  String get potNameRequired => 'Informe um nome';
+
+  @override
+  String get potDiameterField => 'Diâmetro';
+
+  @override
+  String get potLocationLabel => 'Localização';
+
+  @override
+  String get potNotesLabel => 'Observações';
+
+  @override
+  String get potLocationCascadeHint =>
+      'Mudar a localização também move as plantas deste vaso.';
+
+  @override
+  String get searchPotsHint => 'Buscar vasos...';
+
+  @override
+  String get sortMostPlants => 'Mais plantas';
+
+  @override
+  String get noPotsFound => 'Nenhum vaso encontrado';
+
+  @override
+  String get noPotsRegistered => 'Nenhum vaso cadastrado';
+
+  @override
+  String get tapToAddPot => 'Toque em + para adicionar um vaso';
+
+  @override
+  String potPlantCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plantas',
+      one: '1 planta',
+      zero: 'Vazio',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deletePotTitle => 'Excluir vaso?';
+
+  @override
+  String deletePotBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'As $count plantas deste vaso não serão excluídas; elas ficarão sem vaso.',
+      one: 'A planta deste vaso não será excluída; ela ficará sem vaso.',
+      zero: 'O vaso está vazio.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get potPlantsTitle => 'Plantas neste vaso';
+
+  @override
+  String get potEmptyHint => 'Nenhuma planta neste vaso ainda';
+
+  @override
+  String get addPlantsToPot => 'Adicionar planta';
+
+  @override
+  String addPlantsToPotTitle(String pot) {
+    return 'Adicionar plantas a $pot';
+  }
+
+  @override
+  String moveHereCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Mover para cá ($count)',
+      zero: 'Mover para cá',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get movePlantToOtherPot => 'Mover para outro vaso';
+
+  @override
+  String get removePlantFromPot => 'Tirar do vaso';
+
+  @override
+  String get moveAllPlantsTo => 'Mover todas para…';
+
+  @override
+  String get movePotToLocation => 'Mover vaso para…';
+
+  @override
+  String get chooseLocationTitle => 'Escolher localização';
+
+  @override
+  String get potLabel => 'Vaso';
+
+  @override
+  String get noPot => 'Sem vaso';
+
+  @override
+  String get newPotEllipsis => 'Novo vaso…';
+
+  @override
+  String get changePot => 'Mudar de vaso';
+
+  @override
+  String get choosePotTitle => 'Escolher vaso';
+
+  @override
+  String get currentPot => 'Vaso atual';
+
+  @override
+  String inPotNamed(String pot) {
+    return 'Em: $pot';
+  }
+
+  @override
+  String sharesPotWith(String names) {
+    return 'Divide o vaso com: $names';
+  }
+
+  @override
+  String repottingMovedToPot(String pot) {
+    return 'Movida para o vaso $pot';
+  }
+
+  @override
+  String get repottingRemovedFromPot => 'Tirada do vaso';
+
+  @override
+  String get repottingPotHint =>
+      'Escolher um vaso move a planta para ele ao salvar. Um vaso novo usa o diâmetro e o material acima.';
+
+  @override
+  String get newPotNameTitle => 'Nome do novo vaso';
+
+  @override
+  String get historyFieldPot => 'Vaso';
+
+  @override
+  String plantsMoved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plantas movidas',
+      one: '1 planta movida',
+      zero: 'Nenhuma planta movida',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get potEntryAction => 'Novo registro no vaso';
+
+  @override
+  String potEntryTitle(String pot, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Registro no vaso $pot — $count plantas',
+      one: 'Registro no vaso $pot — 1 planta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get potEntryEmptyHint =>
+      'Adicione plantas ao vaso para registrar algo nele';
+
+  @override
+  String get waterPot => 'Regar o vaso';
+
+  @override
+  String potWatered(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plantas regadas',
+      one: '1 planta regada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String potPlantPickerOtherPot(String pot) {
+    return 'Em outro vaso: $pot';
+  }
 }

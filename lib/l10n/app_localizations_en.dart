@@ -2827,4 +2827,232 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$season · $next in $_temp0';
   }
+
+  @override
+  String get navPots => 'Pots';
+
+  @override
+  String get potKindPot => 'Pot';
+
+  @override
+  String get potKindPlanter => 'Planter';
+
+  @override
+  String get potKindBed => 'Bed';
+
+  @override
+  String get potKindOther => 'Other';
+
+  @override
+  String get potKindLabel => 'Kind';
+
+  @override
+  String get addPot => 'Add pot';
+
+  @override
+  String get editPot => 'Edit pot';
+
+  @override
+  String get newPotTitle => 'New pot';
+
+  @override
+  String get potNameLabel => 'Name';
+
+  @override
+  String get potNameHint => 'e.g. Big blue pot';
+
+  @override
+  String get potNameRequired => 'Enter a name';
+
+  @override
+  String get potDiameterField => 'Diameter';
+
+  @override
+  String get potLocationLabel => 'Location';
+
+  @override
+  String get potNotesLabel => 'Notes';
+
+  @override
+  String get potLocationCascadeHint =>
+      'Changing the location also moves the plants in this pot.';
+
+  @override
+  String get searchPotsHint => 'Search pots...';
+
+  @override
+  String get sortMostPlants => 'Most plants';
+
+  @override
+  String get noPotsFound => 'No pots found';
+
+  @override
+  String get noPotsRegistered => 'No pots registered';
+
+  @override
+  String get tapToAddPot => 'Tap + to add a pot';
+
+  @override
+  String potPlantCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plants',
+      one: '1 plant',
+      zero: 'Empty',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deletePotTitle => 'Delete pot?';
+
+  @override
+  String deletePotBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'The $count plants in this pot will not be deleted; they will be left without a pot.',
+      one:
+          'The plant in this pot will not be deleted; it will be left without a pot.',
+      zero: 'The pot is empty.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get potPlantsTitle => 'Plants in this pot';
+
+  @override
+  String get potEmptyHint => 'No plants in this pot yet';
+
+  @override
+  String get addPlantsToPot => 'Add plants';
+
+  @override
+  String addPlantsToPotTitle(String pot) {
+    return 'Add plants to $pot';
+  }
+
+  @override
+  String moveHereCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Move here ($count)',
+      zero: 'Move here',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get movePlantToOtherPot => 'Move to another pot';
+
+  @override
+  String get removePlantFromPot => 'Take out of the pot';
+
+  @override
+  String get moveAllPlantsTo => 'Move all to…';
+
+  @override
+  String get movePotToLocation => 'Move pot to…';
+
+  @override
+  String get chooseLocationTitle => 'Choose a location';
+
+  @override
+  String get potLabel => 'Pot';
+
+  @override
+  String get noPot => 'No pot';
+
+  @override
+  String get newPotEllipsis => 'New pot…';
+
+  @override
+  String get changePot => 'Change pot';
+
+  @override
+  String get choosePotTitle => 'Choose a pot';
+
+  @override
+  String get currentPot => 'Current pot';
+
+  @override
+  String inPotNamed(String pot) {
+    return 'In: $pot';
+  }
+
+  @override
+  String sharesPotWith(String names) {
+    return 'Shares the pot with: $names';
+  }
+
+  @override
+  String repottingMovedToPot(String pot) {
+    return 'Moved to pot $pot';
+  }
+
+  @override
+  String get repottingRemovedFromPot => 'Taken out of its pot';
+
+  @override
+  String get repottingPotHint =>
+      'Picking a pot moves the plant into it when saved. A new pot takes the diameter and material above.';
+
+  @override
+  String get newPotNameTitle => 'Name of the new pot';
+
+  @override
+  String get historyFieldPot => 'Pot';
+
+  @override
+  String plantsMoved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plants moved',
+      one: '1 plant moved',
+      zero: 'No plant moved',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get potEntryAction => 'New entry for the pot';
+
+  @override
+  String potEntryTitle(String pot, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Entry in $pot — $count plants',
+      one: 'Entry in $pot — 1 plant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get potEntryEmptyHint =>
+      'Add plants to the pot to record entries for it';
+
+  @override
+  String get waterPot => 'Water the pot';
+
+  @override
+  String potWatered(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plants watered',
+      one: '1 plant watered',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String potPlantPickerOtherPot(String pot) {
+    return 'In another pot: $pot';
+  }
 }

@@ -54,21 +54,21 @@ String _$homeWidgetGatewayHash() => r'66546dc4a06d4e67c6e30b59f99e1c5355b11293';
 
 /// Keeps the home-screen widget in step with the agenda while the app runs:
 /// every new agenda (an action, a sync pull, a workspace switch, the resume
-/// refresh) republishes the snapshot. Read once at startup to start it.
+/// refresh) republishes the snapshot. Listen to it to keep it running.
 
 @ProviderFor(homeWidgetSync)
 final homeWidgetSyncProvider = HomeWidgetSyncProvider._();
 
 /// Keeps the home-screen widget in step with the agenda while the app runs:
 /// every new agenda (an action, a sync pull, a workspace switch, the resume
-/// refresh) republishes the snapshot. Read once at startup to start it.
+/// refresh) republishes the snapshot. Listen to it to keep it running.
 
 final class HomeWidgetSyncProvider
     extends $FunctionalProvider<HomeWidgetSync, HomeWidgetSync, HomeWidgetSync>
     with $Provider<HomeWidgetSync> {
   /// Keeps the home-screen widget in step with the agenda while the app runs:
   /// every new agenda (an action, a sync pull, a workspace switch, the resume
-  /// refresh) republishes the snapshot. Read once at startup to start it.
+  /// refresh) republishes the snapshot. Listen to it to keep it running.
   HomeWidgetSyncProvider._()
       : super(
           from: null,

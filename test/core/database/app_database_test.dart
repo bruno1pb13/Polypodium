@@ -638,6 +638,60 @@ void main() {
     expect(version.read<int>('user_version'), db.schemaVersion);
   });
 
+  test('migration from v21 creates the pots table and adds no pot to plants',
+      () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE plants (
+          id TEXT NOT NULL PRIMARY KEY,
+          species_id TEXT NOT NULL,
+          nickname TEXT NOT NULL,
+          soil_type TEXT NOT NULL,
+          irrigation_frequency_days INTEGER NULL,
+          acquisition_date INTEGER NOT NULL,
+          location_id TEXT NULL,
+          last_irrigated_at INTEGER NULL,
+          last_pesticide_applied_at INTEGER NULL,
+          pesticide_reapplication_days INTEGER NULL,
+          status TEXT NOT NULL DEFAULT 'active',
+          status_changed_at INTEGER NULL,
+          parent_plant_id TEXT NULL,
+          cover_photo_id TEXT NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          deleted_at INTEGER NULL,
+          local_rev INTEGER NOT NULL DEFAULT 0,
+          device_id TEXT NULL
+        )
+      ''');
+      raw.execute('''
+        INSERT INTO plants (id, species_id, nickname, soil_type,
+          acquisition_date, created_at, updated_at, local_rev)
+        VALUES ('p1', 's1', 'Old plant', 'loamy', 0, 0, 0, 5)
+      ''');
+      raw.execute('PRAGMA user_version = 21');
+    }));
+
+    final plant = await db.plantsDao.getById('p1');
+    expect(plant!.potId, isNull);
+    expect(plant.localRev, 5);
+
+    await db.potsDao.upsert(PotsTableCompanion.insert(
+      id: 'pot1',
+      name: 'Vaso',
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    ));
+    final pot = await db.potsDao.getById('pot1');
+    expect(pot!.kind, PotKind.pot);
+    expect(pot.material, isNull);
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
   test('migrating from before v14 rebuilds plants with the parent column',
       () async {
     await db.close();
@@ -674,7 +728,7 @@ void main() {
     expect((await db.plantsDao.getById('p1'))!.parentPlantId, isNull);
     final columns = await db.customSelect('PRAGMA table_info(plants)').get();
     expect(columns.map((c) => c.read<String>('name')),
-        containsAll(['parent_plant_id', 'cover_photo_id']));
+        containsAll(['parent_plant_id', 'cover_photo_id', 'pot_id']));
   });
 
   test('flowering months are stored as a bitmask', () async {

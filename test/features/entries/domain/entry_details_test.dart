@@ -76,6 +76,23 @@ void main() {
       RepottingDetails(potMaterial: PotMaterial.fabric),
     ),
     (
+      EntryType.repotting,
+      '{"potDiameterCm":30.0,"potMaterial":"ceramic","fromPotId":"pot1",'
+          '"toPotId":"pot2","toPotName":"Vaso grande"}',
+      RepottingDetails(
+        potDiameterCm: 30,
+        potMaterial: PotMaterial.ceramic,
+        fromPotId: 'pot1',
+        toPotId: 'pot2',
+        toPotName: 'Vaso grande',
+      ),
+    ),
+    (
+      EntryType.repotting,
+      '{"fromPotId":"pot1"}',
+      RepottingDetails(fromPotId: 'pot1'),
+    ),
+    (
       EntryType.harvest,
       '{"quantity":1.5,"unit":"kg"}',
       HarvestDetails(quantity: 1.5, unit: HarvestUnit.kg),
@@ -181,6 +198,22 @@ void main() {
               '{"potDiameterCm":12,"potMaterial":"bamboo"}'),
           const RepottingDetails(
               potDiameterCm: 12, potMaterial: PotMaterial.other));
+    });
+
+    test('repotting: entries from before pots have no pot, and pot ids of '
+        'unexpected types are skipped', () {
+      final old = EntryDetails.decode(EntryType.repotting,
+          '{"potDiameterCm":14,"newSoilId":"s1"}') as RepottingDetails;
+      expect(old.fromPotId, isNull);
+      expect(old.toPotId, isNull);
+      expect(old.toPotName, isNull);
+      expect(old.isRemovalFromPot, isFalse);
+      expect(
+          EntryDetails.decode(EntryType.repotting,
+              '{"fromPotId":1,"toPotId":["x"],"toPotName":false}'),
+          const RepottingDetails());
+      expect(const RepottingDetails(fromPotId: 'p').isRemovalFromPot, isTrue);
+      expect(const RepottingDetails(fromPotId: 'p').isEmpty, isFalse);
     });
 
     test('ignores fields of unexpected types', () {

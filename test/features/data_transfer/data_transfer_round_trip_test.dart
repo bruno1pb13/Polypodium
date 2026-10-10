@@ -160,6 +160,44 @@ void main() {
     expect(plant.coverPhotoId, 'entry1');
   });
 
+  test('pots and the plants in them survive the round trip', () async {
+    await seedSpecies(source, 'Ficus lyrata', t0);
+    await source.potsDao.upsert(PotsTableCompanion.insert(
+      id: 'pot1',
+      name: 'Vaso azul',
+      kind: const Value(PotKind.planter),
+      diameterCm: const Value(30),
+      material: const Value(PotMaterial.ceramic),
+      notes: const Value('Furo no fundo'),
+      createdAt: t0,
+      updatedAt: t1,
+      localRev: const Value(1),
+    ));
+    await source.plantsDao.upsert(PlantsTableCompanion.insert(
+      id: 'plant1',
+      speciesId: 'species1',
+      nickname: 'No vaso',
+      soilType: 'loamy',
+      acquisitionDate: t0,
+      potId: const Value('pot1'),
+      createdAt: t0,
+      updatedAt: t1,
+      localRev: const Value(2),
+    ));
+
+    final bytes = await DataExportService(source).buildArchiveBytes();
+    await DataImportService(target, FakePhotoStorage())
+        .importFromBytes(bytes);
+
+    final pot = await target.potsDao.getById('pot1');
+    expect(pot!.name, 'Vaso azul');
+    expect(pot.kind, PotKind.planter);
+    expect(pot.diameterCm, 30);
+    expect(pot.material, PotMaterial.ceramic);
+    expect(pot.notes, 'Furo no fundo');
+    expect((await target.plantsDao.getById('plant1'))!.potId, 'pot1');
+  });
+
   test('the species care sheet survives the round trip', () async {
     await source.speciesDao.upsert(SpeciesTableCompanion.insert(
       id: 'species1',
