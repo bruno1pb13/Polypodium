@@ -9,6 +9,7 @@ import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/plants/presentation/screens/home_screen.dart';
 import '../../features/species/presentation/screens/species_list_screen.dart';
 import '../../features/locations/presentation/screens/locations_list_screen.dart';
+import '../../features/pots/presentation/screens/pots_list_screen.dart';
 import '../../features/soils/presentation/screens/soils_list_screen.dart';
 import '../../features/defensivos/presentation/screens/defensivos_list_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
@@ -36,6 +37,7 @@ class _AppShellState extends State<AppShell> {
     context.l10n.navActivity,
     context.l10n.navSpecies,
     context.l10n.navLocations,
+    context.l10n.navPots,
     context.l10n.navSoils,
     context.l10n.navDefensivos,
     context.l10n.navSettings,
@@ -47,6 +49,7 @@ class _AppShellState extends State<AppShell> {
     Icons.timeline_outlined,
     Icons.eco_outlined,
     Icons.location_on_outlined,
+    Icons.yard_outlined,
     Icons.terrain_outlined,
     Icons.science_outlined,
     Icons.settings_outlined,
@@ -58,6 +61,7 @@ class _AppShellState extends State<AppShell> {
     Icons.timeline,
     Icons.eco,
     Icons.location_on,
+    Icons.yard,
     Icons.terrain,
     Icons.science,
     Icons.settings,
@@ -70,9 +74,10 @@ class _AppShellState extends State<AppShell> {
     3 => const ActivityScreen(),
     4 => const SpeciesListScreen(),
     5 => const LocationsListScreen(),
-    6 => const SoilsListScreen(),
-    7 => const DefensivosListScreen(),
-    8 => const SettingsScreen(),
+    6 => const PotsListScreen(),
+    7 => const SoilsListScreen(),
+    8 => const DefensivosListScreen(),
+    9 => const SettingsScreen(),
     _ => const DashboardScreen(),
   };
 

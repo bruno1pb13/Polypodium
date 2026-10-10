@@ -53,7 +53,8 @@ class _FakeServer {
   final uploads = <String, List<int>>{};
   final downloads = <String>[];
   final pulls = <Uri>[];
-  Set<String> knownEntities = {...legacyEntityTypes, 'entry_photo'};
+  // Every server stored `bed` (pots) from its first per-entity tables.
+  Set<String> knownEntities = {...legacyEntityTypes, 'bed', 'entry_photo'};
 
   Future<http.Response> handle(http.Request request) async {
     final path = request.url.path;
@@ -107,7 +108,9 @@ class _FakeServer {
   }
 
   List<Uri> get photoBackfills => pulls
-      .where((u) => u.queryParameters['entities'] == 'entry_photo')
+      .where((u) =>
+          u.queryParameters['entities']?.split(',').contains('entry_photo') ??
+          false)
       .toList();
 }
 
@@ -293,7 +296,8 @@ void main() {
           contains('entry_photo'));
       expect(
           await cursors
-              .getEntityBackfillCursor(syncServerPeerId, {'entry_photo'}),
+              .getEntityBackfillCursor(
+                  syncServerPeerId, {'bed', 'entry_photo'}),
           0);
 
       await sync();
@@ -310,7 +314,7 @@ void main() {
 
     test('a server without entry photos leaves them undeclared', () async {
       await cursors.setPullCursor(syncServerPeerId, 3);
-      server.knownEntities = {...legacyEntityTypes};
+      server.knownEntities = {...legacyEntityTypes, 'bed'};
 
       await sync();
       await sync();
@@ -326,6 +330,45 @@ void main() {
       expect(await cursors.getDeclaredEntityTypes(syncServerPeerId),
           contains('entry_photo'));
     });
+  });
+
+  test('a device that pulled before pots existed backfills them, once',
+      () async {
+    // A release that ignored `bed` pulled past this pot.
+    server.rows.add(SyncChange(
+      entityType: 'bed',
+      entityId: 'pot1',
+      payload: const {
+        'id': 'pot1',
+        'name': 'Vaso azul',
+        'kind': 'pot',
+        'createdAt': '2026-01-01T00:00:00.000',
+      },
+      updatedAt: DateTime.utc(2026, 1, 1),
+      deviceId: 'other-device',
+      rev: 1,
+    ));
+    await cursors.setPullCursor(syncServerPeerId, 1);
+    await cursors.addDeclaredEntryTypes(
+        syncServerPeerId, {for (final t in EntryType.values) t.name});
+    await cursors.addDeclaredEntityTypes(
+        syncServerPeerId, {...legacyEntityTypes, 'entry_photo'});
+
+    await sync();
+
+    expect((await db.potsDao.getById('pot1'))!.name, 'Vaso azul');
+    expect(await cursors.getDeclaredEntityTypes(syncServerPeerId),
+        contains('bed'));
+    final backfills = server.pulls
+        .where((u) => u.queryParameters['entities'] == 'bed')
+        .toList();
+    expect(backfills, hasLength(1));
+    expect(backfills.single.queryParameters['since'], '0');
+
+    await sync();
+    expect(
+        server.pulls.where((u) => u.queryParameters['entities'] == 'bed'),
+        hasLength(1));
   });
 
   test('an unknown entity type is ignored on pull', () async {

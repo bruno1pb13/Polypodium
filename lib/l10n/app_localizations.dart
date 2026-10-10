@@ -4748,6 +4748,300 @@ abstract class AppLocalizations {
   /// **'{season} · {next} in {days, plural, =0{less than a day} one{1 day} other{{days} days}}'**
   String seasonNextIn(String season, String next, int days);
 
+  /// No description provided for @navPots.
+  ///
+  /// In en, this message translates to:
+  /// **'Pots'**
+  String get navPots;
+
+  /// No description provided for @potKindPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Pot'**
+  String get potKindPot;
+
+  /// No description provided for @potKindPlanter.
+  ///
+  /// In en, this message translates to:
+  /// **'Planter'**
+  String get potKindPlanter;
+
+  /// No description provided for @potKindBed.
+  ///
+  /// In en, this message translates to:
+  /// **'Bed'**
+  String get potKindBed;
+
+  /// No description provided for @potKindOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get potKindOther;
+
+  /// No description provided for @potKindLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get potKindLabel;
+
+  /// No description provided for @addPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Add pot'**
+  String get addPot;
+
+  /// No description provided for @editPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit pot'**
+  String get editPot;
+
+  /// No description provided for @newPotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New pot'**
+  String get newPotTitle;
+
+  /// No description provided for @potNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Big blue pot'**
+  String get potNameHint;
+
+  /// No description provided for @potNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name'**
+  String get potNameRequired;
+
+  /// No description provided for @potDiameterField.
+  ///
+  /// In en, this message translates to:
+  /// **'Diameter'**
+  String get potDiameterField;
+
+  /// No description provided for @potNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get potNotesLabel;
+
+  /// No description provided for @potLocationCascadeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing the location also moves the plants in this pot.'**
+  String get potLocationCascadeHint;
+
+  /// No description provided for @searchPotsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search pots...'**
+  String get searchPotsHint;
+
+  /// No description provided for @sortMostPlants.
+  ///
+  /// In en, this message translates to:
+  /// **'Most plants'**
+  String get sortMostPlants;
+
+  /// No description provided for @noPotsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No pots found'**
+  String get noPotsFound;
+
+  /// No description provided for @noPotsRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'No pots registered'**
+  String get noPotsRegistered;
+
+  /// No description provided for @tapToAddPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to add a pot'**
+  String get tapToAddPot;
+
+  /// No description provided for @potPlantCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Empty} one{1 plant} other{{count} plants}}'**
+  String potPlantCount(int count);
+
+  /// No description provided for @deletePotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete pot?'**
+  String get deletePotTitle;
+
+  /// No description provided for @deletePotBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{The pot is empty.} one{The plant in this pot will not be deleted; it will be left without a pot.} other{The {count} plants in this pot will not be deleted; they will be left without a pot.}}'**
+  String deletePotBody(int count);
+
+  /// No description provided for @potPlantsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plants in this pot'**
+  String get potPlantsTitle;
+
+  /// No description provided for @potEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No plants in this pot yet'**
+  String get potEmptyHint;
+
+  /// No description provided for @addPlantsToPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Add plants'**
+  String get addPlantsToPot;
+
+  /// No description provided for @addPlantsToPotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add plants to {pot}'**
+  String addPlantsToPotTitle(String pot);
+
+  /// No description provided for @moveHereCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Move here} other{Move here ({count})}}'**
+  String moveHereCount(int count);
+
+  /// No description provided for @movePlantToOtherPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to another pot'**
+  String get movePlantToOtherPot;
+
+  /// No description provided for @removePlantFromPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Take out of the pot'**
+  String get removePlantFromPot;
+
+  /// No description provided for @moveAllPlantsTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Move all to…'**
+  String get moveAllPlantsTo;
+
+  /// No description provided for @movePotToLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Move pot to…'**
+  String get movePotToLocation;
+
+  /// No description provided for @chooseLocationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a location'**
+  String get chooseLocationTitle;
+
+  /// No description provided for @potLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pot'**
+  String get potLabel;
+
+  /// No description provided for @noPot.
+  ///
+  /// In en, this message translates to:
+  /// **'No pot'**
+  String get noPot;
+
+  /// No description provided for @newPotEllipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'New pot…'**
+  String get newPotEllipsis;
+
+  /// No description provided for @changePot.
+  ///
+  /// In en, this message translates to:
+  /// **'Change pot'**
+  String get changePot;
+
+  /// No description provided for @choosePotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a pot'**
+  String get choosePotTitle;
+
+  /// No description provided for @sharesPotWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Shares the pot with: {names}'**
+  String sharesPotWith(String names);
+
+  /// No description provided for @repottingMovedToPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to pot {pot}'**
+  String repottingMovedToPot(String pot);
+
+  /// No description provided for @repottingRemovedFromPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken out of its pot'**
+  String get repottingRemovedFromPot;
+
+  /// No description provided for @repottingPotHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Picking a pot moves the plant into it when saved. A new pot takes the diameter and material above.'**
+  String get repottingPotHint;
+
+  /// No description provided for @historyFieldPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Pot'**
+  String get historyFieldPot;
+
+  /// No description provided for @plantsMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No plant moved} one{1 plant moved} other{{count} plants moved}}'**
+  String plantsMoved(int count);
+
+  /// No description provided for @potEntryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'New entry for the pot'**
+  String get potEntryAction;
+
+  /// No description provided for @potEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Entry in {pot} — 1 plant} other{Entry in {pot} — {count} plants}}'**
+  String potEntryTitle(String pot, int count);
+
+  /// No description provided for @potEntryEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add plants to the pot to record entries for it'**
+  String get potEntryEmptyHint;
+
+  /// No description provided for @waterPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Water the pot'**
+  String get waterPot;
+
+  /// No description provided for @potPlantPickerOtherPot.
+  ///
+  /// In en, this message translates to:
+  /// **'In another pot: {pot}'**
+  String potPlantPickerOtherPot(String pot);
+
+  /// No description provided for @keepCurrentPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the current pot'**
+  String get keepCurrentPot;
+
   /// No description provided for @updateAvailable.
   ///
   /// In en, this message translates to:

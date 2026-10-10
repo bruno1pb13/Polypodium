@@ -7,6 +7,7 @@ mixin _$RemindersDaoMixin on DatabaseAccessor<AppDatabase> {
   $SpeciesTableTable get speciesTable => attachedDatabase.speciesTable;
   $SoilsTableTable get soilsTable => attachedDatabase.soilsTable;
   $LocationsTableTable get locationsTable => attachedDatabase.locationsTable;
+  $PotsTableTable get potsTable => attachedDatabase.potsTable;
   $PlantsTableTable get plantsTable => attachedDatabase.plantsTable;
   $RemindersTableTable get remindersTable => attachedDatabase.remindersTable;
   $EntriesTableTable get entriesTable => attachedDatabase.entriesTable;
@@ -23,6 +24,8 @@ class RemindersDaoManager {
   $$LocationsTableTableTableManager get locationsTable =>
       $$LocationsTableTableTableManager(
           _db.attachedDatabase, _db.locationsTable);
+  $$PotsTableTableTableManager get potsTable =>
+      $$PotsTableTableTableManager(_db.attachedDatabase, _db.potsTable);
   $$PlantsTableTableTableManager get plantsTable =>
       $$PlantsTableTableTableManager(_db.attachedDatabase, _db.plantsTable);
   $$RemindersTableTableTableManager get remindersTable =>

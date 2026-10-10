@@ -651,6 +651,8 @@ void main() {
         await pump(tester, plant(), size: const Size(400, 2400));
         expect(tester.takeException(), isNull);
 
+        await tester.scrollUntilVisible(find.text('Gráficos'), 200,
+            scrollable: find.byType(Scrollable).first);
         await tester.tap(find.text('Gráficos'));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);

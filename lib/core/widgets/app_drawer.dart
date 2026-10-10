@@ -8,6 +8,7 @@ import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/plants/presentation/screens/home_screen.dart';
 import '../../features/species/presentation/screens/species_list_screen.dart';
 import '../../features/locations/presentation/screens/locations_list_screen.dart';
+import '../../features/pots/presentation/screens/pots_list_screen.dart';
 import '../../features/soils/presentation/screens/soils_list_screen.dart';
 import '../../features/defensivos/presentation/screens/defensivos_list_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
@@ -162,6 +163,18 @@ class AppDrawer extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                                 builder: (_) => const LocationsListScreen()),
+                          );
+                        },
+                      ),
+                      _DrawerItem(
+                        icon: Icons.yard_outlined,
+                        label: context.l10n.navPots,
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const PotsListScreen()),
                           );
                         },
                       ),

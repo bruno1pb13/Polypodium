@@ -12,6 +12,7 @@ import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../data/plants_repository.dart';
 import '../../domain/plant_model.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
+import '../../../pots/presentation/providers/pots_providers.dart';
 import '../../../soils/presentation/providers/soils_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
 
@@ -65,7 +66,17 @@ class PlantMutations {
     final plantsRepo = _ref.read(plantsRepositoryProvider);
     final oldPlant = await plantsRepo.getById(plant.id);
 
-    await plantsRepo.save(plant);
+    // A pot change on an existing plant goes through the pot move, which
+    // records it in the diary as a repotting; the location was already
+    // picked on the form.
+    final potChanged = oldPlant != null && oldPlant.potId != plant.potId;
+    await plantsRepo
+        .save(potChanged ? plant.copyWith(potId: oldPlant.potId) : plant);
+    if (potChanged) {
+      await _ref
+          .read(potMutationsProvider)
+          .movePlants([plant.id], plant.potId, applyPotLocation: false);
+    }
 
     final note = await _generateHistoryNote(oldPlant, plant);
     if (note != null) {
@@ -141,6 +152,10 @@ class PlantMutations {
       sb.writeln('• ${l10n.historyFieldSoil}: ${soil?.name ?? l10n.unknown}');
       if (location != null) {
         sb.writeln('• ${l10n.historyFieldLocation}: ${location.name}');
+      }
+      if (next.potId != null) {
+        final pot = await _ref.read(potsRepositoryProvider).getById(next.potId!);
+        if (pot != null) sb.writeln('• ${l10n.historyFieldPot}: ${pot.name}');
       }
       if (next.parentPlantId != null) {
         sb.writeln('• ${l10n.historyFieldParent}: '
@@ -241,13 +256,16 @@ Future<List<PlantWithSpecies>> plantsWithSpecies(Ref ref) async {
   final plantsStream = ref.watch(plantsNotifierProvider.future);
   final speciesStream = ref.watch(speciesNotifierProvider.future);
   final locationsStream = ref.watch(locationsNotifierProvider.future);
+  final potsStream = ref.watch(potsNotifierProvider.future);
 
   final plants = await plantsStream;
   final species = await speciesStream;
   final locations = await locationsStream;
+  final pots = await potsStream;
 
   final speciesById = {for (final s in species) s.id: s};
   final locationsById = {for (final l in locations) l.id: l};
+  final potsById = {for (final pot in pots) pot.id: pot};
 
   // null when there's no server to compare against (local-only workspace).
   final cursor = await ref.watch(pushCursorToServerProvider.future);
@@ -273,6 +291,7 @@ Future<List<PlantWithSpecies>> plantsWithSpecies(Ref ref) async {
       plant: p,
       species: species,
       location: location,
+      pot: p.potId != null ? potsById[p.potId] : null,
       isPendingSync: isPendingSync,
     ));
   }

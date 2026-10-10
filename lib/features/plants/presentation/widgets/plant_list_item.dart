@@ -11,6 +11,7 @@ import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/plant_model.dart';
 import 'plant_status.dart';
 import '../../../../core/theme/glass_colors.dart';
+import 'plant_short_code_text.dart';
 
 class PlantListItem extends ConsumerWidget {
   final PlantWithSpecies plantWithSpecies;
@@ -129,27 +130,48 @@ class PlantListItem extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
-                                child: Text(
-                                  pws.plant.nickname,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 17,
-                                    color: transparencyEnabled
-                                        ? context.glass.fg
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant,
-                                    letterSpacing: 0.3,
-                                    shadows: transparencyEnabled
-                                        ? [
-                                            Shadow(
-                                              color: context.glass.shadow(Colors.black26),
-                                              offset: Offset(0, 1),
-                                              blurRadius: 2,
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        pws.plant.nickname,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 17,
+                                          color: transparencyEnabled
+                                              ? context.glass.fg
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                          letterSpacing: 0.3,
+                                          shadows: transparencyEnabled
+                                              ? [
+                                                  Shadow(
+                                                    color: context.glass.shadow(Colors.black26),
+                                                    offset: Offset(0, 1),
+                                                    blurRadius: 2,
+                                                  ),
+                                                ]
+                                              : null,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    PlantShortCodeText(
+                                      pws.plant.shortCode,
+                                      color: transparencyEnabled
+                                          ? context.glass.fgFaint
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant
+                                              .withValues(alpha: 0.6),
+                                    ),
+                                  ],
                                 ),
                               ),
                               if (pws.isPendingSync)

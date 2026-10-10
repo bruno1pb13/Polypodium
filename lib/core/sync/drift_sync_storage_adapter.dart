@@ -18,10 +18,15 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
 
   final AppDatabase _db;
 
+  /// In FK-dependency order. `bed` is the wire name of pots (PotsTable):
+  /// the app calls them pots, but every server has stored `bed` rows since
+  /// its first per-entity tables, so the historical name is kept and no
+  /// server change or re-push is needed.
   static const _entityTypes = [
     'species',
     'soil',
     'location',
+    'bed',
     'plant',
     'entry',
     'entry_photo',
@@ -77,6 +82,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
         await _applyEntryPhoto(change);
       case 'location':
         await _applyLocation(change);
+      case 'bed':
+        await _applyPot(change);
       case 'soil':
         await _applySoil(change);
       case 'defensivo':
@@ -101,6 +108,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
         return _db.entryPhotosDao.changesSince(since, limit: limit);
       case 'location':
         return _db.locationsDao.changesSince(since, limit: limit);
+      case 'bed':
+        return _db.potsDao.changesSince(since, limit: limit);
       case 'soil':
         return _db.soilsDao.changesSince(since, limit: limit);
       case 'defensivo':
@@ -161,6 +170,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'statusChangedAt': r.statusChangedAt?.toIso8601String(),
           'parentPlantId': r.parentPlantId,
           'coverPhotoId': r.coverPhotoId,
+          'potId': r.potId,
           'createdAt': r.createdAt.toIso8601String(),
         };
       case 'entry':
@@ -205,6 +215,22 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'description': r.description,
           'latitude': r.latitude,
           'longitude': r.longitude,
+          'createdAt': r.createdAt.toIso8601String(),
+        };
+      case 'bed':
+        final r = row as PotsTableData;
+        entityId = r.id;
+        updatedAt = r.updatedAt;
+        deletedAt = r.deletedAt;
+        rev = r.localRev;
+        payload = {
+          'id': r.id,
+          'name': r.name,
+          'kind': r.kind.name,
+          'diameterCm': r.diameterCm,
+          'material': r.material?.name,
+          'locationId': r.locationId,
+          'notes': r.notes,
           'createdAt': r.createdAt.toIso8601String(),
         };
       case 'soil':
@@ -355,6 +381,8 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       parentPlantId: Value(p['parentPlantId'] as String?),
       // Older clients don't send it: back to the latest photo.
       coverPhotoId: Value(p['coverPhotoId'] as String?),
+      // Older clients don't send it: out of any pot.
+      potId: Value(p['potId'] as String?),
       createdAt: DateTime.parse(p['createdAt'] as String),
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),
@@ -454,6 +482,30 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       description: Value(p['description'] as String?),
       latitude: Value((p['latitude'] as num?)?.toDouble()),
       longitude: Value((p['longitude'] as num?)?.toDouble()),
+      createdAt: DateTime.parse(p['createdAt'] as String),
+      updatedAt: change.updatedAt,
+      deletedAt: Value(change.deletedAt),
+      localRev: const Value(0),
+      deviceId: Value(change.deviceId),
+    ));
+  }
+
+  /// A pot (wire name `bed`). Its location change arrives with the plant
+  /// rows the sending device already moved, so nothing cascades here.
+  Future<void> _applyPot(SyncChange change) async {
+    final existing = await _db.potsDao.getById(change.entityId);
+    if (!_incomingWins(change, existing?.updatedAt, existing?.deviceId)) {
+      return;
+    }
+    final p = change.payload;
+    await _db.potsDao.upsert(PotsTableCompanion.insert(
+      id: change.entityId,
+      name: p['name'] as String? ?? '',
+      kind: Value(PotKind.fromName(p['kind'] as String?)),
+      diameterCm: Value((p['diameterCm'] as num?)?.toDouble()),
+      material: Value(PotMaterial.fromName(p['material'] as String?)),
+      locationId: Value(p['locationId'] as String?),
+      notes: Value(p['notes'] as String?),
       createdAt: DateTime.parse(p['createdAt'] as String),
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),

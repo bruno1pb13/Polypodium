@@ -122,3 +122,23 @@ class MonthSetConverter extends TypeConverter<Set<int>, int> {
         }
       : {};
 }
+
+class PotKindConverter extends TypeConverter<PotKind, String> {
+  const PotKindConverter();
+
+  @override
+  PotKind fromSql(String fromDb) => PotKind.fromName(fromDb);
+
+  @override
+  String toSql(PotKind value) => value.name;
+}
+
+class PotMaterialConverter extends TypeConverter<PotMaterial?, String?> {
+  const PotMaterialConverter();
+
+  @override
+  PotMaterial? fromSql(String? fromDb) => PotMaterial.fromName(fromDb);
+
+  @override
+  String? toSql(PotMaterial? value) => value?.name;
+}

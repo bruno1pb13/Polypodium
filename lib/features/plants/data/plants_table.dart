@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../../core/database/converters.dart';
 import '../../locations/data/locations_table.dart';
+import '../../pots/data/pots_table.dart';
 import '../../soils/data/soils_table.dart';
 import '../../species/data/species_table.dart';
 
@@ -50,6 +51,13 @@ class PlantsTable extends Table {
   /// synced photo under its own path. Null, or pointing at a photo that was
   /// deleted, means the latest photo is used.
   TextColumn get coverPhotoId => text().nullable()();
+
+  /// The pot the plant is in, if any. Several plants may share a pot.
+  /// Pots are only soft-deleted: deleting one clears this column on its
+  /// plants (PotsRepository.delete).
+  TextColumn get potId => text()
+      .nullable()
+      .references(PotsTable, #id, onDelete: KeyAction.setNull)();
 
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();

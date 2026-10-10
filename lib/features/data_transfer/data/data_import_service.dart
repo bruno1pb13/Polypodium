@@ -119,6 +119,14 @@ class DataImportService {
             skipped++;
           }
         }
+        // Backups made before schema v22 have no such section.
+        for (final row in rowsOf('pots')) {
+          if (await _applyPot(row)) {
+            applied++;
+          } else {
+            skipped++;
+          }
+        }
         for (final row in rowsOf('defensivos')) {
           if (await _applyDefensivo(row)) {
             applied++;
@@ -352,6 +360,31 @@ class DataImportService {
     return true;
   }
 
+  Future<bool> _applyPot(Map<String, dynamic> row) async {
+    final existing = await _db.potsDao.getById(row['id'] as String);
+    final updatedAt = _updatedAt(row);
+    if (!_incomingWins(
+        row, updatedAt, existing?.updatedAt, existing?.deviceId)) {
+      return false;
+    }
+    final rev = await _db.syncMetaDao.nextRev();
+    await _db.potsDao.upsert(PotsTableCompanion.insert(
+      id: row['id'] as String,
+      name: row['name'] as String? ?? '',
+      kind: Value(PotKind.fromName(row['kind'] as String?)),
+      diameterCm: Value((row['diameterCm'] as num?)?.toDouble()),
+      material: Value(PotMaterial.fromName(row['material'] as String?)),
+      locationId: Value(row['locationId'] as String?),
+      notes: Value(row['notes'] as String?),
+      createdAt: DateTime.parse(row['createdAt'] as String),
+      updatedAt: updatedAt,
+      deletedAt: Value(_deletedAt(row)),
+      localRev: Value(rev),
+      deviceId: Value(_db.deviceId),
+    ));
+    return true;
+  }
+
   Future<bool> _applyPlant(Map<String, dynamic> row) async {
     final existing = await _db.plantsDao.getById(row['id'] as String);
     final updatedAt = _updatedAt(row);
@@ -391,6 +424,8 @@ class DataImportService {
       parentPlantId: Value(row['parentPlantId'] as String?),
       // Backups from before schema v19 have no cover photo.
       coverPhotoId: Value(row['coverPhotoId'] as String?),
+      // Backups from before schema v22 have no pots.
+      potId: Value(row['potId'] as String?),
       createdAt: DateTime.parse(row['createdAt'] as String),
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),
