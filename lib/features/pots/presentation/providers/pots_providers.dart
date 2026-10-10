@@ -75,6 +75,11 @@ class PotMutations {
     _triggerSync();
   }
 
+  /// The active plants in [potId] right now; see
+  /// [PotsRepository.activePlantIds].
+  Future<List<String>> activePlantIds(String potId) =>
+      _repo.activePlantIds(potId);
+
   Future<void> moveToLocation(String potId, String? locationId) async {
     await _repo.moveToLocation(potId, locationId);
     _triggerSync();

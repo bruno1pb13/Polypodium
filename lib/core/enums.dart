@@ -38,7 +38,25 @@ enum EntryType {
   /// callers skip such rows instead of failing.
   static EntryType? fromName(String? name) =>
       EntryType.values.asNameMap()[name];
+
+  /// Whether an entry of this type can be recorded for a whole pot at once
+  /// (one entry per plant in it): care given to the pot as a whole. Per-plant
+  /// measurements and events (height, harvest, repotting, history) are not.
+  bool get isPotCompatible => potCompatibleEntryTypes.contains(this);
 }
+
+/// Entry types offered when recording an entry for every plant of a pot.
+/// Repotting a whole pot is moving its plants (PotsRepository.moveAllPlants).
+const potCompatibleEntryTypes = {
+  EntryType.irrigation,
+  EntryType.fertilizer,
+  EntryType.pesticide,
+  EntryType.pest,
+  EntryType.chlorosis,
+  EntryType.pruning,
+  EntryType.observation,
+  EntryType.other,
+};
 
 /// Unit of a harvested quantity (see HarvestDetails). Persisted by name.
 enum HarvestUnit {

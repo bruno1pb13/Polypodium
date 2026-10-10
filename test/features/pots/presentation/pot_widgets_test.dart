@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polypodium/core/enums.dart';
+import 'package:polypodium/core/storage/photo_storage.dart';
+import 'package:polypodium/core/storage/photo_storage_provider.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/locations/domain/location_model.dart';
+import 'package:polypodium/features/locations/presentation/providers/locations_providers.dart';
+import 'package:polypodium/features/entries/presentation/screens/add_entry_screen.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/plants/presentation/providers/plants_providers.dart';
 import 'package:polypodium/features/pots/domain/pot_model.dart';
@@ -23,12 +27,28 @@ class _FakeTransparencyNotifier extends TransparencyEnabledNotifier {
   bool build() => true;
 }
 
+class _FakeLocationsNotifier extends LocationsNotifier {
+  @override
+  Stream<List<LocationModel>> build() => Stream.value([
+        LocationModel(
+            id: 'loc1', name: 'Varanda', createdAt: DateTime(2024, 1, 1)),
+        LocationModel(
+            id: 'loc2', name: 'Cozinha', createdAt: DateTime(2024, 1, 1)),
+      ]);
+}
+
 class _FakePotMutations extends PotMutations {
   _FakePotMutations(super.ref);
 
   final moves = <String>[];
   final moveAlls = <(String, String?)>[];
   final deleted = <String>[];
+  final locationMoves = <String>[];
+
+  @override
+  Future<void> moveToLocation(String potId, String? locationId) async {
+    locationMoves.add('$potId->$locationId');
+  }
 
   @override
   Future<List<String>> movePlants(Iterable<String> plantIds, String? potId,
@@ -100,6 +120,9 @@ final _bluePot = PotWithPlants(
   plants: [_a, _b],
 );
 final _planterPot = PotWithPlants(pot: _planter);
+final _emptyPot = PotWithPlants(
+  pot: PotModel(id: 'empty', name: 'Vazio', createdAt: DateTime(2024, 3, 1)),
+);
 
 void main() {
   late _FakePotMutations mutations;
@@ -113,12 +136,15 @@ void main() {
         transparencyEnabledNotifierProvider
             .overrideWith(_FakeTransparencyNotifier.new),
         potsWithPlantsProvider
-            .overrideWith((ref) async => [_planterPot, _bluePot]),
+            .overrideWith((ref) async => [_planterPot, _bluePot, _emptyPot]),
         potMutationsProvider.overrideWith((ref) {
           return mutations = _FakePotMutations(ref);
         }),
         plantsWithSpeciesProvider.overrideWith((ref) async => [_a, _b, _c]),
         entryMutationsProvider.overrideWith((ref) => EntryMutations(ref)),
+        locationsNotifierProvider.overrideWith(_FakeLocationsNotifier.new),
+        photoStorageProvider
+            .overrideWithValue(PhotoStorage(baseDirName: 'test_photos')),
       ],
       child: MaterialApp(
         locale: const Locale('pt'),
@@ -293,6 +319,44 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(mutations.deleted, ['blue']);
+    });
+
+    testWidgets('"move pot to" moves it with its plants to the location',
+        (tester) async {
+      await pump(tester, const PotDetailScreen(potId: 'blue'));
+
+      await tester.tap(find.text('Mover vaso para…'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cozinha'));
+      await tester.pumpAndSettle();
+
+      expect(mutations.locationMoves, ['blue->loc2']);
+    });
+
+    testWidgets(
+        'the pot entry opens the bulk form for its plants, '
+        'restricted to the pot types', (tester) async {
+      await pump(tester, const PotDetailScreen(potId: 'blue'));
+
+      await tester.tap(find.text('Novo registro no vaso'));
+      await tester.pumpAndSettle();
+
+      final screen = tester.widget<AddEntryScreen>(find.byType(AddEntryScreen));
+      expect(screen.plantIds, ['a', 'b']);
+      expect(screen.allowedTypes, potCompatibleEntryTypes);
+      expect(screen.resolvePlantIds, isNotNull);
+      expect(
+          find.text('Registro no vaso Vaso azul — 2 plantas'), findsOneWidget);
+    });
+
+    testWidgets('an empty pot can\'t get an entry', (tester) async {
+      await pump(tester, const PotDetailScreen(potId: 'empty'));
+
+      await tester.tap(find.text('Novo registro no vaso'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AddEntryScreen), findsNothing);
+      expect(find.text('Nenhuma planta neste vaso ainda'), findsOneWidget);
     });
   });
 }

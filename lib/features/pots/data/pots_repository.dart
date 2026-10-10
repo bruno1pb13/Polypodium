@@ -149,6 +149,13 @@ class PotsRepository {
     return moved;
   }
 
+  /// Ids of the active plants in [potId] right now: those an entry recorded
+  /// for the pot goes to.
+  Future<List<String>> activePlantIds(String potId) async => [
+        for (final p in await _db.plantsDao.getByPot(potId))
+          if (p.status == PlantStatus.active) p.id,
+      ];
+
   /// Moves every live plant of [fromPotId] to [toPotId] (null: out of any
   /// pot), e.g. when transplanting them all to a bigger pot.
   Future<List<String>> moveAllPlants(String fromPotId, String? toPotId,

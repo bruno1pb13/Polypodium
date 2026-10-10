@@ -396,6 +396,61 @@ void main() {
     expect(entries[0].id, isNot(entries[1].id));
   });
 
+  group('entry for a pot', () {
+    testWidgets('offers only the pot-compatible types, with the given title',
+        (tester) async {
+      await pump(
+        tester,
+        const AddEntryScreen.bulk(
+          plantIds: ['p1', 'p2'],
+          initialType: EntryType.height,
+          allowedTypes: potCompatibleEntryTypes,
+          title: 'Registro no vaso Vaso azul — 2 plantas',
+        ),
+      );
+
+      expect(find.text('Registro no vaso Vaso azul — 2 plantas'),
+          findsOneWidget);
+      for (final type in EntryType.values) {
+        final chip = find.text(
+            '${type.emoji} ${type.label(lookupAppLocalizations(const Locale('pt')))}');
+        final offered = type.isPotCompatible &&
+            type != EntryType.other &&
+            type != EntryType.history;
+        expect(chip, offered ? findsWidgets : findsNothing,
+            reason: type.name);
+      }
+      // A disallowed initial type falls back to observation.
+      await tester.tap(find.text('Salvar para 2 plantas'));
+      await tester.pumpAndSettle();
+      expect(mutations.created.single.map((e) => e.type).toSet(),
+          {EntryType.observation});
+    });
+
+    testWidgets('creates one entry per plant in the pot when saved',
+        (tester) async {
+      final inPot = ['p1'];
+      await pump(
+        tester,
+        AddEntryScreen.bulk(
+          plantIds: const ['p1'],
+          initialType: EntryType.irrigation,
+          allowedTypes: potCompatibleEntryTypes,
+          resolvePlantIds: () async => [...inPot],
+        ),
+      );
+      // A plant moved into the pot while the form is open gets the entry.
+      inPot.add('p2');
+      await save(tester);
+      // One moved in afterwards doesn't.
+      inPot.add('p3');
+
+      final entries = mutations.created.single;
+      expect(entries.map((e) => e.plantId), ['p1', 'p2']);
+      expect(entries.map((e) => e.type).toSet(), {EntryType.irrigation});
+    });
+  });
+
   group('reminder interval', () {
     ReminderStatus existing(EntryType type, int days, {bool enabled = true}) =>
         ReminderStatus(

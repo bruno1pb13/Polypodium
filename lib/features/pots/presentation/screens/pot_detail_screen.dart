@@ -5,6 +5,7 @@ import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/glass_colors.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
+import '../../../entries/presentation/screens/add_entry_screen.dart';
 import '../../../plants/domain/plant_model.dart';
 import '../../../plants/presentation/screens/plant_detail_screen.dart';
 import '../../domain/pot_with_plants.dart';
@@ -28,6 +29,7 @@ class PotDetailScreen extends ConsumerWidget {
 
     return PotScreenScaffold(
       title: pot?.pot.name ?? l10n.potLabel,
+      floatingActionButton: pot == null ? null : _PotEntryButton(pot: pot),
       actions: pot == null
           ? null
           : [
@@ -210,6 +212,45 @@ class _PotDetailBody extends ConsumerWidget {
         ),
       ],
     );
+  }
+}
+
+/// "New entry for the pot": one entry per active plant in the pot when it
+/// is saved, of the types that make sense for a whole pot.
+class _PotEntryButton extends ConsumerWidget {
+  final PotWithPlants pot;
+
+  const _PotEntryButton({required this.pot});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final plants = pot.activePlants;
+    final button = FloatingActionButton.extended(
+      heroTag: null,
+      onPressed: plants.isEmpty
+          ? null
+          : () {
+              final mutations = ref.read(potMutationsProvider);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AddEntryScreen.bulk(
+                    plantIds: [for (final p in plants) p.plant.id],
+                    allowedTypes: potCompatibleEntryTypes,
+                    title: l10n.potEntryTitle(pot.pot.name, plants.length),
+                    resolvePlantIds: () => mutations.activePlantIds(pot.pot.id),
+                  ),
+                ),
+              );
+            },
+      backgroundColor: plants.isEmpty ? context.glass.tint(0.15) : null,
+      foregroundColor: plants.isEmpty ? context.glass.fgFaint : null,
+      icon: const Icon(Icons.playlist_add),
+      label: Text(l10n.potEntryAction),
+    );
+    if (plants.isNotEmpty) return button;
+    return Tooltip(message: l10n.potEntryEmptyHint, child: button);
   }
 }
 

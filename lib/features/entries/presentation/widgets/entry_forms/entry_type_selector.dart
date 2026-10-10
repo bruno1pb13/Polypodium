@@ -10,10 +10,14 @@ class EntryTypeSelector extends StatelessWidget {
   final EntryType selectedType;
   final ValueChanged<EntryType> onSelected;
 
+  /// When set, only these types are offered.
+  final Set<EntryType>? allowedTypes;
+
   const EntryTypeSelector({
     super.key,
     required this.selectedType,
     required this.onSelected,
+    this.allowedTypes,
   });
 
   @override
@@ -35,6 +39,7 @@ class EntryTypeSelector extends StatelessWidget {
           runSpacing: 8,
           children: EntryType.values
               .where((t) => t != EntryType.history && t != EntryType.other)
+              .where((t) => allowedTypes?.contains(t) ?? true)
               .map((t) {
             final selected = t == selectedType;
             return ChoiceChip(

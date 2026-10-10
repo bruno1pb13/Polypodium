@@ -229,4 +229,37 @@ void main() {
     expect(() => pots.movePlantToPot('a', 'pot1'), throwsArgumentError);
     expect((await plant('a')).potId, isNull);
   });
+
+  test('a pot entry goes to the active plants in it right now', () async {
+    await addPot('pot1');
+    await addPlant('a', potId: 'pot1');
+    await addPlant('b', potId: 'pot1');
+    await addPlant('c');
+    await db.plantsDao.upsert(PlantsTableCompanion.insert(
+      id: 'dead',
+      speciesId: 'species1',
+      nickname: 'dead',
+      soilType: 'loamy',
+      acquisitionDate: t0,
+      potId: const Value('pot1'),
+      status: const Value(PlantStatus.dead),
+      createdAt: t0,
+      updatedAt: t0,
+    ));
+
+    expect(await pots.activePlantIds('pot1'), ['a', 'b']);
+    await pots.movePlantToPot('c', 'pot1');
+    await pots.movePlantToPot('a', null);
+    expect(await pots.activePlantIds('pot1'), ['b', 'c']);
+  });
+
+  test('per-plant entry types are not offered for a whole pot', () {
+    expect(EntryType.values.where((t) => !t.isPotCompatible).toSet(), {
+      EntryType.height,
+      EntryType.harvest,
+      EntryType.history,
+      EntryType.repotting,
+    });
+    expect(EntryType.irrigation.isPotCompatible, isTrue);
+  });
 }
