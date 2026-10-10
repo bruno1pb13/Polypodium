@@ -117,6 +117,7 @@ class PlantGroupScreen extends ConsumerWidget {
                   itemCount: plants.length,
                   itemBuilder: (ctx, i) => PlantListItem(
                     plantWithSpecies: plants[i],
+                    showPot: true,
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
