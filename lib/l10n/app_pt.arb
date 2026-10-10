@@ -856,5 +856,14 @@
   "potEntryEmptyHint": "Adicione plantas ao vaso para registrar algo nele",
   "waterPot": "Regar o vaso",
   "potPlantPickerOtherPot": "Em outro vaso: {pot}",
-  "keepCurrentPot": "Manter o vaso atual"
+  "keepCurrentPot": "Manter o vaso atual",
+  "updateAvailable": "A versão {version} está disponível",
+  "updateAvailableNoVersion": "Uma nova versão está disponível",
+  "updateInstall": "Atualizar",
+  "updateDismiss": "Ignorar esta versão",
+  "updateCheck": "Verificar atualizações",
+  "updateCurrentVersion": "Versão atual: {version}",
+  "updateUpToDate": "Você está na versão mais recente",
+  "updateCheckFailed": "Não foi possível verificar atualizações",
+  "updateFound": "Uma nova versão está disponível"
 }

@@ -3032,4 +3032,35 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get keepCurrentPot => 'Manter o vaso atual';
+
+  @override
+  String updateAvailable(String version) {
+    return 'A versão $version está disponível';
+  }
+
+  @override
+  String get updateAvailableNoVersion => 'Uma nova versão está disponível';
+
+  @override
+  String get updateInstall => 'Atualizar';
+
+  @override
+  String get updateDismiss => 'Ignorar esta versão';
+
+  @override
+  String get updateCheck => 'Verificar atualizações';
+
+  @override
+  String updateCurrentVersion(String version) {
+    return 'Versão atual: $version';
+  }
+
+  @override
+  String get updateUpToDate => 'Você está na versão mais recente';
+
+  @override
+  String get updateCheckFailed => 'Não foi possível verificar atualizações';
+
+  @override
+  String get updateFound => 'Uma nova versão está disponível';
 }

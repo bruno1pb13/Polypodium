@@ -66,9 +66,13 @@ jobs:
           storeFile=../upload-keystore.jks
           EOF
 
+      # DIST_CHANNEL tells the app where to look for updates: the APK on
+      # GitHub releases, the AAB only through Google Play (its policy forbids
+      # updating any other way). See lib/core/updates/distribution_channel.dart.
       - name: Build APK
         run: |
           flutter build apk --release \
+            --dart-define=DIST_CHANNEL=github \
             --build-name=${{ needs.version.outputs.build_name }} \
             --build-number=${{ needs.version.outputs.build_number }}
 
@@ -80,6 +84,7 @@ jobs:
       - name: Build AAB (Google Play)
         run: |
           flutter build appbundle --release \
+            --dart-define=DIST_CHANNEL=play \
             --build-name=${{ needs.version.outputs.build_name }} \
             --build-number=${{ needs.version.outputs.build_number }}
 

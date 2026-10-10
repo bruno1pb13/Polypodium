@@ -3030,4 +3030,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keepCurrentPot => 'Keep the current pot';
+
+  @override
+  String updateAvailable(String version) {
+    return 'Version $version is available';
+  }
+
+  @override
+  String get updateAvailableNoVersion => 'A new version is available';
+
+  @override
+  String get updateInstall => 'Update';
+
+  @override
+  String get updateDismiss => 'Skip this version';
+
+  @override
+  String get updateCheck => 'Check for updates';
+
+  @override
+  String updateCurrentVersion(String version) {
+    return 'Current version: $version';
+  }
+
+  @override
+  String get updateUpToDate => 'You have the latest version';
+
+  @override
+  String get updateCheckFailed => 'Couldn\'t check for updates';
+
+  @override
+  String get updateFound => 'A new version is available';
 }

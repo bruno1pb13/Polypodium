@@ -1433,5 +1433,16 @@
   "waterPot": "Water the pot",
   "potPlantPickerOtherPot": "In another pot: {pot}",
   "@potPlantPickerOtherPot": {"placeholders": {"pot": {"type": "String"}}},
-  "keepCurrentPot": "Keep the current pot"
+  "keepCurrentPot": "Keep the current pot",
+  "updateAvailable": "Version {version} is available",
+  "@updateAvailable": {"placeholders": {"version": {"type": "String"}}},
+  "updateAvailableNoVersion": "A new version is available",
+  "updateInstall": "Update",
+  "updateDismiss": "Skip this version",
+  "updateCheck": "Check for updates",
+  "updateCurrentVersion": "Current version: {version}",
+  "@updateCurrentVersion": {"placeholders": {"version": {"type": "String"}}},
+  "updateUpToDate": "You have the latest version",
+  "updateCheckFailed": "Couldn't check for updates",
+  "updateFound": "A new version is available"
 }
