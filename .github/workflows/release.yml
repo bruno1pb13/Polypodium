@@ -50,6 +50,15 @@ jobs:
           channel: 'stable'
           cache: true
 
+      # Flutter's Linux build ignores --build-name when writing version.json
+      # (what package_info_plus reads), so the AppImage reported pubspec's
+      # version. Writing the tag into pubspec keeps every platform in step.
+      - name: Set version in pubspec
+        shell: bash
+        run: |
+          sed -i -E "s/^version: .*/version: ${{ needs.version.outputs.build_name }}+${{ needs.version.outputs.build_number }}/" pubspec.yaml
+          grep '^version:' pubspec.yaml
+
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
 
@@ -115,6 +124,15 @@ jobs:
           cache: true
 
       - run: flutter config --enable-linux-desktop
+      # Flutter's Linux build ignores --build-name when writing version.json
+      # (what package_info_plus reads), so the AppImage reported pubspec's
+      # version. Writing the tag into pubspec keeps every platform in step.
+      - name: Set version in pubspec
+        shell: bash
+        run: |
+          sed -i -E "s/^version: .*/version: ${{ needs.version.outputs.build_name }}+${{ needs.version.outputs.build_number }}/" pubspec.yaml
+          grep '^version:' pubspec.yaml
+
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
 
@@ -149,6 +167,15 @@ jobs:
           cache: true
 
       - run: flutter config --enable-windows-desktop
+      # Flutter's Linux build ignores --build-name when writing version.json
+      # (what package_info_plus reads), so the AppImage reported pubspec's
+      # version. Writing the tag into pubspec keeps every platform in step.
+      - name: Set version in pubspec
+        shell: bash
+        run: |
+          sed -i -E "s/^version: .*/version: ${{ needs.version.outputs.build_name }}+${{ needs.version.outputs.build_number }}/" pubspec.yaml
+          grep '^version:' pubspec.yaml
+
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
 
