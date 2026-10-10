@@ -865,5 +865,8 @@
   "updateCurrentVersion": "Versão atual: {version}",
   "updateUpToDate": "Você está na versão mais recente",
   "updateCheckFailed": "Não foi possível verificar atualizações",
-  "updateFound": "Uma nova versão está disponível"
+  "updateFound": "Uma nova versão está disponível",
+  "serverUpdateAvailable": "A versão {version} do servidor está disponível",
+  "serverOutdatedBanner": "Servidor desatualizado: {current} → {latest}",
+  "serverOutdatedDismiss": "Ocultar este aviso"
 }

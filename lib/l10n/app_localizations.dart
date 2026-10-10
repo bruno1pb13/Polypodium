@@ -5095,6 +5095,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A new version is available'**
   String get updateFound;
+
+  /// No description provided for @serverUpdateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} of the server is available'**
+  String serverUpdateAvailable(String version);
+
+  /// No description provided for @serverOutdatedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Server outdated: {current} → {latest}'**
+  String serverOutdatedBanner(String current, String latest);
+
+  /// No description provided for @serverOutdatedDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide this notice'**
+  String get serverOutdatedDismiss;
 }
 
 class _AppLocalizationsDelegate
