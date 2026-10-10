@@ -10,6 +10,7 @@ import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../entries/presentation/screens/add_entry_screen.dart';
 import '../../../labels/presentation/screens/plant_labels_screen.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
+import '../../../pots/presentation/widgets/plant_pot_card.dart';
 import '../../../reminders/presentation/widgets/plant_reminders_card.dart';
 import '../../../soils/presentation/providers/soils_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
@@ -186,6 +187,9 @@ class PlantDetailScreen extends ConsumerWidget {
                       ),
                     SliverToBoxAdapter(
                       child: PlantInfoCard(plant: plant, pws: pws, soilName: soil?.name, soilComposition: soil?.composition),
+                    ),
+                    SliverToBoxAdapter(
+                      child: PlantPotCard(plant: plant),
                     ),
                     SliverToBoxAdapter(
                       child: PlantLineageCard(

@@ -1836,6 +1836,599 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
   }
 }
 
+class $PotsTableTable extends PotsTable
+    with TableInfo<$PotsTableTable, PotsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PotsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  late final GeneratedColumnWithTypeConverter<PotKind, String> kind =
+      GeneratedColumn<String>('kind', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('pot'))
+          .withConverter<PotKind>($PotsTableTable.$converterkind);
+  static const VerificationMeta _diameterCmMeta =
+      const VerificationMeta('diameterCm');
+  @override
+  late final GeneratedColumn<double> diameterCm = GeneratedColumn<double>(
+      'diameter_cm', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  @override
+  late final GeneratedColumnWithTypeConverter<PotMaterial?, String> material =
+      GeneratedColumn<String>('material', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<PotMaterial?>($PotsTableTable.$convertermaterial);
+  static const VerificationMeta _locationIdMeta =
+      const VerificationMeta('locationId');
+  @override
+  late final GeneratedColumn<String> locationId = GeneratedColumn<String>(
+      'location_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES locations (id) ON DELETE SET NULL'));
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _localRevMeta =
+      const VerificationMeta('localRev');
+  @override
+  late final GeneratedColumn<int> localRev = GeneratedColumn<int>(
+      'local_rev', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _deviceIdMeta =
+      const VerificationMeta('deviceId');
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+      'device_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        kind,
+        diameterCm,
+        material,
+        locationId,
+        notes,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        localRev,
+        deviceId
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pots';
+  @override
+  VerificationContext validateIntegrity(Insertable<PotsTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('diameter_cm')) {
+      context.handle(
+          _diameterCmMeta,
+          diameterCm.isAcceptableOrUnknown(
+              data['diameter_cm']!, _diameterCmMeta));
+    }
+    if (data.containsKey('location_id')) {
+      context.handle(
+          _locationIdMeta,
+          locationId.isAcceptableOrUnknown(
+              data['location_id']!, _locationIdMeta));
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    if (data.containsKey('local_rev')) {
+      context.handle(_localRevMeta,
+          localRev.isAcceptableOrUnknown(data['local_rev']!, _localRevMeta));
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(_deviceIdMeta,
+          deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PotsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PotsTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      kind: $PotsTableTable.$converterkind.fromSql(attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}kind'])!),
+      diameterCm: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}diameter_cm']),
+      material: $PotsTableTable.$convertermaterial.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}material'])),
+      locationId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}location_id']),
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      localRev: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}local_rev'])!,
+      deviceId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}device_id']),
+    );
+  }
+
+  @override
+  $PotsTableTable createAlias(String alias) {
+    return $PotsTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<PotKind, String> $converterkind =
+      const PotKindConverter();
+  static TypeConverter<PotMaterial?, String?> $convertermaterial =
+      const PotMaterialConverter();
+}
+
+class PotsTableData extends DataClass implements Insertable<PotsTableData> {
+  final String id;
+  final String name;
+  final PotKind kind;
+  final double? diameterCm;
+  final PotMaterial? material;
+  final String? locationId;
+  final String? notes;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int localRev;
+  final String? deviceId;
+  const PotsTableData(
+      {required this.id,
+      required this.name,
+      required this.kind,
+      this.diameterCm,
+      this.material,
+      this.locationId,
+      this.notes,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt,
+      required this.localRev,
+      this.deviceId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    {
+      map['kind'] =
+          Variable<String>($PotsTableTable.$converterkind.toSql(kind));
+    }
+    if (!nullToAbsent || diameterCm != null) {
+      map['diameter_cm'] = Variable<double>(diameterCm);
+    }
+    if (!nullToAbsent || material != null) {
+      map['material'] =
+          Variable<String>($PotsTableTable.$convertermaterial.toSql(material));
+    }
+    if (!nullToAbsent || locationId != null) {
+      map['location_id'] = Variable<String>(locationId);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['local_rev'] = Variable<int>(localRev);
+    if (!nullToAbsent || deviceId != null) {
+      map['device_id'] = Variable<String>(deviceId);
+    }
+    return map;
+  }
+
+  PotsTableCompanion toCompanion(bool nullToAbsent) {
+    return PotsTableCompanion(
+      id: Value(id),
+      name: Value(name),
+      kind: Value(kind),
+      diameterCm: diameterCm == null && nullToAbsent
+          ? const Value.absent()
+          : Value(diameterCm),
+      material: material == null && nullToAbsent
+          ? const Value.absent()
+          : Value(material),
+      locationId: locationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(locationId),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      localRev: Value(localRev),
+      deviceId: deviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deviceId),
+    );
+  }
+
+  factory PotsTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PotsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      kind: serializer.fromJson<PotKind>(json['kind']),
+      diameterCm: serializer.fromJson<double?>(json['diameterCm']),
+      material: serializer.fromJson<PotMaterial?>(json['material']),
+      locationId: serializer.fromJson<String?>(json['locationId']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      localRev: serializer.fromJson<int>(json['localRev']),
+      deviceId: serializer.fromJson<String?>(json['deviceId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'kind': serializer.toJson<PotKind>(kind),
+      'diameterCm': serializer.toJson<double?>(diameterCm),
+      'material': serializer.toJson<PotMaterial?>(material),
+      'locationId': serializer.toJson<String?>(locationId),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'localRev': serializer.toJson<int>(localRev),
+      'deviceId': serializer.toJson<String?>(deviceId),
+    };
+  }
+
+  PotsTableData copyWith(
+          {String? id,
+          String? name,
+          PotKind? kind,
+          Value<double?> diameterCm = const Value.absent(),
+          Value<PotMaterial?> material = const Value.absent(),
+          Value<String?> locationId = const Value.absent(),
+          Value<String?> notes = const Value.absent(),
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent(),
+          int? localRev,
+          Value<String?> deviceId = const Value.absent()}) =>
+      PotsTableData(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        kind: kind ?? this.kind,
+        diameterCm: diameterCm.present ? diameterCm.value : this.diameterCm,
+        material: material.present ? material.value : this.material,
+        locationId: locationId.present ? locationId.value : this.locationId,
+        notes: notes.present ? notes.value : this.notes,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        localRev: localRev ?? this.localRev,
+        deviceId: deviceId.present ? deviceId.value : this.deviceId,
+      );
+  PotsTableData copyWithCompanion(PotsTableCompanion data) {
+    return PotsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      diameterCm:
+          data.diameterCm.present ? data.diameterCm.value : this.diameterCm,
+      material: data.material.present ? data.material.value : this.material,
+      locationId:
+          data.locationId.present ? data.locationId.value : this.locationId,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      localRev: data.localRev.present ? data.localRev.value : this.localRev,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PotsTableData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('kind: $kind, ')
+          ..write('diameterCm: $diameterCm, ')
+          ..write('material: $material, ')
+          ..write('locationId: $locationId, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, kind, diameterCm, material,
+      locationId, notes, createdAt, updatedAt, deletedAt, localRev, deviceId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PotsTableData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.kind == this.kind &&
+          other.diameterCm == this.diameterCm &&
+          other.material == this.material &&
+          other.locationId == this.locationId &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.localRev == this.localRev &&
+          other.deviceId == this.deviceId);
+}
+
+class PotsTableCompanion extends UpdateCompanion<PotsTableData> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<PotKind> kind;
+  final Value<double?> diameterCm;
+  final Value<PotMaterial?> material;
+  final Value<String?> locationId;
+  final Value<String?> notes;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> localRev;
+  final Value<String?> deviceId;
+  final Value<int> rowid;
+  const PotsTableCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.diameterCm = const Value.absent(),
+    this.material = const Value.absent(),
+    this.locationId = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PotsTableCompanion.insert({
+    required String id,
+    required String name,
+    this.kind = const Value.absent(),
+    this.diameterCm = const Value.absent(),
+    this.material = const Value.absent(),
+    this.locationId = const Value.absent(),
+    this.notes = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.localRev = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<PotsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? kind,
+    Expression<double>? diameterCm,
+    Expression<String>? material,
+    Expression<String>? locationId,
+    Expression<String>? notes,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? localRev,
+    Expression<String>? deviceId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (kind != null) 'kind': kind,
+      if (diameterCm != null) 'diameter_cm': diameterCm,
+      if (material != null) 'material': material,
+      if (locationId != null) 'location_id': locationId,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (localRev != null) 'local_rev': localRev,
+      if (deviceId != null) 'device_id': deviceId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PotsTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<PotKind>? kind,
+      Value<double?>? diameterCm,
+      Value<PotMaterial?>? material,
+      Value<String?>? locationId,
+      Value<String?>? notes,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? localRev,
+      Value<String?>? deviceId,
+      Value<int>? rowid}) {
+    return PotsTableCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      kind: kind ?? this.kind,
+      diameterCm: diameterCm ?? this.diameterCm,
+      material: material ?? this.material,
+      locationId: locationId ?? this.locationId,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      localRev: localRev ?? this.localRev,
+      deviceId: deviceId ?? this.deviceId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (kind.present) {
+      map['kind'] =
+          Variable<String>($PotsTableTable.$converterkind.toSql(kind.value));
+    }
+    if (diameterCm.present) {
+      map['diameter_cm'] = Variable<double>(diameterCm.value);
+    }
+    if (material.present) {
+      map['material'] = Variable<String>(
+          $PotsTableTable.$convertermaterial.toSql(material.value));
+    }
+    if (locationId.present) {
+      map['location_id'] = Variable<String>(locationId.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (localRev.present) {
+      map['local_rev'] = Variable<int>(localRev.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PotsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('kind: $kind, ')
+          ..write('diameterCm: $diameterCm, ')
+          ..write('material: $material, ')
+          ..write('locationId: $locationId, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('localRev: $localRev, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $PlantsTableTable extends PlantsTable
     with TableInfo<$PlantsTableTable, PlantsTableData> {
   @override
@@ -1938,6 +2531,14 @@ class $PlantsTableTable extends PlantsTable
   late final GeneratedColumn<String> coverPhotoId = GeneratedColumn<String>(
       'cover_photo_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _potIdMeta = const VerificationMeta('potId');
+  @override
+  late final GeneratedColumn<String> potId = GeneratedColumn<String>(
+      'pot_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES pots (id) ON DELETE SET NULL'));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -1986,6 +2587,7 @@ class $PlantsTableTable extends PlantsTable
         statusChangedAt,
         parentPlantId,
         coverPhotoId,
+        potId,
         createdAt,
         updatedAt,
         deletedAt,
@@ -2083,6 +2685,10 @@ class $PlantsTableTable extends PlantsTable
           coverPhotoId.isAcceptableOrUnknown(
               data['cover_photo_id']!, _coverPhotoIdMeta));
     }
+    if (data.containsKey('pot_id')) {
+      context.handle(
+          _potIdMeta, potId.isAcceptableOrUnknown(data['pot_id']!, _potIdMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -2148,6 +2754,8 @@ class $PlantsTableTable extends PlantsTable
           .read(DriftSqlType.string, data['${effectivePrefix}parent_plant_id']),
       coverPhotoId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}cover_photo_id']),
+      potId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pot_id']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -2204,6 +2812,11 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
   /// synced photo under its own path. Null, or pointing at a photo that was
   /// deleted, means the latest photo is used.
   final String? coverPhotoId;
+
+  /// The pot the plant is in, if any. Several plants may share a pot.
+  /// Pots are only soft-deleted: deleting one clears this column on its
+  /// plants (PotsRepository.delete).
+  final String? potId;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -2224,6 +2837,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       this.statusChangedAt,
       this.parentPlantId,
       this.coverPhotoId,
+      this.potId,
       required this.createdAt,
       required this.updatedAt,
       this.deletedAt,
@@ -2266,6 +2880,9 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
     }
     if (!nullToAbsent || coverPhotoId != null) {
       map['cover_photo_id'] = Variable<String>(coverPhotoId);
+    }
+    if (!nullToAbsent || potId != null) {
+      map['pot_id'] = Variable<String>(potId);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -2312,6 +2929,8 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       coverPhotoId: coverPhotoId == null && nullToAbsent
           ? const Value.absent()
           : Value(coverPhotoId),
+      potId:
+          potId == null && nullToAbsent ? const Value.absent() : Value(potId),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -2345,6 +2964,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       statusChangedAt: serializer.fromJson<DateTime?>(json['statusChangedAt']),
       parentPlantId: serializer.fromJson<String?>(json['parentPlantId']),
       coverPhotoId: serializer.fromJson<String?>(json['coverPhotoId']),
+      potId: serializer.fromJson<String?>(json['potId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -2373,6 +2993,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       'statusChangedAt': serializer.toJson<DateTime?>(statusChangedAt),
       'parentPlantId': serializer.toJson<String?>(parentPlantId),
       'coverPhotoId': serializer.toJson<String?>(coverPhotoId),
+      'potId': serializer.toJson<String?>(potId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -2396,6 +3017,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           Value<DateTime?> statusChangedAt = const Value.absent(),
           Value<String?> parentPlantId = const Value.absent(),
           Value<String?> coverPhotoId = const Value.absent(),
+          Value<String?> potId = const Value.absent(),
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
@@ -2428,6 +3050,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
             parentPlantId.present ? parentPlantId.value : this.parentPlantId,
         coverPhotoId:
             coverPhotoId.present ? coverPhotoId.value : this.coverPhotoId,
+        potId: potId.present ? potId.value : this.potId,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -2467,6 +3090,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       coverPhotoId: data.coverPhotoId.present
           ? data.coverPhotoId.value
           : this.coverPhotoId,
+      potId: data.potId.present ? data.potId.value : this.potId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -2492,6 +3116,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           ..write('statusChangedAt: $statusChangedAt, ')
           ..write('parentPlantId: $parentPlantId, ')
           ..write('coverPhotoId: $coverPhotoId, ')
+          ..write('potId: $potId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -2517,6 +3142,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
       statusChangedAt,
       parentPlantId,
       coverPhotoId,
+      potId,
       createdAt,
       updatedAt,
       deletedAt,
@@ -2540,6 +3166,7 @@ class PlantsTableData extends DataClass implements Insertable<PlantsTableData> {
           other.statusChangedAt == this.statusChangedAt &&
           other.parentPlantId == this.parentPlantId &&
           other.coverPhotoId == this.coverPhotoId &&
+          other.potId == this.potId &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -2562,6 +3189,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
   final Value<DateTime?> statusChangedAt;
   final Value<String?> parentPlantId;
   final Value<String?> coverPhotoId;
+  final Value<String?> potId;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -2583,6 +3211,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.statusChangedAt = const Value.absent(),
     this.parentPlantId = const Value.absent(),
     this.coverPhotoId = const Value.absent(),
+    this.potId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -2605,6 +3234,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     this.statusChangedAt = const Value.absent(),
     this.parentPlantId = const Value.absent(),
     this.coverPhotoId = const Value.absent(),
+    this.potId = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -2633,6 +3263,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     Expression<DateTime>? statusChangedAt,
     Expression<String>? parentPlantId,
     Expression<String>? coverPhotoId,
+    Expression<String>? potId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -2658,6 +3289,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       if (statusChangedAt != null) 'status_changed_at': statusChangedAt,
       if (parentPlantId != null) 'parent_plant_id': parentPlantId,
       if (coverPhotoId != null) 'cover_photo_id': coverPhotoId,
+      if (potId != null) 'pot_id': potId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -2682,6 +3314,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       Value<DateTime?>? statusChangedAt,
       Value<String?>? parentPlantId,
       Value<String?>? coverPhotoId,
+      Value<String?>? potId,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
@@ -2706,6 +3339,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
       statusChangedAt: statusChangedAt ?? this.statusChangedAt,
       parentPlantId: parentPlantId ?? this.parentPlantId,
       coverPhotoId: coverPhotoId ?? this.coverPhotoId,
+      potId: potId ?? this.potId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -2764,6 +3398,9 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
     if (coverPhotoId.present) {
       map['cover_photo_id'] = Variable<String>(coverPhotoId.value);
     }
+    if (potId.present) {
+      map['pot_id'] = Variable<String>(potId.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -2802,6 +3439,7 @@ class PlantsTableCompanion extends UpdateCompanion<PlantsTableData> {
           ..write('statusChangedAt: $statusChangedAt, ')
           ..write('parentPlantId: $parentPlantId, ')
           ..write('coverPhotoId: $coverPhotoId, ')
+          ..write('potId: $potId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -6133,6 +6771,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SpeciesTableTable speciesTable = $SpeciesTableTable(this);
   late final $SoilsTableTable soilsTable = $SoilsTableTable(this);
   late final $LocationsTableTable locationsTable = $LocationsTableTable(this);
+  late final $PotsTableTable potsTable = $PotsTableTable(this);
   late final $PlantsTableTable plantsTable = $PlantsTableTable(this);
   late final $EntriesTableTable entriesTable = $EntriesTableTable(this);
   late final $EntryPhotosTableTable entryPhotosTable =
@@ -6157,6 +6796,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         speciesTable,
         soilsTable,
         locationsTable,
+        potsTable,
         plantsTable,
         entriesTable,
         entryPhotosTable,
@@ -6175,11 +6815,25 @@ abstract class _$AppDatabase extends GeneratedDatabase {
             on: TableUpdateQuery.onTableName('locations',
                 limitUpdateKind: UpdateKind.delete),
             result: [
+              TableUpdate('pots', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('locations',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
               TableUpdate('plants', kind: UpdateKind.update),
             ],
           ),
           WritePropagation(
             on: TableUpdateQuery.onTableName('plants',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('plants', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('pots',
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('plants', kind: UpdateKind.update),
@@ -7010,6 +7664,20 @@ final class $$LocationsTableTableReferences extends BaseReferences<
   $$LocationsTableTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
+  static MultiTypedResultKey<$PotsTableTable, List<PotsTableData>>
+      _potsTableRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.potsTable,
+              aliasName: 'locations__id__pots__location_id');
+
+  $$PotsTableTableProcessedTableManager get potsTableRefs {
+    final manager = $$PotsTableTableTableManager($_db, $_db.potsTable)
+        .filter((f) => f.locationId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_potsTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
   static MultiTypedResultKey<$PlantsTableTable, List<PlantsTableData>>
       _plantsTableRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.plantsTable,
@@ -7063,6 +7731,27 @@ class $$LocationsTableTableFilterComposer
 
   ColumnFilters<String> get deviceId => $composableBuilder(
       column: $table.deviceId, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> potsTableRefs(
+      Expression<bool> Function($$PotsTableTableFilterComposer f) f) {
+    final $$PotsTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.potsTable,
+        getReferencedColumn: (t) => t.locationId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PotsTableTableFilterComposer(
+              $db: $db,
+              $table: $db.potsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 
   Expression<bool> plantsTableRefs(
       Expression<bool> Function($$PlantsTableTableFilterComposer f) f) {
@@ -7165,6 +7854,27 @@ class $$LocationsTableTableAnnotationComposer
   GeneratedColumn<String> get deviceId =>
       $composableBuilder(column: $table.deviceId, builder: (column) => column);
 
+  Expression<T> potsTableRefs<T extends Object>(
+      Expression<T> Function($$PotsTableTableAnnotationComposer a) f) {
+    final $$PotsTableTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.potsTable,
+        getReferencedColumn: (t) => t.locationId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PotsTableTableAnnotationComposer(
+              $db: $db,
+              $table: $db.potsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
   Expression<T> plantsTableRefs<T extends Object>(
       Expression<T> Function($$PlantsTableTableAnnotationComposer a) f) {
     final $$PlantsTableTableAnnotationComposer composer = $composerBuilder(
@@ -7198,7 +7908,7 @@ class $$LocationsTableTableTableManager extends RootTableManager<
     $$LocationsTableTableUpdateCompanionBuilder,
     (LocationsTableData, $$LocationsTableTableReferences),
     LocationsTableData,
-    PrefetchHooks Function({bool plantsTableRefs})> {
+    PrefetchHooks Function({bool potsTableRefs, bool plantsTableRefs})> {
   $$LocationsTableTableTableManager(
       _$AppDatabase db, $LocationsTableTable table)
       : super(TableManagerState(
@@ -7268,13 +7978,30 @@ class $$LocationsTableTableTableManager extends RootTableManager<
                     $$LocationsTableTableReferences(db, table, e)
                   ))
               .toList(),
-          prefetchHooksCallback: ({plantsTableRefs = false}) {
+          prefetchHooksCallback: (
+              {potsTableRefs = false, plantsTableRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [if (plantsTableRefs) db.plantsTable],
+              explicitlyWatchedTables: [
+                if (potsTableRefs) db.potsTable,
+                if (plantsTableRefs) db.plantsTable
+              ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
+                  if (potsTableRefs)
+                    await $_getPrefetchedData<LocationsTableData,
+                            $LocationsTableTable, PotsTableData>(
+                        currentTable: table,
+                        referencedTable: $$LocationsTableTableReferences
+                            ._potsTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$LocationsTableTableReferences(db, table, p0)
+                                .potsTableRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.locationId == item.id),
+                        typedResults: items),
                   if (plantsTableRefs)
                     await $_getPrefetchedData<LocationsTableData,
                             $LocationsTableTable, PlantsTableData>(
@@ -7306,7 +8033,459 @@ typedef $$LocationsTableTableProcessedTableManager = ProcessedTableManager<
     $$LocationsTableTableUpdateCompanionBuilder,
     (LocationsTableData, $$LocationsTableTableReferences),
     LocationsTableData,
-    PrefetchHooks Function({bool plantsTableRefs})>;
+    PrefetchHooks Function({bool potsTableRefs, bool plantsTableRefs})>;
+typedef $$PotsTableTableCreateCompanionBuilder = PotsTableCompanion Function({
+  required String id,
+  required String name,
+  Value<PotKind> kind,
+  Value<double?> diameterCm,
+  Value<PotMaterial?> material,
+  Value<String?> locationId,
+  Value<String?> notes,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
+  Value<String?> deviceId,
+  Value<int> rowid,
+});
+typedef $$PotsTableTableUpdateCompanionBuilder = PotsTableCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<PotKind> kind,
+  Value<double?> diameterCm,
+  Value<PotMaterial?> material,
+  Value<String?> locationId,
+  Value<String?> notes,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> localRev,
+  Value<String?> deviceId,
+  Value<int> rowid,
+});
+
+final class $$PotsTableTableReferences
+    extends BaseReferences<_$AppDatabase, $PotsTableTable, PotsTableData> {
+  $$PotsTableTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $LocationsTableTable _locationIdTable(_$AppDatabase db) =>
+      db.locationsTable.createAlias('pots__location_id__locations__id');
+
+  $$LocationsTableTableProcessedTableManager? get locationId {
+    final $_column = $_itemColumn<String>('location_id');
+    if ($_column == null) return null;
+    final manager = $$LocationsTableTableTableManager($_db, $_db.locationsTable)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_locationIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$PlantsTableTable, List<PlantsTableData>>
+      _plantsTableRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.plantsTable,
+              aliasName: 'pots__id__plants__pot_id');
+
+  $$PlantsTableTableProcessedTableManager get plantsTableRefs {
+    final manager = $$PlantsTableTableTableManager($_db, $_db.plantsTable)
+        .filter((f) => f.potId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_plantsTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$PotsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PotsTableTable> {
+  $$PotsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<PotKind, PotKind, String> get kind =>
+      $composableBuilder(
+          column: $table.kind,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<double> get diameterCm => $composableBuilder(
+      column: $table.diameterCm, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<PotMaterial?, PotMaterial, String>
+      get material => $composableBuilder(
+          column: $table.material,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnFilters(column));
+
+  $$LocationsTableTableFilterComposer get locationId {
+    final $$LocationsTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.locationId,
+        referencedTable: $db.locationsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocationsTableTableFilterComposer(
+              $db: $db,
+              $table: $db.locationsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<bool> plantsTableRefs(
+      Expression<bool> Function($$PlantsTableTableFilterComposer f) f) {
+    final $$PlantsTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.plantsTable,
+        getReferencedColumn: (t) => t.potId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PlantsTableTableFilterComposer(
+              $db: $db,
+              $table: $db.plantsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$PotsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PotsTableTable> {
+  $$PotsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get diameterCm => $composableBuilder(
+      column: $table.diameterCm, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get material => $composableBuilder(
+      column: $table.material, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get localRev => $composableBuilder(
+      column: $table.localRev, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnOrderings(column));
+
+  $$LocationsTableTableOrderingComposer get locationId {
+    final $$LocationsTableTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.locationId,
+        referencedTable: $db.locationsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocationsTableTableOrderingComposer(
+              $db: $db,
+              $table: $db.locationsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$PotsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PotsTableTable> {
+  $$PotsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PotKind, String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<double> get diameterCm => $composableBuilder(
+      column: $table.diameterCm, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PotMaterial?, String> get material =>
+      $composableBuilder(column: $table.material, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get localRev =>
+      $composableBuilder(column: $table.localRev, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  $$LocationsTableTableAnnotationComposer get locationId {
+    final $$LocationsTableTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.locationId,
+        referencedTable: $db.locationsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocationsTableTableAnnotationComposer(
+              $db: $db,
+              $table: $db.locationsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<T> plantsTableRefs<T extends Object>(
+      Expression<T> Function($$PlantsTableTableAnnotationComposer a) f) {
+    final $$PlantsTableTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.plantsTable,
+        getReferencedColumn: (t) => t.potId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PlantsTableTableAnnotationComposer(
+              $db: $db,
+              $table: $db.plantsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$PotsTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PotsTableTable,
+    PotsTableData,
+    $$PotsTableTableFilterComposer,
+    $$PotsTableTableOrderingComposer,
+    $$PotsTableTableAnnotationComposer,
+    $$PotsTableTableCreateCompanionBuilder,
+    $$PotsTableTableUpdateCompanionBuilder,
+    (PotsTableData, $$PotsTableTableReferences),
+    PotsTableData,
+    PrefetchHooks Function({bool locationId, bool plantsTableRefs})> {
+  $$PotsTableTableTableManager(_$AppDatabase db, $PotsTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PotsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PotsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PotsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<PotKind> kind = const Value.absent(),
+            Value<double?> diameterCm = const Value.absent(),
+            Value<PotMaterial?> material = const Value.absent(),
+            Value<String?> locationId = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PotsTableCompanion(
+            id: id,
+            name: name,
+            kind: kind,
+            diameterCm: diameterCm,
+            material: material,
+            locationId: locationId,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
+            deviceId: deviceId,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            Value<PotKind> kind = const Value.absent(),
+            Value<double?> diameterCm = const Value.absent(),
+            Value<PotMaterial?> material = const Value.absent(),
+            Value<String?> locationId = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> localRev = const Value.absent(),
+            Value<String?> deviceId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PotsTableCompanion.insert(
+            id: id,
+            name: name,
+            kind: kind,
+            diameterCm: diameterCm,
+            material: material,
+            locationId: locationId,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            localRev: localRev,
+            deviceId: deviceId,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$PotsTableTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {locationId = false, plantsTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (plantsTableRefs) db.plantsTable],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (locationId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.locationId,
+                    referencedTable:
+                        $$PotsTableTableReferences._locationIdTable(db),
+                    referencedColumn:
+                        $$PotsTableTableReferences._locationIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (plantsTableRefs)
+                    await $_getPrefetchedData<PotsTableData, $PotsTableTable,
+                            PlantsTableData>(
+                        currentTable: table,
+                        referencedTable: $$PotsTableTableReferences
+                            ._plantsTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$PotsTableTableReferences(db, table, p0)
+                                .plantsTableRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.potId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$PotsTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $PotsTableTable,
+    PotsTableData,
+    $$PotsTableTableFilterComposer,
+    $$PotsTableTableOrderingComposer,
+    $$PotsTableTableAnnotationComposer,
+    $$PotsTableTableCreateCompanionBuilder,
+    $$PotsTableTableUpdateCompanionBuilder,
+    (PotsTableData, $$PotsTableTableReferences),
+    PotsTableData,
+    PrefetchHooks Function({bool locationId, bool plantsTableRefs})>;
 typedef $$PlantsTableTableCreateCompanionBuilder = PlantsTableCompanion
     Function({
   required String id,
@@ -7323,6 +8502,7 @@ typedef $$PlantsTableTableCreateCompanionBuilder = PlantsTableCompanion
   Value<DateTime?> statusChangedAt,
   Value<String?> parentPlantId,
   Value<String?> coverPhotoId,
+  Value<String?> potId,
   required DateTime createdAt,
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
@@ -7346,6 +8526,7 @@ typedef $$PlantsTableTableUpdateCompanionBuilder = PlantsTableCompanion
   Value<DateTime?> statusChangedAt,
   Value<String?> parentPlantId,
   Value<String?> coverPhotoId,
+  Value<String?> potId,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
@@ -7409,6 +8590,20 @@ final class $$PlantsTableTableReferences
     final manager = $$PlantsTableTableTableManager($_db, $_db.plantsTable)
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_parentPlantIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $PotsTableTable _potIdTable(_$AppDatabase db) =>
+      db.potsTable.createAlias('plants__pot_id__pots__id');
+
+  $$PotsTableTableProcessedTableManager? get potId {
+    final $_column = $_itemColumn<String>('pot_id');
+    if ($_column == null) return null;
+    final manager = $$PotsTableTableTableManager($_db, $_db.potsTable)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_potIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
@@ -7577,6 +8772,26 @@ class $$PlantsTableTableFilterComposer
             $$PlantsTableTableFilterComposer(
               $db: $db,
               $table: $db.plantsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$PotsTableTableFilterComposer get potId {
+    final $$PotsTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.potId,
+        referencedTable: $db.potsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PotsTableTableFilterComposer(
+              $db: $db,
+              $table: $db.potsTable,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -7768,6 +8983,26 @@ class $$PlantsTableTableOrderingComposer
             ));
     return composer;
   }
+
+  $$PotsTableTableOrderingComposer get potId {
+    final $$PotsTableTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.potId,
+        referencedTable: $db.potsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PotsTableTableOrderingComposer(
+              $db: $db,
+              $table: $db.potsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$PlantsTableTableAnnotationComposer
@@ -7904,6 +9139,26 @@ class $$PlantsTableTableAnnotationComposer
     return composer;
   }
 
+  $$PotsTableTableAnnotationComposer get potId {
+    final $$PotsTableTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.potId,
+        referencedTable: $db.potsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PotsTableTableAnnotationComposer(
+              $db: $db,
+              $table: $db.potsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
   Expression<T> entriesTableRefs<T extends Object>(
       Expression<T> Function($$EntriesTableTableAnnotationComposer a) f) {
     final $$EntriesTableTableAnnotationComposer composer = $composerBuilder(
@@ -7963,6 +9218,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
         bool soilType,
         bool locationId,
         bool parentPlantId,
+        bool potId,
         bool entriesTableRefs,
         bool remindersTableRefs})> {
   $$PlantsTableTableTableManager(_$AppDatabase db, $PlantsTableTable table)
@@ -7990,6 +9246,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<DateTime?> statusChangedAt = const Value.absent(),
             Value<String?> parentPlantId = const Value.absent(),
             Value<String?> coverPhotoId = const Value.absent(),
+            Value<String?> potId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -8012,6 +9269,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             statusChangedAt: statusChangedAt,
             parentPlantId: parentPlantId,
             coverPhotoId: coverPhotoId,
+            potId: potId,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -8034,6 +9292,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             Value<DateTime?> statusChangedAt = const Value.absent(),
             Value<String?> parentPlantId = const Value.absent(),
             Value<String?> coverPhotoId = const Value.absent(),
+            Value<String?> potId = const Value.absent(),
             required DateTime createdAt,
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -8056,6 +9315,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
             statusChangedAt: statusChangedAt,
             parentPlantId: parentPlantId,
             coverPhotoId: coverPhotoId,
+            potId: potId,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -8074,6 +9334,7 @@ class $$PlantsTableTableTableManager extends RootTableManager<
               soilType = false,
               locationId = false,
               parentPlantId = false,
+              potId = false,
               entriesTableRefs = false,
               remindersTableRefs = false}) {
             return PrefetchHooks(
@@ -8135,6 +9396,16 @@ class $$PlantsTableTableTableManager extends RootTableManager<
                         $$PlantsTableTableReferences._parentPlantIdTable(db).id,
                   ) as T;
                 }
+                if (potId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.potId,
+                    referencedTable:
+                        $$PlantsTableTableReferences._potIdTable(db),
+                    referencedColumn:
+                        $$PlantsTableTableReferences._potIdTable(db).id,
+                  ) as T;
+                }
 
                 return state;
               },
@@ -8189,6 +9460,7 @@ typedef $$PlantsTableTableProcessedTableManager = ProcessedTableManager<
         bool soilType,
         bool locationId,
         bool parentPlantId,
+        bool potId,
         bool entriesTableRefs,
         bool remindersTableRefs})>;
 typedef $$EntriesTableTableCreateCompanionBuilder = EntriesTableCompanion
@@ -10331,6 +11603,8 @@ class $AppDatabaseManager {
       $$SoilsTableTableTableManager(_db, _db.soilsTable);
   $$LocationsTableTableTableManager get locationsTable =>
       $$LocationsTableTableTableManager(_db, _db.locationsTable);
+  $$PotsTableTableTableManager get potsTable =>
+      $$PotsTableTableTableManager(_db, _db.potsTable);
   $$PlantsTableTableTableManager get plantsTable =>
       $$PlantsTableTableTableManager(_db, _db.plantsTable);
   $$EntriesTableTableTableManager get entriesTable =>

@@ -237,9 +237,12 @@ class PesticideProduct {
 }
 
 /// `{"potDiameterCm": double, "potMaterial": String, "newSoilId": String,
-/// "newSoilName": String}` — all keys optional. `potMaterial` is a
-/// [PotMaterial] name. The soil name is copied at save time so the entry
-/// survives catalog deletions, like [PesticideProduct.name].
+/// "newSoilName": String, "fromPotId": String, "toPotId": String,
+/// "toPotName": String}` — all keys optional. `potMaterial` is a
+/// [PotMaterial] name. The soil and pot names are copied at save time so the
+/// entry survives catalog deletions, like [PesticideProduct.name]. Entries
+/// written before pots existed have no pot keys; a move out of any pot has
+/// a `fromPotId` and no `toPotId`.
 final class RepottingDetails extends EntryDetails {
   final double? potDiameterCm;
   final PotMaterial? potMaterial;
@@ -248,11 +251,21 @@ final class RepottingDetails extends EntryDetails {
   final String? newSoilId;
   final String? newSoilName;
 
+  /// The pot the plant left, if it was in one.
+  final String? fromPotId;
+
+  /// The pot the plant was moved to, if any, and its name at the time.
+  final String? toPotId;
+  final String? toPotName;
+
   const RepottingDetails({
     this.potDiameterCm,
     this.potMaterial,
     this.newSoilId,
     this.newSoilName,
+    this.fromPotId,
+    this.toPotId,
+    this.toPotName,
   });
 
   factory RepottingDetails._fromJson(Map<String, dynamic> json) =>
@@ -263,11 +276,36 @@ final class RepottingDetails extends EntryDetails {
         potMaterial: PotMaterial.fromName(_string(json['potMaterial'])),
         newSoilId: _string(json['newSoilId']),
         newSoilName: _string(json['newSoilName']),
+        fromPotId: _string(json['fromPotId']),
+        toPotId: _string(json['toPotId']),
+        toPotName: _string(json['toPotName']),
+      );
+
+  /// Whether this entry records the plant leaving its pot for no other.
+  bool get isRemovalFromPot => fromPotId != null && toPotId == null;
+
+  RepottingDetails copyWith({
+    String? fromPotId,
+    String? toPotId,
+    String? toPotName,
+  }) =>
+      RepottingDetails(
+        potDiameterCm: potDiameterCm,
+        potMaterial: potMaterial,
+        newSoilId: newSoilId,
+        newSoilName: newSoilName,
+        fromPotId: fromPotId ?? this.fromPotId,
+        toPotId: toPotId ?? this.toPotId,
+        toPotName: toPotName ?? this.toPotName,
       );
 
   @override
   bool get isEmpty =>
-      potDiameterCm == null && potMaterial == null && newSoilId == null;
+      potDiameterCm == null &&
+      potMaterial == null &&
+      newSoilId == null &&
+      fromPotId == null &&
+      toPotId == null;
 
   @override
   Map<String, dynamic> toJson() => {
@@ -275,6 +313,9 @@ final class RepottingDetails extends EntryDetails {
         if (potMaterial != null) 'potMaterial': potMaterial!.name,
         if (newSoilId != null) 'newSoilId': newSoilId,
         if (newSoilName != null) 'newSoilName': newSoilName,
+        if (fromPotId != null) 'fromPotId': fromPotId,
+        if (toPotId != null) 'toPotId': toPotId,
+        if (toPotName != null) 'toPotName': toPotName,
       };
 
   @override
@@ -283,11 +324,14 @@ final class RepottingDetails extends EntryDetails {
       other.potDiameterCm == potDiameterCm &&
       other.potMaterial == potMaterial &&
       other.newSoilId == newSoilId &&
-      other.newSoilName == newSoilName;
+      other.newSoilName == newSoilName &&
+      other.fromPotId == fromPotId &&
+      other.toPotId == toPotId &&
+      other.toPotName == toPotName;
 
   @override
-  int get hashCode =>
-      Object.hash(potDiameterCm, potMaterial, newSoilId, newSoilName);
+  int get hashCode => Object.hash(potDiameterCm, potMaterial, newSoilId,
+      newSoilName, fromPotId, toPotId, toPotName);
 }
 
 /// `{"quantity": double, "unit": String, "duringCarencia": true}` — all keys

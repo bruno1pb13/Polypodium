@@ -402,6 +402,10 @@ class _EntryDataBadge extends StatelessWidget {
     if (details == null) return null;
     final diameter = details.potDiameterCm;
     final parts = [
+      if (details.toPotName case final pot? when pot.isNotEmpty)
+        l10n.repottingMovedToPot(pot)
+      else if (details.isRemovalFromPot)
+        l10n.repottingRemovedFromPot,
       if (diameter != null) l10n.potDiameterSummary(_fmt(diameter)),
       if (details.potMaterial != null) details.potMaterial!.label(l10n),
       if (details.newSoilName case final soil? when soil.isNotEmpty) soil,

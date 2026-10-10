@@ -29,6 +29,8 @@ import 'package:polypodium/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../helpers/accessibility.dart';
+import 'package:polypodium/features/pots/domain/pot_model.dart';
+import 'package:polypodium/features/pots/presentation/providers/pots_providers.dart';
 
 class _FakeTransparencyNotifier extends TransparencyEnabledNotifier {
   @override
@@ -95,6 +97,11 @@ class _EmptySpeciesNotifier extends SpeciesNotifier {
 class _EmptyLocationsNotifier extends LocationsNotifier {
   @override
   Stream<List<LocationModel>> build() => Stream.value(const []);
+}
+
+class _EmptyPotsNotifier extends PotsNotifier {
+  @override
+  Stream<List<PotModel>> build() => Stream.value(const []);
 }
 
 class _EmptySoilsNotifier extends SoilsNotifier {
@@ -177,6 +184,7 @@ void main() {
         // Watched by the add-plant screen opened from the FAB.
         speciesNotifierProvider.overrideWith(_EmptySpeciesNotifier.new),
         locationsNotifierProvider.overrideWith(_EmptyLocationsNotifier.new),
+        potsNotifierProvider.overrideWith(_EmptyPotsNotifier.new),
         soilsNotifierProvider.overrideWith(_EmptySoilsNotifier.new),
       ],
       child: MaterialApp(
@@ -243,6 +251,39 @@ void main() {
     await search(tester, '');
     expect(find.text('Samambaia'), findsOneWidget);
     expect(find.text('Antúrio'), findsOneWidget);
+  });
+
+  testWidgets('search matches the name of the plant\'s pot', (tester) async {
+    final pot = PotModel(
+        id: 'pot1', name: 'Vaso azul', createdAt: DateTime(2024, 1, 1));
+    final inPot = PlantWithSpecies(
+      plant: anturio.plant.copyWith(potId: 'pot1'),
+      species: anturio.species,
+      pot: pot,
+    );
+    await pump(tester, [inPot, samambaia]);
+
+    await search(tester, 'azul');
+    expect(find.text('Antúrio'), findsOneWidget);
+    expect(find.text('Samambaia'), findsNothing);
+  });
+
+  testWidgets('each plant shows its short code next to the name',
+      (tester) async {
+    final long = PlantWithSpecies(
+      plant: samambaia.plant.copyWith(
+          id: '3f9a1c7e-0000-4000-8000-000000000000',
+          nickname: 'Samambaia de nome muito comprido que não cabe na linha'),
+      species: samambaia.species,
+    );
+    final semantics = tester.ensureSemantics();
+    await pump(tester, [long, anturio]);
+
+    expect(find.text('#3F9A1C'), findsOneWidget);
+    expect(find.text('#P2'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('Código 3F9A1C')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    semantics.dispose();
   });
 
   testWidgets('sort menu reorders the list', (tester) async {

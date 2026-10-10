@@ -16,6 +16,8 @@ import '../../../entries/presentation/providers/carencia_providers.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../reminders/domain/reminder_model.dart';
 import '../../../reminders/presentation/providers/reminders_providers.dart';
+import '../../../pots/domain/pot_model.dart';
+import '../../../pots/presentation/widgets/pot_ui.dart';
 import '../../../soils/domain/soil_model.dart';
 import '../widgets/entry_forms/chlorosis_form.dart';
 import '../widgets/entry_forms/entry_form_widgets.dart';
@@ -42,11 +44,31 @@ class AddEntryScreen extends ConsumerStatefulWidget {
   /// Entry type preselected when the screen opens (defaults to observation).
   final EntryType? initialType;
 
-  AddEntryScreen({super.key, required String plantId, this.initialType})
-      : plantIds = [plantId];
+  /// When set, only these types can be picked (e.g. potCompatibleEntryTypes
+  /// for an entry recorded for a whole pot).
+  final Set<EntryType>? allowedTypes;
 
-  const AddEntryScreen.bulk(
-      {super.key, required this.plantIds, this.initialType});
+  /// Replaces the default title.
+  final String? title;
+
+  /// When set, gives the plants at save time instead of [plantIds] (which
+  /// then only sizes the button), e.g. the plants in a pot right then.
+  final Future<List<String>> Function()? resolvePlantIds;
+
+  AddEntryScreen({super.key, required String plantId, this.initialType})
+      : plantIds = [plantId],
+        allowedTypes = null,
+        title = null,
+        resolvePlantIds = null;
+
+  const AddEntryScreen.bulk({
+    super.key,
+    required this.plantIds,
+    this.initialType,
+    this.allowedTypes,
+    this.title,
+    this.resolvePlantIds,
+  });
 
   @override
   ConsumerState<AddEntryScreen> createState() => _AddEntryScreenState();
@@ -57,7 +79,16 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   final _heightCtrl = TextEditingController();
   final _pestTypeCtrl = TextEditingController();
 
-  late EntryType _type = widget.initialType ?? EntryType.observation;
+  late EntryType _type = _initialType;
+
+  EntryType get _initialType {
+    final type = widget.initialType ?? EntryType.observation;
+    final allowed = widget.allowedTypes;
+    if (allowed == null || allowed.contains(type)) return type;
+    return allowed.contains(EntryType.observation)
+        ? EntryType.observation
+        : allowed.first;
+  }
   // Saved copies of the picked photos, in order; the first one is the
   // entry's own photo.
   final List<String> _photoPaths = [];
@@ -92,6 +123,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   final _potDiameterCtrl = TextEditingController();
   PotMaterial? _potMaterial;
   SoilModel? _newSoil;
+  PotModel? _repotPot;
 
   // Harvest
   final _harvestQuantityCtrl = TextEditingController();
@@ -243,6 +275,8 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           potMaterial: _potMaterial,
           newSoilId: _newSoil?.id,
           newSoilName: _newSoil?.name,
+          toPotId: _repotPot?.id,
+          toPotName: _repotPot?.name,
         );
       case EntryType.harvest:
         final quantity =
@@ -270,9 +304,10 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
         elevation: 0,
         iconTheme: IconThemeData(color: context.glass.fg),
         title: Text(
-          widget.plantIds.length > 1
-              ? context.l10n.newBulkEntryTitle(widget.plantIds.length)
-              : context.l10n.newEntryTitle,
+          widget.title ??
+              (widget.plantIds.length > 1
+                  ? context.l10n.newBulkEntryTitle(widget.plantIds.length)
+                  : context.l10n.newEntryTitle),
           style: TextStyle(
             color: context.glass.fg,
             fontWeight: FontWeight.w600,
@@ -315,6 +350,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
               children: [
                 EntryGlassCard(
                   child: EntryTypeSelector(
+                    allowedTypes: widget.allowedTypes,
                     selectedType: _type,
                     onSelected: (t) => setState(() {
                       _type = t;
@@ -452,6 +488,16 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           onMaterialChanged: (m) => setState(() => _potMaterial = m),
           newSoil: _newSoil,
           onSoilChanged: (soil) => setState(() => _newSoil = soil),
+          pot: _repotPot,
+          onPotChanged: (pot) => setState(() {
+            _repotPot = pot;
+            // The pot's measures fill the fields left blank.
+            if (pot?.diameterCm != null &&
+                _potDiameterCtrl.text.trim().isEmpty) {
+              _potDiameterCtrl.text = formatPotDiameter(pot!.diameterCm!);
+            }
+            _potMaterial ??= pot?.material;
+          }),
         ),
       EntryType.harvest => HarvestForm(
           quantityController: _harvestQuantityCtrl,
@@ -518,6 +564,12 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     try {
       final now = DateTime.now();
       final details = _details;
+      final plantIds =
+          await widget.resolvePlantIds?.call() ?? widget.plantIds;
+      if (plantIds.isEmpty) {
+        if (mounted) Navigator.pop(context);
+        return;
+      }
 
       // Harvesting a plant still in carência needs a confirmation, and the
       // entry keeps a mark of it.
@@ -525,7 +577,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
       if (_type == EntryType.harvest) {
         final affected = await ref
             .read(carenciaCheckerProvider)
-            .plantsInCarencia(widget.plantIds, now);
+            .plantsInCarencia(plantIds, now);
         if (affected.isNotEmpty) {
           if (!mounted) return;
           // The dialog is modal; no spinner behind it.
@@ -533,7 +585,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           final confirmed = await confirmHarvestDuringCarencia(
             context,
             affected,
-            bulk: widget.plantIds.length > 1,
+            bulk: plantIds.length > 1,
           );
           if (!confirmed || !mounted) return;
           setState(() => _saving = true);
@@ -545,8 +597,8 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim();
       final mutations = ref.read(entryMutationsProvider);
       final entries = <EntryModel>[];
-      for (var i = 0; i < widget.plantIds.length; i++) {
-        final plantId = widget.plantIds[i];
+      for (var i = 0; i < plantIds.length; i++) {
+        final plantId = plantIds[i];
         final entryDetails = details is HarvestDetails
             ? details.copyWith(duringCarencia: inCarencia.contains(plantId))
             : details;

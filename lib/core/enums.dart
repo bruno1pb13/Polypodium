@@ -38,7 +38,25 @@ enum EntryType {
   /// callers skip such rows instead of failing.
   static EntryType? fromName(String? name) =>
       EntryType.values.asNameMap()[name];
+
+  /// Whether an entry of this type can be recorded for a whole pot at once
+  /// (one entry per plant in it): care given to the pot as a whole. Per-plant
+  /// measurements and events (height, harvest, repotting, history) are not.
+  bool get isPotCompatible => potCompatibleEntryTypes.contains(this);
 }
+
+/// Entry types offered when recording an entry for every plant of a pot.
+/// Repotting a whole pot is moving its plants (PotsRepository.moveAllPlants).
+const potCompatibleEntryTypes = {
+  EntryType.irrigation,
+  EntryType.fertilizer,
+  EntryType.pesticide,
+  EntryType.pest,
+  EntryType.chlorosis,
+  EntryType.pruning,
+  EntryType.observation,
+  EntryType.other,
+};
 
 /// Unit of a harvested quantity (see HarvestDetails). Persisted by name.
 enum HarvestUnit {
@@ -66,6 +84,18 @@ enum PotMaterial {
   static PotMaterial? fromName(String? name) => name == null
       ? null
       : PotMaterial.values.asNameMap()[name] ?? PotMaterial.other;
+}
+
+/// What kind of container a pot row is (see PotsTable). Persisted by name.
+enum PotKind {
+  pot,
+  planter,
+  bed,
+  other;
+
+  /// Missing or unknown names (a newer client's kind) are shown as [other].
+  static PotKind fromName(String? name) =>
+      PotKind.values.asNameMap()[name] ?? PotKind.other;
 }
 
 enum DefensivoCategory {
@@ -151,6 +181,12 @@ enum DefensivoSortOption {
 enum LocationSortOption {
   nameAZ,
   nameZA,
+  dateAdded,
+}
+
+enum PotSortOption {
+  nameAZ,
+  mostPlants,
   dateAdded,
 }
 
@@ -394,6 +430,22 @@ extension PotMaterialX on PotMaterial {
         PotMaterial.ceramic => l10n.potMaterialCeramic,
         PotMaterial.fabric => l10n.potMaterialFabric,
         PotMaterial.other => l10n.potMaterialOther,
+      };
+}
+
+extension PotKindX on PotKind {
+  String label(AppLocalizations l10n) => switch (this) {
+        PotKind.pot => l10n.potKindPot,
+        PotKind.planter => l10n.potKindPlanter,
+        PotKind.bed => l10n.potKindBed,
+        PotKind.other => l10n.potKindOther,
+      };
+
+  String get emoji => switch (this) {
+        PotKind.pot => '🪴',
+        PotKind.planter => '🌿',
+        PotKind.bed => '🟫',
+        PotKind.other => '📦',
       };
 }
 
