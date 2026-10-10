@@ -3061,4 +3061,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateFound => 'A new version is available';
+
+  @override
+  String serverUpdateAvailable(String version) {
+    return 'Version $version of the server is available';
+  }
+
+  @override
+  String serverOutdatedBanner(String current, String latest) {
+    return 'Server outdated: $current → $latest';
+  }
+
+  @override
+  String get serverOutdatedDismiss => 'Hide this notice';
 }

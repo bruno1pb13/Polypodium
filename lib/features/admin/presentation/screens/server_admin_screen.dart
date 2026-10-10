@@ -214,6 +214,24 @@ class _StatusCard extends StatelessWidget {
                   .serverUptime(_formatUptime(status.uptimeSeconds))),
               Text(context.l10n.serverVersion(status.version)),
               Text(context.l10n.serverUsers('${status.userCount}')),
+              if (status.updateAvailable && status.latestVersion != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded,
+                        size: 18, color: Theme.of(context).colorScheme.error),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        context.l10n
+                            .serverUpdateAvailable(status.latestVersion!),
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.error),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
           loading: () => const Center(child: CircularProgressIndicator()),

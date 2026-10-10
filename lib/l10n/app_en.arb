@@ -1444,5 +1444,10 @@
   "@updateCurrentVersion": {"placeholders": {"version": {"type": "String"}}},
   "updateUpToDate": "You have the latest version",
   "updateCheckFailed": "Couldn't check for updates",
-  "updateFound": "A new version is available"
+  "updateFound": "A new version is available",
+  "serverUpdateAvailable": "Version {version} of the server is available",
+  "@serverUpdateAvailable": {"placeholders": {"version": {"type": "String"}}},
+  "serverOutdatedBanner": "Server outdated: {current} → {latest}",
+  "@serverOutdatedBanner": {"placeholders": {"current": {"type": "String"}, "latest": {"type": "String"}}},
+  "serverOutdatedDismiss": "Hide this notice"
 }
