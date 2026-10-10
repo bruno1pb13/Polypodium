@@ -16,7 +16,9 @@ import 'core/sync/background_sync.dart';
 import 'l10n/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/app_shell.dart';
+import 'core/updates/update_controller.dart';
 import 'core/widgets/sync_status_banner.dart';
+import 'core/widgets/update_banner.dart';
 import 'features/agenda/data/home_widget_service.dart';
 import 'features/agenda/presentation/providers/home_widget_providers.dart';
 import 'features/onboarding/presentation/screens/intro_screen.dart';
@@ -138,9 +140,10 @@ class PolypodiumApp extends ConsumerWidget {
   }
 }
 
-/// Wraps the whole app (above the Navigator) so the sync status banner
-/// shows on top of any screen, and triggers a sync attempt whenever the app
-/// is opened or comes back to the foreground.
+/// Wraps the whole app (above the Navigator) so the sync status and update
+/// banners show on top of any screen, and triggers a sync attempt (and a
+/// throttled update check) whenever the app is opened or comes back to the
+/// foreground.
 class _AutoSyncScope extends ConsumerStatefulWidget {
   const _AutoSyncScope({required this.child});
 
@@ -182,6 +185,7 @@ class _AutoSyncScopeState extends ConsumerState<_AutoSyncScope>
 
   void _triggerSync() {
     ref.read(autoSyncControllerProvider.notifier).syncNow();
+    ref.read(updateControllerProvider.notifier).checkIfDue();
   }
 
   @override
@@ -189,6 +193,7 @@ class _AutoSyncScopeState extends ConsumerState<_AutoSyncScope>
     return Column(
       children: [
         const SyncStatusBanner(),
+        const UpdateBanner(),
         Expanded(child: widget.child),
       ],
     );

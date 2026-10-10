@@ -4,6 +4,8 @@ import '../providers/settings_providers.dart';
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/sync/sync_providers.dart';
+import '../../../../core/updates/distribution_channel.dart';
+import '../../../../core/updates/update_controller.dart';
 import '../../../data_transfer/presentation/widgets/data_transfer_section.dart';
 import '../../../workspaces/domain/workspace_model.dart';
 import '../../../workspaces/presentation/providers/workspace_providers.dart';
@@ -129,15 +131,75 @@ class SettingsScreen extends ConsumerWidget {
           _SectionHeader(title: context.l10n.settingsData),
           const DataTransferSection(),
           const Divider(),
+          const _UpdateTile(),
           AboutListTile(
             icon: const Icon(Icons.info_outline),
             applicationName: 'Polypodium',
-            applicationVersion: '1.0.0',
+            applicationVersion: ref.watch(appVersionProvider).value ?? '',
             applicationLegalese: '© 2024 Polypodium Team',
             child: Text(context.l10n.aboutApp),
           ),
         ],
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+
+/// Manual update check, for builds that look for updates themselves (Google
+/// Play and GitHub). Microsoft Store and package-manager installs are kept
+/// up to date by the store, so the tile is hidden there.
+class _UpdateTile extends ConsumerStatefulWidget {
+  const _UpdateTile();
+
+  @override
+  ConsumerState<_UpdateTile> createState() => _UpdateTileState();
+}
+
+class _UpdateTileState extends ConsumerState<_UpdateTile> {
+  bool _checking = false;
+
+  Future<void> _check() async {
+    setState(() => _checking = true);
+    final result =
+        await ref.read(updateControllerProvider.notifier).checkNow();
+    if (!mounted) return;
+    setState(() => _checking = false);
+    final message = switch (result) {
+      UpdateCheckResult.available => context.l10n.updateFound,
+      UpdateCheckResult.upToDate => context.l10n.updateUpToDate,
+      UpdateCheckResult.failed ||
+      UpdateCheckResult.unsupported =>
+        context.l10n.updateCheckFailed,
+    };
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final channel = ref.watch(distributionChannelProvider);
+    if (channel != DistributionChannel.playStore &&
+        channel != DistributionChannel.github) {
+      return const SizedBox.shrink();
+    }
+    final version = ref.watch(appVersionProvider).value;
+
+    return ListTile(
+      leading: const Icon(Icons.system_update_outlined),
+      title: Text(context.l10n.updateCheck),
+      subtitle: version == null
+          ? null
+          : Text(context.l10n.updateCurrentVersion(version)),
+      trailing: _checking
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : null,
+      onTap: _checking ? null : _check,
     );
   }
 }

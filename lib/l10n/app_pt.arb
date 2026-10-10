@@ -807,5 +807,14 @@
   "seasonSummer": "Verão",
   "seasonAutumn": "Outono",
   "seasonWinter": "Inverno",
-  "seasonNextIn": "{season} · {next} em {days, plural, =0{menos de um dia} one{1 dia} other{{days} dias}}"
+  "seasonNextIn": "{season} · {next} em {days, plural, =0{menos de um dia} one{1 dia} other{{days} dias}}",
+  "updateAvailable": "A versão {version} está disponível",
+  "updateAvailableNoVersion": "Uma nova versão está disponível",
+  "updateInstall": "Atualizar",
+  "updateDismiss": "Ignorar esta versão",
+  "updateCheck": "Verificar atualizações",
+  "updateCurrentVersion": "Versão atual: {version}",
+  "updateUpToDate": "Você está na versão mais recente",
+  "updateCheckFailed": "Não foi possível verificar atualizações",
+  "updateFound": "Uma nova versão está disponível"
 }

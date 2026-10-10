@@ -4747,6 +4747,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{season} · {next} in {days, plural, =0{less than a day} one{1 day} other{{days} days}}'**
   String seasonNextIn(String season, String next, int days);
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is available'**
+  String updateAvailable(String version);
+
+  /// No description provided for @updateAvailableNoVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version is available'**
+  String get updateAvailableNoVersion;
+
+  /// No description provided for @updateInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get updateInstall;
+
+  /// No description provided for @updateDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip this version'**
+  String get updateDismiss;
+
+  /// No description provided for @updateCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates'**
+  String get updateCheck;
+
+  /// No description provided for @updateCurrentVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Current version: {version}'**
+  String updateCurrentVersion(String version);
+
+  /// No description provided for @updateUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'You have the latest version'**
+  String get updateUpToDate;
+
+  /// No description provided for @updateCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t check for updates'**
+  String get updateCheckFailed;
+
+  /// No description provided for @updateFound.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version is available'**
+  String get updateFound;
 }
 
 class _AppLocalizationsDelegate

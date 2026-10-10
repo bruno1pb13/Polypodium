@@ -13,6 +13,7 @@
 - **Enums**: Localizados em `lib/core/enums.dart`.
 - **UI**: Estilo Glassmorphism com fundos de imagem e desfoque.
 - **Busca**: Componente reutilizável `AppSearchBar` em `lib/core/widgets/`.
+- **Atualizações**: `lib/core/updates/` — o canal de distribuição (`DistributionChannel`) decide onde procurar versão nova: Google Play (in-app update) no AAB, GitHub Releases no APK/ZIP portátil/AppImage, nada na Microsoft Store (ela atualiza sozinha) nem em debug. No Android o canal vem de `--dart-define=DIST_CHANNEL=play|github` (release.yml); build sem o define não checa. Builds de loja nunca podem apontar para o GitHub (política das lojas).
 - **Início**: painel em `lib/features/dashboard/` (`DashboardScreen`), tela inicial do app; a lista de plantas abre a partir dele. O histórico de registros fica em `lib/features/activity/` (`ActivityScreen`).
 
 ## Filtros e Ordenação

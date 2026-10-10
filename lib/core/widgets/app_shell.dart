@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../updates/update_controller.dart';
 import '../l10n/l10n.dart';
 import '../../features/activity/presentation/screens/activity_screen.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
@@ -192,7 +194,12 @@ class _SideNav extends StatelessWidget {
           const Spacer(),
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text('v1.0.0', style: Theme.of(context).textTheme.bodySmall),
+            child: Consumer(
+              builder: (context, ref, _) => Text(
+                'v${ref.watch(appVersionProvider).value ?? ''}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
           ),
         ],
       ),
