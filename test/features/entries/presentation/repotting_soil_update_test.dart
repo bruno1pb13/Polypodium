@@ -14,6 +14,8 @@ import 'package:polypodium/features/entries/domain/entry_model.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/plants/presentation/providers/plants_providers.dart';
+import 'package:polypodium/features/pots/domain/pot_model.dart';
+import 'package:polypodium/features/pots/presentation/providers/pots_providers.dart';
 import 'package:polypodium/features/reminders/domain/reminder_model.dart';
 
 class _NoopNotificationService implements INotificationService {
@@ -123,5 +125,64 @@ void main() {
       expect(plant.soilId, 'loamy');
       expect((await entriesOf(id)).map((e) => e.type), [EntryType.repotting]);
     }
+  });
+
+  group('pots', () {
+    Future<void> addPot(String id, {String? locationId}) =>
+        container.read(potsRepositoryProvider).save(PotModel(
+              id: id,
+              name: 'Vaso $id',
+              diameterCm: 30,
+              locationId: locationId,
+              createdAt: t0,
+            ));
+
+    test('a repotting into a pot moves every plant there, noting where '
+        'each one came from, without a second entry', () async {
+      await addPot('old');
+      await addPot('big', locationId: 'balcony');
+      await container.read(potsRepositoryProvider)
+          .movePlantToPot('p1', 'old', recordEntry: false);
+
+      await container.read(entryMutationsProvider).createMany([
+        for (final id in ['p1', 'p2'])
+          repotting(id,
+              const RepottingDetails(toPotId: 'big', toPotName: 'Vaso big')),
+      ]);
+
+      for (final id in ['p1', 'p2']) {
+        final plant =
+            (await container.read(plantsRepositoryProvider).getById(id))!;
+        expect(plant.potId, 'big');
+        expect(plant.locationId, 'balcony');
+        expect((await entriesOf(id)).map((e) => e.type),
+            [EntryType.repotting]);
+      }
+      final p1Details =
+          (await entriesOf('p1')).single.details as RepottingDetails;
+      expect(p1Details.fromPotId, 'old');
+      final p2Details =
+          (await entriesOf('p2')).single.details as RepottingDetails;
+      expect(p2Details.fromPotId, isNull);
+    });
+
+    test('changing the pot on the plant form records the move, keeping the '
+        'location picked on the form', () async {
+      await addPot('big', locationId: 'balcony');
+      final plant =
+          (await container.read(plantsRepositoryProvider).getById('p1'))!;
+
+      await container
+          .read(plantMutationsProvider)
+          .save(plant.copyWith(potId: 'big', locationId: 'kitchen'));
+
+      final saved =
+          (await container.read(plantsRepositoryProvider).getById('p1'))!;
+      expect(saved.potId, 'big');
+      expect(saved.locationId, 'kitchen');
+      final entries = await entriesOf('p1');
+      final move = entries.singleWhere((e) => e.type == EntryType.repotting);
+      expect((move.details as RepottingDetails).toPotId, 'big');
+    });
   });
 }

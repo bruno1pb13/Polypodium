@@ -199,4 +199,4 @@ final class FilteredSortedPlantsProvider extends $FunctionalProvider<
 }
 
 String _$filteredSortedPlantsHash() =>
-    r'00ac04cadf4e4b63858b2f9c949f1d6b365a1322';
+    r'c3fe42f77e5e602599cf615ca7d59a4b276e87fb';

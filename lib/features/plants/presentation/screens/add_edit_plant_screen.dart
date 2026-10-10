@@ -13,6 +13,9 @@ import '../../../species/presentation/screens/add_species_screen.dart';
 import '../../../species/presentation/widgets/species_autocomplete.dart';
 import '../../../locations/presentation/providers/locations_providers.dart';
 import '../../../locations/presentation/screens/add_edit_location_screen.dart';
+import '../../../pots/domain/pot_model.dart';
+import '../../../pots/presentation/providers/pots_providers.dart';
+import '../../../pots/presentation/widgets/pot_selection_field.dart';
 import '../../../soils/domain/soil_model.dart';
 import '../../../soils/presentation/providers/soils_providers.dart';
 import '../../../soils/presentation/widgets/soil_selection_field.dart';
@@ -50,6 +53,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
   String? _tempExternalScientificName;
 
   String? _selectedLocationId;
+  String? _selectedPotId;
   String? _selectedSoilId;
   String? _parentPlantId;
   DateTime _acquisitionDate = DateTime.now();
@@ -74,6 +78,8 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
     );
     _selectedSpeciesId = p?.speciesId;
     _selectedLocationId = p?.locationId;
+    // A cutting doesn't start in its parent's pot.
+    _selectedPotId = widget.plant?.potId;
     _selectedSoilId = p?.soilId;
     _parentPlantId = widget.plant?.parentPlantId ?? parent?.id;
     _acquisitionDate = widget.plant?.acquisitionDate ?? DateTime.now();
@@ -121,6 +127,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
     final locationsAsync = ref.watch(locationsNotifierProvider);
     final soilsAsync = ref.watch(soilsNotifierProvider);
     final plants = ref.watch(plantsNotifierProvider).value ?? const [];
+    final pots = ref.watch(potsNotifierProvider).value ?? const [];
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
@@ -411,6 +418,28 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
                                     ),
                                   ],
                                 ),
+                                const SizedBox(height: 12),
+                                PotSelectionField(
+                                  selectedPot: pots
+                                      .where((p) => p.id == _selectedPotId)
+                                      .firstOrNull,
+                                  newPotDefaults: _selectedLocationId == null
+                                      ? null
+                                      : PotModel(
+                                          id: '',
+                                          name: '',
+                                          locationId: _selectedLocationId,
+                                          createdAt: DateTime.now(),
+                                        ),
+                                  onPotSelected: (pot) => setState(() {
+                                    _selectedPotId = pot?.id;
+                                    // The plant goes where its pot is; the
+                                    // location can still be changed after.
+                                    if (pot?.locationId != null) {
+                                      _selectedLocationId = pot!.locationId;
+                                    }
+                                  }),
+                                ),
                                 const SizedBox(height: 8),
                                 _DatePickerTile(
                                   date: _acquisitionDate,
@@ -617,6 +646,7 @@ class _AddEditPlantScreenState extends ConsumerState<AddEditPlantScreen> {
             frequencyText.isEmpty ? null : int.parse(frequencyText),
         acquisitionDate: _acquisitionDate,
         locationId: _selectedLocationId,
+        potId: _selectedPotId,
         lastIrrigatedAt: widget.plant?.lastIrrigatedAt,
         lastPesticideAppliedAt: widget.plant?.lastPesticideAppliedAt,
         pesticideReapplicationDays: widget.plant?.pesticideReapplicationDays,

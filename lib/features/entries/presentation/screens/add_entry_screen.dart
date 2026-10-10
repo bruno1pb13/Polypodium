@@ -16,6 +16,8 @@ import '../../../entries/presentation/providers/carencia_providers.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../reminders/domain/reminder_model.dart';
 import '../../../reminders/presentation/providers/reminders_providers.dart';
+import '../../../pots/domain/pot_model.dart';
+import '../../../pots/presentation/widgets/pot_ui.dart';
 import '../../../soils/domain/soil_model.dart';
 import '../widgets/entry_forms/chlorosis_form.dart';
 import '../widgets/entry_forms/entry_form_widgets.dart';
@@ -92,6 +94,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   final _potDiameterCtrl = TextEditingController();
   PotMaterial? _potMaterial;
   SoilModel? _newSoil;
+  PotModel? _repotPot;
 
   // Harvest
   final _harvestQuantityCtrl = TextEditingController();
@@ -243,6 +246,8 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           potMaterial: _potMaterial,
           newSoilId: _newSoil?.id,
           newSoilName: _newSoil?.name,
+          toPotId: _repotPot?.id,
+          toPotName: _repotPot?.name,
         );
       case EntryType.harvest:
         final quantity =
@@ -452,6 +457,16 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           onMaterialChanged: (m) => setState(() => _potMaterial = m),
           newSoil: _newSoil,
           onSoilChanged: (soil) => setState(() => _newSoil = soil),
+          pot: _repotPot,
+          onPotChanged: (pot) => setState(() {
+            _repotPot = pot;
+            // The pot's measures fill the fields left blank.
+            if (pot?.diameterCm != null &&
+                _potDiameterCtrl.text.trim().isEmpty) {
+              _potDiameterCtrl.text = formatPotDiameter(pot!.diameterCm!);
+            }
+            _potMaterial ??= pot?.material;
+          }),
         ),
       EntryType.harvest => HarvestForm(
           quantityController: _harvestQuantityCtrl,

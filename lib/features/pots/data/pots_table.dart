@@ -15,9 +15,8 @@ class PotsTable extends Table {
 
   TextColumn get id => text()();
   TextColumn get name => text()();
-  TextColumn get kind => text()
-      .map(const PotKindConverter())
-      .withDefault(const Constant('pot'))();
+  TextColumn get kind =>
+      text().map(const PotKindConverter()).withDefault(const Constant('pot'))();
   RealColumn get diameterCm => real().nullable()();
   TextColumn get material =>
       text().map(const PotMaterialConverter()).nullable()();

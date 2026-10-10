@@ -4802,12 +4802,6 @@ abstract class AppLocalizations {
   /// **'New pot'**
   String get newPotTitle;
 
-  /// No description provided for @potNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get potNameLabel;
-
   /// No description provided for @potNameHint.
   ///
   /// In en, this message translates to:
@@ -4825,12 +4819,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Diameter'**
   String get potDiameterField;
-
-  /// No description provided for @potLocationLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Location'**
-  String get potLocationLabel;
 
   /// No description provided for @potNotesLabel.
   ///
@@ -4982,18 +4970,6 @@ abstract class AppLocalizations {
   /// **'Choose a pot'**
   String get choosePotTitle;
 
-  /// No description provided for @currentPot.
-  ///
-  /// In en, this message translates to:
-  /// **'Current pot'**
-  String get currentPot;
-
-  /// No description provided for @inPotNamed.
-  ///
-  /// In en, this message translates to:
-  /// **'In: {pot}'**
-  String inPotNamed(String pot);
-
   /// No description provided for @sharesPotWith.
   ///
   /// In en, this message translates to:
@@ -5017,12 +4993,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Picking a pot moves the plant into it when saved. A new pot takes the diameter and material above.'**
   String get repottingPotHint;
-
-  /// No description provided for @newPotNameTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Name of the new pot'**
-  String get newPotNameTitle;
 
   /// No description provided for @historyFieldPot.
   ///
@@ -5060,17 +5030,17 @@ abstract class AppLocalizations {
   /// **'Water the pot'**
   String get waterPot;
 
-  /// No description provided for @potWatered.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, one{1 plant watered} other{{count} plants watered}}'**
-  String potWatered(int count);
-
   /// No description provided for @potPlantPickerOtherPot.
   ///
   /// In en, this message translates to:
   /// **'In another pot: {pot}'**
   String potPlantPickerOtherPot(String pot);
+
+  /// No description provided for @keepCurrentPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the current pot'**
+  String get keepCurrentPot;
 }
 
 class _AppLocalizationsDelegate

@@ -2859,9 +2859,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get newPotTitle => 'Novo vaso';
 
   @override
-  String get potNameLabel => 'Nome';
-
-  @override
   String get potNameHint => 'Ex.: Vaso azul grande';
 
   @override
@@ -2869,9 +2866,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get potDiameterField => 'Diâmetro';
-
-  @override
-  String get potLocationLabel => 'Localização';
 
   @override
   String get potNotesLabel => 'Observações';
@@ -2979,14 +2973,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get choosePotTitle => 'Escolher vaso';
 
   @override
-  String get currentPot => 'Vaso atual';
-
-  @override
-  String inPotNamed(String pot) {
-    return 'Em: $pot';
-  }
-
-  @override
   String sharesPotWith(String names) {
     return 'Divide o vaso com: $names';
   }
@@ -3002,9 +2988,6 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get repottingPotHint =>
       'Escolher um vaso move a planta para ele ao salvar. Um vaso novo usa o diâmetro e o material acima.';
-
-  @override
-  String get newPotNameTitle => 'Nome do novo vaso';
 
   @override
   String get historyFieldPot => 'Vaso';
@@ -3043,18 +3026,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get waterPot => 'Regar o vaso';
 
   @override
-  String potWatered(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count plantas regadas',
-      one: '1 planta regada',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String potPlantPickerOtherPot(String pot) {
     return 'Em outro vaso: $pot';
   }
+
+  @override
+  String get keepCurrentPot => 'Manter o vaso atual';
 }

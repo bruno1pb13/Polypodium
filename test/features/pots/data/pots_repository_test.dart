@@ -79,8 +79,7 @@ void main() {
 
     await pots.movePlantsToPot(['a', 'b'], 'pot1');
 
-    expect((await db.plantsDao.getByPot('pot1')).map((p) => p.id),
-        ['a', 'b']);
+    expect((await db.plantsDao.getByPot('pot1')).map((p) => p.id), ['a', 'b']);
   });
 
   test('moving a plant is a synced write and records a repotting entry',

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../../../core/enums.dart';
 import '../../../../../core/l10n/l10n.dart';
 import '../../../../../core/theme/glass_colors.dart';
+import '../../../../pots/domain/pot_model.dart';
+import '../../../../pots/presentation/widgets/pot_selection_field.dart';
+import '../../../../pots/presentation/widgets/pot_ui.dart';
 import '../../../../soils/domain/soil_model.dart';
 import '../../../../soils/presentation/widgets/soil_selection_field.dart';
 import 'entry_form_widgets.dart';
@@ -11,14 +14,19 @@ import 'entry_form_widgets.dart';
 // Repotting — pot diameter/material and an optional new soil
 // ---------------------------------------------------------------------------
 
-/// The diameter controller and the picked material/soil are owned by the
-/// screen; picking a soil also moves the plant to it when saved.
+/// The diameter controller and the picked material/soil/pot are owned by
+/// the screen; picking a soil or a pot also moves the plant to it when
+/// saved.
 class RepottingForm extends StatelessWidget {
   final TextEditingController diameterController;
   final PotMaterial? material;
   final ValueChanged<PotMaterial?> onMaterialChanged;
   final SoilModel? newSoil;
   final ValueChanged<SoilModel?> onSoilChanged;
+
+  /// The pot the plant goes into; null keeps its current pot.
+  final PotModel? pot;
+  final ValueChanged<PotModel?>? onPotChanged;
 
   const RepottingForm({
     super.key,
@@ -27,6 +35,8 @@ class RepottingForm extends StatelessWidget {
     required this.onMaterialChanged,
     required this.newSoil,
     required this.onSoilChanged,
+    this.pot,
+    this.onPotChanged,
   });
 
   @override
@@ -107,6 +117,25 @@ class RepottingForm extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         EntryHintText(l10n.newSoilHint),
+        if (onPotChanged != null) ...[
+          const SizedBox(height: 16),
+          PotSelectionField(
+            selectedPot: pot,
+            onPotSelected: onPotChanged!,
+            allowNone: false,
+            emptyLabel: l10n.keepCurrentPot,
+            // "New pot…" starts from the measures typed above.
+            newPotDefaults: PotModel(
+              id: '',
+              name: '',
+              diameterCm: parsePotDiameter(diameterController.text),
+              material: material,
+              createdAt: DateTime.now(),
+            ),
+          ),
+          const SizedBox(height: 4),
+          EntryHintText(l10n.repottingPotHint),
+        ],
       ],
     );
   }

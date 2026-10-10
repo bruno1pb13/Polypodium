@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../plants/presentation/providers/plants_providers.dart';
+import '../../../pots/presentation/providers/pots_providers.dart';
 import '../../../reminders/domain/reminder_model.dart';
 import '../../../reminders/presentation/providers/reminders_providers.dart';
 import '../../../../core/enums.dart';
@@ -111,6 +112,7 @@ class EntryMutations {
   Future<void> createMany(List<EntryModel> entries,
       {int? reminderIntervalDays}) async {
     if (entries.isEmpty) return;
+    entries = [for (final e in entries) await _withFromPot(e)];
     final entriesRepo = _ref.read(entriesRepositoryProvider);
     final plantsRepo = _ref.read(plantsRepositoryProvider);
     var needsReschedule = false;
@@ -135,7 +137,10 @@ class EntryMutations {
     }
     if (needsReschedule) await plantsRepo.rescheduleNotifications();
     for (final entry in entries) {
-      if (entry.type == EntryType.repotting) await _applyNewSoil(entry);
+      if (entry.type == EntryType.repotting) {
+        await _applyNewSoil(entry);
+        await _applyNewPot(entry);
+      }
     }
     _triggerSync();
   }
@@ -153,6 +158,30 @@ class EntryMutations {
         await _ref.read(plantsRepositoryProvider).getById(entry.plantId);
     if (plant == null || plant.soilId == soilId) return;
     await _ref.read(plantMutationsProvider).save(plant.copyWith(soilId: soilId));
+  }
+
+  /// A repotting into a pot notes the pot each plant leaves.
+  Future<EntryModel> _withFromPot(EntryModel entry) async {
+    final details = entry.details;
+    if (details is! RepottingDetails || details.toPotId == null) return entry;
+    final plant =
+        await _ref.read(plantsRepositoryProvider).getById(entry.plantId);
+    final from = plant?.potId;
+    if (from == null || from == details.toPotId) return entry;
+    return entry.copyWith(
+        extraData: details.copyWith(fromPotId: from).encode());
+  }
+
+  /// Moves the plant into the pot picked on a repotting [entry]; the entry
+  /// itself is the move's diary record. Same scope as [_applyNewSoil].
+  Future<void> _applyNewPot(EntryModel entry) async {
+    final details = entry.details;
+    if (details is! RepottingDetails) return;
+    final potId = details.toPotId;
+    if (potId == null) return;
+    await _ref
+        .read(potsRepositoryProvider)
+        .movePlantToPot(entry.plantId, potId, recordEntry: false);
   }
 
   /// Records a plain irrigation entry, dated now, for each of [plantIds].

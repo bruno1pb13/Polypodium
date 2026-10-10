@@ -63,6 +63,7 @@ Future<List<PlantWithSpecies>> filteredSortedPlants(Ref ref) async {
         p.plant.nickname.normalize().contains(query) ||
         p.species.popularName.normalize().contains(query) ||
         p.species.scientificName.normalize().contains(query) ||
+        (p.pot?.name.normalize().contains(query) ?? false) ||
         matchesPlantShortCode(query, p.plant.shortCode));
   }
 

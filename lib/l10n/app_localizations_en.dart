@@ -2856,9 +2856,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newPotTitle => 'New pot';
 
   @override
-  String get potNameLabel => 'Name';
-
-  @override
   String get potNameHint => 'e.g. Big blue pot';
 
   @override
@@ -2866,9 +2863,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get potDiameterField => 'Diameter';
-
-  @override
-  String get potLocationLabel => 'Location';
 
   @override
   String get potNotesLabel => 'Notes';
@@ -2977,14 +2971,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get choosePotTitle => 'Choose a pot';
 
   @override
-  String get currentPot => 'Current pot';
-
-  @override
-  String inPotNamed(String pot) {
-    return 'In: $pot';
-  }
-
-  @override
   String sharesPotWith(String names) {
     return 'Shares the pot with: $names';
   }
@@ -3000,9 +2986,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get repottingPotHint =>
       'Picking a pot moves the plant into it when saved. A new pot takes the diameter and material above.';
-
-  @override
-  String get newPotNameTitle => 'Name of the new pot';
 
   @override
   String get historyFieldPot => 'Pot';
@@ -3041,18 +3024,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get waterPot => 'Water the pot';
 
   @override
-  String potWatered(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count plants watered',
-      one: '1 plant watered',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String potPlantPickerOtherPot(String pot) {
     return 'In another pot: $pot';
   }
+
+  @override
+  String get keepCurrentPot => 'Keep the current pot';
 }

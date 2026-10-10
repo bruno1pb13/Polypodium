@@ -166,6 +166,12 @@ enum LocationSortOption {
   dateAdded,
 }
 
+enum PotSortOption {
+  nameAZ,
+  mostPlants,
+  dateAdded,
+}
+
 enum EntrySortOption {
   dateDesc,
   dateAsc,

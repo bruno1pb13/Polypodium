@@ -1,6 +1,7 @@
 import '../../../core/enums.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../locations/domain/location_model.dart';
+import '../../pots/domain/pot_model.dart';
 import '../../species/domain/species_model.dart';
 
 class PlantModel {
@@ -131,12 +132,16 @@ class PlantWithSpecies {
   final PlantModel plant;
   final SpeciesModel species;
   final LocationModel? location;
+
+  /// The pot the plant is in, when it is in a live one.
+  final PotModel? pot;
   final bool isPendingSync;
 
   const PlantWithSpecies({
     required this.plant,
     required this.species,
     this.location,
+    this.pot,
     this.isPendingSync = false,
   });
 
