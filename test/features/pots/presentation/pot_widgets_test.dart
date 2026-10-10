@@ -111,7 +111,7 @@ final _planter = PotModel(
 
 final _a = _plant('a', 'Samambaia da sala', pot: _blue);
 final _b = _plant('b', 'Jiboia', pot: _blue);
-final _c = _plant('c', 'Babosa');
+final _c = _plant('c3f9a1c0', 'Babosa');
 
 final _bluePot = PotWithPlants(
   pot: _blue,
@@ -162,7 +162,7 @@ void main() {
 
       expect(find.text('Vaso azul'), findsOneWidget);
       expect(find.text('30 cm · Barro'), findsOneWidget);
-      expect(find.text('Divide o vaso com: Jiboia'), findsOneWidget);
+      expect(find.text('Divide o vaso com: Jiboia #B'), findsOneWidget);
       expect(find.text('Mudar de vaso'), findsOneWidget);
     });
 
@@ -175,7 +175,7 @@ void main() {
       await tester.tap(find.text('Jardineira'));
       await tester.pumpAndSettle();
 
-      expect(mutations.moves.single, 'c->planter');
+      expect(mutations.moves.single, 'c3f9a1c0->planter');
     });
 
     testWidgets('lays out without overflow at text scale 2.0', (tester) async {
@@ -210,7 +210,7 @@ void main() {
       expect(find.text('Sem vaso'), findsOneWidget);
       expect(find.text('Jardineira'), findsOneWidget);
       expect(find.text('Vaso azul'), findsOneWidget);
-      expect(find.textContaining('2 plantas: Samambaia da sala, Jiboia'),
+      expect(find.textContaining('2 plantas: Samambaia da sala #A, Jiboia #B'),
           findsOneWidget);
       expect(find.text('Novo vaso…'), findsOneWidget);
       // Back out without picking.
@@ -263,6 +263,26 @@ void main() {
       expect(find.text('Plantas neste vaso (2)'), findsOneWidget);
       expect(find.text('Samambaia da sala'), findsOneWidget);
       expect(find.text('Jiboia'), findsOneWidget);
+      // Short codes tell same-named plants apart.
+      expect(find.text('#A'), findsOneWidget);
+      expect(find.text('#B'), findsOneWidget);
+    });
+
+    testWidgets('the add-plant sheet shows and searches the short code',
+        (tester) async {
+      await pump(tester, const PotDetailScreen(potId: 'blue'));
+
+      await tester.tap(find.text('Adicionar planta'));
+      await tester.pumpAndSettle();
+      expect(find.text('#C3F9A1'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), '#c3f9');
+      await tester.pumpAndSettle();
+      expect(find.text('Babosa'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), '#ffff');
+      await tester.pumpAndSettle();
+      expect(find.text('Babosa'), findsNothing);
     });
 
     testWidgets('adds the picked plants to the pot', (tester) async {
@@ -278,7 +298,7 @@ void main() {
       await tester.tap(find.text('Mover para cá (1)'));
       await tester.pumpAndSettle();
 
-      expect(mutations.moves.single, 'c->blue');
+      expect(mutations.moves.single, 'c3f9a1c0->blue');
     });
 
     testWidgets('takes a plant out of the pot', (tester) async {

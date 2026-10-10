@@ -7,6 +7,7 @@ import '../../../../core/utils/string_utils.dart';
 import '../../../../core/widgets/app_search_bar.dart';
 import '../../../plants/domain/plant_model.dart';
 import '../../../plants/presentation/providers/plants_providers.dart';
+import '../../../plants/presentation/widgets/plant_short_code_text.dart';
 import '../../domain/pot_model.dart';
 import 'pot_ui.dart';
 
@@ -93,6 +94,7 @@ class _PlantsForPotSheetState extends ConsumerState<PlantsForPotSheet> {
                         leading: Icon(Icons.local_florist_outlined,
                             color: context.glass.fgMuted),
                         title: p.plant.nickname,
+                        titleSuffix: PlantShortCodeText(p.plant.shortCode),
                         subtitle: [
                           p.species.popularName,
                           if (p.pot != null)

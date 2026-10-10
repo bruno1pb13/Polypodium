@@ -8,6 +8,7 @@ import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../entries/presentation/screens/add_entry_screen.dart';
 import '../../../plants/domain/plant_model.dart';
 import '../../../plants/presentation/screens/plant_detail_screen.dart';
+import '../../../plants/presentation/widgets/plant_short_code_text.dart';
 import '../../domain/pot_with_plants.dart';
 import '../providers/pots_providers.dart';
 import '../widgets/plants_for_pot_sheet.dart';
@@ -273,11 +274,22 @@ class _PotPlantRow extends ConsumerWidget {
     final tile = ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Icon(Icons.local_florist_outlined, color: context.glass.fgMuted),
-      title: Text(
-        p.nickname,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: context.glass.fg, fontWeight: FontWeight.w600),
+      title: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: [
+          Flexible(
+            child: Text(
+              p.nickname,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  color: context.glass.fg, fontWeight: FontWeight.w600),
+            ),
+          ),
+          const SizedBox(width: 6),
+          PlantShortCodeText(p.shortCode),
+        ],
       ),
       subtitle: Text(subtitle,
           maxLines: 1,

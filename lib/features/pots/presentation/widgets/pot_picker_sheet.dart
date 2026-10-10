@@ -186,7 +186,9 @@ class _PotTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final specs = potSpecs(l10n, pot.pot);
-    final names = pot.plants.map((p) => p.plant.nickname).join(', ');
+    final names = pot.plants
+        .map((p) => '${p.plant.nickname} #${p.plant.shortCode}')
+        .join(', ');
     final subtitle = [
       l10n.potPlantCount(pot.plants.length) + (names.isEmpty ? '' : ': $names'),
       if (pot.location != null) pot.location!.name,

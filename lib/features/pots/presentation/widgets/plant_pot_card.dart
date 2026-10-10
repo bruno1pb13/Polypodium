@@ -29,7 +29,8 @@ class PlantPotCard extends ConsumerWidget {
     final others = [
       if (pot != null)
         for (final p in pot.plants)
-          if (p.plant.id != plant.id) p.plant.nickname,
+          if (p.plant.id != plant.id)
+            '${p.plant.nickname} #${p.plant.shortCode}',
     ];
     final muted = transparent ? context.glass.fgMuted : null;
     final strong = transparent ? context.glass.fg : null;

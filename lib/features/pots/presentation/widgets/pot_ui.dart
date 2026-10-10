@@ -193,6 +193,9 @@ class PotPickerTile extends StatelessWidget {
   final Widget leading;
   final String title;
   final String? subtitle;
+
+  /// Shown right after the title (which is ellipsized first).
+  final Widget? titleSuffix;
   final bool selected;
   final Widget? trailing;
   final VoidCallback? onTap;
@@ -202,6 +205,7 @@ class PotPickerTile extends StatelessWidget {
     required this.leading,
     required this.title,
     this.subtitle,
+    this.titleSuffix,
     this.selected = false,
     this.trailing,
     this.onTap,
@@ -234,15 +238,27 @@ class PotPickerTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: context.glass.fg,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: context.glass.fg,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                        if (titleSuffix != null) ...[
+                          const SizedBox(width: 6),
+                          titleSuffix!,
+                        ],
+                      ],
                     ),
                     if (subtitle != null && subtitle!.isNotEmpty)
                       Text(

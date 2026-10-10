@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/enums.dart';
 import '../../../../core/utils/string_utils.dart';
+import '../../../plants/domain/plant_model.dart';
 import '../../domain/pot_with_plants.dart';
 import 'pots_providers.dart';
 
@@ -36,13 +37,15 @@ class PotSortOptionNotifier extends _$PotSortOptionNotifier {
 }
 
 /// Whether [pot] matches the normalized [query]: its name, notes, location
-/// or the nickname of a plant in it.
+/// or the nickname or short code of a plant in it.
 bool potMatchesQuery(PotWithPlants pot, String query) {
   if (query.isEmpty) return true;
   return pot.pot.name.normalize().contains(query) ||
       (pot.pot.notes?.normalize().contains(query) ?? false) ||
       (pot.location?.name.normalize().contains(query) ?? false) ||
-      pot.plants.any((p) => p.plant.nickname.normalize().contains(query));
+      pot.plants.any((p) =>
+          p.plant.nickname.normalize().contains(query) ||
+          matchesPlantShortCode(query, p.plant.shortCode));
 }
 
 List<PotWithPlants> sortPots(List<PotWithPlants> pots, PotSortOption option) {

@@ -268,6 +268,24 @@ void main() {
     expect(find.text('Samambaia'), findsNothing);
   });
 
+  testWidgets('each plant shows its short code next to the name',
+      (tester) async {
+    final long = PlantWithSpecies(
+      plant: samambaia.plant.copyWith(
+          id: '3f9a1c7e-0000-4000-8000-000000000000',
+          nickname: 'Samambaia de nome muito comprido que não cabe na linha'),
+      species: samambaia.species,
+    );
+    final semantics = tester.ensureSemantics();
+    await pump(tester, [long, anturio]);
+
+    expect(find.text('#3F9A1C'), findsOneWidget);
+    expect(find.text('#P2'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('Código 3F9A1C')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    semantics.dispose();
+  });
+
   testWidgets('sort menu reorders the list', (tester) async {
     await pump(tester, [anturio, samambaia]);
 
