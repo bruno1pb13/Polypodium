@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../entries/presentation/providers/carencia_providers.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
@@ -21,6 +22,9 @@ class PlantListItem extends ConsumerWidget {
   final VoidCallback? onToggleSelect;
   final VoidCallback? onStartSelection;
 
+  /// Adds the plant's pot to the subtitle line, after the location.
+  final bool showPot;
+
   const PlantListItem({
     super.key,
     required this.plantWithSpecies,
@@ -29,6 +33,7 @@ class PlantListItem extends ConsumerWidget {
     this.isSelected = false,
     this.onToggleSelect,
     this.onStartSelection,
+    this.showPot = false,
   });
 
   @override
@@ -201,7 +206,8 @@ class PlantListItem extends ConsumerWidget {
                           ),
                           Text(
                             '${pws.species.popularName}'
-                            '${pws.location != null ? ' • ${pws.location!.name}' : ''}',
+                            '${pws.location != null ? ' • ${pws.location!.name}' : ''}'
+                            '${showPot && pws.pot != null ? ' • ${pws.pot!.kind.emoji} ${pws.pot!.name}' : ''}',
                             style: TextStyle(
                               fontSize: 13,
                               color: transparencyEnabled
