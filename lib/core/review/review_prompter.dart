@@ -15,7 +15,7 @@ class ReviewPrompter {
   ReviewPrompter({required Future<void> Function() requestReview})
       : _requestReview = requestReview;
 
-  static const wateringsBeforeAsking = 30;
+  static const wateringsBeforeAsking = 15;
   static const _countKey = 'review.waterings';
   static const _askedKey = 'review.asked';
 
