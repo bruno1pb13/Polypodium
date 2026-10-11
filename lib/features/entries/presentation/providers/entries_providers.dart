@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/database/database_provider.dart';
+import '../../../../core/review/review_prompter.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../plants/presentation/providers/plants_providers.dart';
 import '../../../pots/presentation/providers/pots_providers.dart';
@@ -143,6 +144,9 @@ class EntryMutations {
       }
     }
     _triggerSync();
+    if (entries.any((e) => e.type == EntryType.irrigation)) {
+      _ref.read(reviewPrompterProvider)?.recordWatering().catchError((_) {});
+    }
   }
 
   /// Saves the plant with the soil picked on a repotting [entry], through
