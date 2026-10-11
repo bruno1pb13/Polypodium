@@ -14,7 +14,7 @@ Polypodium: Cuidar de Plantas
 ### Descrição curta
 
 ```
-Lembrete de rega, diário com fotos e horta. Grátis, offline e sem anúncios.
+Lembrete de rega, diário com fotos e horta. Funciona 100% offline.
 ```
 
 ### Descrição completa
@@ -82,7 +82,7 @@ Polypodium: Plant Care Diary
 ### Short description
 
 ```
-Watering reminders, photo journal and garden log. Free, offline and ad-free.
+Watering reminders, photo journal and garden log. Works 100% offline.
 ```
 
 ### Full description
