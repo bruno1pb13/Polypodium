@@ -18,7 +18,7 @@ void main() {
     }
   }
 
-  test('asks on the 10th watering', () async {
+  test('asks on the Nth watering', () async {
     await water(ReviewPrompter.wateringsBeforeAsking - 1);
     expect(requests, 0);
     await water(1);
