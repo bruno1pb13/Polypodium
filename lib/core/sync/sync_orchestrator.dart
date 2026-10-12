@@ -45,6 +45,13 @@ const originalServerEntityTypes = {
   'bed',
 };
 
+/// Entity types left out of the essentials a fresh device pulls first: the
+/// history, by far the bulk of a garden, and the only part with photos.
+const historyEntityTypes = {'entry', 'entry_photo'};
+
+/// Pulls above this many changes are worth telling the user about.
+const largeSyncThreshold = 300;
+
 /// Entities whose payload carries a photo file through the photo side
 /// channel (`photoPath` locally, `photoKey` on the wire).
 const _photoEntityTypes = {'entry', 'entry_photo'};
@@ -55,11 +62,45 @@ class SyncResult {
   const SyncResult({required this.pulled, required this.pushed});
 }
 
+enum SyncStage {
+  /// A fresh device pulling everything but the history, before the user
+  /// gets the app: without it the plant list would fill in for minutes.
+  essentials,
+
+  /// The regular pull. Data may still be missing while it runs.
+  rest,
+}
+
+/// Where a running pull stands, reported after each page.
+class SyncProgress {
+  final SyncStage stage;
+
+  /// Changes applied so far in this stage.
+  final int done;
+
+  /// Changes this stage holds in all; null when the server can't tell.
+  final int? total;
+
+  /// Whether the pull is big enough to tell the user about.
+  final bool large;
+
+  const SyncProgress({
+    required this.stage,
+    required this.done,
+    this.total,
+    this.large = false,
+  });
+}
+
 /// Orchestrates a full sync cycle against one peer (today: always "the
 /// server", identified by [_serverPeerId] -- a future LAN peer would reuse
 /// the same orchestrator against a different peer id/URL). Depends only on
 /// the storage/cursor/transport abstractions, never on Drift or `http`
 /// directly, so each side can be swapped/tested independently.
+/// Reports a pull's applied changes so far, out of its size (null when
+/// unknown), and whether more pages follow.
+typedef _PageProgress = void Function(int done, int? total, bool hasMore);
+
 class SyncOrchestrator {
   SyncOrchestrator({
     required ISyncStorageAdapter storage,
@@ -79,18 +120,45 @@ class SyncOrchestrator {
   static const _serverPeerId = syncServerPeerId;
   static const _pageSize = 100;
 
+  /// [onProgress] follows the pull, the part that grows with the garden;
+  /// it gets null once the pull is done.
   Future<SyncResult> sync({
     required String serverUrl,
     required String token,
     required String deviceId,
+    void Function(SyncProgress? progress)? onProgress,
   }) async {
+    final fresh = await _cursors.getPullCursor(_serverPeerId) == 0;
     // Before the pull, which moves the cursor the first record depends on.
     final newEntryTypes = await _undeclaredEntryTypes();
     final newEntities = await _undeclaredEntityTypes();
     // Before the push, which moves the cursor a fresh device is told by.
     final pushedBefore = await _cursors.getPushCursor(_serverPeerId) > 0;
+    final essentialsFirst = fresh &&
+        await _pullsEssentialsFirst(serverUrl: serverUrl, token: token);
+    if (essentialsFirst) {
+      onProgress?.call(const SyncProgress(
+          stage: SyncStage.essentials, done: 0, large: true));
+      await _pullEssentials(
+          serverUrl: serverUrl, token: token, onProgress: onProgress);
+    }
     final pull = await _pull(
-        serverUrl: serverUrl, token: token, deviceId: deviceId);
+        serverUrl: serverUrl,
+        token: token,
+        deviceId: deviceId,
+        onProgress: onProgress == null
+            ? null
+            : (done, total, hasMore) => onProgress(SyncProgress(
+                  stage: SyncStage.rest,
+                  done: done,
+                  total: total,
+                  large: essentialsFirst ||
+                      (total != null
+                          ? total > largeSyncThreshold
+                          : hasMore && done >= largeSyncThreshold),
+                )));
+    onProgress?.call(null);
+    // The essentials came again with the full pull, so they're counted once.
     var pulled = pull.applied;
     final supported = pull.supported;
     final repush = supported == null
@@ -124,11 +192,13 @@ class SyncOrchestrator {
     required String serverUrl,
     required String token,
     required String deviceId,
+    _PageProgress? onProgress,
   }) async {
     final result = await _pullPages(
       serverUrl: serverUrl,
       token: token,
       since: await _cursors.getPullCursor(_serverPeerId),
+      onProgress: onProgress,
       onApplied: (cursor) async {
         await _cursors.setPullCursor(_serverPeerId, cursor);
         // Best-effort bookkeeping only -- failures here don't affect
@@ -143,6 +213,46 @@ class SyncOrchestrator {
       },
     );
     return (applied: result.applied, supported: result.supported);
+  }
+
+  // -- essentials first: a fresh device facing a big garden pulls every
+  //    entity but the history before the regular pull, so the user gets
+  //    the plants in seconds and the history fills in behind. Nothing is
+  //    persisted: the regular pull starts from rev 0 all the same and
+  //    brings the essentials again, which LWW applies as no-ops, and an
+  //    interrupted pass just starts over on a device still fresh. ----------
+
+  /// Whether the whole garden is too big to wait for, or of unknown size.
+  Future<bool> _pullsEssentialsFirst({
+    required String serverUrl,
+    required String token,
+  }) async {
+    final probe = await _http.fetchChanges(
+        serverUrl: serverUrl, token: token, since: 0, limit: 1, count: true);
+    if (probe.changes.isEmpty) return false;
+    final total = probe.remaining;
+    return total == null || total > largeSyncThreshold;
+  }
+
+  Future<void> _pullEssentials({
+    required String serverUrl,
+    required String token,
+    void Function(SyncProgress? progress)? onProgress,
+  }) async {
+    await _pullPages(
+      serverUrl: serverUrl,
+      token: token,
+      since: 0,
+      entities: _storage.entityTypes.difference(historyEntityTypes),
+      onApplied: (_) async {},
+      onProgress: onProgress == null
+          ? null
+          : (done, total, _) => onProgress(SyncProgress(
+              stage: SyncStage.essentials,
+              done: done,
+              total: total,
+              large: true)),
+    );
   }
 
   // -- backfill: entries of types this build learned since its last
@@ -235,7 +345,8 @@ class SyncOrchestrator {
   /// of the last one applied per page to [onApplied]. Not [completed] when
   /// cut short by a failed photo download. [echoed] is the entity
   /// restriction as the server echoed it (null without one), [supported]
-  /// the entity types it reported storing.
+  /// the entity types it reported storing. With [onProgress], the first
+  /// page asks the server for the pull's size.
   Future<
       ({
         int applied,
@@ -249,8 +360,11 @@ class SyncOrchestrator {
     required Future<void> Function(int cursor) onApplied,
     Set<String>? entryTypes,
     Set<String>? entities,
+    _PageProgress? onProgress,
   }) async {
     var total = 0;
+    var first = true;
+    int? size;
 
     while (true) {
       final page = await _http.fetchChanges(
@@ -259,7 +373,10 @@ class SyncOrchestrator {
           since: since,
           limit: _pageSize,
           entryTypes: entryTypes,
-          entities: entities);
+          entities: entities,
+          count: onProgress != null && first);
+      first = false;
+      size ??= page.remaining;
       final supported = page.supportedEntities;
       if (entities != null && page.entities == null) {
         return (
@@ -284,6 +401,9 @@ class SyncOrchestrator {
         since = page.changes[appliedCount - 1].rev;
         await onApplied(since);
       }
+      // Rows written meanwhile can outgrow the count taken up front.
+      final sizeNow = size == null ? null : (total > size ? total : size);
+      onProgress?.call(total, sizeNow, page.hasMore);
 
       if (appliedCount < page.changes.length || !page.hasMore) {
         return (

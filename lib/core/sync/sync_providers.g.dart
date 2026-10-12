@@ -48,7 +48,67 @@ final class SyncServiceProvider
   }
 }
 
-String _$syncServiceHash() => r'791c01c68a6b89a1c88dfd019d65010eab2abceb';
+String _$syncServiceHash() => r'7ea779a917866f722e7985026e727c8d98decd1d';
+
+/// The active workspace's running pull, or null when none is: drives the
+/// first-sync overlay and the "still syncing" strip at the top of the app.
+
+@ProviderFor(SyncProgressNotifier)
+final syncProgressNotifierProvider = SyncProgressNotifierProvider._();
+
+/// The active workspace's running pull, or null when none is: drives the
+/// first-sync overlay and the "still syncing" strip at the top of the app.
+final class SyncProgressNotifierProvider
+    extends $NotifierProvider<SyncProgressNotifier, SyncProgress?> {
+  /// The active workspace's running pull, or null when none is: drives the
+  /// first-sync overlay and the "still syncing" strip at the top of the app.
+  SyncProgressNotifierProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'syncProgressNotifierProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$syncProgressNotifierHash();
+
+  @$internal
+  @override
+  SyncProgressNotifier create() => SyncProgressNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SyncProgress? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SyncProgress?>(value),
+    );
+  }
+}
+
+String _$syncProgressNotifierHash() =>
+    r'ca99e4fa0252049d46aa54de7109350183caff4b';
+
+/// The active workspace's running pull, or null when none is: drives the
+/// first-sync overlay and the "still syncing" strip at the top of the app.
+
+abstract class _$SyncProgressNotifier extends $Notifier<SyncProgress?> {
+  SyncProgress? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<SyncProgress?, SyncProgress?>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<SyncProgress?, SyncProgress?>,
+        SyncProgress?,
+        Object?,
+        Object?>;
+    return element.handleCreate(ref, build);
+  }
+}
 
 /// The push cursor for the 'server' peer, or null when there's no server
 /// to compare against (local-only workspace, or never logged in). Entities

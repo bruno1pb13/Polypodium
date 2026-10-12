@@ -212,6 +212,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncOffline => 'No connection to the server — using local data';
 
   @override
+  String get syncEssentialsTitle => 'Downloading your garden';
+
+  @override
+  String get syncEssentialsBody =>
+      'Plants, species and locations first. The history keeps coming in the background afterwards.';
+
+  @override
+  String get syncInBackground =>
+      'Syncing in the background — data may be incomplete';
+
+  @override
+  String syncProgressCount(int done, int total) {
+    return '$done of $total';
+  }
+
+  @override
   String get pendingSync => 'Pending sync';
 
   @override
@@ -1790,6 +1806,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dataOnlyOnDevice => 'Data only on this device';
+
+  @override
+  String diskUsage(String total, String photos) {
+    return 'On this device: $total (photos $photos)';
+  }
+
+  @override
+  String diskUsageTotal(String total) {
+    return 'All workspaces on this device: $total';
+  }
 
   @override
   String get serverAdministration => 'Server administration';

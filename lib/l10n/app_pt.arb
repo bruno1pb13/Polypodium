@@ -67,6 +67,10 @@
 
   "syncDownloaded": "{count, plural, one{1 novidade sincronizada} other{{count} novidades sincronizadas}}",
   "syncOffline": "Sem conexão com o servidor — usando dados locais",
+  "syncEssentialsTitle": "Baixando seu jardim",
+  "syncEssentialsBody": "Primeiro as plantas, espécies e locais. O histórico continua chegando em segundo plano depois.",
+  "syncInBackground": "Sincronizando em segundo plano — os dados podem estar incompletos",
+  "syncProgressCount": "{done} de {total}",
   "pendingSync": "Pendente de sincronização",
   "syncNow": "Sincronizar agora",
   "syncing": "Sincronizando...",
@@ -543,6 +547,8 @@
   "localChip": "Local",
   "localNoSync": "Local — não sincroniza",
   "dataOnlyOnDevice": "Dados só neste dispositivo",
+  "diskUsage": "Neste aparelho: {total} (fotos {photos})",
+  "diskUsageTotal": "Todos os workspaces neste aparelho: {total}",
   "serverAdministration": "Administração do servidor",
 
   "serverAddressTitle": "Endereço do servidor",

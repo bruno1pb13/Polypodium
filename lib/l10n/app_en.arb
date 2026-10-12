@@ -85,6 +85,16 @@
     }
   },
   "syncOffline": "No connection to the server — using local data",
+  "syncEssentialsTitle": "Downloading your garden",
+  "syncEssentialsBody": "Plants, species and locations first. The history keeps coming in the background afterwards.",
+  "syncInBackground": "Syncing in the background — data may be incomplete",
+  "syncProgressCount": "{done} of {total}",
+  "@syncProgressCount": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
   "pendingSync": "Pending sync",
   "syncNow": "Sync now",
   "syncing": "Syncing...",
@@ -811,6 +821,19 @@
   "localChip": "Local",
   "localNoSync": "Local — does not sync",
   "dataOnlyOnDevice": "Data only on this device",
+  "diskUsage": "On this device: {total} (photos {photos})",
+  "@diskUsage": {
+    "placeholders": {
+      "total": {"type": "String"},
+      "photos": {"type": "String"}
+    }
+  },
+  "diskUsageTotal": "All workspaces on this device: {total}",
+  "@diskUsageTotal": {
+    "placeholders": {
+      "total": {"type": "String"}
+    }
+  },
   "serverAdministration": "Server administration",
 
   "serverAddressTitle": "Server address",

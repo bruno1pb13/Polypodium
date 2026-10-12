@@ -188,15 +188,22 @@ class _SideNav extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: WorkspaceSelector(),
           ),
-          for (int i = 0; i < labels.length; i++)
-            _NavTile(
-              icon: i == selectedIndex ? selectedIcons[i] : icons[i],
-              label: labels[i],
-              selected: i == selectedIndex,
-              onTap: () => onSelected(i),
-              trailing: i == _kAgendaIndex ? const AgendaBadge() : null,
+          // Scrolls on short windows instead of overflowing.
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                for (int i = 0; i < labels.length; i++)
+                  _NavTile(
+                    icon: i == selectedIndex ? selectedIcons[i] : icons[i],
+                    label: labels[i],
+                    selected: i == selectedIndex,
+                    onTap: () => onSelected(i),
+                    trailing: i == _kAgendaIndex ? const AgendaBadge() : null,
+                  ),
+              ],
             ),
-          const Spacer(),
+          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Consumer(

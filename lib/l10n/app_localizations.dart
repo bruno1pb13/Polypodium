@@ -458,6 +458,30 @@ abstract class AppLocalizations {
   /// **'No connection to the server — using local data'**
   String get syncOffline;
 
+  /// No description provided for @syncEssentialsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading your garden'**
+  String get syncEssentialsTitle;
+
+  /// No description provided for @syncEssentialsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Plants, species and locations first. The history keeps coming in the background afterwards.'**
+  String get syncEssentialsBody;
+
+  /// No description provided for @syncInBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing in the background — data may be incomplete'**
+  String get syncInBackground;
+
+  /// No description provided for @syncProgressCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total}'**
+  String syncProgressCount(int done, int total);
+
   /// No description provided for @pendingSync.
   ///
   /// In en, this message translates to:
@@ -3181,6 +3205,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Data only on this device'**
   String get dataOnlyOnDevice;
+
+  /// No description provided for @diskUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'On this device: {total} (photos {photos})'**
+  String diskUsage(String total, String photos);
+
+  /// No description provided for @diskUsageTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'All workspaces on this device: {total}'**
+  String diskUsageTotal(String total);
 
   /// No description provided for @serverAdministration.
   ///

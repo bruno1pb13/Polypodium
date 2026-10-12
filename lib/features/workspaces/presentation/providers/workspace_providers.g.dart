@@ -190,3 +190,97 @@ final class ActiveWorkspaceProvider
 }
 
 String _$activeWorkspaceHash() => r'b25fd7253aaac449fc6987be914674dc83b55efb';
+
+/// What [workspaceId] takes on this device, measured afresh whenever a
+/// screen starts watching it.
+
+@ProviderFor(workspaceDiskUsage)
+final workspaceDiskUsageProvider = WorkspaceDiskUsageFamily._();
+
+/// What [workspaceId] takes on this device, measured afresh whenever a
+/// screen starts watching it.
+
+final class WorkspaceDiskUsageProvider extends $FunctionalProvider<
+        AsyncValue<WorkspaceDiskUsage>,
+        WorkspaceDiskUsage,
+        FutureOr<WorkspaceDiskUsage>>
+    with
+        $FutureModifier<WorkspaceDiskUsage>,
+        $FutureProvider<WorkspaceDiskUsage> {
+  /// What [workspaceId] takes on this device, measured afresh whenever a
+  /// screen starts watching it.
+  WorkspaceDiskUsageProvider._(
+      {required WorkspaceDiskUsageFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'workspaceDiskUsageProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$workspaceDiskUsageHash();
+
+  @override
+  String toString() {
+    return r'workspaceDiskUsageProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<WorkspaceDiskUsage> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<WorkspaceDiskUsage> create(Ref ref) {
+    final argument = this.argument as String;
+    return workspaceDiskUsage(
+      ref,
+      argument,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WorkspaceDiskUsageProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$workspaceDiskUsageHash() =>
+    r'1fb97ec811e52fe5502ee0fda9c1eeae661f2d78';
+
+/// What [workspaceId] takes on this device, measured afresh whenever a
+/// screen starts watching it.
+
+final class WorkspaceDiskUsageFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<WorkspaceDiskUsage>, String> {
+  WorkspaceDiskUsageFamily._()
+      : super(
+          retry: null,
+          name: r'workspaceDiskUsageProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// What [workspaceId] takes on this device, measured afresh whenever a
+  /// screen starts watching it.
+
+  WorkspaceDiskUsageProvider call(
+    String workspaceId,
+  ) =>
+      WorkspaceDiskUsageProvider._(argument: workspaceId, from: this);
+
+  @override
+  String toString() => r'workspaceDiskUsageProvider';
+}
