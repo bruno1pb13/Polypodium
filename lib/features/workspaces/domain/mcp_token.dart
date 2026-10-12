@@ -37,6 +37,9 @@ class McpToken {
       );
 }
 
+/// A garden's tokens, and whether the server has MCP turned on.
+typedef McpTokenList = ({bool enabled, List<McpToken> tokens});
+
 /// A token just created, with its secret.
 typedef CreatedMcpToken = ({McpToken token, String secret});
 

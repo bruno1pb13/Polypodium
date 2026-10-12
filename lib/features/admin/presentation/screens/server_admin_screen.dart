@@ -33,6 +33,7 @@ class ServerAdminScreen extends ConsumerWidget {
             _StatusCard(statusAsync: statusAsync),
             _DataSettingsCard(workspace: workspace),
             _WeatherCard(workspace: workspace),
+            _McpCard(workspace: workspace),
             const Divider(height: 1),
             usersAsync.when(
               data: (users) => Column(
@@ -427,6 +428,68 @@ class _WeatherCardState extends ConsumerState<_WeatherCard> {
     setState(() => _busy = true);
     try {
       await action();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(localizedErrorMessage(e, context.l10n))));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+}
+
+/// Whether AI assistants may connect to the server's gardens over MCP.
+/// Hidden on servers that predate the feature.
+class _McpCard extends ConsumerStatefulWidget {
+  const _McpCard({required this.workspace});
+
+  final Workspace workspace;
+
+  @override
+  ConsumerState<_McpCard> createState() => _McpCardState();
+}
+
+class _McpCardState extends ConsumerState<_McpCard> {
+  bool _busy = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final settings =
+        ref.watch(serverDataSettingsNotifierProvider(widget.workspace)).value;
+    if (settings == null || !settings.supportsMcp) {
+      return const SizedBox.shrink();
+    }
+    return Card(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Text(context.l10n.mcpAccess,
+                  style: Theme.of(context).textTheme.titleMedium),
+            ),
+            SwitchListTile(
+              title: Text(context.l10n.mcpAllowOnServer),
+              subtitle: Text(context.l10n.mcpAllowOnServerSubtitle),
+              value: settings.mcpEnabled!,
+              onChanged: _busy ? null : _set,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _set(bool value) async {
+    setState(() => _busy = true);
+    try {
+      await ref
+          .read(serverDataSettingsNotifierProvider(widget.workspace).notifier)
+          .setMcpEnabled(value);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

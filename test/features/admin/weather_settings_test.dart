@@ -19,6 +19,19 @@ void main() {
     expect(current.weatherEnabled, isFalse);
   });
 
+  test('MCP is unsupported, off or on', () {
+    final old = ServerDataSettings.fromJson(
+        {'allowMemberExport': true, 'allowMemberImport': true});
+    expect(old.supportsMcp, isFalse);
+    final off = ServerDataSettings.fromJson({
+      'allowMemberExport': true,
+      'allowMemberImport': true,
+      'mcpEnabled': false,
+    });
+    expect(off.supportsMcp, isTrue);
+    expect(off.mcpEnabled, isFalse);
+  });
+
   test('weather status summarizes the regions', () {
     final status = ServerWeatherStatus.fromJson({
       'enabled': true,

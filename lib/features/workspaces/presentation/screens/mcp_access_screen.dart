@@ -31,7 +31,7 @@ class McpAccessScreen extends StatefulWidget {
   State<McpAccessScreen> createState() => _McpAccessScreenState();
 }
 
-typedef _McpView = ({Garden garden, List<McpToken> tokens});
+typedef _McpView = ({Garden garden, bool enabled, List<McpToken> tokens});
 
 class _McpAccessScreenState extends State<McpAccessScreen> {
   late Future<_McpView> _view = _load();
@@ -44,9 +44,9 @@ class _McpAccessScreenState extends State<McpAccessScreen> {
         .listGardens(serverUrl: _serverUrl, token: _token);
     final garden = workspaceGarden(gardens, widget.workspace.gardenId) ??
         (throw const GardenAccessDeniedException());
-    final tokens = await widget.client
+    final list = await widget.client
         .listTokens(serverUrl: _serverUrl, token: _token, gardenId: garden.id);
-    return (garden: garden, tokens: tokens);
+    return (garden: garden, enabled: list.enabled, tokens: list.tokens);
   }
 
   void _reload() {
@@ -155,7 +155,7 @@ class _McpAccessScreenState extends State<McpAccessScreen> {
               ),
             _ => const Center(child: CircularProgressIndicator()),
           },
-          floatingActionButton: view == null
+          floatingActionButton: view == null || !view.enabled
               ? null
               : FloatingActionButton.extended(
                   onPressed: () => _create(view.garden),
@@ -200,6 +200,15 @@ class _TokenList extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Text(l10n.mcpIntro),
         ),
+        if (!view.enabled)
+          Card(
+            margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: ListTile(
+              leading: const Icon(Icons.block),
+              title: Text(l10n.mcpDisabledOnServer),
+              subtitle: Text(l10n.mcpDisabledOnServerHint),
+            ),
+          ),
         ListTile(
           leading: const Icon(Icons.link),
           title: Text(l10n.mcpEndpoint),
