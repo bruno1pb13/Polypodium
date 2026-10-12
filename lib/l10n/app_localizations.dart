@@ -4412,6 +4412,150 @@ abstract class AppLocalizations {
   /// **'Try again'**
   String get gardenRetry;
 
+  /// No description provided for @mcpAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'AI access (MCP)'**
+  String get mcpAccess;
+
+  /// No description provided for @mcpIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect AI assistants such as Claude or Cursor to this garden over MCP. Each token reaches only this garden, with your account\'s access.'**
+  String get mcpIntro;
+
+  /// No description provided for @mcpEndpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'MCP server address'**
+  String get mcpEndpoint;
+
+  /// No description provided for @mcpCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get mcpCopy;
+
+  /// No description provided for @mcpCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied.'**
+  String get mcpCopied;
+
+  /// No description provided for @mcpNoTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'No tokens yet.'**
+  String get mcpNoTokens;
+
+  /// No description provided for @mcpNewToken.
+  ///
+  /// In en, this message translates to:
+  /// **'New token'**
+  String get mcpNewToken;
+
+  /// No description provided for @mcpTokenNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (e.g. Claude on my laptop)'**
+  String get mcpTokenNameLabel;
+
+  /// No description provided for @mcpAllowWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow changes'**
+  String get mcpAllowWrite;
+
+  /// No description provided for @mcpAllowWriteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The assistant can record waterings and create or edit plants. Otherwise it only reads.'**
+  String get mcpAllowWriteHint;
+
+  /// No description provided for @mcpCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get mcpCreate;
+
+  /// No description provided for @mcpReadWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Read and write'**
+  String get mcpReadWrite;
+
+  /// No description provided for @mcpReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read only'**
+  String get mcpReadOnly;
+
+  /// No description provided for @mcpNeverUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Never used'**
+  String get mcpNeverUsed;
+
+  /// No description provided for @mcpLastUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Last used on {date}'**
+  String mcpLastUsed(String date);
+
+  /// No description provided for @mcpTokenCreatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Token created'**
+  String get mcpTokenCreatedTitle;
+
+  /// No description provided for @mcpTokenCreatedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy it now: it won\'t be shown again. Anyone holding this token can reach the garden.'**
+  String get mcpTokenCreatedBody;
+
+  /// No description provided for @mcpClaudeCodeCommand.
+  ///
+  /// In en, this message translates to:
+  /// **'Command for Claude Code'**
+  String get mcpClaudeCodeCommand;
+
+  /// No description provided for @mcpDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get mcpDone;
+
+  /// No description provided for @mcpRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get mcpRevoke;
+
+  /// No description provided for @mcpRevokeTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke {name}'**
+  String mcpRevokeTooltip(String name);
+
+  /// No description provided for @mcpRevokeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke token?'**
+  String get mcpRevokeTitle;
+
+  /// No description provided for @mcpRevokeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistants using \"{name}\" lose access right away.'**
+  String mcpRevokeBody(String name);
+
+  /// No description provided for @errorMcpUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This server doesn\'t offer MCP access yet. Update it to use it.'**
+  String get errorMcpUnsupported;
+
   /// No description provided for @navHome.
   ///
   /// In en, this message translates to:

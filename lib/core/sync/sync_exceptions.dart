@@ -31,6 +31,15 @@ class GardenAccessDeniedException implements Exception {
   String toString() => 'GardenAccessDeniedException';
 }
 
+/// The server predates MCP access (`/gardens/<id>/mcp-tokens` doesn't
+/// exist).
+class McpUnsupportedException implements Exception {
+  const McpUnsupportedException();
+
+  @override
+  String toString() => 'McpUnsupportedException';
+}
+
 /// The server predates shared gardens (`/gardens` doesn't exist).
 class GardensUnsupportedException implements Exception {
   const GardensUnsupportedException();

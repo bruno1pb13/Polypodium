@@ -20,6 +20,7 @@ import '../providers/workspace_providers.dart';
 import '../widgets/garden_picker_dialog.dart';
 import '../widgets/workspace_login_dialog.dart';
 import 'garden_members_screen.dart';
+import 'mcp_access_screen.dart';
 
 class WorkspacesScreen extends ConsumerWidget {
   const WorkspacesScreen({super.key});
@@ -59,6 +60,10 @@ class WorkspacesScreen extends ConsumerWidget {
                   ws.isServerAdmin ? () => _openAdmin(context, ref, ws) : null,
               onGardenMembers:
                   ws.isLoggedIn ? () => _openMembers(context, ws) : null,
+              onMcpAccess: ws.isLoggedIn
+                  ? () => Navigator.of(context).push(MaterialPageRoute<void>(
+                      builder: (_) => McpAccessScreen(workspace: ws)))
+                  : null,
               onOpenGarden:
                   ws.isLoggedIn ? () => _openGarden(context, ref, ws) : null,
               onNewGarden:
@@ -440,6 +445,7 @@ class _WorkspaceTile extends StatelessWidget {
     this.onDelete,
     this.onAdminPanel,
     this.onGardenMembers,
+    this.onMcpAccess,
     this.onOpenGarden,
     this.onNewGarden,
   });
@@ -453,6 +459,7 @@ class _WorkspaceTile extends StatelessWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onAdminPanel;
   final VoidCallback? onGardenMembers;
+  final VoidCallback? onMcpAccess;
   final VoidCallback? onOpenGarden;
   final VoidCallback? onNewGarden;
 
@@ -517,6 +524,8 @@ class _WorkspaceTile extends StatelessWidget {
                     onAdminPanel?.call();
                   case 'members':
                     onGardenMembers?.call();
+                  case 'mcp':
+                    onMcpAccess?.call();
                   case 'openGarden':
                     onOpenGarden?.call();
                   case 'newGarden':
@@ -539,6 +548,9 @@ class _WorkspaceTile extends StatelessWidget {
                   PopupMenuItem(
                       value: 'members',
                       child: Text(context.l10n.gardenMembers)),
+                  if (onMcpAccess != null)
+                    PopupMenuItem(
+                        value: 'mcp', child: Text(context.l10n.mcpAccess)),
                   if (onOpenGarden != null)
                     PopupMenuItem(
                         value: 'openGarden',

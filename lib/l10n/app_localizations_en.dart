@@ -2583,6 +2583,88 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gardenRetry => 'Try again';
 
   @override
+  String get mcpAccess => 'AI access (MCP)';
+
+  @override
+  String get mcpIntro =>
+      'Connect AI assistants such as Claude or Cursor to this garden over MCP. Each token reaches only this garden, with your account\'s access.';
+
+  @override
+  String get mcpEndpoint => 'MCP server address';
+
+  @override
+  String get mcpCopy => 'Copy';
+
+  @override
+  String get mcpCopied => 'Copied.';
+
+  @override
+  String get mcpNoTokens => 'No tokens yet.';
+
+  @override
+  String get mcpNewToken => 'New token';
+
+  @override
+  String get mcpTokenNameLabel => 'Name (e.g. Claude on my laptop)';
+
+  @override
+  String get mcpAllowWrite => 'Allow changes';
+
+  @override
+  String get mcpAllowWriteHint =>
+      'The assistant can record waterings and create or edit plants. Otherwise it only reads.';
+
+  @override
+  String get mcpCreate => 'Create';
+
+  @override
+  String get mcpReadWrite => 'Read and write';
+
+  @override
+  String get mcpReadOnly => 'Read only';
+
+  @override
+  String get mcpNeverUsed => 'Never used';
+
+  @override
+  String mcpLastUsed(String date) {
+    return 'Last used on $date';
+  }
+
+  @override
+  String get mcpTokenCreatedTitle => 'Token created';
+
+  @override
+  String get mcpTokenCreatedBody =>
+      'Copy it now: it won\'t be shown again. Anyone holding this token can reach the garden.';
+
+  @override
+  String get mcpClaudeCodeCommand => 'Command for Claude Code';
+
+  @override
+  String get mcpDone => 'Done';
+
+  @override
+  String get mcpRevoke => 'Revoke';
+
+  @override
+  String mcpRevokeTooltip(String name) {
+    return 'Revoke $name';
+  }
+
+  @override
+  String get mcpRevokeTitle => 'Revoke token?';
+
+  @override
+  String mcpRevokeBody(String name) {
+    return 'Assistants using \"$name\" lose access right away.';
+  }
+
+  @override
+  String get errorMcpUnsupported =>
+      'This server doesn\'t offer MCP access yet. Update it to use it.';
+
+  @override
   String get navHome => 'Home';
 
   @override
