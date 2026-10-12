@@ -4550,6 +4550,30 @@ abstract class AppLocalizations {
   /// **'Assistants using \"{name}\" lose access right away.'**
   String mcpRevokeBody(String name);
 
+  /// No description provided for @mcpAllowOnServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow AI assistants (MCP)'**
+  String get mcpAllowOnServer;
+
+  /// No description provided for @mcpAllowOnServerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Members can create tokens that let assistants such as Claude read and, if allowed, change their gardens. Turning it off blocks every token at once.'**
+  String get mcpAllowOnServerSubtitle;
+
+  /// No description provided for @mcpDisabledOnServer.
+  ///
+  /// In en, this message translates to:
+  /// **'MCP access is turned off on this server.'**
+  String get mcpDisabledOnServer;
+
+  /// No description provided for @mcpDisabledOnServerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A server administrator can turn it on under Server administration. Existing tokens work again once it is on.'**
+  String get mcpDisabledOnServerHint;
+
   /// No description provided for @errorMcpUnsupported.
   ///
   /// In en, this message translates to:

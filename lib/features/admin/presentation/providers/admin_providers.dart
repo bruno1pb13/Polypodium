@@ -59,6 +59,15 @@ class ServerDataSettingsNotifier extends _$ServerDataSettingsNotifier {
     state = AsyncData(settings);
     ref.invalidate(serverWeatherStatusProvider(workspace));
   }
+
+  Future<void> setMcpEnabled(bool enabled) async {
+    final settings = await ref.read(adminClientProvider).updateDataSettings(
+          serverUrl: workspace.serverUrl!,
+          token: workspace.token!,
+          mcpEnabled: enabled,
+        );
+    state = AsyncData(settings);
+  }
 }
 
 @riverpod

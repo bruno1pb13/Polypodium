@@ -5,6 +5,7 @@ class ServerDataSettings {
     required this.allowMemberExport,
     required this.allowMemberImport,
     this.weatherEnabled,
+    this.mcpEnabled,
   });
 
   final bool allowMemberExport;
@@ -16,10 +17,17 @@ class ServerDataSettings {
 
   bool get supportsWeather => weatherEnabled != null;
 
+  /// Whether AI assistants may connect over MCP (off by default). Null when
+  /// the server predates the feature.
+  final bool? mcpEnabled;
+
+  bool get supportsMcp => mcpEnabled != null;
+
   factory ServerDataSettings.fromJson(Map<String, dynamic> json) =>
       ServerDataSettings(
         allowMemberExport: json['allowMemberExport'] as bool? ?? true,
         allowMemberImport: json['allowMemberImport'] as bool? ?? true,
         weatherEnabled: json['weatherEnabled'] as bool?,
+        mcpEnabled: json['mcpEnabled'] as bool?,
       );
 }

@@ -51,6 +51,7 @@ class AdminClient {
     bool? allowMemberExport,
     bool? allowMemberImport,
     bool? weatherEnabled,
+    bool? mcpEnabled,
   }) async {
     final response = await http
         .patch(
@@ -62,6 +63,7 @@ class AdminClient {
             if (allowMemberImport != null)
               'allowMemberImport': allowMemberImport,
             if (weatherEnabled != null) 'weatherEnabled': weatherEnabled,
+            if (mcpEnabled != null) 'mcpEnabled': mcpEnabled,
           }),
         )
         .timeout(const Duration(seconds: 15));

@@ -11,9 +11,10 @@ import '../domain/mcp_token.dart';
 class McpTokenClient {
   const McpTokenClient();
 
-  /// The caller's tokens in the garden (everyone's for the owner). Throws
+  /// The caller's tokens in the garden (everyone's for the owner), and
+  /// whether the server's admins have MCP turned on. Throws
   /// [McpUnsupportedException] on a server predating MCP.
-  Future<List<McpToken>> listTokens({
+  Future<McpTokenList> listTokens({
     required String serverUrl,
     required String token,
     required String gardenId,
@@ -23,9 +24,13 @@ class McpTokenClient {
         .timeout(const Duration(seconds: 10));
     _checkStatus(response, 200);
     final data = jsonDecode(response.body) as Map<String, dynamic>;
-    return (data['tokens'] as List<dynamic>)
-        .map((t) => McpToken.fromJson(t as Map<String, dynamic>))
-        .toList();
+    return (
+      // Servers from before the switch had MCP always on.
+      enabled: data['enabled'] as bool? ?? true,
+      tokens: (data['tokens'] as List<dynamic>)
+          .map((t) => McpToken.fromJson(t as Map<String, dynamic>))
+          .toList(),
+    );
   }
 
   Future<CreatedMcpToken> createToken({
@@ -67,10 +72,13 @@ class McpTokenClient {
     }
     if (response.statusCode == expected) return;
     String? message;
+    String? code;
     try {
-      message = (jsonDecode(response.body) as Map<String, dynamic>)['error']
-          as String?;
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      message = body['error'] as String?;
+      code = body['code'] as String?;
     } catch (_) {}
+    if (code == 'mcp_disabled') throw const McpDisabledException();
     if (response.statusCode == 404) {
       // A JSON 404 comes from the garden routes (not a member anymore, or
       // a token already gone); a bare one means the route doesn't exist.

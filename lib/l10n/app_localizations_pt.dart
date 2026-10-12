@@ -2664,6 +2664,21 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get mcpAllowOnServer => 'Permitir assistentes de IA (MCP)';
+
+  @override
+  String get mcpAllowOnServerSubtitle =>
+      'Membros podem criar tokens para que assistentes como o Claude leiam e, se permitido, alterem os jardins deles. Desligar bloqueia todos os tokens na hora.';
+
+  @override
+  String get mcpDisabledOnServer =>
+      'O acesso por MCP está desligado neste servidor.';
+
+  @override
+  String get mcpDisabledOnServerHint =>
+      'Um administrador do servidor pode ligá-lo em Administração do servidor. Os tokens existentes voltam a funcionar quando ele for ligado.';
+
+  @override
   String get errorMcpUnsupported =>
       'Este servidor ainda não oferece acesso por MCP. Atualize-o para usar.';
 

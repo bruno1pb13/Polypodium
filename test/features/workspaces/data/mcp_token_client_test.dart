@@ -36,11 +36,14 @@ void main() {
 
   test('lists the garden\'s tokens', () async {
     final sent = <http.Request>[];
-    final tokens = await withServer(
+    final list = await withServer(
       () => client.listTokens(serverUrl: server, token: 'tok', gardenId: 'g1'),
-      (_) => http.Response(jsonEncode({'tokens': [tokenJson]}), 200),
+      (_) => http.Response(
+          jsonEncode({'enabled': false, 'tokens': [tokenJson]}), 200),
       sent: sent,
     );
+    final tokens = list.tokens;
+    expect(list.enabled, isFalse);
     expect(sent.single.url.toString(),
         '$server/api/v1/gardens/g1/mcp-tokens');
     expect(sent.single.headers['Authorization'], 'Bearer tok');
@@ -78,6 +81,29 @@ void main() {
     );
     expect(sent.single.method, 'DELETE');
     expect(sent.single.url.path, '/api/v1/gardens/g1/mcp-tokens/t1');
+  });
+
+  test('reports MCP turned off by the admins', () async {
+    expect(
+      withServer(
+        () => client.createToken(
+            serverUrl: server,
+            token: 'tok',
+            gardenId: 'g1',
+            name: 'x',
+            canWrite: false),
+        (_) => http.Response(
+            jsonEncode({'error': 'MCP is disabled', 'code': 'mcp_disabled'}),
+            403),
+      ),
+      throwsA(isA<McpDisabledException>()),
+    );
+    // A server from before the switch omits `enabled`: MCP was always on.
+    final list = await withServer(
+      () => client.listTokens(serverUrl: server, token: 'tok', gardenId: 'g1'),
+      (_) => http.Response(jsonEncode({'tokens': []}), 200),
+    );
+    expect(list.enabled, isTrue);
   });
 
   test('tells an old server from a lost garden', () async {

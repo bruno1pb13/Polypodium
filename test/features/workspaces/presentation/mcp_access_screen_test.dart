@@ -25,20 +25,21 @@ class _FakeGardenClient implements GardenClient {
 }
 
 class _FakeMcpClient implements McpTokenClient {
-  _FakeMcpClient(this.tokens);
+  _FakeMcpClient(this.tokens, {this.enabled = true});
 
   final List<McpToken> tokens;
+  final bool enabled;
   final listedGardens = <String>[];
   final created = <({String name, bool canWrite})>[];
   final revoked = <String>[];
 
   @override
-  Future<List<McpToken>> listTokens(
+  Future<McpTokenList> listTokens(
       {required String serverUrl,
       required String token,
       required String gardenId}) async {
     listedGardens.add(gardenId);
-    return List.of(tokens);
+    return (enabled: enabled, tokens: List.of(tokens));
   }
 
   @override
@@ -84,7 +85,8 @@ void main() {
     gardenName: 'Horta',
   );
 
-  _FakeMcpClient client() => _FakeMcpClient([
+  _FakeMcpClient client({bool enabled = true}) =>
+      _FakeMcpClient(enabled: enabled, [
         McpToken(
           id: 'mine',
           name: 'Claude Desktop',
@@ -172,6 +174,17 @@ void main() {
     expect(find.text('Claude Code'), findsOneWidget);
   });
 
+  testWidgets('with MCP off on the server it says so and offers no new token',
+      (tester) async {
+    await pump(tester, client(enabled: false));
+
+    expect(find.text('O acesso por MCP está desligado neste servidor.'),
+        findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsNothing);
+    // Existing tokens can still be revoked.
+    expect(find.byTooltip('Revogar Cursor'), findsOneWidget);
+  });
+
   testWidgets('revokes after confirming', (tester) async {
     final mcp = client();
     await pump(tester, mcp);
@@ -190,6 +203,13 @@ void main() {
     for (final (name, theme) in appThemes) {
       testWidgets('meets the guidelines ($name)', (tester) async {
         await pump(tester, client(), theme: theme);
+        await expectTapTargetGuidelines(tester);
+        await expectReadableText(tester);
+      });
+
+      testWidgets('the disabled notice meets the guidelines ($name)',
+          (tester) async {
+        await pump(tester, client(enabled: false), theme: theme);
         await expectTapTargetGuidelines(tester);
         await expectReadableText(tester);
       });

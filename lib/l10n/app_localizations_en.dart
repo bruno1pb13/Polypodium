@@ -2661,6 +2661,20 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get mcpAllowOnServer => 'Allow AI assistants (MCP)';
+
+  @override
+  String get mcpAllowOnServerSubtitle =>
+      'Members can create tokens that let assistants such as Claude read and, if allowed, change their gardens. Turning it off blocks every token at once.';
+
+  @override
+  String get mcpDisabledOnServer => 'MCP access is turned off on this server.';
+
+  @override
+  String get mcpDisabledOnServerHint =>
+      'A server administrator can turn it on under Server administration. Existing tokens work again once it is on.';
+
+  @override
   String get errorMcpUnsupported =>
       'This server doesn\'t offer MCP access yet. Update it to use it.';
 

@@ -40,6 +40,14 @@ class McpUnsupportedException implements Exception {
   String toString() => 'McpUnsupportedException';
 }
 
+/// The server's admins keep MCP access off.
+class McpDisabledException implements Exception {
+  const McpDisabledException();
+
+  @override
+  String toString() => 'McpDisabledException';
+}
+
 /// The server predates shared gardens (`/gardens` doesn't exist).
 class GardensUnsupportedException implements Exception {
   const GardensUnsupportedException();
