@@ -56,6 +56,9 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   await WorkspaceRepository(prefs).ensureBootstrapped();
   final showIntro = !SettingsRepository(prefs).hasSeenIntro();
+  // Resolved before the first frame: the settings and workspace providers
+  // read it with requireValue.
+  await container.read(sharedPreferencesProvider.future);
 
   if (Platform.isAndroid) {
     await Workmanager().initialize(callbackDispatcher);
