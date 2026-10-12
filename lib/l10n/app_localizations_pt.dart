@@ -2586,6 +2586,88 @@ class AppLocalizationsPt extends AppLocalizations {
   String get gardenRetry => 'Tentar novamente';
 
   @override
+  String get mcpAccess => 'Acesso por IA (MCP)';
+
+  @override
+  String get mcpIntro =>
+      'Conecte assistentes de IA, como Claude ou Cursor, a este jardim pelo MCP. Cada token acessa só este jardim, com as permissões da sua conta.';
+
+  @override
+  String get mcpEndpoint => 'Endereço do servidor MCP';
+
+  @override
+  String get mcpCopy => 'Copiar';
+
+  @override
+  String get mcpCopied => 'Copiado.';
+
+  @override
+  String get mcpNoTokens => 'Nenhum token ainda.';
+
+  @override
+  String get mcpNewToken => 'Novo token';
+
+  @override
+  String get mcpTokenNameLabel => 'Nome (ex.: Claude no notebook)';
+
+  @override
+  String get mcpAllowWrite => 'Permitir alterações';
+
+  @override
+  String get mcpAllowWriteHint =>
+      'O assistente poderá registrar regas e criar ou editar plantas. Sem isso, ele só lê.';
+
+  @override
+  String get mcpCreate => 'Criar';
+
+  @override
+  String get mcpReadWrite => 'Leitura e escrita';
+
+  @override
+  String get mcpReadOnly => 'Somente leitura';
+
+  @override
+  String get mcpNeverUsed => 'Nunca usado';
+
+  @override
+  String mcpLastUsed(String date) {
+    return 'Último uso em $date';
+  }
+
+  @override
+  String get mcpTokenCreatedTitle => 'Token criado';
+
+  @override
+  String get mcpTokenCreatedBody =>
+      'Copie agora: ele não será mostrado de novo. Quem tiver este token acessa o jardim.';
+
+  @override
+  String get mcpClaudeCodeCommand => 'Comando para o Claude Code';
+
+  @override
+  String get mcpDone => 'Pronto';
+
+  @override
+  String get mcpRevoke => 'Revogar';
+
+  @override
+  String mcpRevokeTooltip(String name) {
+    return 'Revogar $name';
+  }
+
+  @override
+  String get mcpRevokeTitle => 'Revogar token?';
+
+  @override
+  String mcpRevokeBody(String name) {
+    return 'Os assistentes que usam \"$name\" perdem o acesso na hora.';
+  }
+
+  @override
+  String get errorMcpUnsupported =>
+      'Este servidor ainda não oferece acesso por MCP. Atualize-o para usar.';
+
+  @override
   String get navHome => 'Início';
 
   @override

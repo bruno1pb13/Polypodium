@@ -54,6 +54,16 @@ class GardenMember {
       );
 }
 
+/// The garden among [gardens] a workspace set to [gardenId] syncs (null:
+/// the account's personal one), or null when the account no longer
+/// belongs to it.
+Garden? workspaceGarden(Iterable<Garden> gardens, String? gardenId) {
+  for (final g in gardens) {
+    if (gardenId == null ? g.isOwnPersonal : g.id == gardenId) return g;
+  }
+  return null;
+}
+
 /// The garden a workspace is set to sync: its id and the name shown for it.
 /// No choice (null) means the account's personal garden.
 typedef GardenChoice = ({String id, String name});

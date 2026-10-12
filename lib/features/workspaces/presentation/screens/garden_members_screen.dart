@@ -36,11 +36,8 @@ class _GardenMembersScreenState extends State<GardenMembersScreen> {
   Future<_GardenView> _load() async {
     final gardens =
         await widget.client.listGardens(serverUrl: _serverUrl, token: _token);
-    final gardenId = widget.workspace.gardenId;
-    final matches = gardens
-        .where((g) => gardenId == null ? g.isOwnPersonal : g.id == gardenId);
-    if (matches.isEmpty) throw const GardenAccessDeniedException();
-    final garden = matches.first;
+    final garden = workspaceGarden(gardens, widget.workspace.gardenId) ??
+        (throw const GardenAccessDeniedException());
     final members = await widget.client
         .listMembers(serverUrl: _serverUrl, token: _token, gardenId: garden.id);
     return (garden: garden, members: members);
