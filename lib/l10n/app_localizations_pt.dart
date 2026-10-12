@@ -2333,7 +2333,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get coverPhotoUpdated => 'Capa atualizada';
 
   @override
-  String get addPhotos => 'Adicionar fotos';
+  String get editEntry => 'Editar registro';
 
   @override
   String get photosTitle => 'Fotos';

@@ -13,7 +13,6 @@ import '../../../plants/presentation/widgets/plant_status.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/entry_details.dart';
 import '../../domain/entry_model.dart';
-import 'entry_forms/entry_photo_section.dart';
 import 'harvest_format.dart';
 import '../../../../core/theme/glass_colors.dart';
 
@@ -21,15 +20,15 @@ class EntryTimelineItem extends ConsumerWidget {
   final EntryModel entry;
   final VoidCallback? onDelete;
 
-  /// Attaches more photos; offered while the entry has room for them.
-  final VoidCallback? onAddPhotos;
+  /// Opens the entry's note and photos for editing.
+  final VoidCallback? onEdit;
   final bool isLast;
 
   const EntryTimelineItem({
     super.key,
     required this.entry,
     this.onDelete,
-    this.onAddPhotos,
+    this.onEdit,
     this.isLast = false,
   });
 
@@ -37,9 +36,7 @@ class EntryTimelineItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
     final canDelete = onDelete != null && entry.type != EntryType.history;
-    final canAddPhotos = onAddPhotos != null &&
-        entry.type != EntryType.history &&
-        entry.photos.length < maxEntryPhotos;
+    final canEdit = onEdit != null && entry.type != EntryType.history;
     final actionColor = transparencyEnabled
         ? context.glass.fgSubtle
         : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
@@ -186,17 +183,17 @@ class EntryTimelineItem extends ConsumerWidget {
                               ),
                             ),
                           ],
-                          if (canAddPhotos || canDelete) ...[
+                          if (canEdit || canDelete) ...[
                             const SizedBox(height: 4),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                if (canAddPhotos)
+                                if (canEdit)
                                   IconButton(
-                                    icon: Icon(Icons.add_a_photo_outlined,
+                                    icon: Icon(Icons.edit_outlined,
                                         color: actionColor, size: 20),
-                                    tooltip: context.l10n.addPhotos,
-                                    onPressed: onAddPhotos,
+                                    tooltip: context.l10n.editEntry,
+                                    onPressed: onEdit,
                                   ),
                                 if (canDelete)
                                   IconButton(

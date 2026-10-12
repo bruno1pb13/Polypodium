@@ -77,40 +77,75 @@ class EntriesRepository {
     await _enforceRetentionPolicy(entry.plantId);
   }
 
-  /// Adds the photos at [paths] to the existing entry [entryId], after the
-  /// ones it has. An entry without photos takes the first as its own (an
-  /// update of the entry row); the rest become extra photo rows. Returns
-  /// false, adding nothing, when the entry is gone.
-  Future<bool> addPhotos(String entryId, List<String> paths) async {
-    if (paths.isEmpty) return true;
-    return _db.transaction(() async {
+  /// Saves the edited [note] and photos of the existing entry [entryId].
+  /// [photoPaths] is the entry's whole photo list, in order: kept photos by
+  /// their current path, new ones by their saved copy. The first is the
+  /// entry's own photo; dropped photos are deleted, rows and files. Returns
+  /// false, changing nothing, when the entry is gone.
+  Future<bool> edit(String entryId,
+      {required String? note, required List<String> photoPaths}) async {
+    final removed = <String>[];
+    final edited = await _db.transaction(() async {
       final row = await _dao.getById(entryId);
       if (row == null || row.deletedAt != null) return false;
       final now = DateTime.now();
-      var rest = paths;
-      if (row.photoPath == null) {
+      final own = photoPaths.firstOrNull;
+      if (row.note != note || row.photoPath != own) {
         final rev = await _db.syncMetaDao.nextRev();
-        await _dao.setPhotoPath(entryId, paths.first, updatedAt: now, rev: rev);
-        rest = paths.sublist(1);
+        await _dao.upsert(row.toCompanion(false).copyWith(
+              note: Value(note),
+              photoPath: Value(own),
+              updatedAt: Value(now),
+              localRev: Value(rev),
+              deviceId: Value(_db.deviceId),
+            ));
       }
-      final existing = await _db.entryPhotosDao.getByEntries([entryId]);
-      var position =
-          existing.fold(0, (max, p) => p.position > max ? p.position : max);
-      for (final path in rest) {
-        final photoRev = await _db.syncMetaDao.nextRev();
-        await _db.entryPhotosDao.upsert(EntryPhotosTableCompanion.insert(
-          id: const Uuid().v4(),
-          entryId: entryId,
-          photoPath: path,
-          position: Value(++position),
-          createdAt: now,
-          updatedAt: now,
-          localRev: Value(photoRev),
+
+      // Each change to a photo row is its own synced write, like on create.
+      final extra = photoPaths.skip(1).toList();
+      final rows = await _db.entryPhotosDao.getByEntries([entryId]);
+      final byPath = {for (final r in rows) r.photoPath: r};
+      Future<void> write(EntryPhotosTableCompanion companion) async {
+        final rev = await _db.syncMetaDao.nextRev();
+        await _db.entryPhotosDao.upsert(companion.copyWith(
+          updatedAt: Value(now),
+          localRev: Value(rev),
           deviceId: Value(_db.deviceId),
         ));
       }
+
+      for (final r in rows) {
+        if (!extra.contains(r.photoPath)) {
+          await write(r.toCompanion(false).copyWith(deletedAt: Value(now)));
+        }
+      }
+      for (final (i, path) in extra.indexed) {
+        final existing = byPath[path];
+        if (existing == null) {
+          await write(EntryPhotosTableCompanion.insert(
+            id: const Uuid().v4(),
+            entryId: entryId,
+            photoPath: path,
+            position: Value(i + 1),
+            createdAt: now,
+            updatedAt: now,
+          ));
+        } else if (existing.position != i + 1) {
+          await write(
+              existing.toCompanion(false).copyWith(position: Value(i + 1)));
+        }
+      }
+
+      removed.addAll([
+        if (row.photoPath != null) row.photoPath!,
+        for (final r in rows) r.photoPath,
+      ].where((path) => !photoPaths.contains(path)));
       return true;
     });
+    for (final path in removed) {
+      await _photoStorage.deletePhoto(path);
+    }
+    return edited;
   }
 
   Future<void> delete(String id) async {

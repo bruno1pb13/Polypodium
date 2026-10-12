@@ -205,14 +205,19 @@ class EntryMutations {
     ]);
   }
 
-  /// Attaches the saved photos at [paths] to the existing entry [entryId].
-  /// Their files are deleted if the entry is gone by then.
-  Future<void> addPhotos(String entryId, List<String> paths) async {
-    final added =
-        await _ref.read(entriesRepositoryProvider).addPhotos(entryId, paths);
-    if (!added) {
+  /// Saves the edited note and photos of the existing entry [entryId] (see
+  /// [EntriesRepository.edit]). The new photos' files are deleted if the
+  /// entry is gone by then.
+  Future<void> edit(String entryId,
+      {required String? note,
+      required List<String> photoPaths,
+      Iterable<String> newPhotoPaths = const []}) async {
+    final edited = await _ref
+        .read(entriesRepositoryProvider)
+        .edit(entryId, note: note, photoPaths: photoPaths);
+    if (!edited) {
       final storage = _ref.read(photoStorageProvider);
-      for (final path in paths) {
+      for (final path in newPhotoPaths) {
         await storage.deletePhoto(path);
       }
       return;
@@ -262,9 +267,6 @@ class EntriesNotifier extends _$EntriesNotifier {
   // notifier is disposed mid-operation.
   Future<void> create(EntryModel entry) =>
       ref.read(entryMutationsProvider).create(entry);
-
-  Future<void> addPhotos(String entryId, List<String> paths) =>
-      ref.read(entryMutationsProvider).addPhotos(entryId, paths);
 
   Future<void> delete(String id) => ref.read(entryMutationsProvider).delete(id);
 }

@@ -2329,7 +2329,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coverPhotoUpdated => 'Cover updated';
 
   @override
-  String get addPhotos => 'Add photos';
+  String get editEntry => 'Edit entry';
 
   @override
   String get photosTitle => 'Photos';

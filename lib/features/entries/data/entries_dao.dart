@@ -55,7 +55,8 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
   /// first.
   Stream<List<EntriesTableData>> watchOfTypes(Iterable<EntryType> types) =>
       (select(entriesTable)
-            ..where((t) => t.type.isInValues(types) & t.deletedAt.isNull())
+            ..where((t) =>
+                t.type.isInValues(types) & t.deletedAt.isNull())
             ..orderBy([(t) => OrderingTerm.desc(t.date)]))
           .watch();
 
@@ -130,18 +131,6 @@ class EntriesDao extends DatabaseAccessor<AppDatabase> with _$EntriesDaoMixin {
 
   Future<void> upsert(EntriesTableCompanion companion) =>
       into(entriesTable).insertOnConflictUpdate(companion);
-
-  /// Gives entry [id] its own photo, as a local write.
-  Future<void> setPhotoPath(String id, String photoPath,
-          {required DateTime updatedAt, required int rev}) =>
-      (update(entriesTable)..where((t) => t.id.equals(id))).write(
-        EntriesTableCompanion(
-          photoPath: Value(photoPath),
-          updatedAt: Value(updatedAt),
-          localRev: Value(rev),
-          deviceId: Value(attachedDatabase.deviceId),
-        ),
-      );
 
   Future<void> softDelete(String id,
           {required DateTime deletedAt, required int rev}) =>

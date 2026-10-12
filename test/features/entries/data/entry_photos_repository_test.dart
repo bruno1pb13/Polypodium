@@ -179,42 +179,71 @@ void main() {
     expect(await cover(), '/c');
   });
 
-  test('photos added to an entry without any become its own and extra ones',
+  test('editing an entry without photos adds its own photo and extra ones',
       () async {
     await repo.create(entry('e1', 1));
     final before = await db.entriesDao.getById('e1');
 
-    expect(await repo.addPhotos('e1', ['/a', '/b']), isTrue);
+    expect(
+        await repo.edit('e1', note: 'nota', photoPaths: ['/a', '/b']), isTrue);
 
     final row = await db.entriesDao.getById('e1');
-    expect(row!.photoPath, '/a');
+    expect((row!.note, row.photoPath), ('nota', '/a'));
     // A local write, pushed again with the photo.
     expect(row.localRev, greaterThan(before!.localRev));
     expect(row.deviceId, 'dev-1');
     final extra = await db.entryPhotosDao.getByEntries(['e1']);
     expect(extra.map((r) => (r.photoPath, r.position)), [('/b', 1)]);
     expect(extra.single.localRev, greaterThan(row.localRev));
-    expect((await repo.getById('e1'))!.photos.map((p) => p.path), ['/a', '/b']);
+    expect(photos.deleted, isEmpty);
   });
 
-  test('photos added to an entry with photos go after them', () async {
+  test('editing only the photos after the first leaves the entry row alone',
+      () async {
     await repo.create(entry('e1', 1, photoPaths: ['/a', '/b']));
     final before = await db.entriesDao.getById('e1');
 
-    await repo.addPhotos('e1', ['/c', '/d']);
+    await repo.edit('e1', note: null, photoPaths: ['/a', '/b', '/c']);
 
-    // The entry row itself is untouched.
     expect((await db.entriesDao.getById('e1'))!.localRev, before!.localRev);
     expect((await repo.getById('e1'))!.photos.map((p) => p.path),
-        ['/a', '/b', '/c', '/d']);
+        ['/a', '/b', '/c']);
   });
 
-  test('no photos are added to a deleted entry', () async {
+  test('photos dropped in an edit are deleted, the next one taking the lead',
+      () async {
+    await repo.create(entry('e1', 1, photoPaths: ['/a', '/b', '/c']));
+
+    await repo.edit('e1', note: null, photoPaths: ['/b', '/new']);
+
+    expect(
+        (await repo.getById('e1'))!.photos.map((p) => p.path), ['/b', '/new']);
+    // '/b' moved from an extra row to the entry itself; its file stays.
+    expect(photos.deleted, unorderedEquals(['/a', '/c']));
+    final tombstones = [
+      for (final id in ['e1-ph2', 'e1-ph3'])
+        await db.entryPhotosDao.getById(id),
+    ];
+    expect(tombstones.every((r) => r!.deletedAt != null && r.localRev > 0),
+        isTrue);
+  });
+
+  test('editing out every photo clears the entry photo', () async {
+    await repo.create(entry('e1', 1, photoPaths: ['/a', '/b']));
+
+    await repo.edit('e1', note: null, photoPaths: []);
+
+    expect((await db.entriesDao.getById('e1'))!.photoPath, isNull);
+    expect(await db.entryPhotosDao.getByEntries(['e1']), isEmpty);
+    expect(photos.deleted, unorderedEquals(['/a', '/b']));
+  });
+
+  test('a deleted entry is not edited', () async {
     await repo.create(entry('e1', 1));
     await repo.delete('e1');
 
-    expect(await repo.addPhotos('e1', ['/a']), isFalse);
+    expect(await repo.edit('e1', note: 'x', photoPaths: ['/a']), isFalse);
     expect((await db.entriesDao.getById('e1'))!.photoPath, isNull);
-    expect(await repo.addPhotos('missing', ['/a']), isFalse);
+    expect(await repo.edit('missing', note: 'x', photoPaths: []), isFalse);
   });
 }

@@ -4016,11 +4016,11 @@ abstract class AppLocalizations {
   /// **'Cover updated'**
   String get coverPhotoUpdated;
 
-  /// No description provided for @addPhotos.
+  /// No description provided for @editEntry.
   ///
   /// In en, this message translates to:
-  /// **'Add photos'**
-  String get addPhotos;
+  /// **'Edit entry'**
+  String get editEntry;
 
   /// No description provided for @photosTitle.
   ///
