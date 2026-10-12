@@ -7,6 +7,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../../core/sync/auto_sync_controller.dart';
 import '../../../../core/sync/sync_providers.dart';
+import '../../../../core/utils/byte_format.dart';
 import '../../../../core/widgets/app_shell.dart';
 import '../../../admin/data/admin_client.dart';
 import '../../../admin/presentation/screens/server_admin_screen.dart';
@@ -71,6 +72,9 @@ class WorkspacesScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
               ),
             ),
+          _DiskUsageTotal(workspaceIds: [for (final w in workspaces) w.id]),
+          // Keeps the last line clear of the floating button.
+          const SizedBox(height: 88),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -480,14 +484,20 @@ class _WorkspaceTile extends StatelessWidget {
           ],
         ],
       ),
-      subtitle: Text(_isLocal
-          ? context.l10n.dataOnlyOnDevice
-          : (workspace.isLoggedIn
-              ? [
-                  workspace.userEmail ?? context.l10n.connected,
-                  if (workspace.gardenName != null) workspace.gardenName!,
-                ].join(' · ')
-              : context.l10n.disconnected)),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(_isLocal
+              ? context.l10n.dataOnlyOnDevice
+              : (workspace.isLoggedIn
+                  ? [
+                      workspace.userEmail ?? context.l10n.connected,
+                      if (workspace.gardenName != null) workspace.gardenName!,
+                    ].join(' · ')
+                  : context.l10n.disconnected)),
+          _DiskUsageLine(workspaceId: workspace.id),
+        ],
+      ),
       selected: isActive,
       onTap: onTap,
       trailing: _isLocal
@@ -549,6 +559,50 @@ class _WorkspaceTile extends StatelessWidget {
                     value: 'delete', child: Text(context.l10n.deleteAction)),
               ],
             ),
+    );
+  }
+}
+
+/// What one workspace takes on this device; blank while it's measured.
+class _DiskUsageLine extends ConsumerWidget {
+  const _DiskUsageLine({required this.workspaceId});
+
+  final String workspaceId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final usage = ref.watch(workspaceDiskUsageProvider(workspaceId)).value;
+    if (usage == null) return const SizedBox.shrink();
+    final locale = context.l10n.localeName;
+    return Text(context.l10n.diskUsage(
+      formatBytes(usage.total, locale),
+      formatBytes(usage.photos, locale),
+    ));
+  }
+}
+
+/// The sum over every workspace, once all of them are measured.
+class _DiskUsageTotal extends ConsumerWidget {
+  const _DiskUsageTotal({required this.workspaceIds});
+
+  final List<String> workspaceIds;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    var total = 0;
+    for (final id in workspaceIds) {
+      final usage = ref.watch(workspaceDiskUsageProvider(id)).value;
+      if (usage == null) return const SizedBox.shrink();
+      total += usage.total;
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Text(
+        context.l10n.diskUsageTotal(
+            formatBytes(total, context.l10n.localeName)),
+        style: Theme.of(context).textTheme.bodySmall,
+        textAlign: TextAlign.center,
+      ),
     );
   }
 }

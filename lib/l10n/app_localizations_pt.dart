@@ -1814,6 +1814,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get dataOnlyOnDevice => 'Dados só neste dispositivo';
 
   @override
+  String diskUsage(String total, String photos) {
+    return 'Neste aparelho: $total (fotos $photos)';
+  }
+
+  @override
+  String diskUsageTotal(String total) {
+    return 'Todos os workspaces neste aparelho: $total';
+  }
+
+  @override
   String get serverAdministration => 'Administração do servidor';
 
   @override

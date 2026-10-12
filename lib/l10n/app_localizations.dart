@@ -3206,6 +3206,18 @@ abstract class AppLocalizations {
   /// **'Data only on this device'**
   String get dataOnlyOnDevice;
 
+  /// No description provided for @diskUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'On this device: {total} (photos {photos})'**
+  String diskUsage(String total, String photos);
+
+  /// No description provided for @diskUsageTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'All workspaces on this device: {total}'**
+  String diskUsageTotal(String total);
+
   /// No description provided for @serverAdministration.
   ///
   /// In en, this message translates to:

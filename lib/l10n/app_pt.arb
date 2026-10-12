@@ -547,6 +547,8 @@
   "localChip": "Local",
   "localNoSync": "Local — não sincroniza",
   "dataOnlyOnDevice": "Dados só neste dispositivo",
+  "diskUsage": "Neste aparelho: {total} (fotos {photos})",
+  "diskUsageTotal": "Todos os workspaces neste aparelho: {total}",
   "serverAdministration": "Administração do servidor",
 
   "serverAddressTitle": "Endereço do servidor",

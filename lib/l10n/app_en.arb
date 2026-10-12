@@ -821,6 +821,19 @@
   "localChip": "Local",
   "localNoSync": "Local — does not sync",
   "dataOnlyOnDevice": "Data only on this device",
+  "diskUsage": "On this device: {total} (photos {photos})",
+  "@diskUsage": {
+    "placeholders": {
+      "total": {"type": "String"},
+      "photos": {"type": "String"}
+    }
+  },
+  "diskUsageTotal": "All workspaces on this device: {total}",
+  "@diskUsageTotal": {
+    "placeholders": {
+      "total": {"type": "String"}
+    }
+  },
   "serverAdministration": "Server administration",
 
   "serverAddressTitle": "Server address",

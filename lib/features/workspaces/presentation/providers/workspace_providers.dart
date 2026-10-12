@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../data/garden_client.dart';
 import '../../data/workspace_auth_client.dart';
+import '../../data/workspace_disk_usage.dart';
 import '../../domain/garden.dart';
 import '../../data/workspace_repository.dart';
 import '../../domain/workspace_model.dart';
@@ -256,4 +257,14 @@ class ActiveWorkspaceIdNotifier extends _$ActiveWorkspaceIdNotifier {
 Workspace activeWorkspace(Ref ref) {
   final id = ref.watch(activeWorkspaceIdNotifierProvider);
   return ref.watch(workspacesNotifierProvider.notifier).getById(id);
+}
+
+/// What [workspaceId] takes on this device, measured afresh whenever a
+/// screen starts watching it.
+@riverpod
+Future<WorkspaceDiskUsage> workspaceDiskUsage(Ref ref, String workspaceId) async {
+  final workspace =
+      ref.read(workspacesNotifierProvider.notifier).getById(workspaceId);
+  final dir = await getApplicationDocumentsDirectory();
+  return measureDiskUsage(workspace, dir.path);
 }

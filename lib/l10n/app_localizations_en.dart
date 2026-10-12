@@ -1808,6 +1808,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dataOnlyOnDevice => 'Data only on this device';
 
   @override
+  String diskUsage(String total, String photos) {
+    return 'On this device: $total (photos $photos)';
+  }
+
+  @override
+  String diskUsageTotal(String total) {
+    return 'All workspaces on this device: $total';
+  }
+
+  @override
   String get serverAdministration => 'Server administration';
 
   @override
