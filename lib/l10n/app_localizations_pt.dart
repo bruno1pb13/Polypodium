@@ -212,6 +212,22 @@ class AppLocalizationsPt extends AppLocalizations {
   String get syncOffline => 'Sem conexão com o servidor — usando dados locais';
 
   @override
+  String get syncEssentialsTitle => 'Baixando seu jardim';
+
+  @override
+  String get syncEssentialsBody =>
+      'Primeiro as plantas, espécies e locais. O histórico continua chegando em segundo plano depois.';
+
+  @override
+  String get syncInBackground =>
+      'Sincronizando em segundo plano — os dados podem estar incompletos';
+
+  @override
+  String syncProgressCount(int done, int total) {
+    return '$done de $total';
+  }
+
+  @override
   String get pendingSync => 'Pendente de sincronização';
 
   @override

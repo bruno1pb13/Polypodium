@@ -13,7 +13,7 @@ import 'sync_http_client.dart';
 import 'sync_orchestrator.dart';
 import 'workspace_config_store.dart';
 
-export 'sync_orchestrator.dart' show SyncResult;
+export 'sync_orchestrator.dart' show SyncProgress, SyncResult, SyncStage;
 
 /// Thin facade over the sync module: owns login/session state (delegated to
 /// [WorkspaceConfigStore]) and wires up [SyncOrchestrator] with this
@@ -28,7 +28,9 @@ class SyncService {
     WorkspaceAuthClient authClient = const WorkspaceAuthClient(),
     SyncHttpClient? httpClient,
     INotificationService notifications = const NotificationService(),
+    void Function(SyncProgress? progress)? onProgress,
   })  : _authClient = authClient,
+        _onProgress = onProgress,
         _plantsRepo = PlantsRepository(db, notifications),
         _orchestrator = SyncOrchestrator(
           storage: DriftSyncStorageAdapter(db),
@@ -45,6 +47,10 @@ class SyncService {
   final WorkspaceAuthClient _authClient;
   final SyncOrchestrator _orchestrator;
   final PlantsRepository _plantsRepo;
+  final void Function(SyncProgress? progress)? _onProgress;
+
+  Future<SyncResult>? _running;
+  bool _rerun = false;
 
   String? get token => _store.current.token;
   String? get deviceId => _store.current.deviceId;
@@ -76,12 +82,43 @@ class SyncService {
     await _store.save(_store.current.disconnected());
   }
 
-  Future<SyncResult> sync() async {
-    if (!isLoggedIn) throw const NotAuthenticatedException();
+  /// Runs one sync at a time: a call while one runs joins it, and gets
+  /// one more pass afterwards for whatever it was called for (a local edit
+  /// to push, usually). Pulling the same pages twice over is what a big
+  /// garden can't afford.
+  Future<SyncResult> sync() {
+    if (!isLoggedIn) {
+      return Future.error(const NotAuthenticatedException());
+    }
+    final running = _running;
+    if (running != null) {
+      _rerun = true;
+      return running;
+    }
+    return _running = _syncUntilSettled().whenComplete(() {
+      _running = null;
+      _onProgress?.call(null);
+    });
+  }
+
+  Future<SyncResult> _syncUntilSettled() async {
+    var pulled = 0;
+    var pushed = 0;
+    do {
+      _rerun = false;
+      final result = await _syncOnce();
+      pulled += result.pulled;
+      pushed += result.pushed;
+    } while (_rerun && isLoggedIn);
+    return SyncResult(pulled: pulled, pushed: pushed);
+  }
+
+  Future<SyncResult> _syncOnce() async {
     final result = await _orchestrator.sync(
       serverUrl: serverUrl!,
       token: token!,
       deviceId: deviceId!,
+      onProgress: _onProgress,
     );
     if (result.pulled > 0) {
       // The pull applies remote changes straight to the database, bypassing

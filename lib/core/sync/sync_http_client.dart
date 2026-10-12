@@ -33,12 +33,17 @@ class ChangesPage {
   /// Every entity type the server stores; null when it predates reporting
   /// them.
   final Set<String>? supportedEntities;
+
+  /// How many changes the whole pull from this page's `since` holds, this
+  /// page included; null when not asked for, or the server predates it.
+  final int? remaining;
   const ChangesPage(
       {required this.changes,
       required this.nextCursor,
       required this.hasMore,
       this.entities,
-      this.supportedEntities});
+      this.supportedEntities,
+      this.remaining});
 }
 
 class ReceiveResult {
@@ -67,9 +72,11 @@ class SyncHttpClient {
     int limit = 100,
     Set<String>? entryTypes,
     Set<String>? entities,
+    bool count = false,
   }) async {
     final query = 'since=$since&limit=$limit'
-        '${entities == null ? '' : '&entities=${entities.join(',')}'}';
+        '${entities == null ? '' : '&entities=${entities.join(',')}'}'
+        '${count ? '&count=1' : ''}';
     final response = await http
         .get(
           Uri.parse('$serverUrl/api/v1/sync/changes?$query'),
@@ -102,6 +109,7 @@ class SyncHttpClient {
       hasMore: data['hasMore'] as bool? ?? false,
       entities: _stringSet(data['entities']),
       supportedEntities: _stringSet(data['supportedEntities']),
+      remaining: data['remaining'] as int?,
     );
   }
 

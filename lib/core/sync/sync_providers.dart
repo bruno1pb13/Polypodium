@@ -34,7 +34,25 @@ SyncService syncService(Ref ref) {
     db,
     _RiverpodWorkspaceConfigStore(ref, workspaceId),
     photoStorage,
+    onProgress: (progress) {
+      // A workspace left mid-sync keeps syncing; its progress isn't news.
+      if (ref.read(activeWorkspaceIdNotifierProvider) != workspaceId) return;
+      ref.read(syncProgressNotifierProvider.notifier).report(progress);
+    },
   );
+}
+
+/// The active workspace's running pull, or null when none is: drives the
+/// first-sync overlay and the "still syncing" strip at the top of the app.
+@Riverpod(keepAlive: true)
+class SyncProgressNotifier extends _$SyncProgressNotifier {
+  @override
+  SyncProgress? build() {
+    ref.watch(activeWorkspaceIdNotifierProvider);
+    return null;
+  }
+
+  void report(SyncProgress? progress) => state = progress;
 }
 
 /// The push cursor for the 'server' peer, or null when there's no server
