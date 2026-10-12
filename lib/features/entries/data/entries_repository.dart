@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/enums.dart';
@@ -29,9 +30,9 @@ class EntriesRepository {
     return [for (final (row, photos) in rows) _fromRow(row, photos)];
   }
 
-  Stream<List<EntryModel>> watchByPlant(String plantId) =>
-      _dao.watchByPlantWithPhotos(plantId).map(
-          (rows) => [for (final (row, photos) in rows) _fromRow(row, photos)]);
+  Stream<List<EntryModel>> watchByPlant(String plantId) => _dao
+      .watchByPlantWithPhotos(plantId)
+      .map((rows) => [for (final (row, photos) in rows) _fromRow(row, photos)]);
 
   /// Entries of every plant dated on or after [since], newest first,
   /// without their extra photos.
@@ -74,6 +75,42 @@ class EntriesRepository {
       }
     });
     await _enforceRetentionPolicy(entry.plantId);
+  }
+
+  /// Adds the photos at [paths] to the existing entry [entryId], after the
+  /// ones it has. An entry without photos takes the first as its own (an
+  /// update of the entry row); the rest become extra photo rows. Returns
+  /// false, adding nothing, when the entry is gone.
+  Future<bool> addPhotos(String entryId, List<String> paths) async {
+    if (paths.isEmpty) return true;
+    return _db.transaction(() async {
+      final row = await _dao.getById(entryId);
+      if (row == null || row.deletedAt != null) return false;
+      final now = DateTime.now();
+      var rest = paths;
+      if (row.photoPath == null) {
+        final rev = await _db.syncMetaDao.nextRev();
+        await _dao.setPhotoPath(entryId, paths.first, updatedAt: now, rev: rev);
+        rest = paths.sublist(1);
+      }
+      final existing = await _db.entryPhotosDao.getByEntries([entryId]);
+      var position =
+          existing.fold(0, (max, p) => p.position > max ? p.position : max);
+      for (final path in rest) {
+        final photoRev = await _db.syncMetaDao.nextRev();
+        await _db.entryPhotosDao.upsert(EntryPhotosTableCompanion.insert(
+          id: const Uuid().v4(),
+          entryId: entryId,
+          photoPath: path,
+          position: Value(++position),
+          createdAt: now,
+          updatedAt: now,
+          localRev: Value(photoRev),
+          deviceId: Value(_db.deviceId),
+        ));
+      }
+      return true;
+    });
   }
 
   Future<void> delete(String id) async {
@@ -121,8 +158,8 @@ class EntriesRepository {
         final rev = await _db.syncMetaDao.nextRev();
         await _dao.softDelete(row.id, deletedAt: now, rev: rev);
         if (row.photoPath != null) photoPaths.add(row.photoPath!);
-        final extra = await _db.entryPhotosDao
-            .softDeleteByEntry(row.id, deletedAt: now);
+        final extra =
+            await _db.entryPhotosDao.softDeleteByEntry(row.id, deletedAt: now);
         photoPaths.addAll(extra.map((p) => p.photoPath));
       }
     });
@@ -154,8 +191,7 @@ class EntriesRepository {
         extraPhotos: row.photoPath == null
             ? const []
             : [
-                for (final p in photos)
-                  EntryPhoto(id: p.id, path: p.photoPath),
+                for (final p in photos) EntryPhoto(id: p.id, path: p.photoPath),
               ],
       );
 

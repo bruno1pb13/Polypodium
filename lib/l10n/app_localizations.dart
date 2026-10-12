@@ -4016,6 +4016,12 @@ abstract class AppLocalizations {
   /// **'Cover updated'**
   String get coverPhotoUpdated;
 
+  /// No description provided for @addPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photos'**
+  String get addPhotos;
+
   /// No description provided for @photosTitle.
   ///
   /// In en, this message translates to:

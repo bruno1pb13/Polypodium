@@ -13,24 +13,36 @@ import '../../../plants/presentation/widgets/plant_status.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/entry_details.dart';
 import '../../domain/entry_model.dart';
+import 'entry_forms/entry_photo_section.dart';
 import 'harvest_format.dart';
 import '../../../../core/theme/glass_colors.dart';
 
 class EntryTimelineItem extends ConsumerWidget {
   final EntryModel entry;
   final VoidCallback? onDelete;
+
+  /// Attaches more photos; offered while the entry has room for them.
+  final VoidCallback? onAddPhotos;
   final bool isLast;
 
   const EntryTimelineItem({
     super.key,
     required this.entry,
     this.onDelete,
+    this.onAddPhotos,
     this.isLast = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
+    final canDelete = onDelete != null && entry.type != EntryType.history;
+    final canAddPhotos = onAddPhotos != null &&
+        entry.type != EntryType.history &&
+        entry.photos.length < maxEntryPhotos;
+    final actionColor = transparencyEnabled
+        ? context.glass.fgSubtle
+        : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -174,25 +186,26 @@ class EntryTimelineItem extends ConsumerWidget {
                               ),
                             ),
                           ],
-                          if (onDelete != null &&
-                              entry.type != EntryType.history) ...[
+                          if (canAddPhotos || canDelete) ...[
                             const SizedBox(height: 4),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: IconButton(
-                                icon: Icon(
-                                  Icons.delete_outline,
-                                  color: transparencyEnabled
-                                      ? context.glass.fgSubtle
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant
-                                          .withValues(alpha: 0.6),
-                                  size: 20,
-                                ),
-                                tooltip: context.l10n.delete,
-                                onPressed: onDelete,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                if (canAddPhotos)
+                                  IconButton(
+                                    icon: Icon(Icons.add_a_photo_outlined,
+                                        color: actionColor, size: 20),
+                                    tooltip: context.l10n.addPhotos,
+                                    onPressed: onAddPhotos,
+                                  ),
+                                if (canDelete)
+                                  IconButton(
+                                    icon: Icon(Icons.delete_outline,
+                                        color: actionColor, size: 20),
+                                    tooltip: context.l10n.delete,
+                                    onPressed: onDelete,
+                                  ),
+                              ],
                             ),
                           ],
                         ],
@@ -319,12 +332,16 @@ class _EntryDataBadge extends StatelessWidget {
           ? ('💚', l10n.chlorosisCured)
           : ('🟡', _severityLabel(l10n, nv.toInt())),
       EntryType.pest => _pestSummary(l10n, details as PestDetails?, nv),
-      EntryType.irrigation when nv != null =>
-        ('💧', _irrigationLabel(l10n, nv.toInt())),
+      EntryType.irrigation when nv != null => (
+          '💧',
+          _irrigationLabel(l10n, nv.toInt())
+        ),
       EntryType.fertilizer =>
         _fertilizerSummary(l10n, details as FertilizerDetails?),
-      EntryType.pruning when details is PruningDetails =>
-        ('✂️', _pruningLabel(l10n, details.reason)),
+      EntryType.pruning when details is PruningDetails => (
+          '✂️',
+          _pruningLabel(l10n, details.reason)
+        ),
       EntryType.pesticide =>
         _pesticideSummary(l10n, details as PesticideDetails?, entry.date),
       EntryType.repotting =>
@@ -335,8 +352,7 @@ class _EntryDataBadge extends StatelessWidget {
           EntryType.harvest.emoji,
           formatHarvestAmount(l10n, details.quantity!, details.unit),
         ),
-      EntryType.observation when nv != null =>
-        (
+      EntryType.observation when nv != null => (
           _healthEmoji(nv.toInt()),
           '${l10n.healthSummary(nv.toInt())} — ${_healthLabel(l10n, nv.toInt())}',
         ),
@@ -382,8 +398,9 @@ class _EntryDataBadge extends StatelessWidget {
 
     // Only worth showing while the next application is still ahead; on older
     // entries that date has long passed.
-    final nextDate =
-        recurrenceDays != null ? date.add(Duration(days: recurrenceDays)) : null;
+    final nextDate = recurrenceDays != null
+        ? date.add(Duration(days: recurrenceDays))
+        : null;
     final nextPart = nextDate != null && nextDate.isAfter(DateTime.now())
         ? l10n.nextPesticideApplication(
             DateFormat.yMd(l10n.localeName).format(nextDate))

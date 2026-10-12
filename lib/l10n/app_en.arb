@@ -1163,6 +1163,7 @@
   },
   "photoOptionsHint": "show photo options",
   "coverPhotoUpdated": "Cover updated",
+  "addPhotos": "Add photos",
   "photosTitle": "Photos",
   "photosCounter": "{count} of {max}",
   "@photosCounter": {

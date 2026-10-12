@@ -63,8 +63,7 @@ final plantAlertStatusProvider =
 
       return (
         hasActiveChlorosis: chlorosisActive,
-        chlorosisSeverity:
-            chlorosisActive && cNv != null ? cNv.toInt() : null,
+        chlorosisSeverity: chlorosisActive && cNv != null ? cNv.toInt() : null,
         hasActivePest: pestActive,
         pestSeverity: pestActive && pNv != null ? pNv.toInt() : null,
       );
@@ -121,8 +120,9 @@ class EntryMutations {
       await entriesRepo.create(entry);
       if (reminderIntervalDays != null &&
           reminderEntryTypes.contains(entry.type)) {
-        await _ref.read(remindersRepositoryProvider).setInterval(
-            entry.plantId, entry.type, reminderIntervalDays);
+        await _ref
+            .read(remindersRepositoryProvider)
+            .setInterval(entry.plantId, entry.type, reminderIntervalDays);
       }
       if (entry.type == EntryType.irrigation) {
         await plantsRepo.refreshPlantStatus(entry.plantId, reschedule: false);
@@ -161,7 +161,9 @@ class EntryMutations {
     final plant =
         await _ref.read(plantsRepositoryProvider).getById(entry.plantId);
     if (plant == null || plant.soilId == soilId) return;
-    await _ref.read(plantMutationsProvider).save(plant.copyWith(soilId: soilId));
+    await _ref
+        .read(plantMutationsProvider)
+        .save(plant.copyWith(soilId: soilId));
   }
 
   /// A repotting into a pot notes the pot each plant leaves.
@@ -201,6 +203,21 @@ class EntryMutations {
           createdAt: now,
         ),
     ]);
+  }
+
+  /// Attaches the saved photos at [paths] to the existing entry [entryId].
+  /// Their files are deleted if the entry is gone by then.
+  Future<void> addPhotos(String entryId, List<String> paths) async {
+    final added =
+        await _ref.read(entriesRepositoryProvider).addPhotos(entryId, paths);
+    if (!added) {
+      final storage = _ref.read(photoStorageProvider);
+      for (final path in paths) {
+        await storage.deletePhoto(path);
+      }
+      return;
+    }
+    _triggerSync();
   }
 
   Future<void> delete(String id) async {
@@ -246,6 +263,8 @@ class EntriesNotifier extends _$EntriesNotifier {
   Future<void> create(EntryModel entry) =>
       ref.read(entryMutationsProvider).create(entry);
 
-  Future<void> delete(String id) =>
-      ref.read(entryMutationsProvider).delete(id);
+  Future<void> addPhotos(String entryId, List<String> paths) =>
+      ref.read(entryMutationsProvider).addPhotos(entryId, paths);
+
+  Future<void> delete(String id) => ref.read(entryMutationsProvider).delete(id);
 }
