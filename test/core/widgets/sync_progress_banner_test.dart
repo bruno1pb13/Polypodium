@@ -79,4 +79,28 @@ void main() {
     expect(find.text(_strip), findsNothing);
     expect(find.text(_overlay), findsNothing);
   });
+
+  testWidgets('the host leaves the app all the room, overlay or not',
+      (tester) async {
+    for (final progress in [
+      null,
+      const SyncProgress(stage: SyncStage.essentials, done: 0, large: true),
+    ]) {
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          syncProgressNotifierProvider.overrideWith(() => _Fixed(progress)),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: SyncEssentialsHost(child: SizedBox(key: Key('app'))),
+        ),
+      ));
+      await tester.pump();
+
+      expect(tester.getSize(find.byKey(const Key('app'))),
+          tester.view.physicalSize / tester.view.devicePixelRatio,
+          reason: 'progress: $progress');
+    }
+  });
 }

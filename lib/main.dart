@@ -203,14 +203,7 @@ class _AutoSyncScopeState extends ConsumerState<_AutoSyncScope>
         const SyncProgressBanner(),
         const UpdateBanner(),
         const ServerOutdatedBanner(),
-        Expanded(
-          child: Stack(
-            children: [
-              Positioned.fill(child: widget.child),
-              const SyncEssentialsOverlay(),
-            ],
-          ),
-        ),
+        Expanded(child: SyncEssentialsHost(child: widget.child)),
       ],
     );
   }

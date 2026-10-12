@@ -85,6 +85,23 @@ class _Strip extends StatelessWidget {
   }
 }
 
+/// Lays [SyncEssentialsOverlay] over [child], which keeps all the room.
+class SyncEssentialsHost extends StatelessWidget {
+  const SyncEssentialsHost({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    // Expand: the overlay is usually an empty box, and a loose Stack would
+    // size the whole app down to it.
+    return Stack(
+      fit: StackFit.expand,
+      children: [child, const SyncEssentialsOverlay()],
+    );
+  }
+}
+
 /// Covers the app while a fresh device pulls the essentials -- seconds, not
 /// the minutes the history can take -- so the user doesn't land on an empty
 /// garden. The pull ending, or failing, lifts it.
