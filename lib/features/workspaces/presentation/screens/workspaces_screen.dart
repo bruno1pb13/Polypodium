@@ -5,10 +5,11 @@ import '../../../../core/database/database_provider.dart';
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
+import '../../../../core/sync/auto_sync_controller.dart';
 import '../../../../core/sync/sync_providers.dart';
+import '../../../../core/widgets/app_shell.dart';
 import '../../../admin/data/admin_client.dart';
 import '../../../admin/presentation/screens/server_admin_screen.dart';
-import '../../../dashboard/presentation/screens/dashboard_screen.dart';
 import '../../data/garden_client.dart';
 import '../../data/workspace_auth_client.dart';
 import '../../data/workspace_migration_service.dart';
@@ -80,18 +81,21 @@ class WorkspacesScreen extends ConsumerWidget {
     );
   }
 
-  void _goHome(BuildContext context) {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const DashboardScreen()),
+  /// Rebuilds the whole shell for the newly active workspace and syncs it
+  /// right away -- a just-added workspace's database is empty until then.
+  void _goHome(BuildContext context, WidgetRef ref) {
+    Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const AppShell()),
       (route) => false,
     );
+    ref.read(autoSyncControllerProvider.notifier).syncNow();
   }
 
   Future<void> _activate(
       BuildContext context, WidgetRef ref, String id) async {
     if (ref.read(activeWorkspaceIdNotifierProvider) == id) return;
     await ref.read(activeWorkspaceIdNotifierProvider.notifier).setActive(id);
-    if (context.mounted) _goHome(context);
+    if (context.mounted) _goHome(context, ref);
   }
 
   Future<void> _addRemote(BuildContext context, WidgetRef ref) async {
@@ -164,7 +168,7 @@ class WorkspacesScreen extends ConsumerWidget {
         },
       ),
     );
-    if (created == true && context.mounted) _goHome(context);
+    if (created == true && context.mounted) _goHome(context, ref);
   }
 
   Future<GardenChoice?> _pickGarden(
@@ -211,7 +215,7 @@ class WorkspacesScreen extends ConsumerWidget {
     await ref
         .read(workspacesNotifierProvider.notifier)
         .openGardenWorkspace(ws, gardenChoiceFor(picked, context.l10n));
-    if (context.mounted) _goHome(context);
+    if (context.mounted) _goHome(context, ref);
   }
 
   /// Creates an empty garden on [ws]'s server and switches to a new
@@ -236,7 +240,7 @@ class WorkspacesScreen extends ConsumerWidget {
       }
       return;
     }
-    if (context.mounted) _goHome(context);
+    if (context.mounted) _goHome(context, ref);
   }
 
   Future<void> _reconnect(
