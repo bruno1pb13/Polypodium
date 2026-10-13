@@ -66,7 +66,12 @@ void main() {
   late _FakeEntryMutations mutations;
 
   Future<void> pump(WidgetTester tester, List<AgendaTask> tasks,
-      {ThemeData? theme}) async {
+      {ThemeData? theme, Size? size}) async {
+    if (size != null) {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+    }
     mutations = _FakeEntryMutations();
     await tester.pumpWidget(ProviderScope(
       overrides: [
@@ -105,6 +110,27 @@ void main() {
     expect(find.text('Reaplicação de defensivo'), findsOneWidget);
     expect(find.text('Reguei'), findsNWidgets(2));
     expect(find.text('Registrar'), findsNWidgets(2));
+  });
+
+  testWidgets('wide screens show each section as a column', (tester) async {
+    await pump(
+        tester,
+        [
+          task('Samambaia', 3),
+          task('Jiboia', 0,
+              kind: AgendaTaskKind.care, type: EntryType.fertilizer),
+          task('Costela', -1),
+        ],
+        size: const Size(1400, 900));
+
+    final overdue = tester.getTopLeft(find.text('Atrasados (1)'));
+    final today = tester.getTopLeft(find.text('Hoje (1)'));
+    final upcoming = tester.getTopLeft(find.text('Próximos 7 dias (1)'));
+    expect(today.dy, overdue.dy);
+    expect(upcoming.dy, overdue.dy);
+    expect(today.dx, greaterThan(overdue.dx));
+    expect(upcoming.dx, greaterThan(today.dx));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('shows the empty state when nothing is pending', (tester) async {

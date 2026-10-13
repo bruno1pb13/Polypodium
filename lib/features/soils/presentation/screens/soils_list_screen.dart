@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/adaptive_layout.dart';
 import '../../../../core/enums.dart';
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/l10n/l10n.dart';
@@ -149,7 +150,7 @@ class _SoilsListScreenState extends ConsumerState<SoilsListScreen> {
                             ),
                           );
                         }
-                        return ListView.builder(
+                        return AdaptiveListView.builder(
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.only(top: 8, bottom: 80),
                           itemCount: soils.length,

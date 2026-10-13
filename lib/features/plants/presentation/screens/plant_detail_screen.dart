@@ -29,6 +29,7 @@ import '../widgets/plant_detail/species_care_card.dart';
 import '../widgets/plant_insights_view.dart';
 import '../widgets/plant_photos_sliver.dart';
 import 'add_edit_plant_screen.dart';
+import '../../../../core/widgets/adaptive_layout.dart';
 import '../../../../core/theme/glass_colors.dart';
 
 class PlantDetailScreen extends ConsumerWidget {
@@ -68,9 +69,8 @@ class PlantDetailScreen extends ConsumerWidget {
                 .firstOrNull
             : null;
 
-        final soil = soilsAsync.value
-            ?.where((s) => s.id == plant.soilId)
-            .firstOrNull;
+        final soil =
+            soilsAsync.value?.where((s) => s.id == plant.soilId).firstOrNull;
 
         final pws = species != null
             ? PlantWithSpecies(
@@ -79,6 +79,98 @@ class PlantDetailScreen extends ConsumerWidget {
                 location: location,
               )
             : null;
+
+        final infoSlivers = <Widget>[
+          SliverToBoxAdapter(
+            child: PlantDetailHeader(plant: plant, pws: pws),
+          ),
+          if (!plant.isActive)
+            SliverToBoxAdapter(
+              child: PlantLifecycleBanner(plant: plant),
+            ),
+          if (pws != null)
+            SliverToBoxAdapter(
+              child: PlantCareAlerts(
+                pws: pws,
+                carencia: carencia,
+              ),
+            ),
+          SliverToBoxAdapter(
+            child: PlantInfoCard(
+                plant: plant,
+                pws: pws,
+                soilName: soil?.name,
+                soilComposition: soil?.composition),
+          ),
+          SliverToBoxAdapter(
+            child: PlantPotCard(plant: plant),
+          ),
+          SliverToBoxAdapter(
+            child: PlantLineageCard(
+              plant: plant,
+              plants: plants,
+              onOpenPlant: (id) => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PlantDetailScreen(plantId: id),
+                ),
+              ),
+              onCreateCutting: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AddEditPlantScreen.cutting(parent: plant),
+                ),
+              ),
+            ),
+          ),
+          if (species != null && species.hasCareInfo)
+            SliverToBoxAdapter(
+              child: SpeciesCareCard(species: species),
+            ),
+          // Reminders of plants that are no longer active are
+          // ignored, so they aren't offered either.
+          if (plant.isActive)
+            SliverToBoxAdapter(
+              child: PlantRemindersCard(plant: plant),
+            ),
+        ];
+        final historySlivers = <Widget>[
+          SliverToBoxAdapter(
+            child: PlantDetailViewSelector(plantId: plantId),
+          ),
+          if (activeView == PlantDetailView.diary) ...[
+            SliverToBoxAdapter(
+              child: PlantEntriesHeader(plantId: plantId),
+            ),
+            // Timeline Entries
+            PlantDiarySliver(plantId: plantId),
+          ] else if (activeView == PlantDetailView.charts)
+            entriesAsync.when(
+              loading: () => const SliverToBoxAdapter(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, _) => SliverToBoxAdapter(
+                child: Center(child: Text(context.l10n.errorGeneric('$e'))),
+              ),
+              data: (entries) => SliverToBoxAdapter(
+                child: PlantInsightsView(entries: entries, pws: pws),
+              ),
+            )
+          else
+            entriesAsync.when(
+              loading: () => const SliverToBoxAdapter(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, _) => SliverToBoxAdapter(
+                child: Center(child: Text(context.l10n.errorGeneric('$e'))),
+              ),
+              data: (entries) => PlantPhotosSliver(
+                entries: entries,
+                coverPhotoId: plant.coverPhotoId,
+                onSetCover: (photoId) => _setCover(context, ref, photoId),
+              ),
+            ),
+        ];
 
         return Scaffold(
           resizeToAvoidBottomInset: false,
@@ -156,113 +248,54 @@ class PlantDetailScreen extends ConsumerWidget {
                 ),
               ),
               SafeArea(
-                child: RefreshIndicator(
-                  onRefresh: () async {
-                    ref.invalidate(plantsNotifierProvider);
-                    ref.invalidate(entriesNotifierProvider(plantId));
-                    try {
-                      await Future.wait([
-                        ref.read(plantsNotifierProvider.future),
-                        ref.read(entriesNotifierProvider(plantId).future),
-                      ]);
-                    } catch (_) {}
-                  },
-                  color: Colors.white,
-                  backgroundColor: Colors.black54,
-                  child: CustomScrollView(
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: PlantDetailHeader(plant: plant, pws: pws),
-                    ),
-                    if (!plant.isActive)
-                      SliverToBoxAdapter(
-                        child: PlantLifecycleBanner(plant: plant),
-                      ),
-                    if (pws != null)
-                      SliverToBoxAdapter(
-                        child: PlantCareAlerts(
-                          pws: pws,
-                          carencia: carencia,
+                child: LayoutBuilder(builder: (context, constraints) {
+                  Widget refreshable(Widget child) => RefreshIndicator(
+                        onRefresh: () async {
+                          ref.invalidate(plantsNotifierProvider);
+                          ref.invalidate(entriesNotifierProvider(plantId));
+                          try {
+                            await Future.wait([
+                              ref.read(plantsNotifierProvider.future),
+                              ref.read(entriesNotifierProvider(plantId).future),
+                            ]);
+                          } catch (_) {}
+                        },
+                        color: Colors.white,
+                        backgroundColor: Colors.black54,
+                        child: child,
+                      );
+                  const bottomSpace =
+                      SliverToBoxAdapter(child: SizedBox(height: 120));
+
+                  if (constraints.maxWidth < kTwoPaneBreakpoint) {
+                    return refreshable(CustomScrollView(
+                      slivers: [...infoSlivers, ...historySlivers, bottomSpace],
+                    ));
+                  }
+                  // Wide: the plant's data on the left, its history on the
+                  // right, each scrolling on its own.
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(
+                        width: (constraints.maxWidth * 0.4).clamp(400.0, 560.0),
+                        child: CustomScrollView(
+                          primary: false,
+                          slivers: [
+                            ...infoSlivers,
+                            const SliverToBoxAdapter(
+                                child: SizedBox(height: 32)),
+                          ],
                         ),
                       ),
-                    SliverToBoxAdapter(
-                      child: PlantInfoCard(plant: plant, pws: pws, soilName: soil?.name, soilComposition: soil?.composition),
-                    ),
-                    SliverToBoxAdapter(
-                      child: PlantPotCard(plant: plant),
-                    ),
-                    SliverToBoxAdapter(
-                      child: PlantLineageCard(
-                        plant: plant,
-                        plants: plants,
-                        onOpenPlant: (id) => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => PlantDetailScreen(plantId: id),
-                          ),
-                        ),
-                        onCreateCutting: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                AddEditPlantScreen.cutting(parent: plant),
-                          ),
-                        ),
+                      Expanded(
+                        child: refreshable(CustomScrollView(
+                          slivers: [...historySlivers, bottomSpace],
+                        )),
                       ),
-                    ),
-                    if (species != null && species.hasCareInfo)
-                      SliverToBoxAdapter(
-                        child: SpeciesCareCard(species: species),
-                      ),
-                    // Reminders of plants that are no longer active are
-                    // ignored, so they aren't offered either.
-                    if (plant.isActive)
-                      SliverToBoxAdapter(
-                        child: PlantRemindersCard(plant: plant),
-                      ),
-                    SliverToBoxAdapter(
-                      child: PlantDetailViewSelector(plantId: plantId),
-                    ),
-                    if (activeView == PlantDetailView.diary) ...[
-                      SliverToBoxAdapter(
-                        child: PlantEntriesHeader(plantId: plantId),
-                      ),
-                      // Timeline Entries
-                      PlantDiarySliver(plantId: plantId),
-                    ] else if (activeView == PlantDetailView.charts)
-                      entriesAsync.when(
-                        loading: () => const SliverToBoxAdapter(
-                          child: Center(child: CircularProgressIndicator()),
-                        ),
-                        error: (e, _) => SliverToBoxAdapter(
-                          child: Center(
-                              child: Text(context.l10n.errorGeneric('$e'))),
-                        ),
-                        data: (entries) => SliverToBoxAdapter(
-                          child:
-                              PlantInsightsView(entries: entries, pws: pws),
-                        ),
-                      )
-                    else
-                      entriesAsync.when(
-                        loading: () => const SliverToBoxAdapter(
-                          child: Center(child: CircularProgressIndicator()),
-                        ),
-                        error: (e, _) => SliverToBoxAdapter(
-                          child: Center(
-                              child: Text(context.l10n.errorGeneric('$e'))),
-                        ),
-                        data: (entries) => PlantPhotosSliver(
-                          entries: entries,
-                          coverPhotoId: plant.coverPhotoId,
-                          onSetCover: (photoId) =>
-                              _setCover(context, ref, photoId),
-                        ),
-                      ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 120)),
-                  ],
-                  ),
-                ),
+                    ],
+                  );
+                }),
               ),
             ],
           ),

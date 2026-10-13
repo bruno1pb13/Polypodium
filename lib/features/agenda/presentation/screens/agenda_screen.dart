@@ -14,6 +14,7 @@ import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/agenda_task.dart';
 import '../providers/agenda_providers.dart';
 import '../../../../core/theme/glass_colors.dart';
+import '../../../../core/widgets/adaptive_layout.dart';
 
 /// Pending care of every active plant: overdue, due today and coming up in
 /// the next [agendaHorizonDays] days, with quick actions per task.
@@ -94,12 +95,47 @@ class AgendaScreen extends ConsumerWidget {
               ),
               data: (tasks) {
                 if (tasks.isEmpty) return const _EmptyState();
-                final rows = _rows(context, tasks);
-                return ListView.builder(
-                  padding: const EdgeInsets.only(top: 8, bottom: 80),
-                  itemCount: rows.length,
-                  itemBuilder: (ctx, i) => rows[i],
-                );
+                return LayoutBuilder(builder: (context, constraints) {
+                  final buckets = [
+                    for (final bucket in AgendaBucket.values)
+                      if (tasks.any((t) => t.bucket == bucket)) bucket,
+                  ];
+                  final columns =
+                      constraints.maxWidth >= kTwoPaneBreakpoint ? buckets : const <AgendaBucket>[];
+                  if (columns.length < 2) {
+                    final rows = _rows(context, tasks);
+                    return ListView.builder(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: centeredGutter(constraints.maxWidth, 760,
+                            gutter: 0),
+                      ).copyWith(top: 8, bottom: 80),
+                      itemCount: rows.length,
+                      itemBuilder: (ctx, i) => rows[i],
+                    );
+                  }
+                  // Wide: one column per section, side by side.
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (final bucket in columns)
+                        Expanded(
+                          child: Builder(builder: (context) {
+                            final rows = _rows(context, [
+                              for (final t in tasks)
+                                if (t.bucket == bucket) t,
+                            ]);
+                            return ListView.builder(
+                              primary: false,
+                              padding:
+                                  const EdgeInsets.only(top: 8, bottom: 80),
+                              itemCount: rows.length,
+                              itemBuilder: (ctx, i) => rows[i],
+                            );
+                          }),
+                        ),
+                    ],
+                  );
+                });
               },
             ),
           ),
@@ -319,7 +355,8 @@ class _AgendaTaskItem extends ConsumerWidget {
                               shadows: transparencyEnabled
                                   ? [
                                       Shadow(
-                                        color: context.glass.shadow(Colors.black26),
+                                        color: context.glass
+                                            .shadow(Colors.black26),
                                         offset: Offset(0, 1),
                                         blurRadius: 2,
                                       ),

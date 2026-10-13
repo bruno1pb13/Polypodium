@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../species/presentation/screens/species_list_screen.dart';
 // ignore: unused_import
 import '../../../locations/presentation/screens/locations_list_screen.dart';
+import '../../../../core/widgets/adaptive_layout.dart';
 import '../../../../core/links/app_link_handler.dart';
 import '../../../../core/sync/auto_sync_controller.dart';
 import '../../../../core/sync/sync_providers.dart';
@@ -371,7 +372,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                             );
                           }
-                          return ListView.builder(
+                          return AdaptiveListView.builder(
                             key: const ValueKey('plants-list'),
                             physics: const AlwaysScrollableScrollPhysics(),
                             padding: const EdgeInsets.only(bottom: 80),

@@ -127,8 +127,9 @@ final _emptyPot = PotWithPlants(
 void main() {
   late _FakePotMutations mutations;
 
-  Future<void> pump(WidgetTester tester, Widget home) async {
-    tester.view.physicalSize = const Size(420, 900);
+  Future<void> pump(WidgetTester tester, Widget home,
+      {Size size = const Size(420, 900)}) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(ProviderScope(
@@ -266,6 +267,18 @@ void main() {
       // Short codes tell same-named plants apart.
       expect(find.text('#A'), findsOneWidget);
       expect(find.text('#B'), findsOneWidget);
+    });
+
+    testWidgets('wide screens put the plants beside the pot data',
+        (tester) async {
+      await pump(tester, const PotDetailScreen(potId: 'blue'),
+          size: const Size(1400, 900));
+
+      final data = tester.getTopLeft(find.text('Varanda'));
+      final plants = tester.getTopLeft(find.text('Plantas neste vaso (2)'));
+      expect(plants.dx, greaterThan(data.dx + 300));
+      expect(plants.dy, lessThan(data.dy + 100));
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('the add-plant sheet shows and searches the short code',

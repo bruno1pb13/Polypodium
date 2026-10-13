@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/settings_providers.dart';
+import '../../../../core/widgets/adaptive_layout.dart';
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/sync/sync_providers.dart';
@@ -25,7 +26,7 @@ class SettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(context.l10n.navSettings),
       ),
-      body: ListView(
+      body: ReadableListView(
         children: [
           _SectionHeader(title: context.l10n.settingsGeneral),
           SwitchListTile(

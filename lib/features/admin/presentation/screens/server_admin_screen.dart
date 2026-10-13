@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/widgets/adaptive_layout.dart';
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../workspaces/domain/workspace_model.dart';
@@ -28,7 +29,7 @@ class ServerAdminScreen extends ConsumerWidget {
           ref.invalidate(serverWeatherStatusProvider(workspace));
           ref.invalidate(serverUsersNotifierProvider(workspace));
         },
-        child: ListView(
+        child: ReadableListView(
           children: [
             _StatusCard(statusAsync: statusAsync),
             _DataSettingsCard(workspace: workspace),
