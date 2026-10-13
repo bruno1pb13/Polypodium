@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/widgets/adaptive_layout.dart';
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/sync/sync_exceptions.dart';
@@ -192,7 +193,7 @@ class _TokenList extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final date = DateFormat.yMd(l10n.localeName);
-    return ListView(
+    return ReadableListView(
       // Clears the FAB.
       padding: const EdgeInsets.only(bottom: 88),
       children: [

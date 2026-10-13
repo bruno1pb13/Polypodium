@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/adaptive_layout.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../entries/presentation/screens/add_entry_screen.dart';
@@ -112,7 +113,7 @@ class PlantGroupScreen extends ConsumerWidget {
                 if (plants.isEmpty) {
                   return _EmptyState(isLocation: locationId != null);
                 }
-                return ListView.builder(
+                return AdaptiveListView.builder(
                   padding: const EdgeInsets.only(top: 8, bottom: 80),
                   itemCount: plants.length,
                   itemBuilder: (ctx, i) => PlantListItem(

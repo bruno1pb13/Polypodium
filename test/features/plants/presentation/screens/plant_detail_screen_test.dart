@@ -219,6 +219,17 @@ void main() {
         findsOneWidget);
   });
 
+  testWidgets('wide screens put the history beside the plant data',
+      (tester) async {
+    await pump(tester, plant(), size: const Size(1400, 900));
+
+    final info = tester.getTopLeft(find.text('Frequência de irrigação'));
+    final diary = tester.getTopLeft(find.text('Diário'));
+    expect(diary.dx, greaterThan(info.dx + 300));
+    expect(diary.dy, lessThan(info.dy));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('renders the lifecycle banner of a non-active plant',
       (tester) async {
     await pump(tester, plant(status: PlantStatus.archived));

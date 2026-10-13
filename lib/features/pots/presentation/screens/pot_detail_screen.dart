@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/enums.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/glass_colors.dart';
+import '../../../../core/widgets/adaptive_layout.dart';
 import '../../../entries/presentation/providers/entries_providers.dart';
 import '../../../entries/presentation/screens/add_entry_screen.dart';
 import '../../../plants/domain/plant_model.dart';
@@ -98,121 +99,145 @@ class _PotDetailBody extends ConsumerWidget {
       side: BorderSide(color: context.glass.tint(0.3)),
     );
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-      children: [
-        PotGlassCard(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              PotKindBadge(kind: pot.pot.kind),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      pot.pot.kind.label(l10n),
-                      style: TextStyle(
-                          color: context.glass.fg,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16),
-                    ),
-                    if (specs != null)
-                      Text(specs,
-                          style: TextStyle(color: context.glass.fgMuted)),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(Icons.location_on_outlined,
-                            size: 16, color: context.glass.fgMuted),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            pot.location?.name ?? l10n.none,
-                            style: TextStyle(color: context.glass.fgMuted),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (pot.pot.notes != null) ...[
-                      const SizedBox(height: 8),
-                      Text(pot.pot.notes!,
-                          style: TextStyle(color: context.glass.fg)),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+    final info = <Widget>[
+      PotGlassCard(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            OutlinedButton.icon(
-              style: buttonStyle,
-              onPressed: () => movePotToLocation(context, ref, pot),
-              icon: const Icon(Icons.place_outlined),
-              label: Text(l10n.movePotToLocation),
-            ),
-            if (pot.plants.isNotEmpty)
-              OutlinedButton.icon(
-                style: buttonStyle,
-                onPressed: () => moveAllPlantsOfPot(context, ref, pot),
-                icon: const Icon(Icons.move_up),
-                label: Text(l10n.moveAllPlantsTo),
+            PotKindBadge(kind: pot.pot.kind),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    pot.pot.kind.label(l10n),
+                    style: TextStyle(
+                        color: context.glass.fg,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16),
+                  ),
+                  if (specs != null)
+                    Text(specs, style: TextStyle(color: context.glass.fgMuted)),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on_outlined,
+                          size: 16, color: context.glass.fgMuted),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          pot.location?.name ?? l10n.none,
+                          style: TextStyle(color: context.glass.fgMuted),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (pot.pot.notes != null) ...[
+                    const SizedBox(height: 8),
+                    Text(pot.pot.notes!,
+                        style: TextStyle(color: context.glass.fg)),
+                  ],
+                ],
               ),
+            ),
           ],
         ),
-        const SizedBox(height: 16),
-        PotGlassCard(
-          padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                '${l10n.potPlantsTitle} (${pot.plants.length})',
+      ),
+      const SizedBox(height: 12),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          OutlinedButton.icon(
+            style: buttonStyle,
+            onPressed: () => movePotToLocation(context, ref, pot),
+            icon: const Icon(Icons.place_outlined),
+            label: Text(l10n.movePotToLocation),
+          ),
+          if (pot.plants.isNotEmpty)
+            OutlinedButton.icon(
+              style: buttonStyle,
+              onPressed: () => moveAllPlantsOfPot(context, ref, pot),
+              icon: const Icon(Icons.move_up),
+              label: Text(l10n.moveAllPlantsTo),
+            ),
+        ],
+      ),
+    ];
+    final plantsCard = PotGlassCard(
+      padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            '${l10n.potPlantsTitle} (${pot.plants.length})',
+            style: TextStyle(
+              color: context.glass.fg,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (pot.plants.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(l10n.potEmptyHint,
+                  style: TextStyle(color: context.glass.fgMuted)),
+            ),
+          for (final p in pot.plants) _PotPlantRow(plant: p, pot: pot),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              onPressed: () async {
+                final ids = await showPlantsForPotPicker(context, pot.pot);
+                if (ids == null || ids.isEmpty || !context.mounted) return;
+                await ref
+                    .read(potMutationsProvider)
+                    .movePlants(ids, pot.pot.id);
+              },
+              icon: Icon(Icons.add, color: context.glass.fg),
+              label: Text(
+                l10n.addPlantsToPot,
                 style: TextStyle(
                   color: context.glass.fg,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 8),
-              if (pot.plants.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(l10n.potEmptyHint,
-                      style: TextStyle(color: context.glass.fgMuted)),
-                ),
-              for (final p in pot.plants) _PotPlantRow(plant: p, pot: pot),
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: TextButton.icon(
-                  onPressed: () async {
-                    final ids = await showPlantsForPotPicker(context, pot.pot);
-                    if (ids == null || ids.isEmpty || !context.mounted) return;
-                    await ref
-                        .read(potMutationsProvider)
-                        .movePlants(ids, pot.pot.id);
-                  },
-                  icon: Icon(Icons.add, color: context.glass.fg),
-                  label: Text(
-                    l10n.addPlantsToPot,
-                    style: TextStyle(
-                      color: context.glass.fg,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
+
+    return LayoutBuilder(builder: (context, constraints) {
+      if (constraints.maxWidth < kTwoPaneBreakpoint) {
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+          children: [...info, const SizedBox(height: 16), plantsCard],
+        );
+      }
+      // Wide: the pot's data and actions beside its plants.
+      return SingleChildScrollView(
+        padding: EdgeInsets.symmetric(
+          horizontal: centeredGutter(constraints.maxWidth, 1200),
+        ).copyWith(top: 16, bottom: 80),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: info,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(flex: 3, child: plantsCard),
+          ],
+        ),
+      );
+    });
   }
 }
 

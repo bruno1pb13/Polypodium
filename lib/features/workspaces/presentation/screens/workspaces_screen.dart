@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/adaptive_layout.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/l10n/l10n.dart';
@@ -37,7 +38,7 @@ class WorkspacesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Workspaces')),
-      body: ListView(
+      body: ReadableListView(
         children: [
           _WorkspaceTile(
             workspace: local,

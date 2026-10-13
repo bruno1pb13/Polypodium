@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/adaptive_layout.dart';
 import '../../../../core/enums.dart';
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/l10n/l10n.dart';
@@ -162,7 +163,7 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                             ),
                           );
                         }
-                        return ListView.builder(
+                        return AdaptiveListView.builder(
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.only(top: 8, bottom: 80),
                           itemCount: species.length,

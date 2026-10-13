@@ -155,8 +155,10 @@ void main() {
   late _FakeEntryMutations mutations;
 
   Future<void> pump(WidgetTester tester, List<PlantWithSpecies> plants,
-      {ThemeData? theme, LabelScanner? scanner}) async {
-    tester.view.physicalSize = const Size(420, 900);
+      {ThemeData? theme,
+      LabelScanner? scanner,
+      Size size = const Size(420, 900)}) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
@@ -219,6 +221,16 @@ void main() {
     expect(find.text('Babosa'), findsNothing);
     expect(tester.getTopLeft(find.text('Samambaia')).dy,
         lessThan(tester.getTopLeft(find.text('Antúrio')).dy));
+  });
+
+  testWidgets('wide screens lay the plants out side by side', (tester) async {
+    await pump(tester, [anturio, samambaia], size: const Size(1200, 900));
+
+    final first = tester.getTopLeft(find.text('Samambaia'));
+    final second = tester.getTopLeft(find.text('Antúrio'));
+    expect(second.dy, first.dy);
+    expect(second.dx, greaterThan(first.dx));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a plant in carência shows its badge', (tester) async {

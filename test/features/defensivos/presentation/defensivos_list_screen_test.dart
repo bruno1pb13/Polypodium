@@ -55,7 +55,8 @@ void main() {
 
   Future<void> pump(
       WidgetTester tester, List<DefensivoModel> defensivos) async {
-    tester.view.physicalSize = const Size(800, 1600);
+    // Phone width: one column, so the order reads top to bottom.
+    tester.view.physicalSize = const Size(420, 1600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
