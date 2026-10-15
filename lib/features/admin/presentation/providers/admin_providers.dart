@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/sync/sync_providers.dart';
 import '../../../workspaces/domain/workspace_model.dart';
+import '../../../workspaces/presentation/providers/workspace_providers.dart';
 import '../../data/admin_client.dart';
 import '../../domain/server_data_settings.dart';
 import '../../domain/server_status.dart';
 import '../../domain/server_user.dart';
+import '../../domain/server_watering_settings.dart';
 import '../../domain/server_weather_status.dart';
 
 part 'admin_providers.g.dart';
@@ -77,6 +82,46 @@ Future<ServerWeatherStatus> serverWeatherStatus(Ref ref, Workspace workspace) {
     serverUrl: workspace.serverUrl!,
     token: workspace.token!,
   );
+}
+
+/// The server's weather-adjusted watering rules; null on a server from
+/// before them.
+@riverpod
+class ServerWateringSettingsNotifier extends _$ServerWateringSettingsNotifier {
+  @override
+  Future<ServerWateringSettings?> build(Workspace workspace) {
+    final client = ref.watch(adminClientProvider);
+    return client.wateringSettings(
+      serverUrl: workspace.serverUrl!,
+      token: workspace.token!,
+    );
+  }
+
+  Future<void> setEnabled(bool enabled) => _update(enabled: enabled);
+
+  Future<void> setRule(WateringRule rule, double value) =>
+      _update(rules: {rule: value});
+
+  Future<void> resetRules() =>
+      _update(rules: {for (final rule in WateringRule.values) rule: null});
+
+  Future<void> _update(
+      {bool? enabled, Map<WateringRule, double?> rules = const {}}) async {
+    final settings =
+        await ref.read(adminClientProvider).updateWateringSettings(
+              serverUrl: workspace.serverUrl!,
+              token: workspace.token!,
+              enabled: enabled,
+              rules: rules,
+            );
+    state = AsyncData(settings);
+    // This device's schedule follows the new rules now instead of on its
+    // next hourly refresh, when the admin is looking at the active server.
+    final active = ref.read(activeWorkspaceProvider);
+    if (active.isLoggedIn && active.serverUrl == workspace.serverUrl) {
+      unawaited(ref.read(syncServiceProvider).refreshWateringAdvice());
+    }
+  }
 }
 
 @riverpod

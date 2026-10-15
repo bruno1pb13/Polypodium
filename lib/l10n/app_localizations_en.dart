@@ -3257,4 +3257,84 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get locationExposedToRainHint =>
       'Plants here get rain (outdoors, uncovered). When the server has weather on, rain can postpone their watering.';
+
+  @override
+  String get wateringRulesTitle => 'Weather-adjusted watering';
+
+  @override
+  String get wateringRulesEnable => 'Adjust watering to the weather';
+
+  @override
+  String get wateringRulesEnableSubtitle =>
+      'Postpones watering when it rains on plants in locations exposed to rain, and brings it forward on hot days.';
+
+  @override
+  String get wateringRulesNeedsWeather =>
+      'Only works with weather forecasts on.';
+
+  @override
+  String get wateringRuleMinRain => 'Minimum rain';
+
+  @override
+  String get wateringRuleMinRainHint => 'Daily rain below this is ignored';
+
+  @override
+  String get wateringRuleRainEfficiency => 'Rain that counts';
+
+  @override
+  String get wateringRuleRainEfficiencyHint =>
+      'Share of the rain that reaches the roots. 0% means rain never postpones';
+
+  @override
+  String get wateringRuleMaxPostpone => 'Postpone at most';
+
+  @override
+  String get wateringRuleMaxPostponeHint =>
+      'Never more than the plant\'s own interval either. 0 turns postponing off';
+
+  @override
+  String get wateringRuleMaxAdvance => 'Bring forward at most';
+
+  @override
+  String get wateringRuleMaxAdvanceHint =>
+      'Never more than half the plant\'s interval either. 0 turns bringing forward off';
+
+  @override
+  String get wateringRuleMinDemand => 'Least water used on a mild day';
+
+  @override
+  String get wateringRuleMinDemandHint =>
+      'Compared with a typical day. 100% means mild days never postpone';
+
+  @override
+  String get wateringRuleMaxDemand => 'Most water used on a hot day';
+
+  @override
+  String get wateringRuleMaxDemandHint =>
+      'Compared with a typical day. 100% means heat never brings watering forward';
+
+  @override
+  String get wateringRulesReset => 'Restore defaults';
+
+  @override
+  String wateringRuleDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '$days day',
+      zero: 'off',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wateringRuleMm(String mm) {
+    return '$mm mm';
+  }
+
+  @override
+  String wateringRuleDefault(String value) {
+    return 'Default: $value';
+  }
 }
