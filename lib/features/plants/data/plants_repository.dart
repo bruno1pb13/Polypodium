@@ -143,6 +143,7 @@ class PlantsRepository {
     final plants = (await getAll()).where((p) => p.isActive).toList();
     final species = await _speciesRepo.getAll();
     final speciesById = {for (final s in species) s.id: s};
+    final adjustments = await _db.wateringAdjustmentsDao.getAll();
 
     final items = <PlantWithSpecies>[];
     for (final plant in plants) {
@@ -154,7 +155,11 @@ class PlantsRepository {
             '${plant.id}; irrigation notification skipped');
         continue;
       }
-      items.add(PlantWithSpecies(plant: plant, species: plantSpecies));
+      items.add(PlantWithSpecies(
+        plant: plant,
+        species: plantSpecies,
+        wateringAdjustment: adjustments[plant.id],
+      ));
     }
 
     final plantsById = {for (final plant in plants) plant.id: plant};

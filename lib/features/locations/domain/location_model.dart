@@ -4,6 +4,9 @@ class LocationModel {
   final String? description;
   final double? latitude;
   final double? longitude;
+
+  /// See LocationsTable.exposedToRain.
+  final bool exposedToRain;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -15,6 +18,7 @@ class LocationModel {
     this.description,
     this.latitude,
     this.longitude,
+    this.exposedToRain = false,
     required this.createdAt,
     DateTime? updatedAt,
     this.deletedAt,
@@ -27,6 +31,7 @@ class LocationModel {
     Object? description = _sentinel,
     Object? latitude = _sentinel,
     Object? longitude = _sentinel,
+    bool? exposedToRain,
     DateTime? createdAt,
     DateTime? updatedAt,
     Object? deletedAt = _sentinel,
@@ -42,6 +47,7 @@ class LocationModel {
             latitude == _sentinel ? this.latitude : latitude as double?,
         longitude:
             longitude == _sentinel ? this.longitude : longitude as double?,
+        exposedToRain: exposedToRain ?? this.exposedToRain,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt == _sentinel ? this.deletedAt : deletedAt as DateTime?,

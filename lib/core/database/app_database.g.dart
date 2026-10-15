@@ -1358,6 +1358,16 @@ class $LocationsTableTable extends LocationsTable
   late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
       'longitude', aliasedName, true,
       type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _exposedToRainMeta =
+      const VerificationMeta('exposedToRain');
+  @override
+  late final GeneratedColumn<bool> exposedToRain = GeneratedColumn<bool>(
+      'exposed_to_rain', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("exposed_to_rain" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -1397,6 +1407,7 @@ class $LocationsTableTable extends LocationsTable
         description,
         latitude,
         longitude,
+        exposedToRain,
         createdAt,
         updatedAt,
         deletedAt,
@@ -1437,6 +1448,12 @@ class $LocationsTableTable extends LocationsTable
     if (data.containsKey('longitude')) {
       context.handle(_longitudeMeta,
           longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta));
+    }
+    if (data.containsKey('exposed_to_rain')) {
+      context.handle(
+          _exposedToRainMeta,
+          exposedToRain.isAcceptableOrUnknown(
+              data['exposed_to_rain']!, _exposedToRainMeta));
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -1481,6 +1498,8 @@ class $LocationsTableTable extends LocationsTable
           .read(DriftSqlType.double, data['${effectivePrefix}latitude']),
       longitude: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}longitude']),
+      exposedToRain: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}exposed_to_rain'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -1507,6 +1526,10 @@ class LocationsTableData extends DataClass
   final String? description;
   final double? latitude;
   final double? longitude;
+
+  /// Plants here get rain (outdoors, uncovered), so the server's watering
+  /// advice may postpone their watering when it rains.
+  final bool exposedToRain;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -1518,6 +1541,7 @@ class LocationsTableData extends DataClass
       this.description,
       this.latitude,
       this.longitude,
+      required this.exposedToRain,
       required this.createdAt,
       required this.updatedAt,
       this.deletedAt,
@@ -1537,6 +1561,7 @@ class LocationsTableData extends DataClass
     if (!nullToAbsent || longitude != null) {
       map['longitude'] = Variable<double>(longitude);
     }
+    map['exposed_to_rain'] = Variable<bool>(exposedToRain);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -1562,6 +1587,7 @@ class LocationsTableData extends DataClass
       longitude: longitude == null && nullToAbsent
           ? const Value.absent()
           : Value(longitude),
+      exposedToRain: Value(exposedToRain),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -1583,6 +1609,7 @@ class LocationsTableData extends DataClass
       description: serializer.fromJson<String?>(json['description']),
       latitude: serializer.fromJson<double?>(json['latitude']),
       longitude: serializer.fromJson<double?>(json['longitude']),
+      exposedToRain: serializer.fromJson<bool>(json['exposedToRain']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -1599,6 +1626,7 @@ class LocationsTableData extends DataClass
       'description': serializer.toJson<String?>(description),
       'latitude': serializer.toJson<double?>(latitude),
       'longitude': serializer.toJson<double?>(longitude),
+      'exposedToRain': serializer.toJson<bool>(exposedToRain),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -1613,6 +1641,7 @@ class LocationsTableData extends DataClass
           Value<String?> description = const Value.absent(),
           Value<double?> latitude = const Value.absent(),
           Value<double?> longitude = const Value.absent(),
+          bool? exposedToRain,
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
@@ -1624,6 +1653,7 @@ class LocationsTableData extends DataClass
         description: description.present ? description.value : this.description,
         latitude: latitude.present ? latitude.value : this.latitude,
         longitude: longitude.present ? longitude.value : this.longitude,
+        exposedToRain: exposedToRain ?? this.exposedToRain,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -1638,6 +1668,9 @@ class LocationsTableData extends DataClass
           data.description.present ? data.description.value : this.description,
       latitude: data.latitude.present ? data.latitude.value : this.latitude,
       longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      exposedToRain: data.exposedToRain.present
+          ? data.exposedToRain.value
+          : this.exposedToRain,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -1654,6 +1687,7 @@ class LocationsTableData extends DataClass
           ..write('description: $description, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
+          ..write('exposedToRain: $exposedToRain, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -1665,7 +1699,7 @@ class LocationsTableData extends DataClass
 
   @override
   int get hashCode => Object.hash(id, name, description, latitude, longitude,
-      createdAt, updatedAt, deletedAt, localRev, deviceId);
+      exposedToRain, createdAt, updatedAt, deletedAt, localRev, deviceId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1675,6 +1709,7 @@ class LocationsTableData extends DataClass
           other.description == this.description &&
           other.latitude == this.latitude &&
           other.longitude == this.longitude &&
+          other.exposedToRain == this.exposedToRain &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -1688,6 +1723,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
   final Value<String?> description;
   final Value<double?> latitude;
   final Value<double?> longitude;
+  final Value<bool> exposedToRain;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -1700,6 +1736,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     this.description = const Value.absent(),
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
+    this.exposedToRain = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -1713,6 +1750,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     this.description = const Value.absent(),
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
+    this.exposedToRain = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -1729,6 +1767,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     Expression<String>? description,
     Expression<double>? latitude,
     Expression<double>? longitude,
+    Expression<bool>? exposedToRain,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -1742,6 +1781,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
       if (description != null) 'description': description,
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
+      if (exposedToRain != null) 'exposed_to_rain': exposedToRain,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -1757,6 +1797,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
       Value<String?>? description,
       Value<double?>? latitude,
       Value<double?>? longitude,
+      Value<bool>? exposedToRain,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
@@ -1769,6 +1810,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
       description: description ?? this.description,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
+      exposedToRain: exposedToRain ?? this.exposedToRain,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -1795,6 +1837,9 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
     }
     if (longitude.present) {
       map['longitude'] = Variable<double>(longitude.value);
+    }
+    if (exposedToRain.present) {
+      map['exposed_to_rain'] = Variable<bool>(exposedToRain.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -1825,6 +1870,7 @@ class LocationsTableCompanion extends UpdateCompanion<LocationsTableData> {
           ..write('description: $description, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
+          ..write('exposedToRain: $exposedToRain, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -6765,6 +6811,411 @@ class SyncConfirmedEntityTypesTableCompanion
   }
 }
 
+class $WateringAdjustmentsTableTable extends WateringAdjustmentsTable
+    with
+        TableInfo<$WateringAdjustmentsTableTable,
+            WateringAdjustmentsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WateringAdjustmentsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _plantIdMeta =
+      const VerificationMeta('plantId');
+  @override
+  late final GeneratedColumn<String> plantId = GeneratedColumn<String>(
+      'plant_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _lastWateredAtMeta =
+      const VerificationMeta('lastWateredAt');
+  @override
+  late final GeneratedColumn<DateTime> lastWateredAt =
+      GeneratedColumn<DateTime>('last_watered_at', aliasedName, false,
+          type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _frequencyDaysMeta =
+      const VerificationMeta('frequencyDays');
+  @override
+  late final GeneratedColumn<int> frequencyDays = GeneratedColumn<int>(
+      'frequency_days', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _shiftDaysMeta =
+      const VerificationMeta('shiftDays');
+  @override
+  late final GeneratedColumn<int> shiftDays = GeneratedColumn<int>(
+      'shift_days', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+      'reason', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _rainMmMeta = const VerificationMeta('rainMm');
+  @override
+  late final GeneratedColumn<double> rainMm = GeneratedColumn<double>(
+      'rain_mm', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _fetchedAtMeta =
+      const VerificationMeta('fetchedAt');
+  @override
+  late final GeneratedColumn<DateTime> fetchedAt = GeneratedColumn<DateTime>(
+      'fetched_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        plantId,
+        lastWateredAt,
+        frequencyDays,
+        shiftDays,
+        reason,
+        rainMm,
+        fetchedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'watering_adjustments';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<WateringAdjustmentsTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('plant_id')) {
+      context.handle(_plantIdMeta,
+          plantId.isAcceptableOrUnknown(data['plant_id']!, _plantIdMeta));
+    } else if (isInserting) {
+      context.missing(_plantIdMeta);
+    }
+    if (data.containsKey('last_watered_at')) {
+      context.handle(
+          _lastWateredAtMeta,
+          lastWateredAt.isAcceptableOrUnknown(
+              data['last_watered_at']!, _lastWateredAtMeta));
+    } else if (isInserting) {
+      context.missing(_lastWateredAtMeta);
+    }
+    if (data.containsKey('frequency_days')) {
+      context.handle(
+          _frequencyDaysMeta,
+          frequencyDays.isAcceptableOrUnknown(
+              data['frequency_days']!, _frequencyDaysMeta));
+    } else if (isInserting) {
+      context.missing(_frequencyDaysMeta);
+    }
+    if (data.containsKey('shift_days')) {
+      context.handle(_shiftDaysMeta,
+          shiftDays.isAcceptableOrUnknown(data['shift_days']!, _shiftDaysMeta));
+    } else if (isInserting) {
+      context.missing(_shiftDaysMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(_reasonMeta,
+          reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta));
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    if (data.containsKey('rain_mm')) {
+      context.handle(_rainMmMeta,
+          rainMm.isAcceptableOrUnknown(data['rain_mm']!, _rainMmMeta));
+    }
+    if (data.containsKey('fetched_at')) {
+      context.handle(_fetchedAtMeta,
+          fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta));
+    } else if (isInserting) {
+      context.missing(_fetchedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {plantId};
+  @override
+  WateringAdjustmentsTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return WateringAdjustmentsTableData(
+      plantId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}plant_id'])!,
+      lastWateredAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_watered_at'])!,
+      frequencyDays: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}frequency_days'])!,
+      shiftDays: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}shift_days'])!,
+      reason: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}reason'])!,
+      rainMm: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}rain_mm'])!,
+      fetchedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}fetched_at'])!,
+    );
+  }
+
+  @override
+  $WateringAdjustmentsTableTable createAlias(String alias) {
+    return $WateringAdjustmentsTableTable(attachedDatabase, alias);
+  }
+}
+
+class WateringAdjustmentsTableData extends DataClass
+    implements Insertable<WateringAdjustmentsTableData> {
+  final String plantId;
+  final DateTime lastWateredAt;
+  final int frequencyDays;
+  final int shiftDays;
+  final String reason;
+  final double rainMm;
+  final DateTime fetchedAt;
+  const WateringAdjustmentsTableData(
+      {required this.plantId,
+      required this.lastWateredAt,
+      required this.frequencyDays,
+      required this.shiftDays,
+      required this.reason,
+      required this.rainMm,
+      required this.fetchedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['plant_id'] = Variable<String>(plantId);
+    map['last_watered_at'] = Variable<DateTime>(lastWateredAt);
+    map['frequency_days'] = Variable<int>(frequencyDays);
+    map['shift_days'] = Variable<int>(shiftDays);
+    map['reason'] = Variable<String>(reason);
+    map['rain_mm'] = Variable<double>(rainMm);
+    map['fetched_at'] = Variable<DateTime>(fetchedAt);
+    return map;
+  }
+
+  WateringAdjustmentsTableCompanion toCompanion(bool nullToAbsent) {
+    return WateringAdjustmentsTableCompanion(
+      plantId: Value(plantId),
+      lastWateredAt: Value(lastWateredAt),
+      frequencyDays: Value(frequencyDays),
+      shiftDays: Value(shiftDays),
+      reason: Value(reason),
+      rainMm: Value(rainMm),
+      fetchedAt: Value(fetchedAt),
+    );
+  }
+
+  factory WateringAdjustmentsTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return WateringAdjustmentsTableData(
+      plantId: serializer.fromJson<String>(json['plantId']),
+      lastWateredAt: serializer.fromJson<DateTime>(json['lastWateredAt']),
+      frequencyDays: serializer.fromJson<int>(json['frequencyDays']),
+      shiftDays: serializer.fromJson<int>(json['shiftDays']),
+      reason: serializer.fromJson<String>(json['reason']),
+      rainMm: serializer.fromJson<double>(json['rainMm']),
+      fetchedAt: serializer.fromJson<DateTime>(json['fetchedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'plantId': serializer.toJson<String>(plantId),
+      'lastWateredAt': serializer.toJson<DateTime>(lastWateredAt),
+      'frequencyDays': serializer.toJson<int>(frequencyDays),
+      'shiftDays': serializer.toJson<int>(shiftDays),
+      'reason': serializer.toJson<String>(reason),
+      'rainMm': serializer.toJson<double>(rainMm),
+      'fetchedAt': serializer.toJson<DateTime>(fetchedAt),
+    };
+  }
+
+  WateringAdjustmentsTableData copyWith(
+          {String? plantId,
+          DateTime? lastWateredAt,
+          int? frequencyDays,
+          int? shiftDays,
+          String? reason,
+          double? rainMm,
+          DateTime? fetchedAt}) =>
+      WateringAdjustmentsTableData(
+        plantId: plantId ?? this.plantId,
+        lastWateredAt: lastWateredAt ?? this.lastWateredAt,
+        frequencyDays: frequencyDays ?? this.frequencyDays,
+        shiftDays: shiftDays ?? this.shiftDays,
+        reason: reason ?? this.reason,
+        rainMm: rainMm ?? this.rainMm,
+        fetchedAt: fetchedAt ?? this.fetchedAt,
+      );
+  WateringAdjustmentsTableData copyWithCompanion(
+      WateringAdjustmentsTableCompanion data) {
+    return WateringAdjustmentsTableData(
+      plantId: data.plantId.present ? data.plantId.value : this.plantId,
+      lastWateredAt: data.lastWateredAt.present
+          ? data.lastWateredAt.value
+          : this.lastWateredAt,
+      frequencyDays: data.frequencyDays.present
+          ? data.frequencyDays.value
+          : this.frequencyDays,
+      shiftDays: data.shiftDays.present ? data.shiftDays.value : this.shiftDays,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      rainMm: data.rainMm.present ? data.rainMm.value : this.rainMm,
+      fetchedAt: data.fetchedAt.present ? data.fetchedAt.value : this.fetchedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WateringAdjustmentsTableData(')
+          ..write('plantId: $plantId, ')
+          ..write('lastWateredAt: $lastWateredAt, ')
+          ..write('frequencyDays: $frequencyDays, ')
+          ..write('shiftDays: $shiftDays, ')
+          ..write('reason: $reason, ')
+          ..write('rainMm: $rainMm, ')
+          ..write('fetchedAt: $fetchedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(plantId, lastWateredAt, frequencyDays,
+      shiftDays, reason, rainMm, fetchedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is WateringAdjustmentsTableData &&
+          other.plantId == this.plantId &&
+          other.lastWateredAt == this.lastWateredAt &&
+          other.frequencyDays == this.frequencyDays &&
+          other.shiftDays == this.shiftDays &&
+          other.reason == this.reason &&
+          other.rainMm == this.rainMm &&
+          other.fetchedAt == this.fetchedAt);
+}
+
+class WateringAdjustmentsTableCompanion
+    extends UpdateCompanion<WateringAdjustmentsTableData> {
+  final Value<String> plantId;
+  final Value<DateTime> lastWateredAt;
+  final Value<int> frequencyDays;
+  final Value<int> shiftDays;
+  final Value<String> reason;
+  final Value<double> rainMm;
+  final Value<DateTime> fetchedAt;
+  final Value<int> rowid;
+  const WateringAdjustmentsTableCompanion({
+    this.plantId = const Value.absent(),
+    this.lastWateredAt = const Value.absent(),
+    this.frequencyDays = const Value.absent(),
+    this.shiftDays = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.rainMm = const Value.absent(),
+    this.fetchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  WateringAdjustmentsTableCompanion.insert({
+    required String plantId,
+    required DateTime lastWateredAt,
+    required int frequencyDays,
+    required int shiftDays,
+    required String reason,
+    this.rainMm = const Value.absent(),
+    required DateTime fetchedAt,
+    this.rowid = const Value.absent(),
+  })  : plantId = Value(plantId),
+        lastWateredAt = Value(lastWateredAt),
+        frequencyDays = Value(frequencyDays),
+        shiftDays = Value(shiftDays),
+        reason = Value(reason),
+        fetchedAt = Value(fetchedAt);
+  static Insertable<WateringAdjustmentsTableData> custom({
+    Expression<String>? plantId,
+    Expression<DateTime>? lastWateredAt,
+    Expression<int>? frequencyDays,
+    Expression<int>? shiftDays,
+    Expression<String>? reason,
+    Expression<double>? rainMm,
+    Expression<DateTime>? fetchedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (plantId != null) 'plant_id': plantId,
+      if (lastWateredAt != null) 'last_watered_at': lastWateredAt,
+      if (frequencyDays != null) 'frequency_days': frequencyDays,
+      if (shiftDays != null) 'shift_days': shiftDays,
+      if (reason != null) 'reason': reason,
+      if (rainMm != null) 'rain_mm': rainMm,
+      if (fetchedAt != null) 'fetched_at': fetchedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  WateringAdjustmentsTableCompanion copyWith(
+      {Value<String>? plantId,
+      Value<DateTime>? lastWateredAt,
+      Value<int>? frequencyDays,
+      Value<int>? shiftDays,
+      Value<String>? reason,
+      Value<double>? rainMm,
+      Value<DateTime>? fetchedAt,
+      Value<int>? rowid}) {
+    return WateringAdjustmentsTableCompanion(
+      plantId: plantId ?? this.plantId,
+      lastWateredAt: lastWateredAt ?? this.lastWateredAt,
+      frequencyDays: frequencyDays ?? this.frequencyDays,
+      shiftDays: shiftDays ?? this.shiftDays,
+      reason: reason ?? this.reason,
+      rainMm: rainMm ?? this.rainMm,
+      fetchedAt: fetchedAt ?? this.fetchedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (plantId.present) {
+      map['plant_id'] = Variable<String>(plantId.value);
+    }
+    if (lastWateredAt.present) {
+      map['last_watered_at'] = Variable<DateTime>(lastWateredAt.value);
+    }
+    if (frequencyDays.present) {
+      map['frequency_days'] = Variable<int>(frequencyDays.value);
+    }
+    if (shiftDays.present) {
+      map['shift_days'] = Variable<int>(shiftDays.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (rainMm.present) {
+      map['rain_mm'] = Variable<double>(rainMm.value);
+    }
+    if (fetchedAt.present) {
+      map['fetched_at'] = Variable<DateTime>(fetchedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WateringAdjustmentsTableCompanion(')
+          ..write('plantId: $plantId, ')
+          ..write('lastWateredAt: $lastWateredAt, ')
+          ..write('frequencyDays: $frequencyDays, ')
+          ..write('shiftDays: $shiftDays, ')
+          ..write('reason: $reason, ')
+          ..write('rainMm: $rainMm, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6788,6 +7239,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $SyncEntityTypesTableTable(this);
   late final $SyncConfirmedEntityTypesTableTable syncConfirmedEntityTypesTable =
       $SyncConfirmedEntityTypesTableTable(this);
+  late final $WateringAdjustmentsTableTable wateringAdjustmentsTable =
+      $WateringAdjustmentsTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6806,7 +7259,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         syncCursorsTable,
         syncEntryTypesTable,
         syncEntityTypesTable,
-        syncConfirmedEntityTypesTable
+        syncConfirmedEntityTypesTable,
+        wateringAdjustmentsTable
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -7637,6 +8091,7 @@ typedef $$LocationsTableTableCreateCompanionBuilder = LocationsTableCompanion
   Value<String?> description,
   Value<double?> latitude,
   Value<double?> longitude,
+  Value<bool> exposedToRain,
   required DateTime createdAt,
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
@@ -7651,6 +8106,7 @@ typedef $$LocationsTableTableUpdateCompanionBuilder = LocationsTableCompanion
   Value<String?> description,
   Value<double?> latitude,
   Value<double?> longitude,
+  Value<bool> exposedToRain,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
@@ -7716,6 +8172,9 @@ class $$LocationsTableTableFilterComposer
 
   ColumnFilters<double> get longitude => $composableBuilder(
       column: $table.longitude, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get exposedToRain => $composableBuilder(
+      column: $table.exposedToRain, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -7799,6 +8258,10 @@ class $$LocationsTableTableOrderingComposer
   ColumnOrderings<double> get longitude => $composableBuilder(
       column: $table.longitude, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get exposedToRain => $composableBuilder(
+      column: $table.exposedToRain,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -7838,6 +8301,9 @@ class $$LocationsTableTableAnnotationComposer
 
   GeneratedColumn<double> get longitude =>
       $composableBuilder(column: $table.longitude, builder: (column) => column);
+
+  GeneratedColumn<bool> get exposedToRain => $composableBuilder(
+      column: $table.exposedToRain, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -7926,6 +8392,7 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             Value<String?> description = const Value.absent(),
             Value<double?> latitude = const Value.absent(),
             Value<double?> longitude = const Value.absent(),
+            Value<bool> exposedToRain = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -7939,6 +8406,7 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             description: description,
             latitude: latitude,
             longitude: longitude,
+            exposedToRain: exposedToRain,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -7952,6 +8420,7 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             Value<String?> description = const Value.absent(),
             Value<double?> latitude = const Value.absent(),
             Value<double?> longitude = const Value.absent(),
+            Value<bool> exposedToRain = const Value.absent(),
             required DateTime createdAt,
             required DateTime updatedAt,
             Value<DateTime?> deletedAt = const Value.absent(),
@@ -7965,6 +8434,7 @@ class $$LocationsTableTableTableManager extends RootTableManager<
             description: description,
             latitude: latitude,
             longitude: longitude,
+            exposedToRain: exposedToRain,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -11593,6 +12063,218 @@ typedef $$SyncConfirmedEntityTypesTableTableProcessedTableManager
         ),
         SyncConfirmedEntityTypesTableData,
         PrefetchHooks Function()>;
+typedef $$WateringAdjustmentsTableTableCreateCompanionBuilder
+    = WateringAdjustmentsTableCompanion Function({
+  required String plantId,
+  required DateTime lastWateredAt,
+  required int frequencyDays,
+  required int shiftDays,
+  required String reason,
+  Value<double> rainMm,
+  required DateTime fetchedAt,
+  Value<int> rowid,
+});
+typedef $$WateringAdjustmentsTableTableUpdateCompanionBuilder
+    = WateringAdjustmentsTableCompanion Function({
+  Value<String> plantId,
+  Value<DateTime> lastWateredAt,
+  Value<int> frequencyDays,
+  Value<int> shiftDays,
+  Value<String> reason,
+  Value<double> rainMm,
+  Value<DateTime> fetchedAt,
+  Value<int> rowid,
+});
+
+class $$WateringAdjustmentsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $WateringAdjustmentsTableTable> {
+  $$WateringAdjustmentsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get plantId => $composableBuilder(
+      column: $table.plantId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastWateredAt => $composableBuilder(
+      column: $table.lastWateredAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get frequencyDays => $composableBuilder(
+      column: $table.frequencyDays, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get shiftDays => $composableBuilder(
+      column: $table.shiftDays, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get reason => $composableBuilder(
+      column: $table.reason, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get rainMm => $composableBuilder(
+      column: $table.rainMm, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
+      column: $table.fetchedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$WateringAdjustmentsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $WateringAdjustmentsTableTable> {
+  $$WateringAdjustmentsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get plantId => $composableBuilder(
+      column: $table.plantId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastWateredAt => $composableBuilder(
+      column: $table.lastWateredAt,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get frequencyDays => $composableBuilder(
+      column: $table.frequencyDays,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get shiftDays => $composableBuilder(
+      column: $table.shiftDays, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+      column: $table.reason, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get rainMm => $composableBuilder(
+      column: $table.rainMm, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get fetchedAt => $composableBuilder(
+      column: $table.fetchedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$WateringAdjustmentsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $WateringAdjustmentsTableTable> {
+  $$WateringAdjustmentsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get plantId =>
+      $composableBuilder(column: $table.plantId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastWateredAt => $composableBuilder(
+      column: $table.lastWateredAt, builder: (column) => column);
+
+  GeneratedColumn<int> get frequencyDays => $composableBuilder(
+      column: $table.frequencyDays, builder: (column) => column);
+
+  GeneratedColumn<int> get shiftDays =>
+      $composableBuilder(column: $table.shiftDays, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<double> get rainMm =>
+      $composableBuilder(column: $table.rainMm, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fetchedAt =>
+      $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
+}
+
+class $$WateringAdjustmentsTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $WateringAdjustmentsTableTable,
+    WateringAdjustmentsTableData,
+    $$WateringAdjustmentsTableTableFilterComposer,
+    $$WateringAdjustmentsTableTableOrderingComposer,
+    $$WateringAdjustmentsTableTableAnnotationComposer,
+    $$WateringAdjustmentsTableTableCreateCompanionBuilder,
+    $$WateringAdjustmentsTableTableUpdateCompanionBuilder,
+    (
+      WateringAdjustmentsTableData,
+      BaseReferences<_$AppDatabase, $WateringAdjustmentsTableTable,
+          WateringAdjustmentsTableData>
+    ),
+    WateringAdjustmentsTableData,
+    PrefetchHooks Function()> {
+  $$WateringAdjustmentsTableTableTableManager(
+      _$AppDatabase db, $WateringAdjustmentsTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$WateringAdjustmentsTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$WateringAdjustmentsTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$WateringAdjustmentsTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> plantId = const Value.absent(),
+            Value<DateTime> lastWateredAt = const Value.absent(),
+            Value<int> frequencyDays = const Value.absent(),
+            Value<int> shiftDays = const Value.absent(),
+            Value<String> reason = const Value.absent(),
+            Value<double> rainMm = const Value.absent(),
+            Value<DateTime> fetchedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              WateringAdjustmentsTableCompanion(
+            plantId: plantId,
+            lastWateredAt: lastWateredAt,
+            frequencyDays: frequencyDays,
+            shiftDays: shiftDays,
+            reason: reason,
+            rainMm: rainMm,
+            fetchedAt: fetchedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String plantId,
+            required DateTime lastWateredAt,
+            required int frequencyDays,
+            required int shiftDays,
+            required String reason,
+            Value<double> rainMm = const Value.absent(),
+            required DateTime fetchedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              WateringAdjustmentsTableCompanion.insert(
+            plantId: plantId,
+            lastWateredAt: lastWateredAt,
+            frequencyDays: frequencyDays,
+            shiftDays: shiftDays,
+            reason: reason,
+            rainMm: rainMm,
+            fetchedAt: fetchedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$WateringAdjustmentsTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $WateringAdjustmentsTableTable,
+        WateringAdjustmentsTableData,
+        $$WateringAdjustmentsTableTableFilterComposer,
+        $$WateringAdjustmentsTableTableOrderingComposer,
+        $$WateringAdjustmentsTableTableAnnotationComposer,
+        $$WateringAdjustmentsTableTableCreateCompanionBuilder,
+        $$WateringAdjustmentsTableTableUpdateCompanionBuilder,
+        (
+          WateringAdjustmentsTableData,
+          BaseReferences<_$AppDatabase, $WateringAdjustmentsTableTable,
+              WateringAdjustmentsTableData>
+        ),
+        WateringAdjustmentsTableData,
+        PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -11627,4 +12309,7 @@ class $AppDatabaseManager {
       get syncConfirmedEntityTypesTable =>
           $$SyncConfirmedEntityTypesTableTableTableManager(
               _db, _db.syncConfirmedEntityTypesTable);
+  $$WateringAdjustmentsTableTableTableManager get wateringAdjustmentsTable =>
+      $$WateringAdjustmentsTableTableTableManager(
+          _db, _db.wateringAdjustmentsTable);
 }

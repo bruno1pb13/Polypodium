@@ -168,7 +168,7 @@ final class ServerDataSettingsNotifierProvider extends $AsyncNotifierProvider<
 }
 
 String _$serverDataSettingsNotifierHash() =>
-    r'9ae856609383848285ca1835ea3d9304d5dd259a';
+    r'0cc2dfaf935415421fc5e2f9ca0eea7597bd40c9';
 
 final class ServerDataSettingsNotifierFamily extends $Family
     with

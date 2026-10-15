@@ -55,11 +55,16 @@ Future<List<AgendaTask>> loadAgendaTasks(AppDatabase db) async {
   final speciesById = {
     for (final s in await SpeciesRepository(db).getAll()) s.id: s,
   };
+  final adjustments = await db.wateringAdjustmentsDao.getAll();
   return buildAgendaTasks(
     plants: [
       for (final plant in plants)
         if (speciesById[plant.speciesId] case final species?)
-          PlantWithSpecies(plant: plant, species: species),
+          PlantWithSpecies(
+            plant: plant,
+            species: species,
+            wateringAdjustment: adjustments[plant.id],
+          ),
     ],
     reminders: await RemindersRepository(db).getAllStatuses(),
   );

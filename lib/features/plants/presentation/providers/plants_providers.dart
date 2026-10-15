@@ -15,6 +15,7 @@ import '../../../locations/presentation/providers/locations_providers.dart';
 import '../../../pots/presentation/providers/pots_providers.dart';
 import '../../../soils/presentation/providers/soils_providers.dart';
 import '../../../species/presentation/providers/species_providers.dart';
+import '../../../weather/presentation/providers/weather_providers.dart';
 
 import '../../../../core/sync/sync_providers.dart';
 
@@ -257,11 +258,13 @@ Future<List<PlantWithSpecies>> plantsWithSpecies(Ref ref) async {
   final speciesStream = ref.watch(speciesNotifierProvider.future);
   final locationsStream = ref.watch(locationsNotifierProvider.future);
   final potsStream = ref.watch(potsNotifierProvider.future);
+  final adjustmentsStream = ref.watch(wateringAdjustmentsProvider.future);
 
   final plants = await plantsStream;
   final species = await speciesStream;
   final locations = await locationsStream;
   final pots = await potsStream;
+  final adjustments = await adjustmentsStream;
 
   final speciesById = {for (final s in species) s.id: s};
   final locationsById = {for (final l in locations) l.id: l};
@@ -293,6 +296,7 @@ Future<List<PlantWithSpecies>> plantsWithSpecies(Ref ref) async {
       location: location,
       pot: p.potId != null ? potsById[p.potId] : null,
       isPendingSync: isPendingSync,
+      wateringAdjustment: adjustments[p.id],
     ));
   }
 

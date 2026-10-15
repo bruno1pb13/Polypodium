@@ -31,6 +31,7 @@ import '../widgets/plant_photos_sliver.dart';
 import 'add_edit_plant_screen.dart';
 import '../../../../core/widgets/adaptive_layout.dart';
 import '../../../../core/theme/glass_colors.dart';
+import '../../../weather/presentation/providers/weather_providers.dart';
 
 class PlantDetailScreen extends ConsumerWidget {
   final String plantId;
@@ -46,6 +47,8 @@ class PlantDetailScreen extends ConsumerWidget {
     final entriesAsync = ref.watch(entriesNotifierProvider(plantId));
     final carencia = ref.watch(plantCarenciaProvider(plantId));
     final activeView = ref.watch(plantDetailViewNotifierProvider(plantId));
+    final adjustment =
+        ref.watch(wateringAdjustmentsProvider).value?[plantId];
 
     return plantsAsync.when(
       loading: () =>
@@ -77,6 +80,7 @@ class PlantDetailScreen extends ConsumerWidget {
                 plant: plant,
                 species: species,
                 location: location,
+                wateringAdjustment: adjustment,
               )
             : null;
 

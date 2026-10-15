@@ -135,6 +135,7 @@ class WorkspaceMigrationService {
           description: Value(row.description),
           latitude: Value(row.latitude),
           longitude: Value(row.longitude),
+          exposedToRain: Value(row.exposedToRain),
           createdAt: row.createdAt,
           updatedAt: DateTime.now(),
           localRev: Value(rev),

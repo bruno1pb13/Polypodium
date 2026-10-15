@@ -182,3 +182,50 @@ final class LocationWeatherFamily extends $Family
   @override
   String toString() => r'locationWeatherProvider';
 }
+
+/// The server's weather adjustments stored on this device, by plant id
+/// (see WateringAdjustment). Refreshed after each sync.
+
+@ProviderFor(wateringAdjustments)
+final wateringAdjustmentsProvider = WateringAdjustmentsProvider._();
+
+/// The server's weather adjustments stored on this device, by plant id
+/// (see WateringAdjustment). Refreshed after each sync.
+
+final class WateringAdjustmentsProvider extends $FunctionalProvider<
+        AsyncValue<Map<String, WateringAdjustment>>,
+        Map<String, WateringAdjustment>,
+        Stream<Map<String, WateringAdjustment>>>
+    with
+        $FutureModifier<Map<String, WateringAdjustment>>,
+        $StreamProvider<Map<String, WateringAdjustment>> {
+  /// The server's weather adjustments stored on this device, by plant id
+  /// (see WateringAdjustment). Refreshed after each sync.
+  WateringAdjustmentsProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'wateringAdjustmentsProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$wateringAdjustmentsHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<Map<String, WateringAdjustment>> $createElement(
+          $ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<Map<String, WateringAdjustment>> create(Ref ref) {
+    return wateringAdjustments(ref);
+  }
+}
+
+String _$wateringAdjustmentsHash() =>
+    r'7466067e7bca10041b74d92f32bc39abcdf906c3';

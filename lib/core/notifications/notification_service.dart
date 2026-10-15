@@ -684,7 +684,8 @@ class NotificationService implements INotificationService {
     final groups = <DateTime, List<PlantModel>>{};
     for (final item in plants) {
       if (!item.plant.isActive) continue;
-      final frequencyDays = item.effectiveFrequencyDays;
+      // The weather adjustment included.
+      final frequencyDays = item.scheduledFrequencyDays;
       if (frequencyDays == null) continue;
 
       final scheduled = computeNextIrrigationDate(

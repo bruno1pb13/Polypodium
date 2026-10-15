@@ -1,6 +1,7 @@
 import 'package:uuid/uuid.dart';
 
 import '../../features/plants/data/plants_repository.dart';
+import '../../features/weather/data/weather_client.dart';
 import '../../features/workspaces/data/workspace_auth_client.dart';
 import '../database/app_database.dart';
 import '../notifications/notification_service.dart';
@@ -28,8 +29,11 @@ class SyncService {
     WorkspaceAuthClient authClient = const WorkspaceAuthClient(),
     SyncHttpClient? httpClient,
     INotificationService notifications = const NotificationService(),
+    WeatherClient weatherClient = const WeatherClient(),
     void Function(SyncProgress? progress)? onProgress,
-  })  : _authClient = authClient,
+  })  : _db = db,
+        _authClient = authClient,
+        _weatherClient = weatherClient,
         _onProgress = onProgress,
         _plantsRepo = PlantsRepository(db, notifications),
         _orchestrator = SyncOrchestrator(
@@ -43,14 +47,21 @@ class SyncService {
               gardenId: _store.current.gardenId),
         );
 
+  final AppDatabase _db;
   final WorkspaceConfigStore _store;
   final WorkspaceAuthClient _authClient;
+  final WeatherClient _weatherClient;
   final SyncOrchestrator _orchestrator;
   final PlantsRepository _plantsRepo;
   final void Function(SyncProgress? progress)? _onProgress;
 
   Future<SyncResult>? _running;
   bool _rerun = false;
+  DateTime? _wateringFetchedAt;
+
+  /// How often a sync that moved nothing still refreshes the watering
+  /// advice (the forecast behind it changes about daily).
+  static const _wateringRefreshInterval = Duration(hours: 1);
 
   String? get token => _store.current.token;
   String? get deviceId => _store.current.deviceId;
@@ -110,7 +121,37 @@ class SyncService {
       pulled += result.pulled;
       pushed += result.pushed;
     } while (_rerun && isLoggedIn);
+    if (isLoggedIn) await _refreshWateringAdvice(changed: pulled + pushed > 0);
     return SyncResult(pulled: pulled, pushed: pushed);
+  }
+
+  /// Replaces the stored weather adjustments with the server's, right after
+  /// the push so the advice already counts this device's latest waterings.
+  /// Best effort: weather is extra, a failure keeps the previous advice
+  /// (which expires on its own, see WateringAdjustment.maxAge).
+  Future<void> _refreshWateringAdvice({required bool changed}) async {
+    final now = DateTime.now();
+    final last = _wateringFetchedAt;
+    if (!changed &&
+        last != null &&
+        now.difference(last) < _wateringRefreshInterval) {
+      return;
+    }
+    try {
+      final advice = await _weatherClient.wateringAdvice(
+        serverUrl: serverUrl!,
+        token: token!,
+        gardenId: _store.current.gardenId,
+        now: now,
+      );
+      _wateringFetchedAt = now;
+      if (await _db.wateringAdjustmentsDao.replaceAll(advice)) {
+        await _plantsRepo.rescheduleNotifications();
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('[SyncService] Watering advice not refreshed: $e');
+    }
   }
 
   Future<SyncResult> _syncOnce() async {

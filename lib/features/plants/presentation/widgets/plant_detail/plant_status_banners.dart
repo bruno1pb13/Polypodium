@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../../../../../core/enums.dart';
 import '../../../../../core/l10n/l10n.dart';
 import '../../../../entries/domain/carencia.dart';
+import '../../../../weather/domain/watering_adjustment.dart';
+import '../../../../weather/presentation/watering_adjustment_text.dart';
 import '../../../domain/plant_model.dart';
 import '../plant_status.dart';
 
@@ -55,6 +57,8 @@ class PlantCareAlerts extends StatelessWidget {
               : overdueText(wateringDays),
           tone: StatusTone.danger,
         ),
+      if (pws.activeWateringAdjustment case final adjustment?)
+        _wateringAdjustmentBanner(l10n, adjustment),
       if (pws.needsPesticideReapplication && pesticideDays != null)
         PlantStatusBanner(
           emoji: EntryType.pesticide.emoji,
@@ -77,6 +81,21 @@ class PlantCareAlerts extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Column(children: banners),
+    );
+  }
+
+  Widget _wateringAdjustmentBanner(
+      AppLocalizations l10n, WateringAdjustment adjustment) {
+    final text = wateringAdjustmentText(l10n, adjustment);
+    final last = pws.plant.lastIrrigatedAt!.toLocal();
+    final next = DateTime(
+        last.year, last.month, last.day + pws.scheduledFrequencyDays!);
+    return PlantStatusBanner(
+      emoji: text.emoji,
+      title: text.label,
+      subtitle: '${text.detail}. '
+          '${l10n.nextWateringOn(DateFormat.Md(l10n.localeName).format(next))}',
+      tone: StatusTone.neutral,
     );
   }
 

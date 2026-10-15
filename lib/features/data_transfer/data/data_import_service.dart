@@ -351,6 +351,7 @@ class DataImportService {
       description: Value(row['description'] as String?),
       latitude: Value((row['latitude'] as num?)?.toDouble()),
       longitude: Value((row['longitude'] as num?)?.toDouble()),
+      exposedToRain: Value(row['exposedToRain'] == true),
       createdAt: DateTime.parse(row['createdAt'] as String),
       updatedAt: updatedAt,
       deletedAt: Value(_deletedAt(row)),

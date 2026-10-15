@@ -903,5 +903,14 @@
   "updateFound": "Uma nova versão está disponível",
   "serverUpdateAvailable": "A versão {version} do servidor está disponível",
   "serverOutdatedBanner": "Servidor desatualizado: {current} → {latest}",
-  "serverOutdatedDismiss": "Ocultar este aviso"
+  "serverOutdatedDismiss": "Ocultar este aviso",
+  "wateringPostponedRain": "Rega adiada {days, plural, one{{days} dia} other{{days} dias}} pela chuva",
+  "wateringPostponedCool": "Rega adiada {days, plural, one{{days} dia} other{{days} dias}} pelo tempo fresco",
+  "wateringAdvancedHeat": "Rega adiantada {days, plural, one{{days} dia} other{{days} dias}} pelo calor",
+  "wateringRainDetail": "{mm} mm de chuva desde a última rega ou na previsão",
+  "wateringCoolDetail": "Dias mais frescos que o normal: a planta gasta menos água",
+  "wateringHeatDetail": "Dias mais quentes e secos que o normal: a planta gasta mais água",
+  "nextWateringOn": "Próxima rega: {date}",
+  "locationExposedToRain": "Exposto à chuva",
+  "locationExposedToRainHint": "As plantas aqui recebem chuva (ao ar livre, sem cobertura). Com a previsão do tempo ligada no servidor, a chuva pode adiar a rega delas."
 }

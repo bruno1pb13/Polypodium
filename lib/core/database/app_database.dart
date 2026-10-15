@@ -25,6 +25,8 @@ import '../../features/species/data/species_dao.dart';
 import '../../features/species/data/species_table.dart';
 import '../../features/soils/data/soils_dao.dart';
 import '../../features/soils/data/soils_table.dart';
+import '../../features/weather/data/watering_adjustments_dao.dart';
+import '../../features/weather/data/watering_adjustments_table.dart';
 import 'converters.dart';
 import 'sync_cursors_dao.dart';
 import 'sync_cursors_table.dart';
@@ -40,6 +42,7 @@ export '../../features/pots/data/pots_table.dart';
 export '../../features/reminders/data/reminders_table.dart';
 export '../../features/soils/data/soils_table.dart';
 export '../../features/species/data/species_table.dart';
+export '../../features/weather/data/watering_adjustments_table.dart';
 export 'sync_cursors_table.dart';
 export 'sync_meta_table.dart';
 
@@ -61,6 +64,7 @@ part 'app_database.g.dart';
     SyncEntryTypesTable,
     SyncEntityTypesTable,
     SyncConfirmedEntityTypesTable,
+    WateringAdjustmentsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -77,7 +81,7 @@ class AppDatabase extends _$AppDatabase {
   final String? deviceId;
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -90,6 +94,8 @@ class AppDatabase extends _$AppDatabase {
   late final RemindersDao remindersDao = RemindersDao(this);
   late final SyncMetaDao syncMetaDao = SyncMetaDao(this);
   late final SyncCursorsDao syncCursorsDao = SyncCursorsDao(this);
+  late final WateringAdjustmentsDao wateringAdjustmentsDao =
+      WateringAdjustmentsDao(this);
 
   Future<void> _seedFresh() async {
     await into(syncMetaTable).insertOnConflictUpdate(
@@ -178,6 +184,8 @@ class AppDatabase extends _$AppDatabase {
                 await m.addColumn(table, table.columnsByName['device_id']!);
               }
             }
+            // The v14 step also creates locations with the current shape.
+            await _addExposedToRain(m);
           }
           if (from < 14) {
             // Link any leftover free-text location to a locations row, then
@@ -264,8 +272,24 @@ class AppDatabase extends _$AppDatabase {
               await m.addColumn(plantsTable, plantsTable.potId);
             }
           }
+          if (from < 23) {
+            // Weather-adjusted watering: the rain exposure of a location
+            // (synced) and the server's adjustments (local only).
+            await _addExposedToRain(m);
+            await m.createTable(wateringAdjustmentsTable);
+          }
         },
       );
+
+  /// Adds locations.exposed_to_rain unless the table is missing or already
+  /// has it.
+  Future<void> _addExposedToRain(Migrator m) async {
+    final columns = await _columnNames(locationsTable);
+    if (columns.isNotEmpty &&
+        !columns.contains(locationsTable.exposedToRain.name)) {
+      await m.addColumn(locationsTable, locationsTable.exposedToRain);
+    }
+  }
 
   Future<List<String>> _columnNames(TableInfo table) =>
       customSelect('SELECT name FROM pragma_table_info(?)',
