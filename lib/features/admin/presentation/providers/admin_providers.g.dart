@@ -302,6 +302,122 @@ final class ServerWeatherStatusFamily extends $Family
   String toString() => r'serverWeatherStatusProvider';
 }
 
+/// The server's weather-adjusted watering rules; null on a server from
+/// before them.
+
+@ProviderFor(ServerWateringSettingsNotifier)
+final serverWateringSettingsNotifierProvider =
+    ServerWateringSettingsNotifierFamily._();
+
+/// The server's weather-adjusted watering rules; null on a server from
+/// before them.
+final class ServerWateringSettingsNotifierProvider
+    extends $AsyncNotifierProvider<ServerWateringSettingsNotifier,
+        ServerWateringSettings?> {
+  /// The server's weather-adjusted watering rules; null on a server from
+  /// before them.
+  ServerWateringSettingsNotifierProvider._(
+      {required ServerWateringSettingsNotifierFamily super.from,
+      required Workspace super.argument})
+      : super(
+          retry: null,
+          name: r'serverWateringSettingsNotifierProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$serverWateringSettingsNotifierHash();
+
+  @override
+  String toString() {
+    return r'serverWateringSettingsNotifierProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  ServerWateringSettingsNotifier create() => ServerWateringSettingsNotifier();
+
+  @override
+  bool operator ==(Object other) {
+    return other is ServerWateringSettingsNotifierProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$serverWateringSettingsNotifierHash() =>
+    r'90959914be5207f2a9ea4bccee77dd52ef867f46';
+
+/// The server's weather-adjusted watering rules; null on a server from
+/// before them.
+
+final class ServerWateringSettingsNotifierFamily extends $Family
+    with
+        $ClassFamilyOverride<
+            ServerWateringSettingsNotifier,
+            AsyncValue<ServerWateringSettings?>,
+            ServerWateringSettings?,
+            FutureOr<ServerWateringSettings?>,
+            Workspace> {
+  ServerWateringSettingsNotifierFamily._()
+      : super(
+          retry: null,
+          name: r'serverWateringSettingsNotifierProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// The server's weather-adjusted watering rules; null on a server from
+  /// before them.
+
+  ServerWateringSettingsNotifierProvider call(
+    Workspace workspace,
+  ) =>
+      ServerWateringSettingsNotifierProvider._(argument: workspace, from: this);
+
+  @override
+  String toString() => r'serverWateringSettingsNotifierProvider';
+}
+
+/// The server's weather-adjusted watering rules; null on a server from
+/// before them.
+
+abstract class _$ServerWateringSettingsNotifier
+    extends $AsyncNotifier<ServerWateringSettings?> {
+  late final _$args = ref.$arg as Workspace;
+  Workspace get workspace => _$args;
+
+  FutureOr<ServerWateringSettings?> build(
+    Workspace workspace,
+  );
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref
+        as $Ref<AsyncValue<ServerWateringSettings?>, ServerWateringSettings?>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<ServerWateringSettings?>,
+            ServerWateringSettings?>,
+        AsyncValue<ServerWateringSettings?>,
+        Object?,
+        Object?>;
+    return element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
+  }
+}
+
 @ProviderFor(ServerUsersNotifier)
 final serverUsersNotifierProvider = ServerUsersNotifierFamily._();
 

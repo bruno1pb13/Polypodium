@@ -7,6 +7,7 @@ import '../domain/account_info.dart';
 import '../domain/server_data_settings.dart';
 import '../domain/server_status.dart';
 import '../domain/server_user.dart';
+import '../domain/server_watering_settings.dart';
 import '../domain/server_weather_status.dart';
 
 /// Talks to a Polypodium server's admin endpoints (`/api/v1/admin/*`).
@@ -96,6 +97,46 @@ class AdminClient {
             headers: _authHeaders(token))
         .timeout(const Duration(seconds: 120));
     _checkStatus(response, 200);
+  }
+
+  /// The rules that move watering dates with the weather, or null on a
+  /// server from before them (404).
+  Future<ServerWateringSettings?> wateringSettings({
+    required String serverUrl,
+    required String token,
+  }) async {
+    final response = await http
+        .get(Uri.parse('$serverUrl/api/v1/admin/watering'),
+            headers: _authHeaders(token))
+        .timeout(const Duration(seconds: 10));
+    if (response.statusCode == 404) return null;
+    _checkStatus(response, 200);
+    return ServerWateringSettings.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// Changes [enabled] and/or the [rules] given; a rule mapped to null goes
+  /// back to the server's default.
+  Future<ServerWateringSettings> updateWateringSettings({
+    required String serverUrl,
+    required String token,
+    bool? enabled,
+    Map<WateringRule, double?> rules = const {},
+  }) async {
+    final response = await http
+        .patch(
+          Uri.parse('$serverUrl/api/v1/admin/watering'),
+          headers: _authHeaders(token),
+          body: jsonEncode({
+            if (enabled != null) 'enabled': enabled,
+            for (final MapEntry(key: rule, value: value) in rules.entries)
+              rule.name: rule.isWholeDays ? value?.round() : value,
+          }),
+        )
+        .timeout(const Duration(seconds: 15));
+    _checkStatus(response, 200);
+    return ServerWateringSettings.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   Future<ServerStatus> status({

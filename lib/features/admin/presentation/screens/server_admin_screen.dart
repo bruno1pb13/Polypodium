@@ -8,6 +8,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../workspaces/domain/workspace_model.dart';
 import '../../domain/server_status.dart';
 import '../../domain/server_user.dart';
+import '../../domain/server_watering_settings.dart';
 import '../providers/admin_providers.dart';
 
 class ServerAdminScreen extends ConsumerWidget {
@@ -27,6 +28,7 @@ class ServerAdminScreen extends ConsumerWidget {
           ref.invalidate(serverStatusProvider(workspace));
           ref.invalidate(serverDataSettingsNotifierProvider(workspace));
           ref.invalidate(serverWeatherStatusProvider(workspace));
+          ref.invalidate(serverWateringSettingsNotifierProvider(workspace));
           ref.invalidate(serverUsersNotifierProvider(workspace));
         },
         child: ReadableListView(
@@ -34,6 +36,7 @@ class ServerAdminScreen extends ConsumerWidget {
             _StatusCard(statusAsync: statusAsync),
             _DataSettingsCard(workspace: workspace),
             _WeatherCard(workspace: workspace),
+            _WateringCard(workspace: workspace),
             _McpCard(workspace: workspace),
             const Divider(height: 1),
             usersAsync.when(
@@ -423,6 +426,205 @@ class _WeatherCardState extends ConsumerState<_WeatherCard> {
                 }),
       ),
     );
+  }
+
+  Future<void> _run(Future<void> Function() action) async {
+    setState(() => _busy = true);
+    try {
+      await action();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(localizedErrorMessage(e, context.l10n))));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+}
+
+/// The rules that postpone or bring forward watering with the weather.
+/// Shown while weather is on, and hidden on servers that predate them.
+class _WateringCard extends ConsumerStatefulWidget {
+  const _WateringCard({required this.workspace});
+
+  final Workspace workspace;
+
+  @override
+  ConsumerState<_WateringCard> createState() => _WateringCardState();
+}
+
+class _WateringCardState extends ConsumerState<_WateringCard> {
+  bool _busy = false;
+
+  /// Slider positions while dragging, before they are saved.
+  final _dragging = <WateringRule, double>{};
+
+  ServerWateringSettingsNotifier get _notifier => ref.read(
+      serverWateringSettingsNotifierProvider(widget.workspace).notifier);
+
+  @override
+  Widget build(BuildContext context) {
+    final weatherOn = ref
+        .watch(serverDataSettingsNotifierProvider(widget.workspace))
+        .value
+        ?.weatherEnabled;
+    final settings =
+        ref.watch(serverWateringSettingsNotifierProvider(widget.workspace)).value;
+    if (weatherOn != true || settings == null) return const SizedBox.shrink();
+    final l10n = context.l10n;
+
+    return Card(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Text(l10n.wateringRulesTitle,
+                  style: Theme.of(context).textTheme.titleMedium),
+            ),
+            SwitchListTile(
+              title: Text(l10n.wateringRulesEnable),
+              subtitle: Text(l10n.wateringRulesEnableSubtitle),
+              value: settings.enabled,
+              onChanged:
+                  _busy ? null : (v) => _run(() => _notifier.setEnabled(v)),
+            ),
+            if (settings.enabled) ...[
+              for (final rule in WateringRule.values)
+                if (settings.limits[rule] != null)
+                  _ruleTile(context, settings, rule),
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: TextButton.icon(
+                    icon: const Icon(Icons.restart_alt),
+                    label: Text(l10n.wateringRulesReset),
+                    onPressed: _busy || settings.isDefault
+                        ? null
+                        : () => _run(_notifier.resetRules),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _ruleTile(
+      BuildContext context, ServerWateringSettings settings, WateringRule rule) {
+    final l10n = context.l10n;
+    final limits = settings.limits[rule]!;
+    final step = _step(rule);
+    final divisions = ((limits.max - limits.min) / step).round();
+    final value =
+        (_dragging[rule] ?? settings.value(rule)).clamp(limits.min, limits.max);
+    final (title, hint) = switch (rule) {
+      WateringRule.minRainMm => (
+          l10n.wateringRuleMinRain,
+          l10n.wateringRuleMinRainHint
+        ),
+      WateringRule.rainEfficiency => (
+          l10n.wateringRuleRainEfficiency,
+          l10n.wateringRuleRainEfficiencyHint
+        ),
+      WateringRule.maxPostponeDays => (
+          l10n.wateringRuleMaxPostpone,
+          l10n.wateringRuleMaxPostponeHint
+        ),
+      WateringRule.maxAdvanceDays => (
+          l10n.wateringRuleMaxAdvance,
+          l10n.wateringRuleMaxAdvanceHint
+        ),
+      WateringRule.minDemand => (
+          l10n.wateringRuleMinDemand,
+          l10n.wateringRuleMinDemandHint
+        ),
+      WateringRule.maxDemand => (
+          l10n.wateringRuleMaxDemand,
+          l10n.wateringRuleMaxDemandHint
+        ),
+    };
+    final fallback = settings.defaults[rule];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                  child: Text(title,
+                      style: Theme.of(context).textTheme.bodyLarge)),
+              Text(_format(context, rule, value),
+                  style: Theme.of(context).textTheme.labelLarge),
+            ],
+          ),
+          Text(
+            [
+              hint,
+              if (fallback != null)
+                l10n.wateringRuleDefault(_format(context, rule, fallback)),
+            ].join(' · '),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          Slider(
+            value: value,
+            min: limits.min,
+            max: limits.max,
+            divisions: divisions > 0 ? divisions : null,
+            label: _format(context, rule, value),
+            onChanged: _busy
+                ? null
+                : (v) => setState(() => _dragging[rule] = v),
+            onChangeEnd: _busy
+                ? null
+                : (v) => _run(() async {
+                      try {
+                        if (v != settings.value(rule)) {
+                          await _notifier.setRule(rule, _snap(rule, v));
+                        }
+                      } finally {
+                        _dragging.remove(rule);
+                      }
+                    }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static double _step(WateringRule rule) => switch (rule) {
+        WateringRule.minRainMm => 0.5,
+        WateringRule.rainEfficiency || WateringRule.minDemand => 0.05,
+        WateringRule.maxDemand => 0.1,
+        WateringRule.maxPostponeDays || WateringRule.maxAdvanceDays => 1,
+      };
+
+  /// Rounds a slider position to its step, without float noise.
+  static double _snap(WateringRule rule, double value) {
+    final step = _step(rule);
+    return double.parse(((value / step).round() * step).toStringAsFixed(2));
+  }
+
+  static String _format(BuildContext context, WateringRule rule, double value) {
+    final locale = context.l10n.localeName;
+    return switch (rule) {
+      WateringRule.minRainMm => context.l10n.wateringRuleMm(
+          NumberFormat.decimalPatternDigits(locale: locale, decimalDigits: 1)
+              .format(value)),
+      WateringRule.maxPostponeDays ||
+      WateringRule.maxAdvanceDays =>
+        context.l10n.wateringRuleDays(value.round()),
+      _ => NumberFormat.percentPattern(locale).format(value),
+    };
   }
 
   Future<void> _run(Future<void> Function() action) async {

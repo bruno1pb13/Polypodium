@@ -3260,4 +3260,84 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get locationExposedToRainHint =>
       'As plantas aqui recebem chuva (ao ar livre, sem cobertura). Com a previsão do tempo ligada no servidor, a chuva pode adiar a rega delas.';
+
+  @override
+  String get wateringRulesTitle => 'Rega pelo clima';
+
+  @override
+  String get wateringRulesEnable => 'Ajustar a rega pelo clima';
+
+  @override
+  String get wateringRulesEnableSubtitle =>
+      'Adia a rega quando chove nas plantas de locais expostos à chuva e adianta em dias quentes.';
+
+  @override
+  String get wateringRulesNeedsWeather =>
+      'Só funciona com a previsão do tempo ligada.';
+
+  @override
+  String get wateringRuleMinRain => 'Chuva mínima';
+
+  @override
+  String get wateringRuleMinRainHint => 'Chuva diária abaixo disso é ignorada';
+
+  @override
+  String get wateringRuleRainEfficiency => 'Chuva aproveitada';
+
+  @override
+  String get wateringRuleRainEfficiencyHint =>
+      'Parte da chuva que chega às raízes. Com 0% a chuva nunca adia';
+
+  @override
+  String get wateringRuleMaxPostpone => 'Adiar no máximo';
+
+  @override
+  String get wateringRuleMaxPostponeHint =>
+      'Nem mais que a frequência da planta. 0 desliga o adiamento';
+
+  @override
+  String get wateringRuleMaxAdvance => 'Adiantar no máximo';
+
+  @override
+  String get wateringRuleMaxAdvanceHint =>
+      'Nem mais que metade da frequência da planta. 0 desliga o adiantamento';
+
+  @override
+  String get wateringRuleMinDemand => 'Gasto mínimo num dia ameno';
+
+  @override
+  String get wateringRuleMinDemandHint =>
+      'Em relação a um dia típico. Com 100% dias amenos nunca adiam';
+
+  @override
+  String get wateringRuleMaxDemand => 'Gasto máximo num dia quente';
+
+  @override
+  String get wateringRuleMaxDemandHint =>
+      'Em relação a um dia típico. Com 100% o calor nunca adianta a rega';
+
+  @override
+  String get wateringRulesReset => 'Restaurar padrões';
+
+  @override
+  String wateringRuleDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days dias',
+      one: '$days dia',
+      zero: 'desligado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wateringRuleMm(String mm) {
+    return '$mm mm';
+  }
+
+  @override
+  String wateringRuleDefault(String value) {
+    return 'Padrão: $value';
+  }
 }

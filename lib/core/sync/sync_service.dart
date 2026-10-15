@@ -125,6 +125,12 @@ class SyncService {
     return SyncResult(pulled: pulled, pushed: pushed);
   }
 
+  /// Fetches the watering advice now, e.g. after an admin changed the rules
+  /// behind it.
+  Future<void> refreshWateringAdvice() async {
+    if (isLoggedIn) await _refreshWateringAdvice(changed: true);
+  }
+
   /// Replaces the stored weather adjustments with the server's, right after
   /// the push so the advice already counts this device's latest waterings.
   /// Best effort: weather is extra, a failure keeps the previous advice

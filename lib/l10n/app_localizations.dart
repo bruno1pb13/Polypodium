@@ -5377,6 +5377,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plants here get rain (outdoors, uncovered). When the server has weather on, rain can postpone their watering.'**
   String get locationExposedToRainHint;
+
+  /// No description provided for @wateringRulesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather-adjusted watering'**
+  String get wateringRulesTitle;
+
+  /// No description provided for @wateringRulesEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust watering to the weather'**
+  String get wateringRulesEnable;
+
+  /// No description provided for @wateringRulesEnableSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Postpones watering when it rains on plants in locations exposed to rain, and brings it forward on hot days.'**
+  String get wateringRulesEnableSubtitle;
+
+  /// No description provided for @wateringRulesNeedsWeather.
+  ///
+  /// In en, this message translates to:
+  /// **'Only works with weather forecasts on.'**
+  String get wateringRulesNeedsWeather;
+
+  /// No description provided for @wateringRuleMinRain.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum rain'**
+  String get wateringRuleMinRain;
+
+  /// No description provided for @wateringRuleMinRainHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily rain below this is ignored'**
+  String get wateringRuleMinRainHint;
+
+  /// No description provided for @wateringRuleRainEfficiency.
+  ///
+  /// In en, this message translates to:
+  /// **'Rain that counts'**
+  String get wateringRuleRainEfficiency;
+
+  /// No description provided for @wateringRuleRainEfficiencyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Share of the rain that reaches the roots. 0% means rain never postpones'**
+  String get wateringRuleRainEfficiencyHint;
+
+  /// No description provided for @wateringRuleMaxPostpone.
+  ///
+  /// In en, this message translates to:
+  /// **'Postpone at most'**
+  String get wateringRuleMaxPostpone;
+
+  /// No description provided for @wateringRuleMaxPostponeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Never more than the plant\'s own interval either. 0 turns postponing off'**
+  String get wateringRuleMaxPostponeHint;
+
+  /// No description provided for @wateringRuleMaxAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring forward at most'**
+  String get wateringRuleMaxAdvance;
+
+  /// No description provided for @wateringRuleMaxAdvanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Never more than half the plant\'s interval either. 0 turns bringing forward off'**
+  String get wateringRuleMaxAdvanceHint;
+
+  /// No description provided for @wateringRuleMinDemand.
+  ///
+  /// In en, this message translates to:
+  /// **'Least water used on a mild day'**
+  String get wateringRuleMinDemand;
+
+  /// No description provided for @wateringRuleMinDemandHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Compared with a typical day. 100% means mild days never postpone'**
+  String get wateringRuleMinDemandHint;
+
+  /// No description provided for @wateringRuleMaxDemand.
+  ///
+  /// In en, this message translates to:
+  /// **'Most water used on a hot day'**
+  String get wateringRuleMaxDemand;
+
+  /// No description provided for @wateringRuleMaxDemandHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Compared with a typical day. 100% means heat never brings watering forward'**
+  String get wateringRuleMaxDemandHint;
+
+  /// No description provided for @wateringRulesReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore defaults'**
+  String get wateringRulesReset;
+
+  /// No description provided for @wateringRuleDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =0{off} one{{days} day} other{{days} days}}'**
+  String wateringRuleDays(int days);
+
+  /// No description provided for @wateringRuleMm.
+  ///
+  /// In en, this message translates to:
+  /// **'{mm} mm'**
+  String wateringRuleMm(String mm);
+
+  /// No description provided for @wateringRuleDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default: {value}'**
+  String wateringRuleDefault(String value);
 }
 
 class _AppLocalizationsDelegate
