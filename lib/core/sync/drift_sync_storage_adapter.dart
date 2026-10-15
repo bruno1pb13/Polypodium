@@ -215,6 +215,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
           'description': r.description,
           'latitude': r.latitude,
           'longitude': r.longitude,
+          'exposedToRain': r.exposedToRain,
           'createdAt': r.createdAt.toIso8601String(),
         };
       case 'bed':
@@ -482,6 +483,7 @@ class DriftSyncStorageAdapter implements ISyncStorageAdapter {
       description: Value(p['description'] as String?),
       latitude: Value((p['latitude'] as num?)?.toDouble()),
       longitude: Value((p['longitude'] as num?)?.toDouble()),
+      exposedToRain: Value(p['exposedToRain'] == true),
       createdAt: DateTime.parse(p['createdAt'] as String),
       updatedAt: change.updatedAt,
       deletedAt: Value(change.deletedAt),

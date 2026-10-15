@@ -15,6 +15,7 @@ import '../../domain/agenda_task.dart';
 import '../providers/agenda_providers.dart';
 import '../../../../core/theme/glass_colors.dart';
 import '../../../../core/widgets/adaptive_layout.dart';
+import '../../../weather/presentation/watering_adjustment_text.dart';
 
 /// Pending care of every active plant: overdue, due today and coming up in
 /// the next [agendaHorizonDays] days, with quick actions per task.
@@ -376,6 +377,25 @@ class _AgendaTaskItem extends ConsumerWidget {
                                       .withValues(alpha: 0.7),
                             ),
                           ),
+                          if (isIrrigation)
+                            if (pws.activeWateringAdjustment
+                                case final adjustment?) ...[
+                              const SizedBox(height: 2),
+                              Builder(builder: (context) {
+                                final text =
+                                    wateringAdjustmentText(l10n, adjustment);
+                                return Text(
+                                  '${text.emoji} ${text.label}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: transparencyEnabled
+                                        ? context.glass.fgMuted
+                                        : colorScheme.onSurfaceVariant
+                                            .withValues(alpha: 0.7),
+                                  ),
+                                );
+                              }),
+                            ],
                           if (task.bucket == AgendaBucket.overdue) ...[
                             const SizedBox(height: 6),
                             PlantStatusChip(

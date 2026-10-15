@@ -692,6 +692,41 @@ void main() {
     expect(version.read<int>('user_version'), db.schemaVersion);
   });
 
+  test('migration from v22 adds an unexposed location column and the '
+      'watering adjustments table', () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('''
+        CREATE TABLE locations (
+          id TEXT NOT NULL PRIMARY KEY,
+          name TEXT NOT NULL,
+          description TEXT NULL,
+          latitude REAL NULL,
+          longitude REAL NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          deleted_at INTEGER NULL,
+          local_rev INTEGER NOT NULL DEFAULT 0,
+          device_id TEXT NULL
+        )
+      ''');
+      raw.execute('''
+        INSERT INTO locations (id, name, created_at, updated_at, local_rev)
+        VALUES ('l1', 'Varanda', 0, 0, 3)
+      ''');
+      raw.execute('PRAGMA user_version = 22');
+    }));
+
+    final location = await db.locationsDao.getById('l1');
+    expect(location!.exposedToRain, isFalse);
+    expect(location.localRev, 3);
+    expect(await db.wateringAdjustmentsDao.getAll(), isEmpty);
+
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
   test('migrating from before v14 rebuilds plants with the parent column',
       () async {
     await db.close();

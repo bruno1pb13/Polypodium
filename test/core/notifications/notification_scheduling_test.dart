@@ -3,6 +3,7 @@ import 'package:polypodium/core/enums.dart';
 import 'package:polypodium/core/notifications/notification_service.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/species/domain/species_model.dart';
+import 'package:polypodium/features/weather/domain/watering_adjustment.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -176,6 +177,30 @@ void main() {
       expect(groups, hasLength(2));
       expect(nicknames(groups[DateTime(2026, 5, 25)]), ['Basil']);
       expect(nicknames(groups[DateTime(2026, 5, 30)]), ['Cactus']);
+    });
+
+    test('includes the weather adjustment of the current cycle', () {
+      final watered = DateTime(2026, 5, 20);
+      final base = makePlant('Fern', lastIrrigatedAt: watered, frequencyDays: 5);
+      final groups = NotificationService.groupPlantsByDueDate(
+        [
+          PlantWithSpecies(
+            plant: base.plant,
+            species: species,
+            wateringAdjustment: WateringAdjustment(
+              plantId: base.plant.id,
+              lastWateredAt: watered,
+              frequencyDays: 5,
+              shiftDays: 2,
+              reason: WateringAdjustmentReason.rain,
+              fetchedAt: DateTime.now(),
+            ),
+          ),
+        ],
+        now,
+      );
+
+      expect(nicknames(groups[DateTime(2026, 5, 27)]), ['Fern']);
     });
 
     test('falls back to the species default frequency', () {

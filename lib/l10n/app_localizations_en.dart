@@ -3199,4 +3199,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get serverOutdatedDismiss => 'Hide this notice';
+
+  @override
+  String wateringPostponedRain(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '$days day',
+    );
+    return 'Watering postponed $_temp0 for rain';
+  }
+
+  @override
+  String wateringPostponedCool(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '$days day',
+    );
+    return 'Watering postponed $_temp0 for cool weather';
+  }
+
+  @override
+  String wateringAdvancedHeat(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '$days day',
+    );
+    return 'Watering brought forward $_temp0 for heat';
+  }
+
+  @override
+  String wateringRainDetail(String mm) {
+    return '$mm mm of rain since the last watering or forecast';
+  }
+
+  @override
+  String get wateringCoolDetail =>
+      'Cooler days than usual: the plant uses less water';
+
+  @override
+  String get wateringHeatDetail =>
+      'Hotter, drier days than usual: the plant uses more water';
+
+  @override
+  String nextWateringOn(String date) {
+    return 'Next watering: $date';
+  }
+
+  @override
+  String get locationExposedToRain => 'Exposed to rain';
+
+  @override
+  String get locationExposedToRainHint =>
+      'Plants here get rain (outdoors, uncovered). When the server has weather on, rain can postpone their watering.';
 }

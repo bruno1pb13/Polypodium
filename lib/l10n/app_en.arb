@@ -1504,5 +1504,19 @@
   "@serverUpdateAvailable": {"placeholders": {"version": {"type": "String"}}},
   "serverOutdatedBanner": "Server outdated: {current} → {latest}",
   "@serverOutdatedBanner": {"placeholders": {"current": {"type": "String"}, "latest": {"type": "String"}}},
-  "serverOutdatedDismiss": "Hide this notice"
+  "serverOutdatedDismiss": "Hide this notice",
+  "wateringPostponedRain": "Watering postponed {days, plural, one{{days} day} other{{days} days}} for rain",
+  "@wateringPostponedRain": {"placeholders": {"days": {"type": "int"}}},
+  "wateringPostponedCool": "Watering postponed {days, plural, one{{days} day} other{{days} days}} for cool weather",
+  "@wateringPostponedCool": {"placeholders": {"days": {"type": "int"}}},
+  "wateringAdvancedHeat": "Watering brought forward {days, plural, one{{days} day} other{{days} days}} for heat",
+  "@wateringAdvancedHeat": {"placeholders": {"days": {"type": "int"}}},
+  "wateringRainDetail": "{mm} mm of rain since the last watering or forecast",
+  "@wateringRainDetail": {"placeholders": {"mm": {"type": "String"}}},
+  "wateringCoolDetail": "Cooler days than usual: the plant uses less water",
+  "wateringHeatDetail": "Hotter, drier days than usual: the plant uses more water",
+  "nextWateringOn": "Next watering: {date}",
+  "@nextWateringOn": {"placeholders": {"date": {"type": "String"}}},
+  "locationExposedToRain": "Exposed to rain",
+  "locationExposedToRainHint": "Plants here get rain (outdoors, uncovered). When the server has weather on, rain can postpone their watering."
 }

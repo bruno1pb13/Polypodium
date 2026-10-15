@@ -132,6 +132,7 @@ class DataExportService {
               'description': r.description,
               'latitude': r.latitude,
               'longitude': r.longitude,
+              'exposedToRain': r.exposedToRain,
               'createdAt': r.createdAt.toIso8601String(),
               'updatedAt': r.updatedAt.toIso8601String(),
               'deletedAt': r.deletedAt?.toIso8601String(),

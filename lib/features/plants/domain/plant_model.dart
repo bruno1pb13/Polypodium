@@ -3,6 +3,7 @@ import '../../../core/utils/date_utils.dart';
 import '../../locations/domain/location_model.dart';
 import '../../pots/domain/pot_model.dart';
 import '../../species/domain/species_model.dart';
+import '../../weather/domain/watering_adjustment.dart';
 
 class PlantModel {
   final String id;
@@ -137,20 +138,49 @@ class PlantWithSpecies {
   final PotModel? pot;
   final bool isPendingSync;
 
+  /// The server's weather adjustment stored for this plant, if any; it only
+  /// counts while it [WateringAdjustment.appliesTo] the current cycle (see
+  /// [activeWateringAdjustment]).
+  final WateringAdjustment? wateringAdjustment;
+
   const PlantWithSpecies({
     required this.plant,
     required this.species,
     this.location,
     this.pot,
     this.isPendingSync = false,
+    this.wateringAdjustment,
   });
 
   int? get effectiveFrequencyDays =>
       plant.irrigationFrequencyDays ?? species.defaultIrrigationFrequencyDays;
 
+  /// [wateringAdjustment] when it still moves this cycle's watering.
+  WateringAdjustment? get activeWateringAdjustment {
+    final adjustment = wateringAdjustment;
+    if (adjustment == null || !plant.isActive) return null;
+    return adjustment.appliesTo(
+      lastIrrigatedAt: plant.lastIrrigatedAt,
+      frequencyDays: effectiveFrequencyDays,
+    )
+        ? adjustment
+        : null;
+  }
+
+  /// Days the weather adds to (or, negative, takes from) the interval
+  /// before the next watering.
+  int get wateringShiftDays => activeWateringAdjustment?.shiftDays ?? 0;
+
+  /// The interval until the next watering, weather included. Null without
+  /// an interval.
+  int? get scheduledFrequencyDays {
+    final freq = effectiveFrequencyDays;
+    return freq == null ? null : freq + wateringShiftDays;
+  }
+
   bool get needsWatering {
     if (!plant.isActive) return false;
-    final freq = effectiveFrequencyDays;
+    final freq = scheduledFrequencyDays;
     if (freq == null) return false;
     if (plant.lastIrrigatedAt == null) return true;
     return daysSinceIrrigation >= freq;
@@ -163,11 +193,11 @@ class PlantWithSpecies {
     return calendarDaysBetween(plant.lastIrrigatedAt!);
   }
 
-  /// Positive = days overdue, negative = days until due. Null for plants
-  /// that are no longer active.
+  /// Positive = days overdue, negative = days until due, weather included.
+  /// Null for plants that are no longer active.
   int? get daysRelativeToSchedule {
     if (!plant.isActive) return null;
-    final freq = effectiveFrequencyDays;
+    final freq = scheduledFrequencyDays;
     if (freq == null) return null;
     return daysSinceIrrigation - freq;
   }

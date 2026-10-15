@@ -3202,4 +3202,62 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get serverOutdatedDismiss => 'Ocultar este aviso';
+
+  @override
+  String wateringPostponedRain(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days dias',
+      one: '$days dia',
+    );
+    return 'Rega adiada $_temp0 pela chuva';
+  }
+
+  @override
+  String wateringPostponedCool(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days dias',
+      one: '$days dia',
+    );
+    return 'Rega adiada $_temp0 pelo tempo fresco';
+  }
+
+  @override
+  String wateringAdvancedHeat(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days dias',
+      one: '$days dia',
+    );
+    return 'Rega adiantada $_temp0 pelo calor';
+  }
+
+  @override
+  String wateringRainDetail(String mm) {
+    return '$mm mm de chuva desde a última rega ou na previsão';
+  }
+
+  @override
+  String get wateringCoolDetail =>
+      'Dias mais frescos que o normal: a planta gasta menos água';
+
+  @override
+  String get wateringHeatDetail =>
+      'Dias mais quentes e secos que o normal: a planta gasta mais água';
+
+  @override
+  String nextWateringOn(String date) {
+    return 'Próxima rega: $date';
+  }
+
+  @override
+  String get locationExposedToRain => 'Exposto à chuva';
+
+  @override
+  String get locationExposedToRainHint =>
+      'As plantas aqui recebem chuva (ao ar livre, sem cobertura). Com a previsão do tempo ligada no servidor, a chuva pode adiar a rega delas.';
 }

@@ -9,6 +9,11 @@ class LocationsTable extends Table {
   TextColumn get description => text().nullable()();
   RealColumn get latitude => real().nullable()();
   RealColumn get longitude => real().nullable()();
+
+  /// Plants here get rain (outdoors, uncovered), so the server's watering
+  /// advice may postpone their watering when it rains.
+  BoolColumn get exposedToRain =>
+      boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();

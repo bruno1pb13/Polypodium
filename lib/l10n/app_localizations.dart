@@ -5323,6 +5323,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide this notice'**
   String get serverOutdatedDismiss;
+
+  /// No description provided for @wateringPostponedRain.
+  ///
+  /// In en, this message translates to:
+  /// **'Watering postponed {days, plural, one{{days} day} other{{days} days}} for rain'**
+  String wateringPostponedRain(int days);
+
+  /// No description provided for @wateringPostponedCool.
+  ///
+  /// In en, this message translates to:
+  /// **'Watering postponed {days, plural, one{{days} day} other{{days} days}} for cool weather'**
+  String wateringPostponedCool(int days);
+
+  /// No description provided for @wateringAdvancedHeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Watering brought forward {days, plural, one{{days} day} other{{days} days}} for heat'**
+  String wateringAdvancedHeat(int days);
+
+  /// No description provided for @wateringRainDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{mm} mm of rain since the last watering or forecast'**
+  String wateringRainDetail(String mm);
+
+  /// No description provided for @wateringCoolDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooler days than usual: the plant uses less water'**
+  String get wateringCoolDetail;
+
+  /// No description provided for @wateringHeatDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Hotter, drier days than usual: the plant uses more water'**
+  String get wateringHeatDetail;
+
+  /// No description provided for @nextWateringOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Next watering: {date}'**
+  String nextWateringOn(String date);
+
+  /// No description provided for @locationExposedToRain.
+  ///
+  /// In en, this message translates to:
+  /// **'Exposed to rain'**
+  String get locationExposedToRain;
+
+  /// No description provided for @locationExposedToRainHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Plants here get rain (outdoors, uncovered). When the server has weather on, rain can postpone their watering.'**
+  String get locationExposedToRainHint;
 }
 
 class _AppLocalizationsDelegate

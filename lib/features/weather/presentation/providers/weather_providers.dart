@@ -1,9 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/database/database_provider.dart';
 import '../../../admin/presentation/providers/admin_providers.dart';
 import '../../../workspaces/presentation/providers/workspace_providers.dart';
 import '../../data/weather_client.dart';
 import '../../domain/location_weather.dart';
+import '../../domain/watering_adjustment.dart';
 
 part 'weather_providers.g.dart';
 
@@ -44,3 +46,9 @@ Future<LocationWeather?> locationWeather(Ref ref, String locationId) async {
     return null;
   }
 }
+
+/// The server's weather adjustments stored on this device, by plant id
+/// (see WateringAdjustment). Refreshed after each sync.
+@riverpod
+Stream<Map<String, WateringAdjustment>> wateringAdjustments(Ref ref) =>
+    ref.watch(appDatabaseProvider).wateringAdjustmentsDao.watchAll();

@@ -80,4 +80,90 @@ void main() {
       expect(fullPulls, 3, reason: 'a later call starts a sync of its own');
     }, () => client);
   });
+
+  test('after a sync the watering advice replaces the stored one, and a '
+      'server with weather off clears it', () async {
+    final service = SyncService(
+      db,
+      _Store(Workspace(
+        id: 'remote-1',
+        name: 'Server',
+        type: WorkspaceType.remote,
+        serverUrl: 'https://example.test',
+        token: 'tok',
+        deviceId: 'dev-1',
+        createdAt: DateTime(2026, 1, 1),
+      )),
+      PhotoStorage(baseDirName: 'test_photos'),
+    );
+    var weatherOn = true;
+    var adviceCalls = 0;
+    final client = MockClient((request) async {
+      final path = request.url.path;
+      if (path == '/api/v1/sync/changes') {
+        return http.Response(
+            jsonEncode({'changes': [], 'nextCursor': 0, 'hasMore': false}),
+            200);
+      }
+      if (path == '/api/v1/weather/watering') {
+        adviceCalls++;
+        expect(request.headers['Authorization'], 'Bearer tok');
+        if (!weatherOn) {
+          return http.Response(
+              jsonEncode({'error': 'weather is disabled',
+                'code': 'weather_disabled'}),
+              404);
+        }
+        return http.Response(
+            jsonEncode({
+              'generatedAt': '2026-10-15T12:00:00.000Z',
+              'plants': [
+                {
+                  'plantId': 'p1',
+                  'lastWateredAt': '2026-10-12T08:30:00.000',
+                  'frequencyDays': 4,
+                  'shiftDays': 2,
+                  'reason': 'rain',
+                  'rainMm': 12.4,
+                },
+                {'plantId': 'broken'},
+              ],
+            }),
+            200);
+      }
+      return http.Response(jsonEncode({'ok': true}), 200);
+    });
+
+    await http.runWithClient(() async {
+      await service.sync();
+      final stored = await db.wateringAdjustmentsDao.getAll();
+      expect(stored.keys, ['p1']);
+      expect(stored['p1']!.shiftDays, 2);
+      expect(stored['p1']!.rainMm, 12.4);
+      expect(adviceCalls, 1);
+
+      // Nothing moved and it was just fetched: no new request.
+      await service.sync();
+      expect(adviceCalls, 1);
+    }, () => client);
+
+    weatherOn = false;
+    final fresh = SyncService(
+      db,
+      _Store(Workspace(
+        id: 'remote-1',
+        name: 'Server',
+        type: WorkspaceType.remote,
+        serverUrl: 'https://example.test',
+        token: 'tok',
+        deviceId: 'dev-1',
+        createdAt: DateTime(2026, 1, 1),
+      )),
+      PhotoStorage(baseDirName: 'test_photos'),
+    );
+    await http.runWithClient(() async {
+      await fresh.sync();
+      expect(await db.wateringAdjustmentsDao.getAll(), isEmpty);
+    }, () => client);
+  });
 }

@@ -376,6 +376,34 @@ void main() {
     });
   });
 
+  test('a location\'s rain exposure round-trips; older clients send none',
+      () async {
+    await db.locationsDao.upsert(LocationsTableCompanion.insert(
+      id: 'loc1',
+      name: 'Quintal',
+      exposedToRain: const Value(true),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 2),
+      localRev: const Value(1),
+    ));
+    final change = (await adapter.localChangesSince(0,
+            limit: 100, deviceId: 'device-1'))
+        .single;
+    expect(change.payload['exposedToRain'], isTrue);
+
+    final other = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(other.close);
+    final otherAdapter = DriftSyncStorageAdapter(other);
+    await otherAdapter.applyRemoteChange(SyncChange.fromJson(change.toJson()));
+    expect((await other.locationsDao.getById('loc1'))!.exposedToRain, isTrue);
+
+    final older = change.toJson()
+      ..['updatedAt'] = DateTime(2026, 1, 3).toIso8601String();
+    (older['payload'] as Map).remove('exposedToRain');
+    await otherAdapter.applyRemoteChange(SyncChange.fromJson(older));
+    expect((await other.locationsDao.getById('loc1'))!.exposedToRain, isFalse);
+  });
+
   group('pots (wire name bed)', () {
     test('round-trip through localChangesSince/applyRemoteChange', () async {
       await db.potsDao.upsert(PotsTableCompanion.insert(

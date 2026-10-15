@@ -31,6 +31,7 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
   late final TextEditingController _longitudeCtrl;
   bool _saving = false;
   bool _fetchingLocation = false;
+  late bool _exposedToRain;
 
   bool get _isEditing => widget.location != null;
 
@@ -44,6 +45,7 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
         text: widget.location?.latitude?.toString() ?? '');
     _longitudeCtrl = TextEditingController(
         text: widget.location?.longitude?.toString() ?? '');
+    _exposedToRain = widget.location?.exposedToRain ?? false;
   }
 
   @override
@@ -233,6 +235,29 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
                               ),
                             ),
                           ),
+                          const SizedBox(height: 8),
+                          // The glass card's fill would hide the tile's
+                          // ink otherwise.
+                          Material(
+                            type: MaterialType.transparency,
+                            child: SwitchListTile(
+                              contentPadding: EdgeInsets.zero,
+                              value: _exposedToRain,
+                              onChanged: _saving
+                                  ? null
+                                  : (v) => setState(() => _exposedToRain = v),
+                              secondary: Icon(Icons.umbrella_outlined,
+                                  color: context.glass.fg),
+                              title: Text(
+                                context.l10n.locationExposedToRain,
+                                style: TextStyle(color: context.glass.fg),
+                              ),
+                              subtitle: Text(
+                                context.l10n.locationExposedToRainHint,
+                                style: TextStyle(color: context.glass.fgMuted),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -328,6 +353,7 @@ class _AddEditLocationScreenState extends ConsumerState<AddEditLocationScreen> {
             : _descriptionCtrl.text.trim(),
         latitude: _parseCoordinate(_latitudeCtrl),
         longitude: _parseCoordinate(_longitudeCtrl),
+        exposedToRain: _exposedToRain,
         createdAt: widget.location?.createdAt ?? DateTime.now(),
       );
       await ref.read(locationsNotifierProvider.notifier).save(location);

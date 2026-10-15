@@ -175,7 +175,7 @@ final class PlantsWithSpeciesProvider extends $FunctionalProvider<
   }
 }
 
-String _$plantsWithSpeciesHash() => r'99919ca7f573b1cfc91dec510c643e377420b9a7';
+String _$plantsWithSpeciesHash() => r'e6e605328f7a418ce6c0567d0670ce3ad9eb0ea2';
 
 /// Survival of the species' plants: every non-deleted plant counts towards
 /// [total], and all but the dead ones towards [alive] (donated and archived
