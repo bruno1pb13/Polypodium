@@ -142,21 +142,21 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get introWelcomeBody =>
-      'Seu companheiro para cuidar da sua coleção de plantas.';
+      'Um diário de cuidados para a sua coleção de plantas: do que cada uma precisa, tudo o que você já fez por ela e a hora de regar, num só lugar. Começar leva menos de um minuto.';
 
   @override
-  String get introPlantsTitle => 'Acompanhe suas plantas';
+  String get introPlantsTitle => 'Organize seu jardim';
 
   @override
   String get introPlantsBody =>
-      'Cadastre cada planta com fotos, espécie, localização e solo, e mantenha todo o histórico em um só lugar.';
+      'Cadastre cada planta com espécie, fotos, local, vaso e solo. Imprima etiquetas com QR code e encontre qualquer planta com uma leitura.';
 
   @override
   String get introRemindersTitle => 'Lembretes de rega';
 
   @override
   String get introRemindersBody =>
-      'Receba notificações quando for hora de regar, de acordo com as necessidades de cada espécie.';
+      'Receba uma notificação quando for hora de regar, seguindo a frequência de cada planta, no horário que você escolher.';
 
   @override
   String get introRemindersTimeLabel => 'Lembrar às';
@@ -172,11 +172,11 @@ class AppLocalizationsPt extends AppLocalizations {
       'Você pode mudar isso quando quiser nas Configurações.';
 
   @override
-  String get introSyncTitle => 'Seus dados, em todo lugar';
+  String get introSyncTitle => 'Seus dados, do seu jeito';
 
   @override
   String get introSyncBody =>
-      'Tudo funciona offline. Conecte-se a um servidor depois para sincronizar entre dispositivos e fazer backup dos seus dados.';
+      'Tudo funciona offline, desde já. Quando quiser mais, conecte-se a um servidor Polypodium.';
 
   @override
   String get dateFormatPattern => 'dd/MM/yyyy';
@@ -3378,4 +3378,26 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get renameWorkspaceHelper => 'O nome muda só neste aparelho.';
+
+  @override
+  String get introDiaryTitle => 'Um diário para cada planta';
+
+  @override
+  String get introDiaryBody =>
+      'Registre regas, adubações, podas, replantios, colheitas e observações, com fotos. A tela inicial mostra o que precisa de cuidado hoje e como vai o seu jardim.';
+
+  @override
+  String get introSyncOffline =>
+      'Só neste aparelho: sem conta, nada sai do seu celular ou computador.';
+
+  @override
+  String get introSyncServer =>
+      'Com um servidor: sincronize entre aparelhos, tenha backup e compartilhe jardins com outras pessoas.';
+
+  @override
+  String get introSyncLaterNote =>
+      'Você conecta um servidor quando quiser, em Gerenciar workspaces.';
+
+  @override
+  String get introPlatforms => 'Disponível para Android, Windows e Linux.';
 }

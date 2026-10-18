@@ -142,21 +142,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get introWelcomeBody =>
-      'Your companion for caring for your plant collection.';
+      'A care journal for your plant collection: what each one needs, everything you\'ve done for it and when it\'s time to water, all in one place. Getting started takes less than a minute.';
 
   @override
-  String get introPlantsTitle => 'Track your plants';
+  String get introPlantsTitle => 'Organize your garden';
 
   @override
   String get introPlantsBody =>
-      'Register each plant with photos, species, location and soil, and keep its whole history in one place.';
+      'Add each plant with its species, photos, location, pot and soil. Print labels with a QR code and find any plant with a single scan.';
 
   @override
   String get introRemindersTitle => 'Watering reminders';
 
   @override
   String get introRemindersBody =>
-      'Get notified when it\'s time to water, based on each species\' needs.';
+      'Get a notification when it\'s time to water, following each plant\'s own schedule, at the time of day you choose.';
 
   @override
   String get introRemindersTimeLabel => 'Remind me at';
@@ -172,11 +172,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can change this anytime in Settings.';
 
   @override
-  String get introSyncTitle => 'Your data, everywhere';
+  String get introSyncTitle => 'Your data, your way';
 
   @override
   String get introSyncBody =>
-      'Everything works offline. Connect to a server later to sync across devices and back up your data.';
+      'Everything works offline, right away. When you want more, connect to a Polypodium server.';
 
   @override
   String get dateFormatPattern => 'M/d/yyyy';
@@ -3375,4 +3375,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get renameWorkspaceHelper => 'The name only changes on this device.';
+
+  @override
+  String get introDiaryTitle => 'A diary for every plant';
+
+  @override
+  String get introDiaryBody =>
+      'Record watering, fertilizing, pruning, repotting, harvests and observations, with photos. The home screen shows what needs care today and how your garden is doing.';
+
+  @override
+  String get introSyncOffline =>
+      'On this device only: no account, nothing leaves your phone or computer.';
+
+  @override
+  String get introSyncServer =>
+      'With a server: sync between devices, keep a backup and share gardens with other people.';
+
+  @override
+  String get introSyncLaterNote =>
+      'You can connect a server whenever you like, under Manage workspaces.';
+
+  @override
+  String get introPlatforms => 'Available for Android, Windows and Linux.';
 }

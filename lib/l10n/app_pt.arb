@@ -47,17 +47,17 @@
   "introSkip": "Pular",
   "introGetStarted": "Começar",
   "introWelcomeTitle": "Bem-vindo ao Polypodium",
-  "introWelcomeBody": "Seu companheiro para cuidar da sua coleção de plantas.",
-  "introPlantsTitle": "Acompanhe suas plantas",
-  "introPlantsBody": "Cadastre cada planta com fotos, espécie, localização e solo, e mantenha todo o histórico em um só lugar.",
+  "introWelcomeBody": "Um diário de cuidados para a sua coleção de plantas: do que cada uma precisa, tudo o que você já fez por ela e a hora de regar, num só lugar. Começar leva menos de um minuto.",
+  "introPlantsTitle": "Organize seu jardim",
+  "introPlantsBody": "Cadastre cada planta com espécie, fotos, local, vaso e solo. Imprima etiquetas com QR code e encontre qualquer planta com uma leitura.",
   "introRemindersTitle": "Lembretes de rega",
-  "introRemindersBody": "Receba notificações quando for hora de regar, de acordo com as necessidades de cada espécie.",
+  "introRemindersBody": "Receba uma notificação quando for hora de regar, seguindo a frequência de cada planta, no horário que você escolher.",
   "introRemindersTimeLabel": "Lembrar às",
   "introRemindersEnable": "Ativar lembretes",
   "introRemindersEnabled": "Lembretes ativados!",
   "introRemindersLaterNote": "Você pode mudar isso quando quiser nas Configurações.",
-  "introSyncTitle": "Seus dados, em todo lugar",
-  "introSyncBody": "Tudo funciona offline. Conecte-se a um servidor depois para sincronizar entre dispositivos e fazer backup dos seus dados.",
+  "introSyncTitle": "Seus dados, do seu jeito",
+  "introSyncBody": "Tudo funciona offline, desde já. Quando quiser mais, conecte-se a um servidor Polypodium.",
 
   "dateFormatPattern": "dd/MM/yyyy",
 
@@ -942,5 +942,11 @@
   "noServerYet": "Ainda não tem servidor? Veja como criar o seu",
   "loginStepBody": "Entre com a sua conta neste servidor. Se ainda não tem uma, peça ao administrador do servidor: é ele quem cria as contas, pelo app.",
   "disconnectWorkspaceTitle": "Desconectar \"{name}\"?",
-  "renameWorkspaceHelper": "O nome muda só neste aparelho."
+  "renameWorkspaceHelper": "O nome muda só neste aparelho.",
+  "introDiaryTitle": "Um diário para cada planta",
+  "introDiaryBody": "Registre regas, adubações, podas, replantios, colheitas e observações, com fotos. A tela inicial mostra o que precisa de cuidado hoje e como vai o seu jardim.",
+  "introSyncOffline": "Só neste aparelho: sem conta, nada sai do seu celular ou computador.",
+  "introSyncServer": "Com um servidor: sincronize entre aparelhos, tenha backup e compartilhe jardins com outras pessoas.",
+  "introSyncLaterNote": "Você conecta um servidor quando quiser, em Gerenciar workspaces.",
+  "introPlatforms": "Disponível para Android, Windows e Linux."
 }

@@ -47,17 +47,17 @@
   "introSkip": "Skip",
   "introGetStarted": "Get started",
   "introWelcomeTitle": "Welcome to Polypodium",
-  "introWelcomeBody": "Your companion for caring for your plant collection.",
-  "introPlantsTitle": "Track your plants",
-  "introPlantsBody": "Register each plant with photos, species, location and soil, and keep its whole history in one place.",
+  "introWelcomeBody": "A care journal for your plant collection: what each one needs, everything you've done for it and when it's time to water, all in one place. Getting started takes less than a minute.",
+  "introPlantsTitle": "Organize your garden",
+  "introPlantsBody": "Add each plant with its species, photos, location, pot and soil. Print labels with a QR code and find any plant with a single scan.",
   "introRemindersTitle": "Watering reminders",
-  "introRemindersBody": "Get notified when it's time to water, based on each species' needs.",
+  "introRemindersBody": "Get a notification when it's time to water, following each plant's own schedule, at the time of day you choose.",
   "introRemindersTimeLabel": "Remind me at",
   "introRemindersEnable": "Turn on reminders",
   "introRemindersEnabled": "Reminders on!",
   "introRemindersLaterNote": "You can change this anytime in Settings.",
-  "introSyncTitle": "Your data, everywhere",
-  "introSyncBody": "Everything works offline. Connect to a server later to sync across devices and back up your data.",
+  "introSyncTitle": "Your data, your way",
+  "introSyncBody": "Everything works offline, right away. When you want more, connect to a Polypodium server.",
 
   "dateFormatPattern": "M/d/yyyy",
   "@dateFormatPattern": {
@@ -1553,5 +1553,11 @@
   "loginStepBody": "Sign in with your account on this server. If you don't have one, ask the server's administrator: they create accounts in the app.",
   "disconnectWorkspaceTitle": "Disconnect \"{name}\"?",
   "@disconnectWorkspaceTitle": {"placeholders": {"name": {"type": "String"}}},
-  "renameWorkspaceHelper": "The name only changes on this device."
+  "renameWorkspaceHelper": "The name only changes on this device.",
+  "introDiaryTitle": "A diary for every plant",
+  "introDiaryBody": "Record watering, fertilizing, pruning, repotting, harvests and observations, with photos. The home screen shows what needs care today and how your garden is doing.",
+  "introSyncOffline": "On this device only: no account, nothing leaves your phone or computer.",
+  "introSyncServer": "With a server: sync between devices, keep a backup and share gardens with other people.",
+  "introSyncLaterNote": "You can connect a server whenever you like, under Manage workspaces.",
+  "introPlatforms": "Available for Android, Windows and Linux."
 }

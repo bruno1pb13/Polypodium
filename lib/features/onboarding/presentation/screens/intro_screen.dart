@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/links/external_links.dart';
 import '../../../../core/notifications/notification_service.dart';
 import '../../../../core/widgets/app_shell.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
@@ -28,7 +29,7 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
   /// Kept here (not in the page) so it survives swiping away and back.
   bool _remindersOptedIn = false;
 
-  static const _pageCount = 4;
+  static const _pageCount = 5;
 
   @override
   void dispose() {
@@ -43,6 +44,11 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
       MaterialPageRoute(builder: (_) => const AppShell()),
     );
   }
+
+  void _back() => _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+      );
 
   void _next() {
     if (_currentPage == _pageCount - 1) {
@@ -86,6 +92,11 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
       body: context.l10n.introPlantsBody,
     ),
     _IntroPageData(
+      icon: Icons.auto_stories,
+      title: context.l10n.introDiaryTitle,
+      body: context.l10n.introDiaryBody,
+    ),
+    _IntroPageData(
       icon: Icons.water_drop,
       title: context.l10n.introRemindersTitle,
       body: context.l10n.introRemindersBody,
@@ -99,6 +110,7 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
       icon: Icons.cloud_sync,
       title: context.l10n.introSyncTitle,
       body: context.l10n.introSyncBody,
+      child: const _SyncOptions(),
     ),
   ];
 
@@ -166,16 +178,35 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
                     width: double.infinity,
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 400),
-                      child: FilledButton(
-                        onPressed: _next,
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: Text(
-                          isLastPage
-                              ? context.l10n.introGetStarted
-                              : context.l10n.next,
-                        ),
+                      child: Row(
+                        children: [
+                          if (_currentPage > 0) ...[
+                            TextButton(
+                              onPressed: _back,
+                              style: TextButton.styleFrom(
+                                foregroundColor: context.glass.fg,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 20),
+                              ),
+                              child: Text(context.l10n.back),
+                            ),
+                            const SizedBox(width: 12),
+                          ],
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: _next,
+                              style: FilledButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                              child: Text(
+                                isLastPage
+                                    ? context.l10n.introGetStarted
+                                    : context.l10n.next,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -346,6 +377,60 @@ class _ReminderSetup extends ConsumerWidget {
         const SizedBox(height: 12),
         Text(
           context.l10n.introRemindersLaterNote,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: context.glass.fgFaint, fontSize: 12),
+        ),
+      ],
+    );
+  }
+}
+
+/// The two ways to keep the data on the sync page, the documentation for
+/// the server one, and where the app runs.
+class _SyncOptions extends StatelessWidget {
+  const _SyncOptions();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget option(IconData icon, String text) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, size: 20, color: context.glass.fg),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.4,
+                    color: context.glass.fgMuted,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        option(Icons.smartphone_outlined, context.l10n.introSyncOffline),
+        option(Icons.cloud_sync_outlined, context.l10n.introSyncServer),
+        OutlinedButton.icon(
+          onPressed: () => openExternalLink(
+              context, ExternalLinks.serverDocs(context.l10n.localeName)),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: context.glass.fg,
+            side: BorderSide(color: context.glass.tint(0.38)),
+          ),
+          icon: const Icon(Icons.menu_book_outlined, size: 18),
+          label: Text(context.l10n.viewDocumentation),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          '${context.l10n.introSyncLaterNote} ${context.l10n.introPlatforms}',
           textAlign: TextAlign.center,
           style: TextStyle(color: context.glass.fgFaint, fontSize: 12),
         ),

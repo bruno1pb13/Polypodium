@@ -365,19 +365,19 @@ abstract class AppLocalizations {
   /// No description provided for @introWelcomeBody.
   ///
   /// In en, this message translates to:
-  /// **'Your companion for caring for your plant collection.'**
+  /// **'A care journal for your plant collection: what each one needs, everything you\'ve done for it and when it\'s time to water, all in one place. Getting started takes less than a minute.'**
   String get introWelcomeBody;
 
   /// No description provided for @introPlantsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Track your plants'**
+  /// **'Organize your garden'**
   String get introPlantsTitle;
 
   /// No description provided for @introPlantsBody.
   ///
   /// In en, this message translates to:
-  /// **'Register each plant with photos, species, location and soil, and keep its whole history in one place.'**
+  /// **'Add each plant with its species, photos, location, pot and soil. Print labels with a QR code and find any plant with a single scan.'**
   String get introPlantsBody;
 
   /// No description provided for @introRemindersTitle.
@@ -389,7 +389,7 @@ abstract class AppLocalizations {
   /// No description provided for @introRemindersBody.
   ///
   /// In en, this message translates to:
-  /// **'Get notified when it\'s time to water, based on each species\' needs.'**
+  /// **'Get a notification when it\'s time to water, following each plant\'s own schedule, at the time of day you choose.'**
   String get introRemindersBody;
 
   /// No description provided for @introRemindersTimeLabel.
@@ -419,13 +419,13 @@ abstract class AppLocalizations {
   /// No description provided for @introSyncTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your data, everywhere'**
+  /// **'Your data, your way'**
   String get introSyncTitle;
 
   /// No description provided for @introSyncBody.
   ///
   /// In en, this message translates to:
-  /// **'Everything works offline. Connect to a server later to sync across devices and back up your data.'**
+  /// **'Everything works offline, right away. When you want more, connect to a Polypodium server.'**
   String get introSyncBody;
 
   /// Date pattern used for dates embedded in persisted history notes
@@ -5557,6 +5557,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The name only changes on this device.'**
   String get renameWorkspaceHelper;
+
+  /// No description provided for @introDiaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A diary for every plant'**
+  String get introDiaryTitle;
+
+  /// No description provided for @introDiaryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Record watering, fertilizing, pruning, repotting, harvests and observations, with photos. The home screen shows what needs care today and how your garden is doing.'**
+  String get introDiaryBody;
+
+  /// No description provided for @introSyncOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'On this device only: no account, nothing leaves your phone or computer.'**
+  String get introSyncOffline;
+
+  /// No description provided for @introSyncServer.
+  ///
+  /// In en, this message translates to:
+  /// **'With a server: sync between devices, keep a backup and share gardens with other people.'**
+  String get introSyncServer;
+
+  /// No description provided for @introSyncLaterNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can connect a server whenever you like, under Manage workspaces.'**
+  String get introSyncLaterNote;
+
+  /// No description provided for @introPlatforms.
+  ///
+  /// In en, this message translates to:
+  /// **'Available for Android, Windows and Linux.'**
+  String get introPlatforms;
 }
 
 class _AppLocalizationsDelegate
