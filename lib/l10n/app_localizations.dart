@@ -3143,7 +3143,7 @@ abstract class AppLocalizations {
   /// No description provided for @noRemoteWorkspaces.
   ///
   /// In en, this message translates to:
-  /// **'No remote workspaces yet. Add one to sync this data with a server.'**
+  /// **'No remote workspace yet. To sync between devices, add one with the address of a Polypodium server. Don\'t have a server? The documentation shows how to run your own.'**
   String get noRemoteWorkspaces;
 
   /// No description provided for @addRemoteWorkspace.
@@ -3161,7 +3161,7 @@ abstract class AppLocalizations {
   /// No description provided for @disconnectBody.
   ///
   /// In en, this message translates to:
-  /// **'This workspace\'s data stays on this device. To sync again, sign in with your account.'**
+  /// **'You\'ll be signed out on this device. The data already downloaded stays here, but it stops syncing until you sign in again. Nothing is deleted on the server.'**
   String get disconnectBody;
 
   /// No description provided for @deleteWorkspaceTitle.
@@ -3173,7 +3173,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteWorkspaceBody.
   ///
   /// In en, this message translates to:
-  /// **'This workspace\'s data will be erased from this device. This does not affect the account or the data on the server.'**
+  /// **'This erases this workspace\'s plants, records and photos from this device. Your account and the data on the server are not affected: add the workspace again to download them.\n\nChanges that haven\'t synced yet will be lost.'**
   String get deleteWorkspaceBody;
 
   /// No description provided for @adminPermissionLost.
@@ -3245,7 +3245,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrateLocalDataBody.
   ///
   /// In en, this message translates to:
-  /// **'We found data saved only on this device (local workspace). Do you want to send it to this server now?'**
+  /// **'This device has data saved only in the local workspace. Do you want to copy it to this server now? Your plants, species, locations, records and photos are sent, and the local workspace stays on this device as it is.'**
   String get migrateLocalDataBody;
 
   /// No description provided for @serverUrlLabel.
@@ -3263,7 +3263,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstAccountInfo.
   ///
   /// In en, this message translates to:
-  /// **'This server has no accounts yet. Create the main account below — it will be used to access it from now on.'**
+  /// **'This server has no accounts yet. The account you create now becomes the server\'s administrator: it signs in here and creates the accounts of everyone else.'**
   String get firstAccountInfo;
 
   /// No description provided for @workspaceNameLabel.
@@ -4361,7 +4361,7 @@ abstract class AppLocalizations {
   /// No description provided for @newSharedGardenBody.
   ///
   /// In en, this message translates to:
-  /// **'Creates an empty garden on this server, in a new workspace. Add members to share it.'**
+  /// **'Creates an empty garden on this server and opens it in a new workspace. Then invite people under \"Garden members\" to share it.'**
   String get newSharedGardenBody;
 
   /// No description provided for @gardenNameLabel.
@@ -5497,6 +5497,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Default: {value}'**
   String wateringRuleDefault(String value);
+
+  /// No description provided for @linkOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open {url}'**
+  String linkOpenFailed(String url);
+
+  /// No description provided for @viewDocumentation.
+  ///
+  /// In en, this message translates to:
+  /// **'View documentation'**
+  String get viewDocumentation;
+
+  /// No description provided for @workspacesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get workspacesHelp;
+
+  /// No description provided for @workspacesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'A workspace is a separate set of plants and records. The local one keeps everything on this device only. A remote workspace syncs with a Polypodium server, your own or one someone invited you to, so you can use several devices, keep a backup and share gardens.'**
+  String get workspacesIntro;
+
+  /// No description provided for @serverStepBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the address of the Polypodium server you want to sync with. It can be a server you run yourself or one whose administrator gave you an account.'**
+  String get serverStepBody;
+
+  /// No description provided for @serverUrlHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Include http:// or https:// and the port, if any'**
+  String get serverUrlHelper;
+
+  /// No description provided for @noServerYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No server yet? See how to set one up'**
+  String get noServerYet;
+
+  /// No description provided for @loginStepBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your account on this server. If you don\'t have one, ask the server\'s administrator: they create accounts in the app.'**
+  String get loginStepBody;
+
+  /// No description provided for @disconnectWorkspaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect \"{name}\"?'**
+  String disconnectWorkspaceTitle(String name);
+
+  /// No description provided for @renameWorkspaceHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'The name only changes on this device.'**
+  String get renameWorkspaceHelper;
 }
 
 class _AppLocalizationsDelegate

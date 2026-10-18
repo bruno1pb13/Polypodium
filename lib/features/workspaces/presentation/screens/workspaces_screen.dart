@@ -5,6 +5,7 @@ import '../../../../core/widgets/adaptive_layout.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/links/external_links.dart';
 import '../../../../core/storage/photo_storage_provider.dart';
 import '../../../../core/sync/auto_sync_controller.dart';
 import '../../../../core/sync/sync_providers.dart';
@@ -37,9 +38,19 @@ class WorkspacesScreen extends ConsumerWidget {
         workspaces.where((w) => w.type == WorkspaceType.remote).toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Workspaces')),
+      appBar: AppBar(
+        title: const Text('Workspaces'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: context.l10n.workspacesHelp,
+            onPressed: () => _openDocs(context),
+          ),
+        ],
+      ),
       body: ReadableListView(
         children: [
+          const _WorkspacesIntro(),
           _WorkspaceTile(
             workspace: local,
             isActive: activeId == local.id,
@@ -73,9 +84,19 @@ class WorkspacesScreen extends ConsumerWidget {
           if (remotes.isEmpty)
             Padding(
               padding: const EdgeInsets.all(24),
-              child: Text(
-                context.l10n.noRemoteWorkspaces,
-                textAlign: TextAlign.center,
+              child: Column(
+                children: [
+                  Text(
+                    context.l10n.noRemoteWorkspaces,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.menu_book_outlined),
+                    label: Text(context.l10n.viewDocumentation),
+                    onPressed: () => _openDocs(context),
+                  ),
+                ],
               ),
             ),
           _DiskUsageTotal(workspaceIds: [for (final w in workspaces) w.id]),
@@ -90,6 +111,9 @@ class WorkspacesScreen extends ConsumerWidget {
       ),
     );
   }
+
+  void _openDocs(BuildContext context) => openExternalLink(
+      context, ExternalLinks.serverDocs(context.l10n.localeName));
 
   /// Rebuilds the whole shell for the newly active workspace and syncs it
   /// right away -- a just-added workspace's database is empty until then.
@@ -275,7 +299,8 @@ class WorkspacesScreen extends ConsumerWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(ctx.l10n.disconnect),
+        icon: const Icon(Icons.cloud_off_outlined),
+        title: Text(ctx.l10n.disconnectWorkspaceTitle(ws.name)),
         content: Text(ctx.l10n.disconnectBody),
         actions: [
           TextButton(
@@ -299,6 +324,7 @@ class WorkspacesScreen extends ConsumerWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        icon: Icon(Icons.delete_outline, color: Theme.of(ctx).colorScheme.error),
         title: Text(ctx.l10n.deleteWorkspaceTitle(ws.name)),
         content: Text(ctx.l10n.deleteWorkspaceBody),
         actions: [
@@ -365,7 +391,13 @@ class WorkspacesScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(ctx.l10n.renameWorkspace),
-        content: TextField(controller: controller, autofocus: true),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration:
+              InputDecoration(helperText: ctx.l10n.renameWorkspaceHelper),
+          onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -411,6 +443,7 @@ class _NewGardenDialogState extends State<_NewGardenDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(context.l10n.newSharedGardenBody),
+          const SizedBox(height: 8),
           TextField(
             controller: _controller,
             autofocus: true,
@@ -431,6 +464,41 @@ class _NewGardenDialogState extends State<_NewGardenDialog> {
           child: Text(context.l10n.create),
         ),
       ],
+    );
+  }
+}
+
+/// What workspaces are, above the list, for whoever lands here without
+/// knowing; the app bar's help button leads on to the documentation.
+class _WorkspacesIntro extends StatelessWidget {
+  const _WorkspacesIntro();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      child: Card(
+        elevation: 0,
+        color: scheme.secondaryContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.info_outline,
+                  size: 20, color: scheme.onSecondaryContainer),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  context.l10n.workspacesIntro,
+                  style: TextStyle(color: scheme.onSecondaryContainer),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

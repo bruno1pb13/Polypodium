@@ -1768,7 +1768,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noRemoteWorkspaces =>
-      'No remote workspaces yet. Add one to sync this data with a server.';
+      'No remote workspace yet. To sync between devices, add one with the address of a Polypodium server. Don\'t have a server? The documentation shows how to run your own.';
 
   @override
   String get addRemoteWorkspace => 'Add remote workspace';
@@ -1780,7 +1780,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disconnectBody =>
-      'This workspace\'s data stays on this device. To sync again, sign in with your account.';
+      'You\'ll be signed out on this device. The data already downloaded stays here, but it stops syncing until you sign in again. Nothing is deleted on the server.';
 
   @override
   String deleteWorkspaceTitle(String name) {
@@ -1789,7 +1789,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteWorkspaceBody =>
-      'This workspace\'s data will be erased from this device. This does not affect the account or the data on the server.';
+      'This erases this workspace\'s plants, records and photos from this device. Your account and the data on the server are not affected: add the workspace again to download them.\n\nChanges that haven\'t synced yet will be lost.';
 
   @override
   String get adminPermissionLost =>
@@ -1831,7 +1831,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get migrateLocalDataBody =>
-      'We found data saved only on this device (local workspace). Do you want to send it to this server now?';
+      'This device has data saved only in the local workspace. Do you want to copy it to this server now? Your plants, species, locations, records and photos are sent, and the local workspace stays on this device as it is.';
 
   @override
   String get serverUrlLabel => 'Server URL';
@@ -1841,7 +1841,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get firstAccountInfo =>
-      'This server has no accounts yet. Create the main account below — it will be used to access it from now on.';
+      'This server has no accounts yet. The account you create now becomes the server\'s administrator: it signs in here and creates the accounts of everyone else.';
 
   @override
   String get workspaceNameLabel => 'Name of this workspace';
@@ -2552,7 +2552,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get newSharedGardenBody =>
-      'Creates an empty garden on this server, in a new workspace. Add members to share it.';
+      'Creates an empty garden on this server and opens it in a new workspace. Then invite people under \"Garden members\" to share it.';
 
   @override
   String get gardenNameLabel => 'Garden name';
@@ -3337,4 +3337,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String wateringRuleDefault(String value) {
     return 'Default: $value';
   }
+
+  @override
+  String linkOpenFailed(String url) {
+    return 'Couldn\'t open $url';
+  }
+
+  @override
+  String get viewDocumentation => 'View documentation';
+
+  @override
+  String get workspacesHelp => 'Help';
+
+  @override
+  String get workspacesIntro =>
+      'A workspace is a separate set of plants and records. The local one keeps everything on this device only. A remote workspace syncs with a Polypodium server, your own or one someone invited you to, so you can use several devices, keep a backup and share gardens.';
+
+  @override
+  String get serverStepBody =>
+      'Enter the address of the Polypodium server you want to sync with. It can be a server you run yourself or one whose administrator gave you an account.';
+
+  @override
+  String get serverUrlHelper =>
+      'Include http:// or https:// and the port, if any';
+
+  @override
+  String get noServerYet => 'No server yet? See how to set one up';
+
+  @override
+  String get loginStepBody =>
+      'Sign in with your account on this server. If you don\'t have one, ask the server\'s administrator: they create accounts in the app.';
+
+  @override
+  String disconnectWorkspaceTitle(String name) {
+    return 'Disconnect \"$name\"?';
+  }
+
+  @override
+  String get renameWorkspaceHelper => 'The name only changes on this device.';
 }

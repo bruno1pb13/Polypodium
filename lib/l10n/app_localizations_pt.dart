@@ -1774,7 +1774,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get noRemoteWorkspaces =>
-      'Nenhum workspace remoto ainda. Adicione um para sincronizar estes dados com um servidor.';
+      'Nenhum workspace remoto ainda. Para sincronizar entre aparelhos, adicione um com o endereço de um servidor Polypodium. Ainda não tem servidor? A documentação mostra como criar o seu.';
 
   @override
   String get addRemoteWorkspace => 'Adicionar workspace remoto';
@@ -1786,7 +1786,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get disconnectBody =>
-      'Os dados deste workspace continuam neste dispositivo. Para sincronizar novamente, entre com sua conta.';
+      'Você sai da conta neste aparelho. Os dados já baixados continuam aqui, mas param de sincronizar até você entrar de novo. Nada é apagado no servidor.';
 
   @override
   String deleteWorkspaceTitle(String name) {
@@ -1795,7 +1795,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get deleteWorkspaceBody =>
-      'Os dados deste workspace serão apagados deste dispositivo. Isso não afeta a conta nem os dados no servidor.';
+      'Isso apaga deste aparelho as plantas, registros e fotos deste workspace. Sua conta e os dados no servidor não são afetados: adicione o workspace de novo para baixá-los.\n\nAlterações que ainda não foram sincronizadas serão perdidas.';
 
   @override
   String get adminPermissionLost =>
@@ -1837,7 +1837,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get migrateLocalDataBody =>
-      'Encontramos dados salvos apenas neste dispositivo (workspace local). Deseja enviá-los agora para este servidor?';
+      'Este aparelho tem dados salvos só no workspace local. Quer copiá-los agora para este servidor? Suas plantas, espécies, locais, registros e fotos são enviados, e o workspace local continua no aparelho como está.';
 
   @override
   String get serverUrlLabel => 'URL do servidor';
@@ -1847,7 +1847,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get firstAccountInfo =>
-      'Este servidor ainda não tem nenhuma conta. Crie a conta principal abaixo — ela será usada para acessá-lo daqui em diante.';
+      'Este servidor ainda não tem nenhuma conta. A conta criada agora vira a administradora do servidor: é com ela que você entra aqui e cria as contas das outras pessoas.';
 
   @override
   String get workspaceNameLabel => 'Nome deste workspace';
@@ -2556,7 +2556,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get newSharedGardenBody =>
-      'Cria um jardim vazio neste servidor, em um novo workspace. Adicione membros para compartilhá-lo.';
+      'Cria um jardim vazio neste servidor e o abre em um novo workspace. Depois, convide pessoas em \"Membros do jardim\" para compartilhá-lo.';
 
   @override
   String get gardenNameLabel => 'Nome do jardim';
@@ -3340,4 +3340,42 @@ class AppLocalizationsPt extends AppLocalizations {
   String wateringRuleDefault(String value) {
     return 'Padrão: $value';
   }
+
+  @override
+  String linkOpenFailed(String url) {
+    return 'Não foi possível abrir $url';
+  }
+
+  @override
+  String get viewDocumentation => 'Ver documentação';
+
+  @override
+  String get workspacesHelp => 'Ajuda';
+
+  @override
+  String get workspacesIntro =>
+      'Um workspace é um conjunto separado de plantas e registros. O local guarda tudo só neste aparelho. Um workspace remoto sincroniza com um servidor Polypodium, seu ou de alguém que te convidou, para usar vários aparelhos, ter backup e compartilhar jardins.';
+
+  @override
+  String get serverStepBody =>
+      'Informe o endereço do servidor Polypodium com que você quer sincronizar. Pode ser um servidor seu ou um cujo administrador criou uma conta para você.';
+
+  @override
+  String get serverUrlHelper =>
+      'Inclua http:// ou https:// e a porta, se houver';
+
+  @override
+  String get noServerYet => 'Ainda não tem servidor? Veja como criar o seu';
+
+  @override
+  String get loginStepBody =>
+      'Entre com a sua conta neste servidor. Se ainda não tem uma, peça ao administrador do servidor: é ele quem cria as contas, pelo app.';
+
+  @override
+  String disconnectWorkspaceTitle(String name) {
+    return 'Desconectar \"$name\"?';
+  }
+
+  @override
+  String get renameWorkspaceHelper => 'O nome muda só neste aparelho.';
 }

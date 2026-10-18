@@ -800,7 +800,7 @@
   "themeDark": "Dark",
   "aboutApp": "About the App",
 
-  "noRemoteWorkspaces": "No remote workspaces yet. Add one to sync this data with a server.",
+  "noRemoteWorkspaces": "No remote workspace yet. To sync between devices, add one with the address of a Polypodium server. Don't have a server? The documentation shows how to run your own.",
   "addRemoteWorkspace": "Add remote workspace",
   "reconnectWorkspace": "Reconnect \"{name}\"",
   "@reconnectWorkspace": {
@@ -808,14 +808,14 @@
       "name": {"type": "String"}
     }
   },
-  "disconnectBody": "This workspace's data stays on this device. To sync again, sign in with your account.",
+  "disconnectBody": "You'll be signed out on this device. The data already downloaded stays here, but it stops syncing until you sign in again. Nothing is deleted on the server.",
   "deleteWorkspaceTitle": "Delete \"{name}\"?",
   "@deleteWorkspaceTitle": {
     "placeholders": {
       "name": {"type": "String"}
     }
   },
-  "deleteWorkspaceBody": "This workspace's data will be erased from this device. This does not affect the account or the data on the server.",
+  "deleteWorkspaceBody": "This erases this workspace's plants, records and photos from this device. Your account and the data on the server are not affected: add the workspace again to download them.\n\nChanges that haven't synced yet will be lost.",
   "adminPermissionLost": "You no longer have administrator permission.",
   "renameWorkspace": "Rename workspace",
   "localChip": "Local",
@@ -839,10 +839,10 @@
   "serverAddressTitle": "Server address",
   "createFirstAccountTitle": "Create the server's first account",
   "migrateLocalDataTitle": "Migrate local data?",
-  "migrateLocalDataBody": "We found data saved only on this device (local workspace). Do you want to send it to this server now?",
+  "migrateLocalDataBody": "This device has data saved only in the local workspace. Do you want to copy it to this server now? Your plants, species, locations, records and photos are sent, and the local workspace stays on this device as it is.",
   "serverUrlLabel": "Server URL",
   "mustStartWithHttp": "Must start with http:// or https://",
-  "firstAccountInfo": "This server has no accounts yet. Create the main account below — it will be used to access it from now on.",
+  "firstAccountInfo": "This server has no accounts yet. The account you create now becomes the server's administrator: it signs in here and creates the accounts of everyone else.",
   "workspaceNameLabel": "Name of this workspace",
   "workspaceNameHint": "E.g.: Home greenhouse",
   "emailLabel": "Email",
@@ -1316,7 +1316,7 @@
   "gardenLeaveBody": "This workspace will stop syncing with the garden. Its data stays on this device.",
   "gardenLeft": "You left the garden.",
   "newSharedGarden": "New shared garden",
-  "newSharedGardenBody": "Creates an empty garden on this server, in a new workspace. Add members to share it.",
+  "newSharedGardenBody": "Creates an empty garden on this server and opens it in a new workspace. Then invite people under \"Garden members\" to share it.",
   "gardenNameLabel": "Garden name",
   "openGarden": "Open another garden",
   "pickGardenTitle": "Which garden?",
@@ -1541,5 +1541,17 @@
   "wateringRuleMm": "{mm} mm",
   "@wateringRuleMm": {"placeholders": {"mm": {"type": "String"}}},
   "wateringRuleDefault": "Default: {value}",
-  "@wateringRuleDefault": {"placeholders": {"value": {"type": "String"}}}
+  "@wateringRuleDefault": {"placeholders": {"value": {"type": "String"}}},
+  "linkOpenFailed": "Couldn't open {url}",
+  "@linkOpenFailed": {"placeholders": {"url": {"type": "String"}}},
+  "viewDocumentation": "View documentation",
+  "workspacesHelp": "Help",
+  "workspacesIntro": "A workspace is a separate set of plants and records. The local one keeps everything on this device only. A remote workspace syncs with a Polypodium server, your own or one someone invited you to, so you can use several devices, keep a backup and share gardens.",
+  "serverStepBody": "Enter the address of the Polypodium server you want to sync with. It can be a server you run yourself or one whose administrator gave you an account.",
+  "serverUrlHelper": "Include http:// or https:// and the port, if any",
+  "noServerYet": "No server yet? See how to set one up",
+  "loginStepBody": "Sign in with your account on this server. If you don't have one, ask the server's administrator: they create accounts in the app.",
+  "disconnectWorkspaceTitle": "Disconnect \"{name}\"?",
+  "@disconnectWorkspaceTitle": {"placeholders": {"name": {"type": "String"}}},
+  "renameWorkspaceHelper": "The name only changes on this device."
 }

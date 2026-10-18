@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/links/external_links.dart';
 
 /// "Server URL, then credentials" dialog shared by the flows that need to
 /// talk to a Polypodium server: adding a new remote workspace, reconnecting
@@ -294,38 +295,65 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
       _stepWeather => _weatherActions(),
       _ => _migrateActions(),
     };
-    return AlertDialog(title: Text(title), content: content, actions: actions);
+    final icon = switch (_step) {
+      _stepServer => Icons.dns_outlined,
+      _stepCredentials => _isRegisterMode
+          ? Icons.admin_panel_settings_outlined
+          : Icons.account_circle_outlined,
+      _stepWeather => Icons.wb_sunny_outlined,
+      _ => Icons.cloud_upload_outlined,
+    };
+    return AlertDialog(
+      icon: Icon(icon),
+      title: Text(title),
+      content: content,
+      actions: actions,
+    );
   }
 
   Widget _buildServerStep() {
     return Form(
       key: _serverFormKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextFormField(
-            controller: _urlController,
-            decoration: InputDecoration(
-              labelText: context.l10n.serverUrlLabel,
-              hintText: 'https://my-server.com',
-              prefixIcon: const Icon(Icons.dns_outlined),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(context.l10n.serverStepBody),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _urlController,
+              decoration: InputDecoration(
+                labelText: context.l10n.serverUrlLabel,
+                hintText: 'https://my-server.com',
+                helperText: context.l10n.serverUrlHelper,
+                helperMaxLines: 2,
+                prefixIcon: const Icon(Icons.dns_outlined),
+              ),
+              keyboardType: TextInputType.url,
+              autocorrect: false,
+              autofocus: true,
+              onFieldSubmitted: (_) => _checkServer(),
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) {
+                  return context.l10n.requiredShort;
+                }
+                if (!v.trim().startsWith('http')) {
+                  return context.l10n.mustStartWithHttp;
+                }
+                return null;
+              },
             ),
-            keyboardType: TextInputType.url,
-            autocorrect: false,
-            autofocus: true,
-            onFieldSubmitted: (_) => _checkServer(),
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) {
-                return context.l10n.requiredShort;
-              }
-              if (!v.trim().startsWith('http')) {
-                return context.l10n.mustStartWithHttp;
-              }
-              return null;
-            },
-          ),
-          if (_error != null) _buildErrorRow(),
-        ],
+            if (_error != null) _buildErrorRow(),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              icon: const Icon(Icons.menu_book_outlined, size: 18),
+              label: Text(context.l10n.noServerYet),
+              onPressed: () => openExternalLink(
+                  context, ExternalLinks.serverDocs(context.l10n.localeName)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -455,6 +483,8 @@ class _WorkspaceLoginDialogState extends State<WorkspaceLoginDialog> {
 
   List<Widget> _buildLoginFields() {
     return [
+      Text(context.l10n.loginStepBody),
+      const SizedBox(height: 16),
       TextFormField(
         controller: _emailController,
         decoration: InputDecoration(
