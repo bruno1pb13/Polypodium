@@ -5593,6 +5593,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Available for Android, Windows and Linux.'**
   String get introPlatforms;
+
+  /// No description provided for @otherPlatformAndroidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Polypodium on your phone'**
+  String get otherPlatformAndroidTitle;
+
+  /// No description provided for @otherPlatformAndroidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Take your garden with you: on Android you record care right next to the plant, scan labels with the camera and see today\'s watering in a home screen widget. Scan the code with your phone or open Google Play.'**
+  String get otherPlatformAndroidBody;
+
+  /// No description provided for @otherPlatformAndroidAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Google Play'**
+  String get otherPlatformAndroidAction;
+
+  /// No description provided for @otherPlatformDesktopTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Polypodium on your computer'**
+  String get otherPlatformDesktopTitle;
+
+  /// No description provided for @otherPlatformDesktopBody.
+  ///
+  /// In en, this message translates to:
+  /// **'There are also versions for Windows and Linux: a big screen to organize the garden, print labels and go through the history.'**
+  String get otherPlatformDesktopBody;
+
+  /// No description provided for @otherPlatformDesktopAction.
+  ///
+  /// In en, this message translates to:
+  /// **'See downloads'**
+  String get otherPlatformDesktopAction;
+
+  /// No description provided for @otherPlatformSyncNote.
+  ///
+  /// In en, this message translates to:
+  /// **'To see the same plants on both, connect both to the same server.'**
+  String get otherPlatformSyncNote;
+
+  /// No description provided for @dontShowAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t show again'**
+  String get dontShowAgain;
 }
 
 class _AppLocalizationsDelegate

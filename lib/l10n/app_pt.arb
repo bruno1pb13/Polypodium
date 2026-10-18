@@ -948,5 +948,13 @@
   "introSyncOffline": "Só neste aparelho: sem conta, nada sai do seu celular ou computador.",
   "introSyncServer": "Com um servidor: sincronize entre aparelhos, tenha backup e compartilhe jardins com outras pessoas.",
   "introSyncLaterNote": "Você conecta um servidor quando quiser, em Gerenciar workspaces.",
-  "introPlatforms": "Disponível para Android, Windows e Linux."
+  "introPlatforms": "Disponível para Android, Windows e Linux.",
+  "otherPlatformAndroidTitle": "Polypodium no celular",
+  "otherPlatformAndroidBody": "Leve seu jardim com você: no Android você registra os cuidados ao lado da planta, lê as etiquetas com a câmera e vê as regas do dia num widget na tela inicial. Leia o código com o celular ou abra a Google Play.",
+  "otherPlatformAndroidAction": "Abrir na Google Play",
+  "otherPlatformDesktopTitle": "Polypodium no computador",
+  "otherPlatformDesktopBody": "Também há versões para Windows e Linux: uma tela grande para organizar o jardim, imprimir etiquetas e percorrer o histórico.",
+  "otherPlatformDesktopAction": "Ver downloads",
+  "otherPlatformSyncNote": "Para ver as mesmas plantas nos dois, conecte ambos ao mesmo servidor.",
+  "dontShowAgain": "Não mostrar novamente"
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,15 +9,18 @@ import 'package:polypodium/features/dashboard/domain/garden_overview.dart';
 import 'package:polypodium/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:polypodium/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:polypodium/features/dashboard/presentation/widgets/dashboard_card.dart';
+import 'package:polypodium/features/dashboard/presentation/widgets/dashboard_other_platform_card.dart';
 import 'package:polypodium/features/entries/presentation/providers/entries_providers.dart';
 import 'package:polypodium/features/locations/domain/location_model.dart';
 import 'package:polypodium/features/plants/domain/plant_model.dart';
 import 'package:polypodium/features/plants/presentation/providers/plants_providers.dart';
+import 'package:polypodium/features/settings/data/settings_repository.dart';
 import 'package:polypodium/features/settings/presentation/providers/settings_providers.dart';
 import 'package:polypodium/features/species/domain/species_model.dart';
 import 'package:polypodium/features/workspaces/domain/workspace_model.dart';
 import 'package:polypodium/features/workspaces/presentation/providers/workspace_providers.dart';
 import 'package:polypodium/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../helpers/accessibility.dart';
 
@@ -96,20 +100,25 @@ void main() {
   );
 
   late _FakeEntryMutations mutations;
+  late SharedPreferences prefs;
 
   Future<void> pump(
     WidgetTester tester,
     GardenOverview overview, {
     List<PlantWithSpecies>? plants,
     Size size = const Size(420, 900),
+    Map<String, Object> settings = const {},
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
     mutations = _FakeEntryMutations();
+    SharedPreferences.setMockInitialValues(settings);
+    prefs = await SharedPreferences.getInstance();
     await tester.pumpWidget(ProviderScope(
       overrides: [
+        settingsRepositoryProvider.overrideWithValue(SettingsRepository(prefs)),
         transparencyEnabledNotifierProvider
             .overrideWith(_FakeTransparencyNotifier.new),
         activeWorkspaceProvider.overrideWithValue(Workspace.newLocal()),
@@ -201,6 +210,47 @@ void main() {
     final health = cardOf('Saúde do jardim');
     expect(health.dy, today.dy);
     expect(health.dx, greaterThan(today.dx));
+  });
+
+  group('other platform card', () {
+    test('offers the other kind of device', () {
+      expect(otherPlatformFor(TargetPlatform.android), OtherPlatform.desktop);
+      expect(otherPlatformFor(TargetPlatform.windows), OtherPlatform.android);
+      expect(otherPlatformFor(TargetPlatform.linux), OtherPlatform.android);
+      expect(otherPlatformFor(TargetPlatform.iOS), isNull);
+    });
+
+    testWidgets('Android offers the desktop versions until dismissed',
+        (tester) async {
+      await pump(tester, overview);
+      final dismiss = find.text('Não mostrar novamente');
+      await tester.ensureVisible(dismiss);
+      await tester.pumpAndSettle();
+      expect(find.text('Polypodium no computador'), findsOneWidget);
+      expect(find.text('Ver downloads'), findsOneWidget);
+
+      await tester.tap(dismiss);
+      await tester.pumpAndSettle();
+      expect(find.text('Polypodium no computador'), findsNothing);
+      expect(prefs.getBool('other_platform_card_dismissed'), isTrue);
+    });
+
+    testWidgets('stays hidden once dismissed', (tester) async {
+      await pump(tester, overview,
+          settings: {'other_platform_card_dismissed': true});
+      expect(find.text('Polypodium no computador', skipOffstage: false),
+          findsNothing);
+    });
+
+    testWidgets('computers offer the Android app', (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+      await pump(tester, overview);
+      expect(find.text('Polypodium no celular', skipOffstage: false),
+          findsOneWidget);
+      expect(find.text('Abrir na Google Play', skipOffstage: false),
+          findsOneWidget);
+      debugDefaultTargetPlatformOverride = null;
+    });
   });
 
   group('accessibility', () {

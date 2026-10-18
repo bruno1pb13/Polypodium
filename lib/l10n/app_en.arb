@@ -1559,5 +1559,13 @@
   "introSyncOffline": "On this device only: no account, nothing leaves your phone or computer.",
   "introSyncServer": "With a server: sync between devices, keep a backup and share gardens with other people.",
   "introSyncLaterNote": "You can connect a server whenever you like, under Manage workspaces.",
-  "introPlatforms": "Available for Android, Windows and Linux."
+  "introPlatforms": "Available for Android, Windows and Linux.",
+  "otherPlatformAndroidTitle": "Polypodium on your phone",
+  "otherPlatformAndroidBody": "Take your garden with you: on Android you record care right next to the plant, scan labels with the camera and see today's watering in a home screen widget. Scan the code with your phone or open Google Play.",
+  "otherPlatformAndroidAction": "Open Google Play",
+  "otherPlatformDesktopTitle": "Polypodium on your computer",
+  "otherPlatformDesktopBody": "There are also versions for Windows and Linux: a big screen to organize the garden, print labels and go through the history.",
+  "otherPlatformDesktopAction": "See downloads",
+  "otherPlatformSyncNote": "To see the same plants on both, connect both to the same server.",
+  "dontShowAgain": "Don't show again"
 }

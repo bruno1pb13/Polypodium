@@ -3397,4 +3397,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get introPlatforms => 'Available for Android, Windows and Linux.';
+
+  @override
+  String get otherPlatformAndroidTitle => 'Polypodium on your phone';
+
+  @override
+  String get otherPlatformAndroidBody =>
+      'Take your garden with you: on Android you record care right next to the plant, scan labels with the camera and see today\'s watering in a home screen widget. Scan the code with your phone or open Google Play.';
+
+  @override
+  String get otherPlatformAndroidAction => 'Open Google Play';
+
+  @override
+  String get otherPlatformDesktopTitle => 'Polypodium on your computer';
+
+  @override
+  String get otherPlatformDesktopBody =>
+      'There are also versions for Windows and Linux: a big screen to organize the garden, print labels and go through the history.';
+
+  @override
+  String get otherPlatformDesktopAction => 'See downloads';
+
+  @override
+  String get otherPlatformSyncNote =>
+      'To see the same plants on both, connect both to the same server.';
+
+  @override
+  String get dontShowAgain => 'Don\'t show again';
 }
