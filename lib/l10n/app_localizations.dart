@@ -3050,12 +3050,6 @@ abstract class AppLocalizations {
   /// **'Plants linked to this location will not be deleted, but will be left without a location.'**
   String get deleteLocationBody;
 
-  /// No description provided for @settingsGeneral.
-  ///
-  /// In en, this message translates to:
-  /// **'General'**
-  String get settingsGeneral;
-
   /// No description provided for @settingsAppearance.
   ///
   /// In en, this message translates to:
@@ -3133,12 +3127,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dark'**
   String get themeDark;
-
-  /// No description provided for @aboutApp.
-  ///
-  /// In en, this message translates to:
-  /// **'About the App'**
-  String get aboutApp;
 
   /// No description provided for @noRemoteWorkspaces.
   ///
@@ -5641,6 +5629,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Don\'t show again'**
   String get dontShowAgain;
+
+  /// No description provided for @settingsReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get settingsReminders;
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAbout;
+
+  /// No description provided for @settingsRemindersOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On, at {time}'**
+  String settingsRemindersOn(String time);
+
+  /// No description provided for @settingsRemindersOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get settingsRemindersOff;
+
+  /// No description provided for @settingsAppearanceSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme: {theme}'**
+  String settingsAppearanceSummary(String theme);
+
+  /// No description provided for @settingsDataSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Export and import backups'**
+  String get settingsDataSummary;
+
+  /// No description provided for @settingsAboutSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String settingsAboutSummary(String version);
+
+  /// No description provided for @settingsAboutSummaryNoVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version, updates and links'**
+  String get settingsAboutSummaryNoVersion;
+
+  /// No description provided for @appWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Polypodium website'**
+  String get appWebsite;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @openSourceLicenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source licenses'**
+  String get openSourceLicenses;
 }
 
 class _AppLocalizationsDelegate

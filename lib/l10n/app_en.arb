@@ -784,7 +784,6 @@
   "deleteLocationTitle": "Delete location?",
   "deleteLocationBody": "Plants linked to this location will not be deleted, but will be left without a location.",
 
-  "settingsGeneral": "General",
   "settingsAppearance": "Appearance",
   "settingsSync": "Sync",
   "settingsData": "Data",
@@ -798,7 +797,6 @@
   "themeAuto": "Auto",
   "themeLight": "Light",
   "themeDark": "Dark",
-  "aboutApp": "About the App",
 
   "noRemoteWorkspaces": "No remote workspace yet. To sync between devices, add one with the address of a Polypodium server. Don't have a server? The documentation shows how to run your own.",
   "addRemoteWorkspace": "Add remote workspace",
@@ -1567,5 +1565,19 @@
   "otherPlatformDesktopBody": "There are also versions for Windows and Linux: a big screen to organize the garden, print labels and go through the history.",
   "otherPlatformDesktopAction": "See downloads",
   "otherPlatformSyncNote": "To see the same plants on both, connect both to the same server.",
-  "dontShowAgain": "Don't show again"
+  "dontShowAgain": "Don't show again",
+  "settingsReminders": "Reminders",
+  "settingsAbout": "About",
+  "settingsRemindersOn": "On, at {time}",
+  "@settingsRemindersOn": {"placeholders": {"time": {"type": "String"}}},
+  "settingsRemindersOff": "Off",
+  "settingsAppearanceSummary": "Theme: {theme}",
+  "@settingsAppearanceSummary": {"placeholders": {"theme": {"type": "String"}}},
+  "settingsDataSummary": "Export and import backups",
+  "settingsAboutSummary": "Version {version}",
+  "@settingsAboutSummary": {"placeholders": {"version": {"type": "String"}}},
+  "settingsAboutSummaryNoVersion": "Version, updates and links",
+  "appWebsite": "Polypodium website",
+  "privacyPolicy": "Privacy policy",
+  "openSourceLicenses": "Open source licenses"
 }

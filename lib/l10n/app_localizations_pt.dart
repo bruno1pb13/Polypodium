@@ -1725,9 +1725,6 @@ class AppLocalizationsPt extends AppLocalizations {
       'Plantas vinculadas a esta localização não serão deletadas, mas ficarão sem localização.';
 
   @override
-  String get settingsGeneral => 'Geral';
-
-  @override
   String get settingsAppearance => 'Aparência';
 
   @override
@@ -1768,9 +1765,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get themeDark => 'Escuro';
-
-  @override
-  String get aboutApp => 'Sobre o Aplicativo';
 
   @override
   String get noRemoteWorkspaces =>
@@ -3427,4 +3421,43 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get dontShowAgain => 'Não mostrar novamente';
+
+  @override
+  String get settingsReminders => 'Lembretes';
+
+  @override
+  String get settingsAbout => 'Sobre';
+
+  @override
+  String settingsRemindersOn(String time) {
+    return 'Ativados, às $time';
+  }
+
+  @override
+  String get settingsRemindersOff => 'Desativados';
+
+  @override
+  String settingsAppearanceSummary(String theme) {
+    return 'Tema: $theme';
+  }
+
+  @override
+  String get settingsDataSummary => 'Exportar e importar backups';
+
+  @override
+  String settingsAboutSummary(String version) {
+    return 'Versão $version';
+  }
+
+  @override
+  String get settingsAboutSummaryNoVersion => 'Versão, atualizações e links';
+
+  @override
+  String get appWebsite => 'Site do Polypodium';
+
+  @override
+  String get privacyPolicy => 'Política de privacidade';
+
+  @override
+  String get openSourceLicenses => 'Licenças de código aberto';
 }

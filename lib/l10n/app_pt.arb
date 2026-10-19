@@ -520,7 +520,6 @@
   "deleteLocationTitle": "Deletar localização?",
   "deleteLocationBody": "Plantas vinculadas a esta localização não serão deletadas, mas ficarão sem localização.",
 
-  "settingsGeneral": "Geral",
   "settingsAppearance": "Aparência",
   "settingsSync": "Sincronização",
   "settingsData": "Dados",
@@ -534,7 +533,6 @@
   "themeAuto": "Auto",
   "themeLight": "Claro",
   "themeDark": "Escuro",
-  "aboutApp": "Sobre o Aplicativo",
 
   "noRemoteWorkspaces": "Nenhum workspace remoto ainda. Para sincronizar entre aparelhos, adicione um com o endereço de um servidor Polypodium. Ainda não tem servidor? A documentação mostra como criar o seu.",
   "addRemoteWorkspace": "Adicionar workspace remoto",
@@ -956,5 +954,16 @@
   "otherPlatformDesktopBody": "Também há versões para Windows e Linux: uma tela grande para organizar o jardim, imprimir etiquetas e percorrer o histórico.",
   "otherPlatformDesktopAction": "Ver downloads",
   "otherPlatformSyncNote": "Para ver as mesmas plantas nos dois, conecte ambos ao mesmo servidor.",
-  "dontShowAgain": "Não mostrar novamente"
+  "dontShowAgain": "Não mostrar novamente",
+  "settingsReminders": "Lembretes",
+  "settingsAbout": "Sobre",
+  "settingsRemindersOn": "Ativados, às {time}",
+  "settingsRemindersOff": "Desativados",
+  "settingsAppearanceSummary": "Tema: {theme}",
+  "settingsDataSummary": "Exportar e importar backups",
+  "settingsAboutSummary": "Versão {version}",
+  "settingsAboutSummaryNoVersion": "Versão, atualizações e links",
+  "appWebsite": "Site do Polypodium",
+  "privacyPolicy": "Política de privacidade",
+  "openSourceLicenses": "Licenças de código aberto"
 }

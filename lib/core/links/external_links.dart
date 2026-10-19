@@ -10,6 +10,13 @@ abstract final class ExternalLinks {
 
   static bool _isPt(String localeName) => localeName.startsWith('pt');
 
+  static Uri website(String localeName) =>
+      Uri.parse(_isPt(localeName) ? '$_site/' : '$_site/index.en.html');
+
+  static Uri privacyPolicy(String localeName) => Uri.parse(_isPt(localeName)
+      ? '$_site/privacidade.html'
+      : '$_site/privacy.html');
+
   /// How to run a sync server and connect the app to it.
   static Uri serverDocs(String localeName) => Uri.parse(_isPt(localeName)
       ? '$_site/self-host.html'

@@ -69,6 +69,12 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Opens [category] in the column of the two-column layout.
+  Future<void> open(WidgetTester tester, SettingsCategory category) async {
+    await tester.tap(find.byKey(ValueKey('settings-category-${category.name}')));
+    await tester.pumpAndSettle();
+  }
+
   SwitchListTile switchTile(WidgetTester tester, String title) =>
       tester.widget<SwitchListTile>(find.widgetWithText(SwitchListTile, title));
 
@@ -99,7 +105,9 @@ void main() {
 
   testWidgets('toggling auto-sync persists it', (tester) async {
     await pump(tester, remote);
-    expect(find.text('Servidor de casa'), findsOneWidget);
+    await open(tester, SettingsCategory.sync);
+    // In the column's summary and atop the sync settings.
+    expect(find.text('Servidor de casa'), findsNWidgets(2));
     expect(find.text('Tudo sincronizado'), findsOneWidget);
     expect(switchTile(tester, 'Sincronização automática').value, isTrue);
 
@@ -115,6 +123,7 @@ void main() {
 
   testWidgets('a local workspace has no sync controls', (tester) async {
     await pump(tester, Workspace.newLocal());
+    await open(tester, SettingsCategory.sync);
     expect(find.text('Workspace local — não sincroniza'), findsOneWidget);
     expect(find.text('Sincronização automática'), findsNothing);
     expect(find.text('Sincronizar agora'), findsNothing);
@@ -122,6 +131,7 @@ void main() {
 
   testWidgets('appearance settings persist', (tester) async {
     await pump(tester, Workspace.newLocal());
+    await open(tester, SettingsCategory.appearance);
 
     await tester.tap(find.text('Transparência e Blur'));
     await tester.pumpAndSettle();
@@ -137,6 +147,33 @@ void main() {
           .selected,
       {'dark'},
     );
+  });
+
+  testWidgets('the column summarizes each category', (tester) async {
+    await pump(tester, remote);
+    expect(find.text('Ativados, às 09:00'), findsOneWidget);
+    expect(find.text('Tema: Auto'), findsOneWidget);
+    // The workspace's name, in the column only until sync is opened.
+    expect(find.text('Servidor de casa'), findsOneWidget);
+  });
+
+  testWidgets('narrow screens open each category on its own page',
+      (tester) async {
+    await pump(tester, remote, size: const Size(400, 900));
+    expect(find.text('Notificações de Rega'), findsNothing);
+
+    await tester.tap(find.text('Aparência'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SettingsCategoryPage), findsOneWidget);
+    expect(find.text('Transparência e Blur'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Voltar'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SettingsCategoryPage), findsNothing);
+
+    await tester.tap(find.text('Sobre'));
+    await tester.pumpAndSettle();
+    expect(find.text('Política de privacidade'), findsOneWidget);
   });
 
   group('accessibility', () {
@@ -167,6 +204,14 @@ void main() {
         setTextScale(tester, scale);
         await pump(tester, remote, size: const Size(400, 4000));
         expect(tester.takeException(), isNull);
+        for (final category in SettingsCategory.values) {
+          await tester.tap(find.byKey(
+              ValueKey('settings-category-${category.name}')));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          await tester.tap(find.byTooltip('Voltar'));
+          await tester.pumpAndSettle();
+        }
       });
     }
   });
