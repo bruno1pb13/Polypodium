@@ -1527,8 +1527,8 @@ class LocationsTableData extends DataClass
   final double? latitude;
   final double? longitude;
 
-  /// Plants here get rain (outdoors, uncovered), so the server's watering
-  /// advice may postpone their watering when it rains.
+  /// Plants here get rain (outdoors, uncovered), so the weather-adjusted
+  /// watering may postpone their watering when it rains.
   final bool exposedToRain;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -7216,6 +7216,544 @@ class WateringAdjustmentsTableCompanion
   }
 }
 
+class $LocalWeatherRegionsTableTable extends LocalWeatherRegionsTable
+    with
+        TableInfo<$LocalWeatherRegionsTableTable,
+            LocalWeatherRegionsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalWeatherRegionsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _latitudeMeta =
+      const VerificationMeta('latitude');
+  @override
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+      'latitude', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _longitudeMeta =
+      const VerificationMeta('longitude');
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+      'longitude', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _utcOffsetSecondsMeta =
+      const VerificationMeta('utcOffsetSeconds');
+  @override
+  late final GeneratedColumn<int> utcOffsetSeconds = GeneratedColumn<int>(
+      'utc_offset_seconds', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _fetchedAtMeta =
+      const VerificationMeta('fetchedAt');
+  @override
+  late final GeneratedColumn<DateTime> fetchedAt = GeneratedColumn<DateTime>(
+      'fetched_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _attemptedAtMeta =
+      const VerificationMeta('attemptedAt');
+  @override
+  late final GeneratedColumn<DateTime> attemptedAt = GeneratedColumn<DateTime>(
+      'attempted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _lastErrorMeta =
+      const VerificationMeta('lastError');
+  @override
+  late final GeneratedColumn<String> lastError = GeneratedColumn<String>(
+      'last_error', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _issuedOnMeta =
+      const VerificationMeta('issuedOn');
+  @override
+  late final GeneratedColumn<String> issuedOn = GeneratedColumn<String>(
+      'issued_on', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _dailyMeta = const VerificationMeta('daily');
+  @override
+  late final GeneratedColumn<String> daily = GeneratedColumn<String>(
+      'daily', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('[]'));
+  static const VerificationMeta _previousDailyMeta =
+      const VerificationMeta('previousDaily');
+  @override
+  late final GeneratedColumn<String> previousDaily = GeneratedColumn<String>(
+      'previous_daily', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('[]'));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        latitude,
+        longitude,
+        utcOffsetSeconds,
+        fetchedAt,
+        attemptedAt,
+        lastError,
+        issuedOn,
+        daily,
+        previousDaily
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_weather_regions';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<LocalWeatherRegionsTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('latitude')) {
+      context.handle(_latitudeMeta,
+          latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta));
+    } else if (isInserting) {
+      context.missing(_latitudeMeta);
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(_longitudeMeta,
+          longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta));
+    } else if (isInserting) {
+      context.missing(_longitudeMeta);
+    }
+    if (data.containsKey('utc_offset_seconds')) {
+      context.handle(
+          _utcOffsetSecondsMeta,
+          utcOffsetSeconds.isAcceptableOrUnknown(
+              data['utc_offset_seconds']!, _utcOffsetSecondsMeta));
+    }
+    if (data.containsKey('fetched_at')) {
+      context.handle(_fetchedAtMeta,
+          fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta));
+    }
+    if (data.containsKey('attempted_at')) {
+      context.handle(
+          _attemptedAtMeta,
+          attemptedAt.isAcceptableOrUnknown(
+              data['attempted_at']!, _attemptedAtMeta));
+    }
+    if (data.containsKey('last_error')) {
+      context.handle(_lastErrorMeta,
+          lastError.isAcceptableOrUnknown(data['last_error']!, _lastErrorMeta));
+    }
+    if (data.containsKey('issued_on')) {
+      context.handle(_issuedOnMeta,
+          issuedOn.isAcceptableOrUnknown(data['issued_on']!, _issuedOnMeta));
+    }
+    if (data.containsKey('daily')) {
+      context.handle(
+          _dailyMeta, daily.isAcceptableOrUnknown(data['daily']!, _dailyMeta));
+    }
+    if (data.containsKey('previous_daily')) {
+      context.handle(
+          _previousDailyMeta,
+          previousDaily.isAcceptableOrUnknown(
+              data['previous_daily']!, _previousDailyMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalWeatherRegionsTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalWeatherRegionsTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      latitude: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}latitude'])!,
+      longitude: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}longitude'])!,
+      utcOffsetSeconds: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}utc_offset_seconds']),
+      fetchedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}fetched_at']),
+      attemptedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}attempted_at']),
+      lastError: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}last_error']),
+      issuedOn: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}issued_on']),
+      daily: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}daily'])!,
+      previousDaily: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}previous_daily'])!,
+    );
+  }
+
+  @override
+  $LocalWeatherRegionsTableTable createAlias(String alias) {
+    return $LocalWeatherRegionsTableTable(attachedDatabase, alias);
+  }
+}
+
+class LocalWeatherRegionsTableData extends DataClass
+    implements Insertable<LocalWeatherRegionsTableData> {
+  final String id;
+  final double latitude;
+  final double longitude;
+
+  /// The region's offset from UTC at the last fetch, for its local date.
+  final int? utcOffsetSeconds;
+  final DateTime? fetchedAt;
+  final DateTime? attemptedAt;
+  final String? lastError;
+
+  /// The region's local date (`YYYY-MM-DD`) when [daily] was issued.
+  final String? issuedOn;
+
+  /// The last fetch's daily rows as JSON: observed past days, then the
+  /// forecast from [issuedOn] on.
+  final String daily;
+
+  /// The forecast (from its own issue date on) of the last fetch issued on
+  /// an earlier day than [daily], which caps forecast rain (see
+  /// `wateringDays`).
+  final String previousDaily;
+  const LocalWeatherRegionsTableData(
+      {required this.id,
+      required this.latitude,
+      required this.longitude,
+      this.utcOffsetSeconds,
+      this.fetchedAt,
+      this.attemptedAt,
+      this.lastError,
+      this.issuedOn,
+      required this.daily,
+      required this.previousDaily});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['latitude'] = Variable<double>(latitude);
+    map['longitude'] = Variable<double>(longitude);
+    if (!nullToAbsent || utcOffsetSeconds != null) {
+      map['utc_offset_seconds'] = Variable<int>(utcOffsetSeconds);
+    }
+    if (!nullToAbsent || fetchedAt != null) {
+      map['fetched_at'] = Variable<DateTime>(fetchedAt);
+    }
+    if (!nullToAbsent || attemptedAt != null) {
+      map['attempted_at'] = Variable<DateTime>(attemptedAt);
+    }
+    if (!nullToAbsent || lastError != null) {
+      map['last_error'] = Variable<String>(lastError);
+    }
+    if (!nullToAbsent || issuedOn != null) {
+      map['issued_on'] = Variable<String>(issuedOn);
+    }
+    map['daily'] = Variable<String>(daily);
+    map['previous_daily'] = Variable<String>(previousDaily);
+    return map;
+  }
+
+  LocalWeatherRegionsTableCompanion toCompanion(bool nullToAbsent) {
+    return LocalWeatherRegionsTableCompanion(
+      id: Value(id),
+      latitude: Value(latitude),
+      longitude: Value(longitude),
+      utcOffsetSeconds: utcOffsetSeconds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(utcOffsetSeconds),
+      fetchedAt: fetchedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fetchedAt),
+      attemptedAt: attemptedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(attemptedAt),
+      lastError: lastError == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastError),
+      issuedOn: issuedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(issuedOn),
+      daily: Value(daily),
+      previousDaily: Value(previousDaily),
+    );
+  }
+
+  factory LocalWeatherRegionsTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalWeatherRegionsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      latitude: serializer.fromJson<double>(json['latitude']),
+      longitude: serializer.fromJson<double>(json['longitude']),
+      utcOffsetSeconds: serializer.fromJson<int?>(json['utcOffsetSeconds']),
+      fetchedAt: serializer.fromJson<DateTime?>(json['fetchedAt']),
+      attemptedAt: serializer.fromJson<DateTime?>(json['attemptedAt']),
+      lastError: serializer.fromJson<String?>(json['lastError']),
+      issuedOn: serializer.fromJson<String?>(json['issuedOn']),
+      daily: serializer.fromJson<String>(json['daily']),
+      previousDaily: serializer.fromJson<String>(json['previousDaily']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'latitude': serializer.toJson<double>(latitude),
+      'longitude': serializer.toJson<double>(longitude),
+      'utcOffsetSeconds': serializer.toJson<int?>(utcOffsetSeconds),
+      'fetchedAt': serializer.toJson<DateTime?>(fetchedAt),
+      'attemptedAt': serializer.toJson<DateTime?>(attemptedAt),
+      'lastError': serializer.toJson<String?>(lastError),
+      'issuedOn': serializer.toJson<String?>(issuedOn),
+      'daily': serializer.toJson<String>(daily),
+      'previousDaily': serializer.toJson<String>(previousDaily),
+    };
+  }
+
+  LocalWeatherRegionsTableData copyWith(
+          {String? id,
+          double? latitude,
+          double? longitude,
+          Value<int?> utcOffsetSeconds = const Value.absent(),
+          Value<DateTime?> fetchedAt = const Value.absent(),
+          Value<DateTime?> attemptedAt = const Value.absent(),
+          Value<String?> lastError = const Value.absent(),
+          Value<String?> issuedOn = const Value.absent(),
+          String? daily,
+          String? previousDaily}) =>
+      LocalWeatherRegionsTableData(
+        id: id ?? this.id,
+        latitude: latitude ?? this.latitude,
+        longitude: longitude ?? this.longitude,
+        utcOffsetSeconds: utcOffsetSeconds.present
+            ? utcOffsetSeconds.value
+            : this.utcOffsetSeconds,
+        fetchedAt: fetchedAt.present ? fetchedAt.value : this.fetchedAt,
+        attemptedAt: attemptedAt.present ? attemptedAt.value : this.attemptedAt,
+        lastError: lastError.present ? lastError.value : this.lastError,
+        issuedOn: issuedOn.present ? issuedOn.value : this.issuedOn,
+        daily: daily ?? this.daily,
+        previousDaily: previousDaily ?? this.previousDaily,
+      );
+  LocalWeatherRegionsTableData copyWithCompanion(
+      LocalWeatherRegionsTableCompanion data) {
+    return LocalWeatherRegionsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      utcOffsetSeconds: data.utcOffsetSeconds.present
+          ? data.utcOffsetSeconds.value
+          : this.utcOffsetSeconds,
+      fetchedAt: data.fetchedAt.present ? data.fetchedAt.value : this.fetchedAt,
+      attemptedAt:
+          data.attemptedAt.present ? data.attemptedAt.value : this.attemptedAt,
+      lastError: data.lastError.present ? data.lastError.value : this.lastError,
+      issuedOn: data.issuedOn.present ? data.issuedOn.value : this.issuedOn,
+      daily: data.daily.present ? data.daily.value : this.daily,
+      previousDaily: data.previousDaily.present
+          ? data.previousDaily.value
+          : this.previousDaily,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalWeatherRegionsTableData(')
+          ..write('id: $id, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('utcOffsetSeconds: $utcOffsetSeconds, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('attemptedAt: $attemptedAt, ')
+          ..write('lastError: $lastError, ')
+          ..write('issuedOn: $issuedOn, ')
+          ..write('daily: $daily, ')
+          ..write('previousDaily: $previousDaily')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, latitude, longitude, utcOffsetSeconds,
+      fetchedAt, attemptedAt, lastError, issuedOn, daily, previousDaily);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalWeatherRegionsTableData &&
+          other.id == this.id &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
+          other.utcOffsetSeconds == this.utcOffsetSeconds &&
+          other.fetchedAt == this.fetchedAt &&
+          other.attemptedAt == this.attemptedAt &&
+          other.lastError == this.lastError &&
+          other.issuedOn == this.issuedOn &&
+          other.daily == this.daily &&
+          other.previousDaily == this.previousDaily);
+}
+
+class LocalWeatherRegionsTableCompanion
+    extends UpdateCompanion<LocalWeatherRegionsTableData> {
+  final Value<String> id;
+  final Value<double> latitude;
+  final Value<double> longitude;
+  final Value<int?> utcOffsetSeconds;
+  final Value<DateTime?> fetchedAt;
+  final Value<DateTime?> attemptedAt;
+  final Value<String?> lastError;
+  final Value<String?> issuedOn;
+  final Value<String> daily;
+  final Value<String> previousDaily;
+  final Value<int> rowid;
+  const LocalWeatherRegionsTableCompanion({
+    this.id = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.utcOffsetSeconds = const Value.absent(),
+    this.fetchedAt = const Value.absent(),
+    this.attemptedAt = const Value.absent(),
+    this.lastError = const Value.absent(),
+    this.issuedOn = const Value.absent(),
+    this.daily = const Value.absent(),
+    this.previousDaily = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalWeatherRegionsTableCompanion.insert({
+    required String id,
+    required double latitude,
+    required double longitude,
+    this.utcOffsetSeconds = const Value.absent(),
+    this.fetchedAt = const Value.absent(),
+    this.attemptedAt = const Value.absent(),
+    this.lastError = const Value.absent(),
+    this.issuedOn = const Value.absent(),
+    this.daily = const Value.absent(),
+    this.previousDaily = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        latitude = Value(latitude),
+        longitude = Value(longitude);
+  static Insertable<LocalWeatherRegionsTableData> custom({
+    Expression<String>? id,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
+    Expression<int>? utcOffsetSeconds,
+    Expression<DateTime>? fetchedAt,
+    Expression<DateTime>? attemptedAt,
+    Expression<String>? lastError,
+    Expression<String>? issuedOn,
+    Expression<String>? daily,
+    Expression<String>? previousDaily,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (utcOffsetSeconds != null) 'utc_offset_seconds': utcOffsetSeconds,
+      if (fetchedAt != null) 'fetched_at': fetchedAt,
+      if (attemptedAt != null) 'attempted_at': attemptedAt,
+      if (lastError != null) 'last_error': lastError,
+      if (issuedOn != null) 'issued_on': issuedOn,
+      if (daily != null) 'daily': daily,
+      if (previousDaily != null) 'previous_daily': previousDaily,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalWeatherRegionsTableCompanion copyWith(
+      {Value<String>? id,
+      Value<double>? latitude,
+      Value<double>? longitude,
+      Value<int?>? utcOffsetSeconds,
+      Value<DateTime?>? fetchedAt,
+      Value<DateTime?>? attemptedAt,
+      Value<String?>? lastError,
+      Value<String?>? issuedOn,
+      Value<String>? daily,
+      Value<String>? previousDaily,
+      Value<int>? rowid}) {
+    return LocalWeatherRegionsTableCompanion(
+      id: id ?? this.id,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      utcOffsetSeconds: utcOffsetSeconds ?? this.utcOffsetSeconds,
+      fetchedAt: fetchedAt ?? this.fetchedAt,
+      attemptedAt: attemptedAt ?? this.attemptedAt,
+      lastError: lastError ?? this.lastError,
+      issuedOn: issuedOn ?? this.issuedOn,
+      daily: daily ?? this.daily,
+      previousDaily: previousDaily ?? this.previousDaily,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
+    }
+    if (utcOffsetSeconds.present) {
+      map['utc_offset_seconds'] = Variable<int>(utcOffsetSeconds.value);
+    }
+    if (fetchedAt.present) {
+      map['fetched_at'] = Variable<DateTime>(fetchedAt.value);
+    }
+    if (attemptedAt.present) {
+      map['attempted_at'] = Variable<DateTime>(attemptedAt.value);
+    }
+    if (lastError.present) {
+      map['last_error'] = Variable<String>(lastError.value);
+    }
+    if (issuedOn.present) {
+      map['issued_on'] = Variable<String>(issuedOn.value);
+    }
+    if (daily.present) {
+      map['daily'] = Variable<String>(daily.value);
+    }
+    if (previousDaily.present) {
+      map['previous_daily'] = Variable<String>(previousDaily.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalWeatherRegionsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('utcOffsetSeconds: $utcOffsetSeconds, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('attemptedAt: $attemptedAt, ')
+          ..write('lastError: $lastError, ')
+          ..write('issuedOn: $issuedOn, ')
+          ..write('daily: $daily, ')
+          ..write('previousDaily: $previousDaily, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7241,6 +7779,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $SyncConfirmedEntityTypesTableTable(this);
   late final $WateringAdjustmentsTableTable wateringAdjustmentsTable =
       $WateringAdjustmentsTableTable(this);
+  late final $LocalWeatherRegionsTableTable localWeatherRegionsTable =
+      $LocalWeatherRegionsTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7260,7 +7800,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         syncEntryTypesTable,
         syncEntityTypesTable,
         syncConfirmedEntityTypesTable,
-        wateringAdjustmentsTable
+        wateringAdjustmentsTable,
+        localWeatherRegionsTable
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -12275,6 +12816,264 @@ typedef $$WateringAdjustmentsTableTableProcessedTableManager
         ),
         WateringAdjustmentsTableData,
         PrefetchHooks Function()>;
+typedef $$LocalWeatherRegionsTableTableCreateCompanionBuilder
+    = LocalWeatherRegionsTableCompanion Function({
+  required String id,
+  required double latitude,
+  required double longitude,
+  Value<int?> utcOffsetSeconds,
+  Value<DateTime?> fetchedAt,
+  Value<DateTime?> attemptedAt,
+  Value<String?> lastError,
+  Value<String?> issuedOn,
+  Value<String> daily,
+  Value<String> previousDaily,
+  Value<int> rowid,
+});
+typedef $$LocalWeatherRegionsTableTableUpdateCompanionBuilder
+    = LocalWeatherRegionsTableCompanion Function({
+  Value<String> id,
+  Value<double> latitude,
+  Value<double> longitude,
+  Value<int?> utcOffsetSeconds,
+  Value<DateTime?> fetchedAt,
+  Value<DateTime?> attemptedAt,
+  Value<String?> lastError,
+  Value<String?> issuedOn,
+  Value<String> daily,
+  Value<String> previousDaily,
+  Value<int> rowid,
+});
+
+class $$LocalWeatherRegionsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalWeatherRegionsTableTable> {
+  $$LocalWeatherRegionsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get latitude => $composableBuilder(
+      column: $table.latitude, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+      column: $table.longitude, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get utcOffsetSeconds => $composableBuilder(
+      column: $table.utcOffsetSeconds,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
+      column: $table.fetchedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get attemptedAt => $composableBuilder(
+      column: $table.attemptedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get lastError => $composableBuilder(
+      column: $table.lastError, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get issuedOn => $composableBuilder(
+      column: $table.issuedOn, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get daily => $composableBuilder(
+      column: $table.daily, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get previousDaily => $composableBuilder(
+      column: $table.previousDaily, builder: (column) => ColumnFilters(column));
+}
+
+class $$LocalWeatherRegionsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalWeatherRegionsTableTable> {
+  $$LocalWeatherRegionsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get latitude => $composableBuilder(
+      column: $table.latitude, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+      column: $table.longitude, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get utcOffsetSeconds => $composableBuilder(
+      column: $table.utcOffsetSeconds,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get fetchedAt => $composableBuilder(
+      column: $table.fetchedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get attemptedAt => $composableBuilder(
+      column: $table.attemptedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get lastError => $composableBuilder(
+      column: $table.lastError, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get issuedOn => $composableBuilder(
+      column: $table.issuedOn, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get daily => $composableBuilder(
+      column: $table.daily, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get previousDaily => $composableBuilder(
+      column: $table.previousDaily,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$LocalWeatherRegionsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalWeatherRegionsTableTable> {
+  $$LocalWeatherRegionsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
+
+  GeneratedColumn<int> get utcOffsetSeconds => $composableBuilder(
+      column: $table.utcOffsetSeconds, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fetchedAt =>
+      $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get attemptedAt => $composableBuilder(
+      column: $table.attemptedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get lastError =>
+      $composableBuilder(column: $table.lastError, builder: (column) => column);
+
+  GeneratedColumn<String> get issuedOn =>
+      $composableBuilder(column: $table.issuedOn, builder: (column) => column);
+
+  GeneratedColumn<String> get daily =>
+      $composableBuilder(column: $table.daily, builder: (column) => column);
+
+  GeneratedColumn<String> get previousDaily => $composableBuilder(
+      column: $table.previousDaily, builder: (column) => column);
+}
+
+class $$LocalWeatherRegionsTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LocalWeatherRegionsTableTable,
+    LocalWeatherRegionsTableData,
+    $$LocalWeatherRegionsTableTableFilterComposer,
+    $$LocalWeatherRegionsTableTableOrderingComposer,
+    $$LocalWeatherRegionsTableTableAnnotationComposer,
+    $$LocalWeatherRegionsTableTableCreateCompanionBuilder,
+    $$LocalWeatherRegionsTableTableUpdateCompanionBuilder,
+    (
+      LocalWeatherRegionsTableData,
+      BaseReferences<_$AppDatabase, $LocalWeatherRegionsTableTable,
+          LocalWeatherRegionsTableData>
+    ),
+    LocalWeatherRegionsTableData,
+    PrefetchHooks Function()> {
+  $$LocalWeatherRegionsTableTableTableManager(
+      _$AppDatabase db, $LocalWeatherRegionsTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalWeatherRegionsTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalWeatherRegionsTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalWeatherRegionsTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<double> latitude = const Value.absent(),
+            Value<double> longitude = const Value.absent(),
+            Value<int?> utcOffsetSeconds = const Value.absent(),
+            Value<DateTime?> fetchedAt = const Value.absent(),
+            Value<DateTime?> attemptedAt = const Value.absent(),
+            Value<String?> lastError = const Value.absent(),
+            Value<String?> issuedOn = const Value.absent(),
+            Value<String> daily = const Value.absent(),
+            Value<String> previousDaily = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalWeatherRegionsTableCompanion(
+            id: id,
+            latitude: latitude,
+            longitude: longitude,
+            utcOffsetSeconds: utcOffsetSeconds,
+            fetchedAt: fetchedAt,
+            attemptedAt: attemptedAt,
+            lastError: lastError,
+            issuedOn: issuedOn,
+            daily: daily,
+            previousDaily: previousDaily,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required double latitude,
+            required double longitude,
+            Value<int?> utcOffsetSeconds = const Value.absent(),
+            Value<DateTime?> fetchedAt = const Value.absent(),
+            Value<DateTime?> attemptedAt = const Value.absent(),
+            Value<String?> lastError = const Value.absent(),
+            Value<String?> issuedOn = const Value.absent(),
+            Value<String> daily = const Value.absent(),
+            Value<String> previousDaily = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalWeatherRegionsTableCompanion.insert(
+            id: id,
+            latitude: latitude,
+            longitude: longitude,
+            utcOffsetSeconds: utcOffsetSeconds,
+            fetchedAt: fetchedAt,
+            attemptedAt: attemptedAt,
+            lastError: lastError,
+            issuedOn: issuedOn,
+            daily: daily,
+            previousDaily: previousDaily,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$LocalWeatherRegionsTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $LocalWeatherRegionsTableTable,
+        LocalWeatherRegionsTableData,
+        $$LocalWeatherRegionsTableTableFilterComposer,
+        $$LocalWeatherRegionsTableTableOrderingComposer,
+        $$LocalWeatherRegionsTableTableAnnotationComposer,
+        $$LocalWeatherRegionsTableTableCreateCompanionBuilder,
+        $$LocalWeatherRegionsTableTableUpdateCompanionBuilder,
+        (
+          LocalWeatherRegionsTableData,
+          BaseReferences<_$AppDatabase, $LocalWeatherRegionsTableTable,
+              LocalWeatherRegionsTableData>
+        ),
+        LocalWeatherRegionsTableData,
+        PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -12312,4 +13111,7 @@ class $AppDatabaseManager {
   $$WateringAdjustmentsTableTableTableManager get wateringAdjustmentsTable =>
       $$WateringAdjustmentsTableTableTableManager(
           _db, _db.wateringAdjustmentsTable);
+  $$LocalWeatherRegionsTableTableTableManager get localWeatherRegionsTable =>
+      $$LocalWeatherRegionsTableTableTableManager(
+          _db, _db.localWeatherRegionsTable);
 }

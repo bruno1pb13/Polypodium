@@ -25,6 +25,8 @@ import '../../features/species/data/species_dao.dart';
 import '../../features/species/data/species_table.dart';
 import '../../features/soils/data/soils_dao.dart';
 import '../../features/soils/data/soils_table.dart';
+import '../../features/weather/data/local_weather_regions_dao.dart';
+import '../../features/weather/data/local_weather_regions_table.dart';
 import '../../features/weather/data/watering_adjustments_dao.dart';
 import '../../features/weather/data/watering_adjustments_table.dart';
 import 'converters.dart';
@@ -42,6 +44,7 @@ export '../../features/pots/data/pots_table.dart';
 export '../../features/reminders/data/reminders_table.dart';
 export '../../features/soils/data/soils_table.dart';
 export '../../features/species/data/species_table.dart';
+export '../../features/weather/data/local_weather_regions_table.dart';
 export '../../features/weather/data/watering_adjustments_table.dart';
 export 'sync_cursors_table.dart';
 export 'sync_meta_table.dart';
@@ -65,6 +68,7 @@ part 'app_database.g.dart';
     SyncEntityTypesTable,
     SyncConfirmedEntityTypesTable,
     WateringAdjustmentsTable,
+    LocalWeatherRegionsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -81,7 +85,7 @@ class AppDatabase extends _$AppDatabase {
   final String? deviceId;
 
   @override
-  int get schemaVersion => 23;
+  int get schemaVersion => 24;
 
   late final SpeciesDao speciesDao = SpeciesDao(this);
   late final PlantsDao plantsDao = PlantsDao(this);
@@ -96,6 +100,8 @@ class AppDatabase extends _$AppDatabase {
   late final SyncCursorsDao syncCursorsDao = SyncCursorsDao(this);
   late final WateringAdjustmentsDao wateringAdjustmentsDao =
       WateringAdjustmentsDao(this);
+  late final LocalWeatherRegionsDao localWeatherRegionsDao =
+      LocalWeatherRegionsDao(this);
 
   Future<void> _seedFresh() async {
     await into(syncMetaTable).insertOnConflictUpdate(
@@ -277,6 +283,10 @@ class AppDatabase extends _$AppDatabase {
             // (synced) and the server's adjustments (local only).
             await _addExposedToRain(m);
             await m.createTable(wateringAdjustmentsTable);
+          }
+          if (from < 24) {
+            // Forecasts the device fetches itself for the local workspace.
+            await m.createTable(localWeatherRegionsTable);
           }
         },
       );

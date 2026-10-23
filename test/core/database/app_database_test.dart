@@ -727,6 +727,19 @@ void main() {
     expect(version.read<int>('user_version'), db.schemaVersion);
   });
 
+  test('migration from v23 creates the local weather regions table',
+      () async {
+    await db.close();
+    db = AppDatabase.forTesting(NativeDatabase.memory(setup: (raw) {
+      raw.execute('PRAGMA user_version = 23');
+    }));
+
+    expect(await db.localWeatherRegionsDao.getAll(), isEmpty);
+    final version =
+        await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), db.schemaVersion);
+  });
+
   test('migrating from before v14 rebuilds plants with the parent column',
       () async {
     await db.close();
