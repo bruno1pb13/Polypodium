@@ -125,7 +125,9 @@ void main() {
     await service().refresh();
 
     expect(requests, hasLength(1));
-    expect(requests.single.queryParameters['latitude'], '-23.5505');
+    // Rounded to about 1 km before leaving the device.
+    expect(requests.single.queryParameters['latitude'], '-23.5500');
+    expect(requests.single.queryParameters['longitude'], '-46.6300');
     expect(requests.single.queryParameters.containsKey('hourly'), isFalse);
     expect(await db.localWeatherRegionsDao.getAll(), hasLength(1));
 

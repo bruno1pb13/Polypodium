@@ -19,9 +19,13 @@ class OpenMeteoClient {
 
   /// The daily rows for one point. Throws [OpenMeteoException] when the
   /// request fails or the answer isn't a forecast.
+  ///
+  /// The coordinates are rounded to 0.01° (about 1 km) before they leave
+  /// the device, as the privacy policy promises; the forecast grid is
+  /// coarser than that anyway.
   Future<WeatherForecast> fetch(double latitude, double longitude) async {
     final uri = Uri.parse(baseUrl).replace(
-      queryParameters: openMeteoQuery(latitude, longitude,
+      queryParameters: openMeteoQuery(_round(latitude), _round(longitude),
           pastDays: pastDays, forecastDays: forecastDays, hourly: false),
     );
     final http.Response response;
@@ -48,6 +52,8 @@ class OpenMeteoClient {
     }
     return parseOpenMeteo(decoded);
   }
+
+  static double _round(double degrees) => (degrees * 100).roundToDouble() / 100;
 }
 
 class OpenMeteoException implements Exception {
