@@ -2898,6 +2898,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get weatherSetupEnable => 'Ligar';
 
   @override
+  String get localWeatherTitle => 'Previsão do tempo';
+
+  @override
+  String get localWeatherSubtitle =>
+      'Busca a previsão dos locais com coordenadas e adia ou adianta a rega conforme a chuva e o calor. As coordenadas aproximadas dos locais são enviadas ao serviço Open-Meteo.';
+
+  @override
   String get weatherToday => 'Hoje';
 
   @override
@@ -3253,7 +3260,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get locationExposedToRainHint =>
-      'As plantas aqui recebem chuva (ao ar livre, sem cobertura). Com a previsão do tempo ligada no servidor, a chuva pode adiar a rega delas.';
+      'As plantas aqui recebem chuva (ao ar livre, sem cobertura). Com a previsão do tempo ligada, a chuva pode adiar a rega delas.';
 
   @override
   String get wateringRulesTitle => 'Rega pelo clima';

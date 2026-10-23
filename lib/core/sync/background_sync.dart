@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/settings/data/settings_repository.dart';
+import '../../features/weather/data/local_weather_service.dart';
 import '../../features/workspaces/data/workspace_repository.dart';
 import '../../features/workspaces/domain/workspace_model.dart';
 import '../../features/workspaces/domain/workspace_paths.dart';
@@ -79,6 +80,19 @@ class BackgroundSync {
   static Future<void> runForActiveWorkspace(
       AppDatabase db, Workspace? workspace) async {
     final prefs = await SharedPreferences.getInstance();
+    if (workspace?.type == WorkspaceType.local) {
+      // Nothing to sync, but the weather behind the reminders is computed
+      // on this device: keep it fresh while the app stays closed.
+      if (SettingsRepository(prefs).isLocalWeatherEnabled()) {
+        try {
+          await LocalWeatherService(db).refresh().timeout(defaultTimeout);
+        } catch (e) {
+          // ignore: avoid_print
+          print('[BackgroundSync] local weather not refreshed: $e');
+        }
+      }
+      return;
+    }
     await BackgroundSync(
       workspace: workspace,
       settings: SettingsRepository(prefs),

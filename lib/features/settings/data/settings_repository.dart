@@ -13,6 +13,7 @@ class SettingsRepository {
   static const _introSeenKey = 'intro_seen';
   static const _otherPlatformCardDismissedKey =
       'other_platform_card_dismissed';
+  static const _localWeatherEnabledKey = 'local_weather_enabled';
 
   final SharedPreferences _prefs;
 
@@ -82,6 +83,16 @@ class SettingsRepository {
 
   Future<void> setAutoSyncEnabled(bool enabled) async {
     await _prefs.setBool(_autoSyncEnabledKey, enabled);
+  }
+
+  /// Whether the local workspace fetches forecasts from Open-Meteo, which
+  /// sends it the coordinates of its locations. Off until the user turns
+  /// it on; a workspace with a server never fetches them itself.
+  bool isLocalWeatherEnabled() =>
+      _prefs.getBool(_localWeatherEnabledKey) ?? false;
+
+  Future<void> setLocalWeatherEnabled(bool enabled) async {
+    await _prefs.setBool(_localWeatherEnabledKey, enabled);
   }
 
   /// Goes through the same path as every plant mutation, so the recurring

@@ -8,12 +8,15 @@ import '../../../../core/sync/sync_providers.dart';
 import '../../../../core/updates/distribution_channel.dart';
 import '../../../../core/updates/update_controller.dart';
 import '../../../data_transfer/presentation/widgets/data_transfer_section.dart';
+import '../../../weather/presentation/providers/weather_providers.dart';
 import '../../../workspaces/domain/workspace_model.dart';
 import '../../../workspaces/presentation/providers/workspace_providers.dart';
 import '../../../workspaces/presentation/screens/workspaces_screen.dart';
 import '../providers/settings_providers.dart';
 
-/// Watering reminders: whether they're on and at what time of day.
+/// Watering reminders: whether they're on and at what time of day, and in
+/// the local workspace whether the weather adjusts them (a workspace with a
+/// server follows its server's weather settings).
 class RemindersSettings extends ConsumerWidget {
   const RemindersSettings({super.key});
 
@@ -21,6 +24,9 @@ class RemindersSettings extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notificationsEnabled = ref.watch(notificationsEnabledNotifierProvider);
     final notificationTime = ref.watch(notificationTimeNotifierProvider);
+    final isLocal =
+        ref.watch(activeWorkspaceProvider).type == WorkspaceType.local;
+    final localWeather = ref.watch(localWeatherEnabledNotifierProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -57,6 +63,16 @@ class RemindersSettings extends ConsumerWidget {
             }
           },
         ),
+        if (isLocal)
+          SwitchListTile(
+            title: Text(context.l10n.localWeatherTitle),
+            subtitle: Text(context.l10n.localWeatherSubtitle),
+            secondary: const Icon(Icons.wb_cloudy_outlined),
+            value: localWeather,
+            onChanged: (value) => ref
+                .read(localWeatherEnabledNotifierProvider.notifier)
+                .setEnabled(value),
+          ),
       ],
     );
   }
