@@ -4856,6 +4856,18 @@ abstract class AppLocalizations {
   /// **'Turn on'**
   String get weatherSetupEnable;
 
+  /// No description provided for @localWeatherTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather forecast'**
+  String get localWeatherTitle;
+
+  /// No description provided for @localWeatherSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetches the forecast for locations with coordinates and postpones or brings forward watering with rain and heat. The approximate coordinates of your locations are sent to the Open-Meteo service.'**
+  String get localWeatherSubtitle;
+
   /// No description provided for @weatherToday.
   ///
   /// In en, this message translates to:
@@ -5363,7 +5375,7 @@ abstract class AppLocalizations {
   /// No description provided for @locationExposedToRainHint.
   ///
   /// In en, this message translates to:
-  /// **'Plants here get rain (outdoors, uncovered). When the server has weather on, rain can postpone their watering.'**
+  /// **'Plants here get rain (outdoors, uncovered). With the weather forecast on, rain can postpone their watering.'**
   String get locationExposedToRainHint;
 
   /// No description provided for @wateringRulesTitle.

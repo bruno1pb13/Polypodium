@@ -28,6 +28,7 @@ import 'features/onboarding/presentation/screens/intro_screen.dart';
 import 'features/plants/presentation/providers/plants_providers.dart';
 import 'features/settings/data/settings_repository.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
+import 'features/weather/presentation/providers/weather_providers.dart';
 import 'features/workspaces/data/workspace_repository.dart';
 
 /// Background entry point for WorkManager tasks (Android only).
@@ -170,6 +171,7 @@ class _AutoSyncScopeState extends ConsumerState<_AutoSyncScope>
     if (Platform.isAndroid) {
       ref.listenManual(homeWidgetSyncProvider, (_, __) {});
     }
+    ref.listenManual(localWeatherControllerProvider, (_, __) {});
   }
 
   @override
@@ -191,6 +193,7 @@ class _AutoSyncScopeState extends ConsumerState<_AutoSyncScope>
 
   void _triggerSync() {
     ref.read(autoSyncControllerProvider.notifier).syncNow();
+    ref.read(localWeatherControllerProvider.notifier).refresh();
     ref.read(updateControllerProvider.notifier).checkIfDue();
     ref.read(serverUpdateNoticeProvider.notifier).refresh();
   }

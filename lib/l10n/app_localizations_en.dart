@@ -2894,6 +2894,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weatherSetupEnable => 'Turn on';
 
   @override
+  String get localWeatherTitle => 'Weather forecast';
+
+  @override
+  String get localWeatherSubtitle =>
+      'Fetches the forecast for locations with coordinates and postpones or brings forward watering with rain and heat. The approximate coordinates of your locations are sent to the Open-Meteo service.';
+
+  @override
   String get weatherToday => 'Today';
 
   @override
@@ -3250,7 +3257,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationExposedToRainHint =>
-      'Plants here get rain (outdoors, uncovered). When the server has weather on, rain can postpone their watering.';
+      'Plants here get rain (outdoors, uncovered). With the weather forecast on, rain can postpone their watering.';
 
   @override
   String get wateringRulesTitle => 'Weather-adjusted watering';
