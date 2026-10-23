@@ -142,21 +142,21 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get introWelcomeBody =>
-      'Seu companheiro para cuidar da sua coleção de plantas.';
+      'Um diário de cuidados para a sua coleção de plantas: do que cada uma precisa, tudo o que você já fez por ela e a hora de regar, num só lugar. Começar leva menos de um minuto.';
 
   @override
-  String get introPlantsTitle => 'Acompanhe suas plantas';
+  String get introPlantsTitle => 'Organize seu jardim';
 
   @override
   String get introPlantsBody =>
-      'Cadastre cada planta com fotos, espécie, localização e solo, e mantenha todo o histórico em um só lugar.';
+      'Cadastre cada planta com espécie, fotos, local, vaso e solo. Imprima etiquetas com QR code e encontre qualquer planta com uma leitura.';
 
   @override
   String get introRemindersTitle => 'Lembretes de rega';
 
   @override
   String get introRemindersBody =>
-      'Receba notificações quando for hora de regar, de acordo com as necessidades de cada espécie.';
+      'Receba uma notificação quando for hora de regar, seguindo a frequência de cada planta, no horário que você escolher.';
 
   @override
   String get introRemindersTimeLabel => 'Lembrar às';
@@ -172,11 +172,11 @@ class AppLocalizationsPt extends AppLocalizations {
       'Você pode mudar isso quando quiser nas Configurações.';
 
   @override
-  String get introSyncTitle => 'Seus dados, em todo lugar';
+  String get introSyncTitle => 'Seus dados, do seu jeito';
 
   @override
   String get introSyncBody =>
-      'Tudo funciona offline. Conecte-se a um servidor depois para sincronizar entre dispositivos e fazer backup dos seus dados.';
+      'Tudo funciona offline, desde já. Quando quiser mais, conecte-se a um servidor Polypodium.';
 
   @override
   String get dateFormatPattern => 'dd/MM/yyyy';
@@ -1725,9 +1725,6 @@ class AppLocalizationsPt extends AppLocalizations {
       'Plantas vinculadas a esta localização não serão deletadas, mas ficarão sem localização.';
 
   @override
-  String get settingsGeneral => 'Geral';
-
-  @override
   String get settingsAppearance => 'Aparência';
 
   @override
@@ -1770,11 +1767,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get themeDark => 'Escuro';
 
   @override
-  String get aboutApp => 'Sobre o Aplicativo';
-
-  @override
   String get noRemoteWorkspaces =>
-      'Nenhum workspace remoto ainda. Adicione um para sincronizar estes dados com um servidor.';
+      'Nenhum workspace remoto ainda. Para sincronizar entre aparelhos, adicione um com o endereço de um servidor Polypodium. Ainda não tem servidor? A documentação mostra como criar o seu.';
 
   @override
   String get addRemoteWorkspace => 'Adicionar workspace remoto';
@@ -1786,7 +1780,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get disconnectBody =>
-      'Os dados deste workspace continuam neste dispositivo. Para sincronizar novamente, entre com sua conta.';
+      'Você sai da conta neste aparelho. Os dados já baixados continuam aqui, mas param de sincronizar até você entrar de novo. Nada é apagado no servidor.';
 
   @override
   String deleteWorkspaceTitle(String name) {
@@ -1795,7 +1789,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get deleteWorkspaceBody =>
-      'Os dados deste workspace serão apagados deste dispositivo. Isso não afeta a conta nem os dados no servidor.';
+      'Isso apaga deste aparelho as plantas, registros e fotos deste workspace. Sua conta e os dados no servidor não são afetados: adicione o workspace de novo para baixá-los.\n\nAlterações que ainda não foram sincronizadas serão perdidas.';
 
   @override
   String get adminPermissionLost =>
@@ -1837,7 +1831,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get migrateLocalDataBody =>
-      'Encontramos dados salvos apenas neste dispositivo (workspace local). Deseja enviá-los agora para este servidor?';
+      'Este aparelho tem dados salvos só no workspace local. Quer copiá-los agora para este servidor? Suas plantas, espécies, locais, registros e fotos são enviados, e o workspace local continua no aparelho como está.';
 
   @override
   String get serverUrlLabel => 'URL do servidor';
@@ -1847,7 +1841,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get firstAccountInfo =>
-      'Este servidor ainda não tem nenhuma conta. Crie a conta principal abaixo — ela será usada para acessá-lo daqui em diante.';
+      'Este servidor ainda não tem nenhuma conta. A conta criada agora vira a administradora do servidor: é com ela que você entra aqui e cria as contas das outras pessoas.';
 
   @override
   String get workspaceNameLabel => 'Nome deste workspace';
@@ -2556,7 +2550,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get newSharedGardenBody =>
-      'Cria um jardim vazio neste servidor, em um novo workspace. Adicione membros para compartilhá-lo.';
+      'Cria um jardim vazio neste servidor e o abre em um novo workspace. Depois, convide pessoas em \"Membros do jardim\" para compartilhá-lo.';
 
   @override
   String get gardenNameLabel => 'Nome do jardim';
@@ -3340,4 +3334,130 @@ class AppLocalizationsPt extends AppLocalizations {
   String wateringRuleDefault(String value) {
     return 'Padrão: $value';
   }
+
+  @override
+  String linkOpenFailed(String url) {
+    return 'Não foi possível abrir $url';
+  }
+
+  @override
+  String get viewDocumentation => 'Ver documentação';
+
+  @override
+  String get workspacesHelp => 'Ajuda';
+
+  @override
+  String get workspacesIntro =>
+      'Um workspace é um conjunto separado de plantas e registros. O local guarda tudo só neste aparelho. Um workspace remoto sincroniza com um servidor Polypodium, seu ou de alguém que te convidou, para usar vários aparelhos, ter backup e compartilhar jardins.';
+
+  @override
+  String get serverStepBody =>
+      'Informe o endereço do servidor Polypodium com que você quer sincronizar. Pode ser um servidor seu ou um cujo administrador criou uma conta para você.';
+
+  @override
+  String get serverUrlHelper =>
+      'Inclua http:// ou https:// e a porta, se houver';
+
+  @override
+  String get noServerYet => 'Ainda não tem servidor? Veja como criar o seu';
+
+  @override
+  String get loginStepBody =>
+      'Entre com a sua conta neste servidor. Se ainda não tem uma, peça ao administrador do servidor: é ele quem cria as contas, pelo app.';
+
+  @override
+  String disconnectWorkspaceTitle(String name) {
+    return 'Desconectar \"$name\"?';
+  }
+
+  @override
+  String get renameWorkspaceHelper => 'O nome muda só neste aparelho.';
+
+  @override
+  String get introDiaryTitle => 'Um diário para cada planta';
+
+  @override
+  String get introDiaryBody =>
+      'Registre regas, adubações, podas, replantios, colheitas e observações, com fotos. A tela inicial mostra o que precisa de cuidado hoje e como vai o seu jardim.';
+
+  @override
+  String get introSyncOffline =>
+      'Só neste aparelho: sem conta, nada sai do seu celular ou computador.';
+
+  @override
+  String get introSyncServer =>
+      'Com um servidor: sincronize entre aparelhos, tenha backup e compartilhe jardins com outras pessoas.';
+
+  @override
+  String get introSyncLaterNote =>
+      'Você conecta um servidor quando quiser, em Gerenciar workspaces.';
+
+  @override
+  String get introPlatforms => 'Disponível para Android, Windows e Linux.';
+
+  @override
+  String get otherPlatformAndroidTitle => 'Polypodium no celular';
+
+  @override
+  String get otherPlatformAndroidBody =>
+      'Leve seu jardim com você: no Android você registra os cuidados ao lado da planta, lê as etiquetas com a câmera e vê as regas do dia num widget na tela inicial. Leia o código com o celular ou abra a Google Play.';
+
+  @override
+  String get otherPlatformAndroidAction => 'Abrir na Google Play';
+
+  @override
+  String get otherPlatformDesktopTitle => 'Polypodium no computador';
+
+  @override
+  String get otherPlatformDesktopBody =>
+      'Também há versões para Windows e Linux: uma tela grande para organizar o jardim, imprimir etiquetas e percorrer o histórico.';
+
+  @override
+  String get otherPlatformDesktopAction => 'Ver downloads';
+
+  @override
+  String get otherPlatformSyncNote =>
+      'Para ver as mesmas plantas nos dois, conecte ambos ao mesmo servidor.';
+
+  @override
+  String get dontShowAgain => 'Não mostrar novamente';
+
+  @override
+  String get settingsReminders => 'Lembretes';
+
+  @override
+  String get settingsAbout => 'Sobre';
+
+  @override
+  String settingsRemindersOn(String time) {
+    return 'Ativados, às $time';
+  }
+
+  @override
+  String get settingsRemindersOff => 'Desativados';
+
+  @override
+  String settingsAppearanceSummary(String theme) {
+    return 'Tema: $theme';
+  }
+
+  @override
+  String get settingsDataSummary => 'Exportar e importar backups';
+
+  @override
+  String settingsAboutSummary(String version) {
+    return 'Versão $version';
+  }
+
+  @override
+  String get settingsAboutSummaryNoVersion => 'Versão, atualizações e links';
+
+  @override
+  String get appWebsite => 'Site do Polypodium';
+
+  @override
+  String get privacyPolicy => 'Política de privacidade';
+
+  @override
+  String get openSourceLicenses => 'Licenças de código aberto';
 }

@@ -1,333 +1,209 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/settings_providers.dart';
-import '../../../../core/widgets/adaptive_layout.dart';
-import '../../../../core/l10n/error_messages.dart';
-import '../../../../core/l10n/l10n.dart';
-import '../../../../core/sync/sync_providers.dart';
-import '../../../../core/updates/distribution_channel.dart';
-import '../../../../core/updates/update_controller.dart';
-import '../../../data_transfer/presentation/widgets/data_transfer_section.dart';
-import '../../../workspaces/domain/workspace_model.dart';
-import '../../../workspaces/presentation/providers/workspace_providers.dart';
-import '../../../workspaces/presentation/screens/workspaces_screen.dart';
 
-class SettingsScreen extends ConsumerWidget {
+import '../../../../core/l10n/l10n.dart';
+import '../../../../core/updates/update_controller.dart';
+import '../../../../core/widgets/adaptive_layout.dart';
+import '../../../workspaces/presentation/providers/workspace_providers.dart';
+import '../providers/settings_providers.dart';
+import '../widgets/settings_sections.dart';
+
+/// From this width on the categories sit in a column beside the selected
+/// one's settings; below it they're a list leading to one page each.
+const double kSettingsTwoColumnWidth = 760.0;
+
+const double _categoryColumnWidth = 300.0;
+
+enum SettingsCategory {
+  reminders(Icons.notifications_outlined, Icons.notifications),
+  appearance(Icons.palette_outlined, Icons.palette),
+  sync(Icons.cloud_sync_outlined, Icons.cloud_sync),
+  data(Icons.import_export, Icons.import_export),
+  about(Icons.info_outline, Icons.info);
+
+  const SettingsCategory(this.icon, this.selectedIcon);
+
+  final IconData icon;
+  final IconData selectedIcon;
+
+  String title(BuildContext context) => switch (this) {
+        reminders => context.l10n.settingsReminders,
+        appearance => context.l10n.settingsAppearance,
+        sync => context.l10n.settingsSync,
+        data => context.l10n.settingsData,
+        about => context.l10n.settingsAbout,
+      };
+
+  Widget content() => switch (this) {
+        reminders => const RemindersSettings(),
+        appearance => const AppearanceSettings(),
+        sync => const SyncSettings(),
+        data => const DataSettings(),
+        about => const AboutSettings(),
+      };
+}
+
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final notificationsEnabled = ref.watch(notificationsEnabledNotifierProvider);
-    final notificationTime = ref.watch(notificationTimeNotifierProvider);
-    final transparencyEnabled = ref.watch(transparencyEnabledNotifierProvider);
-    final themeModeStr = ref.watch(themeModeNotifierProvider);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.navSettings),
-      ),
-      body: ReadableListView(
-        children: [
-          _SectionHeader(title: context.l10n.settingsGeneral),
-          SwitchListTile(
-            title: Text(context.l10n.wateringNotifications),
-            subtitle: Text(context.l10n.wateringNotificationsSubtitle),
-            secondary: const Icon(Icons.notifications_outlined),
-            value: notificationsEnabled,
-            onChanged: (value) {
-              ref
-                  .read(notificationsEnabledNotifierProvider.notifier)
-                  .setEnabled(value);
-            },
-          ),
-          ListTile(
-            enabled: notificationsEnabled,
-            leading: const Icon(Icons.schedule_outlined),
-            title: Text(context.l10n.notificationTime),
-            subtitle: Text(context.l10n.notificationTimeSubtitle),
-            trailing: Text(
-              notificationTime.format(context),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            onTap: () async {
-              final picked = await showTimePicker(
-                context: context,
-                initialTime: notificationTime,
-              );
-              if (picked != null) {
-                ref
-                    .read(notificationTimeNotifierProvider.notifier)
-                    .setTime(picked);
-              }
-            },
-          ),
-          const Divider(),
-          _SectionHeader(title: context.l10n.settingsAppearance),
-          SwitchListTile(
-            title: Text(context.l10n.transparencyAndBlur),
-            subtitle: Text(context.l10n.transparencyAndBlurSubtitle),
-            secondary: const Icon(Icons.blur_on),
-            value: transparencyEnabled,
-            onChanged: (value) {
-              ref
-                  .read(transparencyEnabledNotifierProvider.notifier)
-                  .setEnabled(value);
-            },
-          ),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final themeSelector = SegmentedButton<String>(
-                segments: [
-                  ButtonSegment(
-                    value: 'system',
-                    icon: const Icon(Icons.brightness_auto),
-                    label: Text(context.l10n.themeAuto),
-                  ),
-                  ButtonSegment(
-                    value: 'light',
-                    icon: const Icon(Icons.light_mode),
-                    label: Text(context.l10n.themeLight),
-                  ),
-                  ButtonSegment(
-                    value: 'dark',
-                    icon: const Icon(Icons.dark_mode),
-                    label: Text(context.l10n.themeDark),
-                  ),
-                ],
-                selected: {themeModeStr},
-                onSelectionChanged: (newSelection) {
-                  ref
-                      .read(themeModeNotifierProvider.notifier)
-                      .setThemeMode(newSelection.first);
-                },
-                showSelectedIcon: false,
-              );
-              // Em telas estreitas o SegmentedButton como trailing esmaga o
-              // título; nesse caso ele desce para uma linha própria.
-              if (constraints.maxWidth < 480) {
-                return Column(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.dark_mode_outlined),
-                      title: Text(context.l10n.darkMode),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                      child: themeSelector,
-                    ),
-                  ],
-                );
-              }
-              return ListTile(
-                leading: const Icon(Icons.dark_mode_outlined),
-                title: Text(context.l10n.darkMode),
-                trailing: themeSelector,
-              );
-            },
-          ),
-          const Divider(),
-          _SectionHeader(title: context.l10n.settingsSync),
-          const _SyncSection(),
-          const Divider(),
-          _SectionHeader(title: context.l10n.settingsData),
-          const DataTransferSection(),
-          const Divider(),
-          const _UpdateTile(),
-          AboutListTile(
-            icon: const Icon(Icons.info_outline),
-            applicationName: 'Polypodium',
-            applicationVersion: ref.watch(appVersionProvider).value ?? '',
-            applicationLegalese: '© 2024 Polypodium Team',
-            child: Text(context.l10n.aboutApp),
-          ),
-        ],
-      ),
-    );
-  }
+  State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-// ---------------------------------------------------------------------------
+class _SettingsScreenState extends State<SettingsScreen> {
+  /// The category open beside the list in the two-column layout.
+  SettingsCategory _selected = SettingsCategory.reminders;
 
-/// Manual update check, for builds that look for updates themselves (Google
-/// Play and GitHub). Microsoft Store and package-manager installs are kept
-/// up to date by the store, so the tile is hidden there.
-class _UpdateTile extends ConsumerStatefulWidget {
-  const _UpdateTile();
-
-  @override
-  ConsumerState<_UpdateTile> createState() => _UpdateTileState();
-}
-
-class _UpdateTileState extends ConsumerState<_UpdateTile> {
-  bool _checking = false;
-
-  Future<void> _check() async {
-    setState(() => _checking = true);
-    final result =
-        await ref.read(updateControllerProvider.notifier).checkNow();
-    if (!mounted) return;
-    setState(() => _checking = false);
-    final message = switch (result) {
-      UpdateCheckResult.available => context.l10n.updateFound,
-      UpdateCheckResult.upToDate => context.l10n.updateUpToDate,
-      UpdateCheckResult.failed ||
-      UpdateCheckResult.unsupported =>
-        context.l10n.updateCheckFailed,
-    };
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
-  }
+  void _openPage(SettingsCategory category) => Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => SettingsCategoryPage(category: category)),
+      );
 
   @override
   Widget build(BuildContext context) {
-    final channel = ref.watch(distributionChannelProvider);
-    if (channel != DistributionChannel.playStore &&
-        channel != DistributionChannel.github) {
-      return const SizedBox.shrink();
-    }
-    final version = ref.watch(appVersionProvider).value;
-
-    return ListTile(
-      leading: const Icon(Icons.system_update_outlined),
-      title: Text(context.l10n.updateCheck),
-      subtitle: version == null
-          ? null
-          : Text(context.l10n.updateCurrentVersion(version)),
-      trailing: _checking
-          ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : null,
-      onTap: _checking ? null : _check,
+    return Scaffold(
+      appBar: AppBar(title: Text(context.l10n.navSettings)),
+      body: LayoutBuilder(builder: (context, constraints) {
+        if (constraints.maxWidth < kSettingsTwoColumnWidth) {
+          return ReadableListView(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            children: [
+              for (final category in SettingsCategory.values)
+                _CategoryTile(
+                  category: category,
+                  onTap: () => _openPage(category),
+                ),
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: _categoryColumnWidth,
+              child: ListView(
+                padding: const EdgeInsets.all(8),
+                children: [
+                  for (final category in SettingsCategory.values)
+                    _CategoryTile(
+                      category: category,
+                      selected: category == _selected,
+                      onTap: () => setState(() => _selected = category),
+                    ),
+                ],
+              ),
+            ),
+            const VerticalDivider(width: 1),
+            Expanded(
+              child: ReadableListView(
+                key: ValueKey(_selected),
+                padding: const EdgeInsets.only(bottom: 24),
+                children: [
+                  _CategoryHeader(title: _selected.title(context)),
+                  _selected.content(),
+                ],
+              ),
+            ),
+          ],
+        );
+      }),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
+/// One category on a page of its own, opened from the narrow layout.
+class SettingsCategoryPage extends StatelessWidget {
+  const SettingsCategoryPage({super.key, required this.category});
 
-class _SyncSection extends ConsumerWidget {
-  const _SyncSection();
+  final SettingsCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(category.title(context))),
+      body: ReadableListView(
+        padding: const EdgeInsets.only(top: 8, bottom: 24),
+        children: [category.content()],
+      ),
+    );
+  }
+}
+
+/// A category in the list or the column, with a line summing up its state.
+class _CategoryTile extends ConsumerWidget {
+  const _CategoryTile({
+    required this.category,
+    required this.onTap,
+    this.selected,
+  });
+
+  final SettingsCategory category;
+  final VoidCallback onTap;
+
+  /// Null in the narrow list, where tiles lead to a page instead.
+  final bool? selected;
+
+  String _summary(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    switch (category) {
+      case SettingsCategory.reminders:
+        return ref.watch(notificationsEnabledNotifierProvider)
+            ? l10n.settingsRemindersOn(
+                ref.watch(notificationTimeNotifierProvider).format(context))
+            : l10n.settingsRemindersOff;
+      case SettingsCategory.appearance:
+        return l10n.settingsAppearanceSummary(
+            switch (ref.watch(themeModeNotifierProvider)) {
+          'light' => l10n.themeLight,
+          'dark' => l10n.themeDark,
+          _ => l10n.themeAuto,
+        });
+      case SettingsCategory.sync:
+        return ref.watch(activeWorkspaceProvider).name;
+      case SettingsCategory.data:
+        return l10n.settingsDataSummary;
+      case SettingsCategory.about:
+        final version = ref.watch(appVersionProvider).value;
+        return version == null
+            ? l10n.settingsAboutSummaryNoVersion
+            : l10n.settingsAboutSummary(version);
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final workspace = ref.watch(activeWorkspaceProvider);
-    final syncState = ref.watch(syncNotifierProvider);
-    final pendingAsync = ref.watch(pendingSyncCountProvider);
-    final isLoading = syncState.isLoading;
-    final autoSyncEnabled = ref.watch(autoSyncEnabledNotifierProvider);
-
-    final pendingText = pendingAsync.when(
-      data: (n) => n == 0
-          ? context.l10n.allSynced
-          : context.l10n.pendingEventsCount(n),
-      loading: () => '...',
-      error: (_, __) => '',
+    final isSelected = selected ?? false;
+    final tile = ListTile(
+      key: ValueKey('settings-category-${category.name}'),
+      leading: Icon(isSelected ? category.selectedIcon : category.icon),
+      title: Text(category.title(context)),
+      subtitle: Text(_summary(context, ref)),
+      trailing: selected == null ? const Icon(Icons.chevron_right) : null,
+      selected: isSelected,
+      onTap: onTap,
     );
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ListTile(
-          leading: Icon(workspace.type == WorkspaceType.local
-              ? Icons.smartphone_outlined
-              : (workspace.isLoggedIn
-                  ? Icons.cloud_done_outlined
-                  : Icons.cloud_off_outlined)),
-          title: Text(workspace.name),
-          subtitle: Text(
-            workspace.type == WorkspaceType.local
-                ? context.l10n.localWorkspaceNoSync
-                : (workspace.isLoggedIn
-                    ? pendingText
-                    : context.l10n.disconnected),
-          ),
-          trailing: syncState.hasError
-              ? IconButton(
-                  icon: const Icon(Icons.error_outline, color: Colors.red),
-                  tooltip:
-                      localizedErrorMessage(syncState.error!, context.l10n),
-                  onPressed: () => _showError(context,
-                      localizedErrorMessage(syncState.error!, context.l10n)),
-                )
-              : null,
-        ),
-        if (workspace.isLoggedIn)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: isLoading
-                    ? null
-                    : () => ref.read(syncNotifierProvider.notifier).sync(),
-                icon: isLoading
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.sync),
-                label:
-                    Text(isLoading ? context.l10n.syncing : context.l10n.syncNow),
-              ),
-            ),
-          ),
-        if (workspace.isLoggedIn)
-          SwitchListTile(
-            title: Text(context.l10n.autoSync),
-            subtitle: Text(autoSyncEnabled
-                ? context.l10n.autoSyncOnSubtitle
-                : context.l10n.autoSyncOffSubtitle),
-            secondary: const Icon(Icons.autorenew),
-            value: autoSyncEnabled,
-            onChanged: (value) => ref
-                .read(autoSyncEnabledNotifierProvider.notifier)
-                .setEnabled(value),
-          ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-          child: SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const WorkspacesScreen()),
-              ),
-              icon: const Icon(Icons.workspaces_outline),
-              label: Text(context.l10n.manageWorkspaces),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showError(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    if (selected == null) return tile;
+    final scheme = Theme.of(context).colorScheme;
+    return ListTileTheme.merge(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      selectedTileColor: scheme.secondaryContainer,
+      selectedColor: scheme.onSecondaryContainer,
+      child: tile,
     );
   }
 }
 
-// ---------------------------------------------------------------------------
+class _CategoryHeader extends StatelessWidget {
+  const _CategoryHeader({required this.title});
 
-class _SectionHeader extends StatelessWidget {
   final String title;
-  const _SectionHeader({required this.title});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        title.toUpperCase(),
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-            ),
-      ),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+      child: Text(title, style: Theme.of(context).textTheme.titleLarge),
     );
   }
 }

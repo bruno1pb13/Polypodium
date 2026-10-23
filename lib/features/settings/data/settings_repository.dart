@@ -11,6 +11,8 @@ class SettingsRepository {
   static const _syncServerUrlKey = 'sync_server_url';
   static const _autoSyncEnabledKey = 'auto_sync_enabled';
   static const _introSeenKey = 'intro_seen';
+  static const _otherPlatformCardDismissedKey =
+      'other_platform_card_dismissed';
 
   final SharedPreferences _prefs;
 
@@ -65,6 +67,15 @@ class SettingsRepository {
 
   Future<void> setIntroSeen() async {
     await _prefs.setBool(_introSeenKey, true);
+  }
+
+  /// Whether the dashboard card offering the app on the other kind of device
+  /// (phone or computer) was turned off with "don't show again".
+  bool isOtherPlatformCardDismissed() =>
+      _prefs.getBool(_otherPlatformCardDismissedKey) ?? false;
+
+  Future<void> dismissOtherPlatformCard() async {
+    await _prefs.setBool(_otherPlatformCardDismissedKey, true);
   }
 
   bool isAutoSyncEnabled() => _prefs.getBool(_autoSyncEnabledKey) ?? true;

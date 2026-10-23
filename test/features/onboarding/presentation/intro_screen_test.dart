@@ -56,7 +56,16 @@ void main() {
     expect(find.text('Bem-vindo ao Polypodium'), findsOneWidget);
 
     await next(tester);
-    expect(find.text('Acompanhe suas plantas'), findsOneWidget);
+    expect(find.text('Organize seu jardim'), findsOneWidget);
+    await next(tester);
+    expect(find.text('Um diário para cada planta'), findsOneWidget);
+
+    // Going back returns to the previous page.
+    await tester.tap(find.text('Voltar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Organize seu jardim'), findsOneWidget);
+    await next(tester);
+
     await next(tester);
     expect(find.text('Lembretes de rega'), findsOneWidget);
     expect(find.text('09:00'), findsOneWidget);
@@ -66,7 +75,8 @@ void main() {
     expect(prefs.getBool('notifications_enabled'), isTrue);
 
     await next(tester);
-    expect(find.text('Seus dados, em todo lugar'), findsOneWidget);
+    expect(find.text('Seus dados, do seu jeito'), findsOneWidget);
+    expect(find.text('Ver documentação'), findsOneWidget);
     expect(find.text('Próximo'), findsNothing);
     expect(prefs.getBool('intro_seen'), isNull);
 

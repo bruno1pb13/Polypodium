@@ -18,6 +18,7 @@ import '../providers/dashboard_providers.dart';
 import '../widgets/dashboard_card.dart';
 import '../widgets/dashboard_care_cards.dart';
 import '../widgets/dashboard_garden_cards.dart';
+import '../widgets/dashboard_other_platform_card.dart';
 import '../widgets/dashboard_summary.dart';
 
 /// Content wider than this is centered instead of stretched.
@@ -239,6 +240,8 @@ class _DashboardBody extends StatelessWidget {
             DashboardGardenCarousel(overview: overview),
           ],
         ],
+        gap,
+        const DashboardOtherPlatformCard(),
       ];
 
       return ListView(

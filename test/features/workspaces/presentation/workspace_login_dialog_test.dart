@@ -102,4 +102,25 @@ void main() {
     expect(find.text('Previsão do tempo'), findsNothing);
     expect(closedWith, isTrue);
   });
+
+  testWidgets('the server step explains itself and points to the docs',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      locale: const Locale('pt'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        body: WorkspaceLoginDialog(
+          title: 'Entrar',
+          checkServer: (_) async {},
+          onSubmit: (_, __, ___) async {},
+        ),
+      ),
+    ));
+
+    expect(find.textContaining('Informe o endereço do servidor'),
+        findsOneWidget);
+    expect(find.text('Ainda não tem servidor? Veja como criar o seu'),
+        findsOneWidget);
+  });
 }
