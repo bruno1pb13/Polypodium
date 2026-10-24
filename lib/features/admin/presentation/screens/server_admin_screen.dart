@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/widgets/adaptive_layout.dart';
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../weather/presentation/widgets/watering_rule_slider.dart';
 import '../../../workspaces/domain/workspace_model.dart';
 import '../../domain/server_status.dart';
 import '../../domain/server_user.dart';
@@ -457,9 +458,6 @@ class _WateringCard extends ConsumerStatefulWidget {
 class _WateringCardState extends ConsumerState<_WateringCard> {
   bool _busy = false;
 
-  /// Slider positions while dragging, before they are saved.
-  final _dragging = <WateringRule, double>{};
-
   ServerWateringSettingsNotifier get _notifier => ref.read(
       serverWateringSettingsNotifierProvider(widget.workspace).notifier);
 
@@ -495,8 +493,17 @@ class _WateringCardState extends ConsumerState<_WateringCard> {
             ),
             if (settings.enabled) ...[
               for (final rule in WateringRule.values)
-                if (settings.limits[rule] != null)
-                  _ruleTile(context, settings, rule),
+                if (settings.limits[rule] case final limits?)
+                  WateringRuleSlider(
+                    rule: rule,
+                    value: settings.value(rule),
+                    min: limits.min,
+                    max: limits.max,
+                    defaultValue: settings.defaults[rule],
+                    enabled: !_busy,
+                    onChanged: (v) =>
+                        _run(() => _notifier.setRule(rule, v)),
+                  ),
               Align(
                 alignment: AlignmentDirectional.centerEnd,
                 child: Padding(
@@ -515,116 +522,6 @@ class _WateringCardState extends ConsumerState<_WateringCard> {
         ),
       ),
     );
-  }
-
-  Widget _ruleTile(
-      BuildContext context, ServerWateringSettings settings, WateringRule rule) {
-    final l10n = context.l10n;
-    final limits = settings.limits[rule]!;
-    final step = _step(rule);
-    final divisions = ((limits.max - limits.min) / step).round();
-    final value =
-        (_dragging[rule] ?? settings.value(rule)).clamp(limits.min, limits.max);
-    final (title, hint) = switch (rule) {
-      WateringRule.minRainMm => (
-          l10n.wateringRuleMinRain,
-          l10n.wateringRuleMinRainHint
-        ),
-      WateringRule.rainEfficiency => (
-          l10n.wateringRuleRainEfficiency,
-          l10n.wateringRuleRainEfficiencyHint
-        ),
-      WateringRule.maxPostponeDays => (
-          l10n.wateringRuleMaxPostpone,
-          l10n.wateringRuleMaxPostponeHint
-        ),
-      WateringRule.maxAdvanceDays => (
-          l10n.wateringRuleMaxAdvance,
-          l10n.wateringRuleMaxAdvanceHint
-        ),
-      WateringRule.minDemand => (
-          l10n.wateringRuleMinDemand,
-          l10n.wateringRuleMinDemandHint
-        ),
-      WateringRule.maxDemand => (
-          l10n.wateringRuleMaxDemand,
-          l10n.wateringRuleMaxDemandHint
-        ),
-    };
-    final fallback = settings.defaults[rule];
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                  child: Text(title,
-                      style: Theme.of(context).textTheme.bodyLarge)),
-              Text(_format(context, rule, value),
-                  style: Theme.of(context).textTheme.labelLarge),
-            ],
-          ),
-          Text(
-            [
-              hint,
-              if (fallback != null)
-                l10n.wateringRuleDefault(_format(context, rule, fallback)),
-            ].join(' · '),
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          Slider(
-            value: value,
-            min: limits.min,
-            max: limits.max,
-            divisions: divisions > 0 ? divisions : null,
-            label: _format(context, rule, value),
-            onChanged: _busy
-                ? null
-                : (v) => setState(() => _dragging[rule] = v),
-            onChangeEnd: _busy
-                ? null
-                : (v) => _run(() async {
-                      try {
-                        if (v != settings.value(rule)) {
-                          await _notifier.setRule(rule, _snap(rule, v));
-                        }
-                      } finally {
-                        _dragging.remove(rule);
-                      }
-                    }),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static double _step(WateringRule rule) => switch (rule) {
-        WateringRule.minRainMm => 0.5,
-        WateringRule.rainEfficiency || WateringRule.minDemand => 0.05,
-        WateringRule.maxDemand => 0.1,
-        WateringRule.maxPostponeDays || WateringRule.maxAdvanceDays => 1,
-      };
-
-  /// Rounds a slider position to its step, without float noise.
-  static double _snap(WateringRule rule, double value) {
-    final step = _step(rule);
-    return double.parse(((value / step).round() * step).toStringAsFixed(2));
-  }
-
-  static String _format(BuildContext context, WateringRule rule, double value) {
-    final locale = context.l10n.localeName;
-    return switch (rule) {
-      WateringRule.minRainMm => context.l10n.wateringRuleMm(
-          NumberFormat.decimalPatternDigits(locale: locale, decimalDigits: 1)
-              .format(value)),
-      WateringRule.maxPostponeDays ||
-      WateringRule.maxAdvanceDays =>
-        context.l10n.wateringRuleDays(value.round()),
-      _ => NumberFormat.percentPattern(locale).format(value),
-    };
   }
 
   Future<void> _run(Future<void> Function() action) async {

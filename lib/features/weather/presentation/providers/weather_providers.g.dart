@@ -243,18 +243,18 @@ final class WateringAdjustmentsProvider extends $FunctionalProvider<
 String _$wateringAdjustmentsHash() =>
     r'7466067e7bca10041b74d92f32bc39abcdf906c3';
 
-/// The "Previsão do tempo" setting of the local workspace (see
+/// The "Analisar a previsão do tempo" setting of the local workspace (see
 /// SettingsRepository.isLocalWeatherEnabled).
 
 @ProviderFor(LocalWeatherEnabledNotifier)
 final localWeatherEnabledNotifierProvider =
     LocalWeatherEnabledNotifierProvider._();
 
-/// The "Previsão do tempo" setting of the local workspace (see
+/// The "Analisar a previsão do tempo" setting of the local workspace (see
 /// SettingsRepository.isLocalWeatherEnabled).
 final class LocalWeatherEnabledNotifierProvider
     extends $NotifierProvider<LocalWeatherEnabledNotifier, bool> {
-  /// The "Previsão do tempo" setting of the local workspace (see
+  /// The "Analisar a previsão do tempo" setting of the local workspace (see
   /// SettingsRepository.isLocalWeatherEnabled).
   LocalWeatherEnabledNotifierProvider._()
       : super(
@@ -286,7 +286,7 @@ final class LocalWeatherEnabledNotifierProvider
 String _$localWeatherEnabledNotifierHash() =>
     r'4fa74366fce7d1f4b13995f271590a2924b10f66';
 
-/// The "Previsão do tempo" setting of the local workspace (see
+/// The "Analisar a previsão do tempo" setting of the local workspace (see
 /// SettingsRepository.isLocalWeatherEnabled).
 
 abstract class _$LocalWeatherEnabledNotifier extends $Notifier<bool> {
@@ -350,6 +350,68 @@ final class LocalWeatherActiveProvider
 String _$localWeatherActiveHash() =>
     r'2dc123f15128f0cd62e3dedc7be69293290ad77a';
 
+/// The watering rules of the local workspace's weather advice, tuned in
+/// the weather settings (see SettingsRepository.getLocalWateringRules).
+
+@ProviderFor(LocalWateringRulesNotifier)
+final localWateringRulesNotifierProvider =
+    LocalWateringRulesNotifierProvider._();
+
+/// The watering rules of the local workspace's weather advice, tuned in
+/// the weather settings (see SettingsRepository.getLocalWateringRules).
+final class LocalWateringRulesNotifierProvider
+    extends $NotifierProvider<LocalWateringRulesNotifier, LocalWateringRules> {
+  /// The watering rules of the local workspace's weather advice, tuned in
+  /// the weather settings (see SettingsRepository.getLocalWateringRules).
+  LocalWateringRulesNotifierProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'localWateringRulesNotifierProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$localWateringRulesNotifierHash();
+
+  @$internal
+  @override
+  LocalWateringRulesNotifier create() => LocalWateringRulesNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(LocalWateringRules value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<LocalWateringRules>(value),
+    );
+  }
+}
+
+String _$localWateringRulesNotifierHash() =>
+    r'b76a8c0e70f48631bdc595b78270de34f6df1bfc';
+
+/// The watering rules of the local workspace's weather advice, tuned in
+/// the weather settings (see SettingsRepository.getLocalWateringRules).
+
+abstract class _$LocalWateringRulesNotifier
+    extends $Notifier<LocalWateringRules> {
+  LocalWateringRules build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<LocalWateringRules, LocalWateringRules>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<LocalWateringRules, LocalWateringRules>,
+        LocalWateringRules,
+        Object?,
+        Object?>;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(localWeatherService)
 final localWeatherServiceProvider = LocalWeatherServiceProvider._();
 
@@ -392,7 +454,7 @@ final class LocalWeatherServiceProvider extends $FunctionalProvider<
 }
 
 String _$localWeatherServiceHash() =>
-    r'f73385b7f64130ae83c3a35623dcfafbbaf05261';
+    r'ae229613ecc3c07b4d5cdaa8d2678c2ce7f3d944';
 
 /// Keeps the local workspace's weather current while the app is open: on
 /// start, hourly, and shortly after plants, species or locations change

@@ -2897,10 +2897,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localWeatherTitle => 'Weather forecast';
 
   @override
-  String get localWeatherSubtitle =>
-      'Fetches the forecast for locations with coordinates and postpones or brings forward watering with rain and heat. The approximate coordinates of your locations are sent to the Open-Meteo service.';
-
-  @override
   String get weatherToday => 'Today';
 
   @override
@@ -3464,4 +3460,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openSourceLicenses => 'Open source licenses';
+
+  @override
+  String get settingsWeatherOn => 'On, via Open-Meteo';
+
+  @override
+  String get settingsWeatherOff => 'Off';
+
+  @override
+  String get settingsWeatherServer => 'From the workspace\'s server';
+
+  @override
+  String get weatherAnalysisTitle => 'Analyze the weather forecast';
+
+  @override
+  String get weatherAnalysisSubtitle =>
+      'Postpones watering when it rains on locations exposed to rain, brings it forward on hot days and shows the forecast for each location.';
+
+  @override
+  String get weatherThirdPartyTitle => 'Sends data to a third-party service';
+
+  @override
+  String get weatherThirdPartyBody =>
+      'When on, the analysis queries Open-Meteo (open-meteo.com), a third-party service, about once a day. It receives this device\'s IP address and the approximate coordinates (rounded to about 1 km) of the locations that have coordinates. Names, plants, photos and entries are never sent.';
+
+  @override
+  String get weatherThirdPartyOff => 'While off, nothing is sent.';
+
+  @override
+  String get weatherEnableDialogTitle => 'Turn on the weather analysis?';
+
+  @override
+  String get weatherEnableDialogFooter =>
+      'You can turn it off at any time; turning it off deletes the forecasts stored on the device.';
+
+  @override
+  String get weatherEnableConfirm => 'Turn on and send';
+
+  @override
+  String weatherStatusUpdated(String date) {
+    return 'Forecast updated on $date';
+  }
+
+  @override
+  String get weatherStatusPending => 'Fetching the first forecast…';
+
+  @override
+  String get weatherStatusFailed =>
+      'The last fetch failed. The app tries again in 1 hour.';
+
+  @override
+  String get weatherStatusNoCoordinates =>
+      'No location has coordinates yet. Add them on each location\'s screen so it gets a forecast.';
+
+  @override
+  String get weatherRulesSection => 'Analysis parameters';
+
+  @override
+  String get weatherRulesSectionHint =>
+      'They apply to this device\'s local workspace. Changing them recomputes the watering dates right away, without a new fetch.';
+
+  @override
+  String get weatherRemoteTitle => 'Computed by the server';
+
+  @override
+  String get weatherRemoteBody =>
+      'In this workspace the forecast and the watering adjustment come from the server, and this device sends nothing to Open-Meteo. The server\'s administrator turns the analysis on and tunes it in Server administration.';
+
+  @override
+  String get weatherRemoteOn => 'The server has the weather forecast on.';
+
+  @override
+  String get weatherRemoteOff =>
+      'The server has the weather forecast off, or couldn\'t be reached.';
+
+  @override
+  String get introWeatherTitle => 'Watering that follows the weather';
+
+  @override
+  String get introWeatherBody =>
+      'If you like, the app analyzes the weather forecast: it postpones watering when it rains and brings it forward on hot days. It stays off until you turn it on.';
+
+  @override
+  String get introWeatherEnable => 'Turn on the weather analysis';
+
+  @override
+  String get introWeatherEnabled => 'Weather analysis on!';
+
+  @override
+  String get introWeatherLaterNote =>
+      'Works for locations with coordinates. Turn it on, off and tune it in Settings › Weather forecast.';
 }

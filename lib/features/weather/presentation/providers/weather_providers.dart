@@ -7,12 +7,14 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/notifications/notification_provider.dart';
+import '../../../admin/domain/server_watering_settings.dart';
 import '../../../admin/presentation/providers/admin_providers.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../../workspaces/domain/workspace_model.dart';
 import '../../../workspaces/presentation/providers/workspace_providers.dart';
 import '../../data/local_weather_service.dart';
 import '../../data/weather_client.dart';
+import '../../domain/local_watering_rules.dart';
 import '../../domain/location_weather.dart';
 import '../../domain/watering_adjustment.dart';
 
@@ -75,7 +77,7 @@ Future<LocationWeather?> locationWeather(Ref ref, String locationId) async {
 Stream<Map<String, WateringAdjustment>> wateringAdjustments(Ref ref) =>
     ref.watch(appDatabaseProvider).wateringAdjustmentsDao.watchAll();
 
-/// The "Previsão do tempo" setting of the local workspace (see
+/// The "Analisar a previsão do tempo" setting of the local workspace (see
 /// SettingsRepository.isLocalWeatherEnabled).
 @riverpod
 class LocalWeatherEnabledNotifier extends _$LocalWeatherEnabledNotifier {
@@ -100,10 +102,40 @@ bool localWeatherActive(Ref ref) =>
     ref.watch(activeWorkspaceProvider).type == WorkspaceType.local &&
     ref.watch(localWeatherEnabledNotifierProvider);
 
+/// The watering rules of the local workspace's weather advice, tuned in
+/// the weather settings (see SettingsRepository.getLocalWateringRules).
+@riverpod
+class LocalWateringRulesNotifier extends _$LocalWateringRulesNotifier {
+  @override
+  LocalWateringRules build() =>
+      ref.watch(settingsRepositoryProvider).getLocalWateringRules();
+
+  Future<void> setRule(WateringRule rule, double value) =>
+      _save(state.withRule(rule, value));
+
+  Future<void> reset() => _save(const LocalWateringRules());
+
+  /// Saves and recomputes the advice from the stored forecasts: new rules
+  /// need no new fetch.
+  Future<void> _save(LocalWateringRules rules) async {
+    await ref.read(settingsRepositoryProvider).setLocalWateringRules(rules);
+    state = rules;
+    if (ref.read(localWeatherActiveProvider)) {
+      // Not through localWeatherServiceProvider, which watches this.
+      await LocalWeatherService(
+        ref.read(appDatabaseProvider),
+        notifications: ref.read(notificationServiceProvider),
+        rules: rules.toRules(),
+      ).recompute();
+    }
+  }
+}
+
 @riverpod
 LocalWeatherService localWeatherService(Ref ref) => LocalWeatherService(
       ref.watch(appDatabaseProvider),
       notifications: ref.watch(notificationServiceProvider),
+      rules: ref.watch(localWateringRulesNotifierProvider).toRules(),
     );
 
 /// Written by hand: riverpod_generator can't see the row class drift

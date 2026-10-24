@@ -4862,12 +4862,6 @@ abstract class AppLocalizations {
   /// **'Weather forecast'**
   String get localWeatherTitle;
 
-  /// No description provided for @localWeatherSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Fetches the forecast for locations with coordinates and postpones or brings forward watering with rain and heat. The approximate coordinates of your locations are sent to the Open-Meteo service.'**
-  String get localWeatherSubtitle;
-
   /// No description provided for @weatherToday.
   ///
   /// In en, this message translates to:
@@ -5707,6 +5701,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open source licenses'**
   String get openSourceLicenses;
+
+  /// No description provided for @settingsWeatherOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On, via Open-Meteo'**
+  String get settingsWeatherOn;
+
+  /// No description provided for @settingsWeatherOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get settingsWeatherOff;
+
+  /// No description provided for @settingsWeatherServer.
+  ///
+  /// In en, this message translates to:
+  /// **'From the workspace\'s server'**
+  String get settingsWeatherServer;
+
+  /// No description provided for @weatherAnalysisTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze the weather forecast'**
+  String get weatherAnalysisTitle;
+
+  /// No description provided for @weatherAnalysisSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Postpones watering when it rains on locations exposed to rain, brings it forward on hot days and shows the forecast for each location.'**
+  String get weatherAnalysisSubtitle;
+
+  /// No description provided for @weatherThirdPartyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends data to a third-party service'**
+  String get weatherThirdPartyTitle;
+
+  /// No description provided for @weatherThirdPartyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When on, the analysis queries Open-Meteo (open-meteo.com), a third-party service, about once a day. It receives this device\'s IP address and the approximate coordinates (rounded to about 1 km) of the locations that have coordinates. Names, plants, photos and entries are never sent.'**
+  String get weatherThirdPartyBody;
+
+  /// No description provided for @weatherThirdPartyOff.
+  ///
+  /// In en, this message translates to:
+  /// **'While off, nothing is sent.'**
+  String get weatherThirdPartyOff;
+
+  /// No description provided for @weatherEnableDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on the weather analysis?'**
+  String get weatherEnableDialogTitle;
+
+  /// No description provided for @weatherEnableDialogFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'You can turn it off at any time; turning it off deletes the forecasts stored on the device.'**
+  String get weatherEnableDialogFooter;
+
+  /// No description provided for @weatherEnableConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on and send'**
+  String get weatherEnableConfirm;
+
+  /// No description provided for @weatherStatusUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Forecast updated on {date}'**
+  String weatherStatusUpdated(String date);
+
+  /// No description provided for @weatherStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching the first forecast…'**
+  String get weatherStatusPending;
+
+  /// No description provided for @weatherStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The last fetch failed. The app tries again in 1 hour.'**
+  String get weatherStatusFailed;
+
+  /// No description provided for @weatherStatusNoCoordinates.
+  ///
+  /// In en, this message translates to:
+  /// **'No location has coordinates yet. Add them on each location\'s screen so it gets a forecast.'**
+  String get weatherStatusNoCoordinates;
+
+  /// No description provided for @weatherRulesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis parameters'**
+  String get weatherRulesSection;
+
+  /// No description provided for @weatherRulesSectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'They apply to this device\'s local workspace. Changing them recomputes the watering dates right away, without a new fetch.'**
+  String get weatherRulesSectionHint;
+
+  /// No description provided for @weatherRemoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Computed by the server'**
+  String get weatherRemoteTitle;
+
+  /// No description provided for @weatherRemoteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'In this workspace the forecast and the watering adjustment come from the server, and this device sends nothing to Open-Meteo. The server\'s administrator turns the analysis on and tunes it in Server administration.'**
+  String get weatherRemoteBody;
+
+  /// No description provided for @weatherRemoteOn.
+  ///
+  /// In en, this message translates to:
+  /// **'The server has the weather forecast on.'**
+  String get weatherRemoteOn;
+
+  /// No description provided for @weatherRemoteOff.
+  ///
+  /// In en, this message translates to:
+  /// **'The server has the weather forecast off, or couldn\'t be reached.'**
+  String get weatherRemoteOff;
+
+  /// No description provided for @introWeatherTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watering that follows the weather'**
+  String get introWeatherTitle;
+
+  /// No description provided for @introWeatherBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If you like, the app analyzes the weather forecast: it postpones watering when it rains and brings it forward on hot days. It stays off until you turn it on.'**
+  String get introWeatherBody;
+
+  /// No description provided for @introWeatherEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on the weather analysis'**
+  String get introWeatherEnable;
+
+  /// No description provided for @introWeatherEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather analysis on!'**
+  String get introWeatherEnabled;
+
+  /// No description provided for @introWeatherLaterNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Works for locations with coordinates. Turn it on, off and tune it in Settings › Weather forecast.'**
+  String get introWeatherLaterNote;
 }
 
 class _AppLocalizationsDelegate
