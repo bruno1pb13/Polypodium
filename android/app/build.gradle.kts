@@ -65,4 +65,6 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+    // WindowCompat.enableEdgeToEdge (MainActivity) needs 1.17+.
+    implementation("androidx.core:core-ktx:1.17.0")
 }

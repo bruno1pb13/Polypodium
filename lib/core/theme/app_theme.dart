@@ -11,6 +11,24 @@ class AppTheme {
 
   static const _seed = Color(0xFF4CAF50);
 
+  /// [SystemUiOverlayStyle.dark] / [SystemUiOverlayStyle.light] paint the
+  /// navigation bar opaque black; the app draws edge-to-edge (MainActivity),
+  /// so it stays transparent and the content shows through.
+  static const overlayDark = SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarDividerColor: Colors.transparent,
+    systemNavigationBarIconBrightness: Brightness.dark,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
+  );
+  static const overlayLight = SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarDividerColor: Colors.transparent,
+    systemNavigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
+  );
+
   static final _pageTransitionsTheme = PageTransitionsTheme(
     builders: {
       TargetPlatform.android: const SmoothPageTransitionsBuilder(),
@@ -27,7 +45,7 @@ class AppTheme {
     pageTransitionsTheme: _pageTransitionsTheme,
     // The glass app bars are transparent over a light surface.
     appBarTheme: const AppBarTheme(
-      systemOverlayStyle: SystemUiOverlayStyle.dark,
+      systemOverlayStyle: overlayDark,
     ),
     extensions: const [GlassColors.light],
   );

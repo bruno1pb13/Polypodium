@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/theme/app_theme.dart';
 
 /// Full-screen camera that pops with the text of the first QR code read.
 class LabelScannerScreen extends StatefulWidget {
@@ -41,7 +41,7 @@ class _LabelScannerScreenState extends State<LabelScannerScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: AppTheme.overlayLight,
         title: Text(context.l10n.labelScan),
       ),
       body: Stack(
