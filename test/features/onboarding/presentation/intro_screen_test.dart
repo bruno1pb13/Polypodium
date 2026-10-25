@@ -75,6 +75,17 @@ void main() {
     expect(prefs.getBool('notifications_enabled'), isTrue);
 
     await next(tester);
+    expect(find.text('Rega conforme o clima'), findsOneWidget);
+    // What turning it on sends, and to whom, is on the page itself.
+    expect(find.text('Envia dados a um serviço de terceiros'), findsOneWidget);
+    expect(find.textContaining('endereço IP'), findsOneWidget);
+    expect(prefs.getBool('local_weather_enabled'), isNull);
+    await tester.tap(find.text('Ativar a análise do clima'));
+    await tester.pumpAndSettle();
+    expect(prefs.getBool('local_weather_enabled'), isTrue);
+    expect(find.text('Análise do clima ativada!'), findsOneWidget);
+
+    await next(tester);
     expect(find.text('Seus dados, do seu jeito'), findsOneWidget);
     expect(find.text('Ver documentação'), findsOneWidget);
     expect(find.text('Próximo'), findsNothing);
@@ -94,8 +105,9 @@ void main() {
     await tester.tap(find.text('Pular'));
     await tester.pumpAndSettle();
     expect(prefs.getBool('intro_seen'), isTrue);
-    // Skipping is not an opt-in to reminders.
+    // Skipping is not an opt-in to reminders nor to the weather.
     expect(prefs.getBool('notifications_enabled'), isFalse);
+    expect(prefs.getBool('local_weather_enabled'), isNull);
     expect(find.byType(IntroScreen), findsNothing);
     expect(find.byType(DashboardScreen), findsOneWidget);
   });

@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/updates/update_controller.dart';
 import '../../../../core/widgets/adaptive_layout.dart';
+import '../../../weather/presentation/providers/weather_providers.dart';
+import '../../../workspaces/domain/workspace_model.dart';
 import '../../../workspaces/presentation/providers/workspace_providers.dart';
 import '../providers/settings_providers.dart';
 import '../widgets/settings_sections.dart';
+import '../widgets/weather_settings.dart';
 
 /// From this width on the categories sit in a column beside the selected
 /// one's settings; below it they're a list leading to one page each.
@@ -16,6 +19,7 @@ const double _categoryColumnWidth = 300.0;
 
 enum SettingsCategory {
   reminders(Icons.notifications_outlined, Icons.notifications),
+  weather(Icons.wb_cloudy_outlined, Icons.wb_cloudy),
   appearance(Icons.palette_outlined, Icons.palette),
   sync(Icons.cloud_sync_outlined, Icons.cloud_sync),
   data(Icons.import_export, Icons.import_export),
@@ -28,6 +32,7 @@ enum SettingsCategory {
 
   String title(BuildContext context) => switch (this) {
         reminders => context.l10n.settingsReminders,
+        weather => context.l10n.localWeatherTitle,
         appearance => context.l10n.settingsAppearance,
         sync => context.l10n.settingsSync,
         data => context.l10n.settingsData,
@@ -36,6 +41,7 @@ enum SettingsCategory {
 
   Widget content() => switch (this) {
         reminders => const RemindersSettings(),
+        weather => const WeatherSettings(),
         appearance => const AppearanceSettings(),
         sync => const SyncSettings(),
         data => const DataSettings(),
@@ -152,6 +158,13 @@ class _CategoryTile extends ConsumerWidget {
             ? l10n.settingsRemindersOn(
                 ref.watch(notificationTimeNotifierProvider).format(context))
             : l10n.settingsRemindersOff;
+      case SettingsCategory.weather:
+        if (ref.watch(activeWorkspaceProvider).type != WorkspaceType.local) {
+          return l10n.settingsWeatherServer;
+        }
+        return ref.watch(localWeatherEnabledNotifierProvider)
+            ? l10n.settingsWeatherOn
+            : l10n.settingsWeatherOff;
       case SettingsCategory.appearance:
         return l10n.settingsAppearanceSummary(
             switch (ref.watch(themeModeNotifierProvider)) {

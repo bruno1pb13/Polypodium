@@ -83,9 +83,13 @@ class BackgroundSync {
     if (workspace?.type == WorkspaceType.local) {
       // Nothing to sync, but the weather behind the reminders is computed
       // on this device: keep it fresh while the app stays closed.
-      if (SettingsRepository(prefs).isLocalWeatherEnabled()) {
+      final settings = SettingsRepository(prefs);
+      if (settings.isLocalWeatherEnabled()) {
         try {
-          await LocalWeatherService(db).refresh().timeout(defaultTimeout);
+          await LocalWeatherService(db,
+                  rules: settings.getLocalWateringRules().toRules())
+              .refresh()
+              .timeout(defaultTimeout);
         } catch (e) {
           // ignore: avoid_print
           print('[BackgroundSync] local weather not refreshed: $e');

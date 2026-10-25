@@ -2901,10 +2901,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get localWeatherTitle => 'Previsão do tempo';
 
   @override
-  String get localWeatherSubtitle =>
-      'Busca a previsão dos locais com coordenadas e adia ou adianta a rega conforme a chuva e o calor. As coordenadas aproximadas dos locais são enviadas ao serviço Open-Meteo.';
-
-  @override
   String get weatherToday => 'Hoje';
 
   @override
@@ -3467,4 +3463,95 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get openSourceLicenses => 'Licenças de código aberto';
+
+  @override
+  String get settingsWeatherOn => 'Ligada, pelo Open-Meteo';
+
+  @override
+  String get settingsWeatherOff => 'Desligada';
+
+  @override
+  String get settingsWeatherServer => 'Pelo servidor do workspace';
+
+  @override
+  String get weatherAnalysisTitle => 'Analisar a previsão do tempo';
+
+  @override
+  String get weatherAnalysisSubtitle =>
+      'Adia a rega quando chove nos locais expostos à chuva, adianta em dias quentes e mostra a previsão em cada local.';
+
+  @override
+  String get weatherThirdPartyTitle => 'Envia dados a um serviço de terceiros';
+
+  @override
+  String get weatherThirdPartyBody =>
+      'Ligada, a análise consulta o Open-Meteo (open-meteo.com), um serviço de terceiros, cerca de uma vez por dia. Ele recebe o endereço IP deste aparelho e as coordenadas aproximadas (arredondadas a cerca de 1 km) dos locais que têm coordenadas. Nomes, plantas, fotos e registros nunca são enviados.';
+
+  @override
+  String get weatherThirdPartyOff => 'Desligada, nada é enviado.';
+
+  @override
+  String get weatherEnableDialogTitle => 'Ligar a análise do clima?';
+
+  @override
+  String get weatherEnableDialogFooter =>
+      'Você pode desligar quando quiser; ao desligar, as previsões guardadas no aparelho são apagadas.';
+
+  @override
+  String get weatherEnableConfirm => 'Ligar e enviar';
+
+  @override
+  String weatherStatusUpdated(String date) {
+    return 'Previsão atualizada em $date';
+  }
+
+  @override
+  String get weatherStatusPending => 'Buscando a primeira previsão…';
+
+  @override
+  String get weatherStatusFailed =>
+      'A última busca falhou. O app tenta de novo em 1 hora.';
+
+  @override
+  String get weatherStatusNoCoordinates =>
+      'Nenhum local tem coordenadas ainda. Informe-as na tela de cada local para que ele receba a previsão.';
+
+  @override
+  String get weatherRulesSection => 'Parâmetros da análise';
+
+  @override
+  String get weatherRulesSectionHint =>
+      'Valem para o workspace local deste aparelho. Mudá-los recalcula as datas de rega na hora, sem nova busca.';
+
+  @override
+  String get weatherRemoteTitle => 'Calculada pelo servidor';
+
+  @override
+  String get weatherRemoteBody =>
+      'Neste workspace a previsão e o ajuste da rega vêm do servidor, e este aparelho não envia nada ao Open-Meteo. O administrador do servidor liga e ajusta a análise em Administração do servidor.';
+
+  @override
+  String get weatherRemoteOn =>
+      'O servidor está com a previsão do tempo ligada.';
+
+  @override
+  String get weatherRemoteOff =>
+      'O servidor está com a previsão do tempo desligada, ou não pôde ser consultado.';
+
+  @override
+  String get introWeatherTitle => 'Rega conforme o clima';
+
+  @override
+  String get introWeatherBody =>
+      'Se quiser, o app analisa a previsão do tempo: adia a rega quando chove e adianta em dias quentes. Fica desligado até você ativar.';
+
+  @override
+  String get introWeatherEnable => 'Ativar a análise do clima';
+
+  @override
+  String get introWeatherEnabled => 'Análise do clima ativada!';
+
+  @override
+  String get introWeatherLaterNote =>
+      'Funciona nos locais com coordenadas. Você liga, desliga e ajusta em Configurações › Previsão do tempo.';
 }

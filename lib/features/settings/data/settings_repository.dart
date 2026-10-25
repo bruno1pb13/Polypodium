@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../plants/presentation/providers/plants_providers.dart';
+import '../../weather/domain/local_watering_rules.dart';
 
 class SettingsRepository {
   static const _notificationsEnabledKey = 'notifications_enabled';
@@ -14,6 +15,7 @@ class SettingsRepository {
   static const _otherPlatformCardDismissedKey =
       'other_platform_card_dismissed';
   static const _localWeatherEnabledKey = 'local_weather_enabled';
+  static const _localWateringRulesKey = 'local_watering_rules';
 
   final SharedPreferences _prefs;
 
@@ -93,6 +95,19 @@ class SettingsRepository {
 
   Future<void> setLocalWeatherEnabled(bool enabled) async {
     await _prefs.setBool(_localWeatherEnabledKey, enabled);
+  }
+
+  /// The watering rules the local workspace's weather advice uses: only
+  /// the ones the user changed (see LocalWateringRules).
+  LocalWateringRules getLocalWateringRules() =>
+      LocalWateringRules.fromJson(_prefs.getString(_localWateringRulesKey));
+
+  Future<void> setLocalWateringRules(LocalWateringRules rules) async {
+    if (rules.overrides.isEmpty) {
+      await _prefs.remove(_localWateringRulesKey);
+    } else {
+      await _prefs.setString(_localWateringRulesKey, rules.toJson());
+    }
   }
 
   /// Goes through the same path as every plant mutation, so the recurring

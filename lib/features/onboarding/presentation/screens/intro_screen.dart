@@ -8,6 +8,7 @@ import '../../../../core/links/external_links.dart';
 import '../../../../core/notifications/notification_service.dart';
 import '../../../../core/widgets/app_shell.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
+import '../../../weather/presentation/providers/weather_providers.dart';
 import '../../../../core/theme/glass_colors.dart';
 
 /// One-time introduction shown on the first launch of the app.
@@ -29,7 +30,10 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
   /// Kept here (not in the page) so it survives swiping away and back.
   bool _remindersOptedIn = false;
 
-  static const _pageCount = 5;
+  /// Same for "turn on the weather analysis" on the weather page.
+  bool _weatherOptedIn = false;
+
+  static const _pageCount = 6;
 
   @override
   void dispose() {
@@ -70,6 +74,15 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
     setState(() => _remindersOptedIn = granted);
   }
 
+  /// The weather page itself says what is sent and to whom, so tapping
+  /// the button is the informed opt-in (the settings switch asks first).
+  Future<void> _enableWeather() async {
+    await ref.read(settingsRepositoryProvider).setLocalWeatherEnabled(true);
+    ref.invalidate(localWeatherEnabledNotifierProvider);
+    if (!mounted) return;
+    setState(() => _weatherOptedIn = true);
+  }
+
   Future<void> _pickReminderTime() async {
     final picked = await showTimePicker(
       context: context,
@@ -104,6 +117,15 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
         optedIn: _remindersOptedIn,
         onEnable: _enableReminders,
         onPickTime: _pickReminderTime,
+      ),
+    ),
+    _IntroPageData(
+      icon: Icons.wb_cloudy,
+      title: context.l10n.introWeatherTitle,
+      body: context.l10n.introWeatherBody,
+      child: _WeatherSetup(
+        optedIn: _weatherOptedIn,
+        onEnable: _enableWeather,
       ),
     ),
     _IntroPageData(
@@ -377,6 +399,84 @@ class _ReminderSetup extends ConsumerWidget {
         const SizedBox(height: 12),
         Text(
           context.l10n.introRemindersLaterNote,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: context.glass.fgFaint, fontSize: 12),
+        ),
+      ],
+    );
+  }
+}
+
+/// Opt-in block on the weather page: what turning it on sends to the
+/// third-party service, and the button. Off unless the user taps it.
+class _WeatherSetup extends StatelessWidget {
+  const _WeatherSetup({required this.optedIn, required this.onEnable});
+
+  final bool optedIn;
+  final Future<void> Function() onEnable;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.glass.tint(0.24)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.privacy_tip_outlined,
+                  size: 20, color: context.glass.fg),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.weatherThirdPartyTitle,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: context.glass.fg,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      context.l10n.weatherThirdPartyBody,
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.4,
+                        color: context.glass.fgMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: optedIn
+              ? FilledButton.tonalIcon(
+                  onPressed: null,
+                  icon: const Icon(Icons.check),
+                  label: Text(context.l10n.introWeatherEnabled),
+                )
+              : FilledButton.icon(
+                  onPressed: onEnable,
+                  icon: const Icon(Icons.wb_cloudy_outlined),
+                  label: Text(context.l10n.introWeatherEnable),
+                ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          context.l10n.introWeatherLaterNote,
           textAlign: TextAlign.center,
           style: TextStyle(color: context.glass.fgFaint, fontSize: 12),
         ),
