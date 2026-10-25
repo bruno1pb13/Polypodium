@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ignore: unused_import
@@ -27,7 +26,7 @@ import '../../../../core/widgets/app_shell.dart';
 import '../widgets/plant_list_item.dart';
 import 'add_edit_plant_screen.dart';
 import 'plant_detail_screen.dart';
-import '../../../../core/theme/glass_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -181,7 +180,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ? AppBar(
               backgroundColor: Colors.black87,
               elevation: 0,
-              systemOverlayStyle: SystemUiOverlayStyle.light,
+              systemOverlayStyle: AppTheme.overlayLight,
               iconTheme: const IconThemeData(color: Colors.white),
               leading: IconButton(
                 icon: const Icon(Icons.close),
