@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:dbus/dbus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:polypodium/core/notifications/notification_service.dart';
 import 'package:polypodium/features/dashboard/domain/garden_overview.dart';
 import 'package:polypodium/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:polypodium/features/dashboard/presentation/screens/dashboard_screen.dart';
@@ -31,9 +35,7 @@ void main() {
         activeWorkspaceProvider.overrideWithValue(Workspace.newLocal()),
         plantsWithSpeciesProvider.overrideWith((ref) async => const []),
         gardenOverviewProvider.overrideWith((ref) async => buildGardenOverview(
-            plants: const [],
-            tasks: const [],
-            conditionEntries: const [])),
+            plants: const [], tasks: const [], conditionEntries: const [])),
       ],
       child: const MaterialApp(
         locale: Locale('pt'),
@@ -49,6 +51,24 @@ void main() {
     await tester.tap(find.text('Próximo'));
     await tester.pumpAndSettle();
   }
+
+  testWidgets('missing Linux session does not prevent the welcome screen',
+      (tester) async {
+    await tester.runAsync(() async {
+      final directory =
+          await Directory.systemTemp.createTemp('intro-notification-bus-');
+      try {
+        await NotificationService.initialize(
+            linuxSession: DBusClient(
+                DBusAddress('unix:path=${directory.path}/missing-bus')));
+      } finally {
+        await directory.delete();
+      }
+    });
+    await pump(tester);
+    expect(find.text('Bem-vindo ao Polypodium'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  }, skip: !Platform.isLinux);
 
   testWidgets('walking through the pages marks the intro as seen',
       (tester) async {

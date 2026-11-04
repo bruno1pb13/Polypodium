@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' show DartPluginRegistrant;
 
+import 'package:dbus/dbus.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -25,6 +26,7 @@ import '../../features/workspaces/data/workspace_repository.dart';
 import '../../features/workspaces/domain/workspace_model.dart';
 import '../../features/workspaces/domain/workspace_paths.dart';
 import '../l10n/l10n.dart';
+import 'linux_notification_init.dart';
 import 'reminder_payload.dart';
 
 /// Runs in a background isolate when a notification action button that
@@ -97,9 +99,16 @@ class NotificationService implements INotificationService {
   /// [onBackgroundNotificationResponse].
   static Future<void> initialize({
     DidReceiveNotificationResponseCallback? onResponse,
+    @visibleForTesting DBusClient? linuxSession,
   }) async {
     await _initTimezone();
-    await _initializePlugin(onResponse: onResponse);
+    if (Platform.isLinux) {
+      await initializeLinuxNotifications(
+          () => _initializePlugin(onResponse: onResponse),
+          client: linuxSession);
+    } else {
+      await _initializePlugin(onResponse: onResponse);
+    }
 
     if (Platform.isAndroid) {
       final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
