@@ -8,6 +8,7 @@ environment:
   flutter: '>=3.32.0'
 
 dependencies:
+  dbus: ^0.7.12
   flutter:
     sdk: flutter
   flutter_localizations:
